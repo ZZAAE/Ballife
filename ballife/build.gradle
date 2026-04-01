@@ -29,16 +29,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-<<<<<<< HEAD
-<<<<<<< HEAD
 	implementation 'com.mysql:mysql-connector-j'
-=======
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-=======
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
->>>>>>> origin/PHH_0401-1
-	implementation 'mysql:mysql-connector-java:8.0.33'
->>>>>>> origin/junboori0401
+
 	compileOnly 'org.projectlombok:lombok'
 
 	//JWt토큰 (로그인 인증용)
