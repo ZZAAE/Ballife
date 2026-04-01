@@ -18,7 +18,7 @@ spring:
       host: localhost #배포할때는 실제 서버 주소가 들어감
       port: 27017
       database: shopping_assistant # 데이터베이스명
-
+      
   security:
     jwt:
       secret: your-super-secret-key-that-is-at-least-64-bytes-long-for-hs512-to-work-correctly
@@ -35,7 +35,20 @@ logging:
 
 springdoc:
   swagger-ui:
+<<<<<<< HEAD
     path: /swagger-ui.html # API 문서 접속 경로 
 
 # 단계별로 스페이스 2칸
 # 탭 사용금지
+=======
+    path: /swagger-ui.html #API 문서 접속 경로
+    enabled: true
+    use-root-path: true
+  api-docs:
+    path: /v3/api-docs
+  show-actuator:
+    true
+
+    #단계별로 스페이스 2칸
+    #탭 사용 금지
+>>>>>>> origin/junboori0401
