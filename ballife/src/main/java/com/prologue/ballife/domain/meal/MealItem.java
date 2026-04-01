@@ -23,22 +23,22 @@ public class MealItem {
     @Column(name = "Calorie")
     private Integer calorie;
 
-    @Column(name = "Carbohydrate", precision = 10, scale = 2)
+    @Column(name = "Carbohydrate")
     private Double carbohydrate;
 
-    @Column(name = "Sugar", precision = 10, scale = 2)
+    @Column(name = "Sugar")
     private Double sugar;
-    
-    @Column(name = "Sodium", precision = 10, scale = 2)
+
+    @Column(name = "Sodium")
     private Double sodium;
-    
-    @Column(name = "Cholesterol", precision = 10, scale = 2)
+
+    @Column(name = "Cholesterol")
     private Double cholesterol;
-    
-    @Column(name = "Saturated_Fat", precision = 10, scale = 2)
+
+    @Column(name = "Saturated_Fat")
     private Double saturatedFat;
-    
-    @Column(name = "Protein", precision = 10, scale = 2)
+
+    @Column(name = "Protein")
     private Double protein;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

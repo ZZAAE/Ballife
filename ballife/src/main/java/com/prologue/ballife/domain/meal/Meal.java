@@ -2,7 +2,7 @@ package com.prologue.ballife.domain.meal;
 
 import java.time.LocalDate;
 
-import com.prologue.ballife.domain.User;
+import com.prologue.ballife.domain.user.User;
 
 import jakarta.persistence.*;
 import lombok.*;
