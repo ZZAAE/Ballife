@@ -24,5 +24,3 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByNickname(String nickname);
 
 }
-
->>>>>>> origin/jisoo0401
