@@ -20,7 +20,7 @@ public class UserDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SignUpRequest1 {
+    public static class SignUpRequest {
 
         // USER 테이블에서 키, 몸무게, 질병번호 제외
         @NotBlank(message = "아이디를 입력해주세요")
@@ -48,24 +48,20 @@ public class UserDto {
 
         @NotBlank(message = "성별을 입력해주세요")
         private String gender;
+
+        // 선택사항으로 변경
+        @DecimalMin(value = "0.1", message = "몸무게는 0보다 커야 합니다")
+        private Double weight;
+
+        @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
+        private Double height; 
     }
 
-    //회원가입2
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SignUpRequest2 {
-
-        // 몸무게, 키, 질병번호는 나중에 받음
-        @NotNull(message = "몸무게를 입력해주세요")
-        @DecimalMin(value = "0.1", message = "몸무게는 0보다 커야 합니다")
-        private Double weight;
-
-        @NotNull(message = "키를 입력해주세요")
-        @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
-        private Double height; 
-        
+    public static class DiseaseInfoRequest {
         private String diseaseIndex;
     }
 
@@ -161,14 +157,21 @@ public class UserDto {
     @AllArgsConstructor
     public static class UpdateRequest {
 
+        @Size(max = 20, message = "이름은 20자 이하여야 합니다")
+        private String username;
+
         @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
         private String nickname;
+
+        private LocalDate birthDate;
 
         @DecimalMin(value = "0.1", message = "몸무게는 0보다 커야 합니다")
         private Double weight;
 
         @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
         private Double height;
+
+        private String gender;
 
         private String diseaseIndex;
     }

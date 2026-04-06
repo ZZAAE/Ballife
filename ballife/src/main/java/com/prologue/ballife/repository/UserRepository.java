@@ -1,7 +1,10 @@
 package com.prologue.ballife.repository;
 
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.prologue.ballife.domain.user.User;
+
 import java.sql.Date;
 import java.util.Optional;
 
@@ -15,8 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByLoginId(String loginId);
     Optional<User> findByUsername(String username);
     Optional<User> findByNickname(String nickname);
-    Optional<User> findByBirthdate(Date birthdate);
-    Optional<User> findByDiseaseindex(String diseaseindex);
+    Optional<User> findByBirthDate(Date birthdate);
+    Optional<User> findByDiseaseIndex(String diseaseindex);
 
     // existsBy - 값이 DB에 있는지 검사 하는 메서드
     boolean existsByEmail(String email);

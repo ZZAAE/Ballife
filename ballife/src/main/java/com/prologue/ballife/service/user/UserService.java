@@ -46,14 +46,12 @@ public class UserService {
                 .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .email(request.getEmail())
                 .birthDate(request.getBirthDate())
                 .gender(request.getGender())
                 .weight(request.getWeight())
                 .height(request.getHeight())
-                .diseaseIndex(request.getDiseaseIndex())
                 .build();
-        // 나도 간식 먹고 싶어 엉엉 ... 쌀과자는 쌀이니까 괜찮지 않을까 ㅜㅜ
-        // kanasisugite sinu
 
         // 3.저장
         // 오라클에 INSERT INTO

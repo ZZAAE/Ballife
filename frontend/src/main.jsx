@@ -17,7 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             duration: 3000, //3초후 자동으로 사라짐
             style: {
               background: "#333",
-              coclor: "#fff",
+              color: "#fff",
             },
           }}
         />

@@ -13,8 +13,9 @@ function SignUpPage() {
     loginId: "",
     password: "",
     passwordConfirm: "",
+    username: "",
     email: "",
-    birthday: "",
+    birthDate: "",
     nickname: "",
     gender: "",
     weight: "",
@@ -48,6 +49,18 @@ function SignUpPage() {
       newErrors.username = "아이디를 5자 이상이어야 합니다.";
     }
 
+    if (!formData.password) {
+      newErrors.password = "비밀번호를 입력해주세요.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "비밀번호는 6자 이상이어야 합니다.";
+    }
+
+    if (!formData.passwordConfirm) {
+      newErrors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
+    } else if (formData.password !== formData.passwordConfirm) {
+      newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+    }
+
     if (!formData.email) {
       newErrors.email = "이메일을 입력해주세요.";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -66,8 +79,8 @@ function SignUpPage() {
       newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
     }
 
-    if(!formData.birthday){
-        newErrors.birthday = "생년월일 입력해주세요."
+    if(!formData.birthDate){
+        newErrors.birthDate = "생년월일을 입력해주세요."
     }
 
     if(!formData.gender || formData.gender == ""){
@@ -100,8 +113,9 @@ function SignUpPage() {
       await authApi.signUp({
         loginId: formData.loginId,
         password: formData.password,
+        username: formData.username,
         email: formData.email,
-        birthday: formData.birthday,
+        birthDate: formData.birthDate,
         nickname: formData.nickname,
         gender: formData.gender,
         weight: formData.weight,
@@ -153,6 +167,14 @@ function SignUpPage() {
           />
 
           <Input
+            label="이름"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="이름"
+          />
+
+          <Input
             label="이메일"
             name="email"
             type="email"
@@ -164,10 +186,10 @@ function SignUpPage() {
 
           <Input
             label="생년월일"
-            name="birthday"
+            name="birthDate"
             type="date"
             onChange={handleChange}
-            error={errors.birthday}
+            error={errors.birthDate}
           />
 
           <Input
