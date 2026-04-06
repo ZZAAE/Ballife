@@ -77,7 +77,7 @@ public class CommentDto {
         private Long parentComment;
 
         private Integer level;
-
+        
         private String imageUrl;
     }
 }
