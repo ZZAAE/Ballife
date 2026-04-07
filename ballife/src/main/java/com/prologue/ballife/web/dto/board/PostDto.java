@@ -44,6 +44,7 @@ public class PostDto {
         private String title;
         private String content;
         private Integer viewCount;
+        private Integer upVote;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
@@ -61,6 +62,7 @@ public class PostDto {
                         .title(post.getTitle())
                         .content(post.getContent())
                         .viewCount(post.getViewCount())
+                        .upVote(post.getUpVote())
                         .createdAt(post.getCreatedAt())
                         .updatedAt(post.getUpdatedAt())
                         .build();
