@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-import { Routes, Route, Link } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
-import HomePage from "./pages/HomePage";
-import SignUpPage from "./pages/SignUpPage";
-import LoginPage from "./pages/LoginPage";
-=======
 import { Routes, Route, Link } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
@@ -14,8 +8,6 @@ import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 
-
->>>>>>> 5109e6fb50a825d86fedb02913bf3e86e4ebe272
 
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
@@ -34,6 +26,12 @@ function App() {
 
             {/* 메뉴 */}
             <div className="flex items-center gap-6">
+              <Link 
+               to="/boards" 
+               className="text-gray-600 hover:text-blue-600 transition"
+              >
+                커뮤니티
+              </Link>
               {isAuthenticated ? (
                 <>
                   {/* nickname 우선, 없으면 username 표시 */}
