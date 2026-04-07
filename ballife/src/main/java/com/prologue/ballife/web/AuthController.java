@@ -43,6 +43,7 @@ public class AuthController {
         UserDto.LoginResponse response = UserDto.LoginResponse.builder()
                 .token("temp-token-" + user.getUserId())
                 .username(user.getUsername())
+                .nickname(user.getNickname())
                 .birthDate(user.getBirthDate())
                 .gender(user.getGender())
                 .weight(user.getWeight())
