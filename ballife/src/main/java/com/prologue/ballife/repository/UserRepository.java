@@ -2,7 +2,6 @@ package com.prologue.ballife.repository;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.prologue.ballife.domain.user.User;
 
 import java.sql.Date;

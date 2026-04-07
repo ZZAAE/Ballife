@@ -1,7 +1,7 @@
-package com.prologue.ballife.web.dto.Exercise;
+package com.prologue.ballife.web.dto.exercise;
 
-import com.prologue.ballife.domain.Exercise.UserExercise;
-import com.prologue.ballife.domain.Exercise.UserExerciseDetail;
+import com.prologue.ballife.domain.exercise.UserExercise;
+import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
