@@ -42,6 +42,7 @@ public class AuthController {
             // 임시 토큰 
         UserDto.LoginResponse response = UserDto.LoginResponse.builder()
                 .token("temp-token-" + user.getUserId())
+                .userId(user.getUserId())
                 .username(user.getUsername())
                 .birthDate(user.getBirthDate())
                 .gender(user.getGender())

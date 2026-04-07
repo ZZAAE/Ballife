@@ -6,7 +6,7 @@ spring:
     password: 1234
   jpa:
     hibernate:
-      ddl-auto: create-drop	# 실서버에서는 validate로 설정해야 한다!
+      ddl-auto: update	# 실서버에서는 validate로 설정해야 한다!
     show-sql: true
     properties:
       hibernate:

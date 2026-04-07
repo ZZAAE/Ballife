@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import toast from 'react-hot-toast';
-import authApi from '../api/authApi';
-import Input from '../components/Input';
-import Button from '../components/Button';
+import Input from '../../components/Input';
+import Button from '../../components/Button';
+import authApi from '../../api/authApi';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ function LoginPage() {
         password: '',
     });
     const [errors, setErrors] = useState({});
+    const { login } = useAuth();
 
     const handleChange = (e) => {
 
@@ -51,6 +53,7 @@ function LoginPage() {
         try {
             setLoading(true);
             const response = await authApi.login(formData);
+            login(response.data); //AuthContext의 login 함수 호출하여 상태 업데이트
 
             // 토큰 저장 -> JWT 토근 발급
             localStorage.setItem('token', response.data.token);
