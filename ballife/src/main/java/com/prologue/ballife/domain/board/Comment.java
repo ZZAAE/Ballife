@@ -68,4 +68,7 @@ public class Comment {
         this.isDeleted = true;
     }
 
+    public void upvoteComment() {
+    this.upVote++;
+    }
 }

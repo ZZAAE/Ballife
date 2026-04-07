@@ -67,7 +67,7 @@ public class PostDto {
                         .updatedAt(post.getUpdatedAt())
                         .build();
         }
-    }
+    };
 
     @Data
     @Builder
@@ -82,12 +82,12 @@ public class PostDto {
         private Integer viewCount;
         private LocalDateTime createdAt;
 
-        public static PostResponse from(Post post){
+        public static PostListResponse from(Post post){
             String userNickname = post.getUserId().getNickname() != null
                                 && !post.getUserId().getNickname().isBlank()
                                 ? post.getUserId().getNickname()
                                 : post.getUserId().getUsername();
-            return PostResponse.builder()
+            return PostListResponse.builder()
                         .id(post.getPostId())
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
@@ -97,7 +97,7 @@ public class PostDto {
                         .createdAt(post.getCreatedAt())
                         .build();
         }
-    }
+    };
 
     //게시물 수정
     @Data
@@ -106,7 +106,7 @@ public class PostDto {
     @AllArgsConstructor
     public static class UpdateRequest{
         @NotBlank(message = "제목은 필수입니다")
-        @Size(max = 200, message = "제목은 200자 이하여야 합니다")
+        @Size(max = 50, message = "제목은 50자 이하여야 합니다")
         private String title;
 
         @NotBlank(message = "내용은 필수입니다")
@@ -116,4 +116,4 @@ public class PostDto {
 
         private String imageUrl;
     }
-}
+};

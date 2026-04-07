@@ -1,8 +1,21 @@
+<<<<<<< HEAD
 import { Routes, Route, Link } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+=======
+import { Routes, Route, Link } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import SignUpPage from './pages/user/SignUpPage';
+import LoginPage from './pages/user/LoginPage';
+import BoardListPage from './pages/board/BoardListPage';
+import PostCreatePage from './pages/board/PostCreatePage';
+import PostEditPage from './pages/board/PostEditPage';
+import PostDetailPage from './pages/board/PostDetailPage';
+
+
+>>>>>>> 5109e6fb50a825d86fedb02913bf3e86e4ebe272
 
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
@@ -63,6 +76,10 @@ function App() {
           {/* <Routes> -> 페이지 이동 경로 */}
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/boards" element={<BoardListPage />} />
+          <Route path="/posts/create" element={<PostCreatePage />} />
+          <Route path="/posts/:id/edit" element={<PostEditPage />} />
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
         </Routes>
       </main>
     </div>

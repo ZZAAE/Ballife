@@ -8,10 +8,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.DuplicateResourceException;
 import com.prologue.ballife.exception.ResourceNotFoundException;
-import com.prologue.ballife.repository.UserRepository;
+import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.user.UserDto;
 
 import lombok.RequiredArgsConstructor;
@@ -174,5 +175,7 @@ public class UserService {
     public boolean isNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
+
+    
 
 }
