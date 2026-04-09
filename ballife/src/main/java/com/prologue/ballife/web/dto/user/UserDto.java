@@ -15,7 +15,7 @@ import com.prologue.ballife.domain.user.User;
 
 public class UserDto {
 
-    //회원가입1
+    //회원가입
     @Data
     @Builder
     @NoArgsConstructor
@@ -35,7 +35,6 @@ public class UserDto {
         @Size(min = 6, message = "비밀번호는 6자 이상이여야 합니다")
         private String password;
 
-        @NotBlank(message = "닉네임을 입력해주세요")
         @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
         private String nickname;
 

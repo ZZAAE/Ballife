@@ -40,6 +40,12 @@ public class UserService {
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateResourceException("닉네임", request.getNickname());
         }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateResourceException("사용자명", request.getUsername());
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("이메일", request.getEmail());
+        }
 
         // 2.회원 생성(비밀번호 암호화도 진행)
         User user = User.builder()

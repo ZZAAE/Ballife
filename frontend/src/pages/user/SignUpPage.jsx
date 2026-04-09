@@ -46,7 +46,7 @@ function SignUpPage() {
     if (!formData.loginId) {
       newErrors.loginId = "아이디를 입력해주세요.";
     } else if (formData.loginId.length < 5) {
-      newErrors.username = "아이디를 5자 이상이어야 합니다.";
+      newErrors.loginId = "아이디는 5자 이상이어야 합니다.";
     }
 
     if (!formData.password) {
@@ -89,13 +89,13 @@ function SignUpPage() {
 
     if(!formData.weight){
         newErrors.weight = "몸무게를 입력해주세요."
-    } else if (formData.weight < 0){
+    } else if (formData.weight <= 0){
         newErrors.weight = "0 이상의 숫자를 입력해주세요";
     }
 
     if(!formData.height){
         newErrors.height = "키를 입력해주세요."
-    } else if (formData.height < 0){
+    } else if (formData.height <= 0){
         newErrors.height = "0 이상의 숫자를 입력해주세요";
     }
 
@@ -116,7 +116,7 @@ function SignUpPage() {
         username: formData.username,
         email: formData.email,
         birthDate: formData.birthDate,
-        nickname: formData.nickname,
+        nickname: formData.nickname, // 이거문젠가
         gender: formData.gender,
         weight: formData.weight,
         height: formData.height,
@@ -142,7 +142,7 @@ function SignUpPage() {
             name="loginId"
             value={formData.loginId}
             onChange={handleChange}
-            placeholder="사용자명 (5자 이상)"
+            placeholder="로그인 아이디 (5자 이상)"
             error={errors.loginId}
           />
 

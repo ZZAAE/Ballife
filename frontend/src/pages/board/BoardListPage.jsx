@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import boardApi from "../../api/boardApi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 // 로그인 auth 구현 필요
 // 내가쓴거 : getBoardByCategory(카테고리별로 검색)
@@ -11,7 +11,10 @@ function BoardListPage(){
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0)
 
-    const [category, setCategory] = useState("ALL"); // 초기값: 전체조회
+    const location = useLocation(); // 게시판 초기화 위해 필요함 링크에서 카테고리값 추출
+    const givenCategory = location.state?.category ?? "ALL" // 디테일에서 넘어온 값이 있나 확인
+
+    const [category, setCategory] = useState(givenCategory || "ALL"); // 초기값: 전체조회
     const [sort, setSort] = useState("latest") // 초기값: 날짜순,   latest|views|recommend
     const [searchKeyword, setSearchKeyword] = useState(""); // 검색기능
     const [keyword, setKeyword] = useState("") // 검색키워드 저장
@@ -37,6 +40,24 @@ function BoardListPage(){
             }
         })();
     }, [page, category, sort, searchKeyword]); // 페이지, 카테고리, 정렬법 변경시 리랜더링
+
+    // 카테고리 한글화
+    const categories  = [
+        { value: 'GENERAL', label: '자유' },
+        { value: 'HYPERLIPIDEMIA', label: '고지혈증' },
+        { value: 'HYPERTENSION', label: '고혈압' },
+        { value: 'OSTEOPOROSIS', label: '골다공증' },
+        { value: 'DIABETES', label: '당뇨' },
+        { value: 'OBESITY', label: '비만' },
+        { value: 'GOUT', label: '통풍' },
+        { value: 'QNA', label: '질문' },
+    ];
+
+    // 작성일 포맷팅
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
 
 
     // 카테고리, 정렬법 변경, 검색시 1페이지로
@@ -93,12 +114,12 @@ function BoardListPage(){
             >
                 <option value="ALL">전체</option>
                 <option value="GENERAL">자유</option>
-                <option value="DIABETES">당뇨</option>
-                <option value="OBESITY">비만</option>
+                <option value="HYPERLIPIDEMIA">고지혈증</option>
                 <option value="HYPERTENSION">고혈압</option>
                 <option value="OSTEOPOROSIS">골다공증</option>
+                <option value="DIABETES">당뇨</option>
+                <option value="OBESITY">비만</option>
                 <option value="GOUT">통풍</option>
-                <option value="HYPERLIPIDEMIA">고지혈증</option>
             </select>
 
             <button
@@ -131,30 +152,32 @@ function BoardListPage(){
                         <th className="px-4 py-3 text-left">게시글 제목</th>
                         <th className="px-4 py-3 text-center">닉네임</th>
                         <th className="px-4 py-3 text-center">조회수</th>
-                        <th className="px-4 py-3 text-center">날짜</th>
+                        <th className="px-4 py-3 text-center">추천수</th>
+                        <th className="px-4 py-3 text-center">작성일</th>
                     </tr>
                 </thead>
                 <tbody>
                     {posts.length > 0 ? (
-                        posts.map((post, index) => (
+                        posts.map((post) => (
                             <tr key={post.id} className="border-b last:border-b-0 hover:bg-gray-50">
                                 <td className="px-4 py-3 text-center text-gray-500">
-                                    {page * 10 + index + 1}
+                                    {post.id}                    {/* {page * 10 + index + 1} */}
                                 </td>
-                                <td className="px-4 py-3 text-center">{post.category}</td>
+                                <td className="px-4 py-3 text-center">{categories.find(c => c.value === post.category)?.label}</td>
                                 <td className="px-4 py-3">
 
                                     <Link
-                                        to={`/posts/${post.id}`}
                                         className="text-gray-900 hover:text-blue-600"
+                                        to={`/posts/${post.id}`}
                                     >
                                         {post.title}
                                     </Link>
                                 </td>
                                 <td className="px-4 py-3 text-center">{post.userNickname}</td>
                                 <td className="px-4 py-3 text-center">{post.viewCount}</td>
+                                <td className="px-4 py-3 text-center">{post.upVote ?? 0}</td>
                                 <td className="px-4 py-3 text-center text-gray-500">
-                                    {post.createdAt}
+                                    {formatDate(post.createdAt)}
                                 </td>
                             </tr>
                         ))
