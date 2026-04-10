@@ -26,20 +26,16 @@ public class UserMedicationGuide {
     @Column(name = "INTAKE_INTERVAL", length = 100, nullable = false)
     private String intakeInterval;
 
-    // 복용 시작 날짜 
-    @Column (name = "START_DATE")
-    private LocalDate startDate;
-
     // 며칠 먹는지 
     @Column (name = "DAY")
     private Integer day;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = true)
+    @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PRESCRIPTION_ID", nullable = true)
+    @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
     private Prescription prescriptionId;
     
 }

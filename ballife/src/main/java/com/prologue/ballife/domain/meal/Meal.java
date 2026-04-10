@@ -1,6 +1,7 @@
 package com.prologue.ballife.domain.meal;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.user.User;
 
@@ -22,7 +23,7 @@ public class Meal {
     private Long mealId;
 
     @Column(name = "MEAL_DATE", nullable = false)
-    private LocalDate mealDate;
+    private LocalDateTime mealDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MEAL_CATEGORY", nullable = false)

@@ -23,7 +23,7 @@ public class Alarm {
 
     // 알람 카테고리 (영양제, 병원약)
     @Enumerated(EnumType.STRING)
-    @Column(name = "ALARM_CATEGORY")
+    @Column(name = "ALARM_CATEGORY", nullable = false)
     private AlarmCategory alarmCategory;
 
     // 알람 시간
@@ -31,16 +31,15 @@ public class Alarm {
     private LocalTime time;
 
     // 알람 요일 (예: "월, 수, 금")
-    @Column(name = "ALARM_DAY", length = 30, nullable = false)
+    @Column(name = "ALARM_DAY", length = 30)
     private String alarmDay;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     private User user;
     
-    @ManyToOne
-    @JoinColumn(name = "KD_CODE")
-    private Medicine kdCode;
+    @Column(name = "KD_CODE", length = 15)
+    private String kdCode;
 
     @ManyToOne
     @JoinColumn(name = "SUPPLEMENT_ID")

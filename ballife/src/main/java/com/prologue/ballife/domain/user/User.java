@@ -31,7 +31,7 @@ public class User {
      @Column(name = "NICKNAME", unique = true, nullable = false, length = 20)
     private String nickname;
 
-    @Column(name = "BIRTH_DATE")
+    @Column(name = "BIRTH_DATE", nullable = false)
     private LocalDate birthDate;
 
     @Column(name = "EMAIL", unique = true, nullable = false, length = 30)
