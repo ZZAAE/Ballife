@@ -79,6 +79,7 @@ public class PostDto {
         private Long userId;
         private String userNickname;
         private String title;
+        private Integer upVote;
         private Integer viewCount;
         private LocalDateTime createdAt;
 
@@ -92,6 +93,7 @@ public class PostDto {
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
                         .userNickname(userNickname)
+                        .upVote(post.getUpVote())
                         .title(post.getTitle())
                         .viewCount(post.getViewCount())
                         .createdAt(post.getCreatedAt())

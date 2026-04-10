@@ -81,7 +81,7 @@ function PostEditPage() {
             setSaving(true);
             await postApi.updatePost(user.userId, id, formData);
             toast.success('수정되었습니다.');
-            //navigate(`/posts`);
+            navigate(`/posts/${id}`);
         } catch (error) {
             console.error(error);
         }finally{

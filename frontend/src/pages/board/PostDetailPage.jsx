@@ -12,19 +12,26 @@ export default function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const categories  = [
+        { value: '', label: '게시판을 선택' },
+        { value: 'GENERAL', label: '자유게시판' },
+        { value: 'HYPERLIPIDEMIA', label: '고지혈증' },
+        { value: 'HYPERTENSION', label: '고혈압' },
+        { value: 'OSTEOPOROSIS', label: '골다공증' },
+        { value: 'DIABETES', label: '당뇨' },
+        { value: 'OBESITY', label: '비만' },
+        { value: 'GOUT', label: '통풍' },
+        { value: 'QNA', label: '질문' },
+    ];
+
   //게시글 불러오기
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
+        await postApi.upViewCount(postId);
         const res = await postApi.getPost(postId);
         setPost(res.data);
-        try {
-          await postApi.recordView(postId); // 조회수를 DB에 1을 증가 시키는 API 요청을 보내고 완료 돨때 까지 기다림
-          setPost((p) => (p ? { ...p, viewCount: (p.viewCount ?? 0) + 1 } : p)); //조회수 증가
-        } catch {
-          /* 조회수 API 실패 시 글은 그대로 표시 */
-        }
       } catch (e) {
         console.error("게시글 요청 실패:", e);
         navigate("/boards"); //실패하면 목록으로 이동
@@ -37,6 +44,12 @@ export default function PostDetailPage() {
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
 
+  // 작성일 포맷팅
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
   return (
     <div className="min-h-screen bg-[#ececec] px-6 py-10">
       <main className="mx-auto max-w-6xl">
@@ -44,11 +57,13 @@ export default function PostDetailPage() {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <p className="text-[15px] font-semibold text-gray-700">
-              <Link to="/community" className="hover:text-blue-600">
+              <Link to="/boards" className="hover:text-blue-600">
                 커뮤니티
               </Link>
               <span> &gt; </span>
-              <span className="font-bold text-blue-500">{post.category}</span>
+              <Link to="/boards" state={{ category: post.category }} className="font-bold text-blue-500">
+              {categories.find(c => c.value === post.category)?.label}
+              </Link>
             </p>
             <p className="mt-1 text-[11px] text-gray-500">
               건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
@@ -80,8 +95,9 @@ export default function PostDetailPage() {
               <span className="font-medium text-gray-700">
                 {post.userNickname}
               </span>
-              {post.createdAt && <span>{post.createdAt}</span>}
+              {post.createdAt && <span>{formatDate(post.createdAt)}</span>}
               <span>조회 {post.viewCount ?? 0}</span>
+              <span>추천 {post.upVote ?? 0}</span>
             </div>
           </div>
 
@@ -99,6 +115,20 @@ export default function PostDetailPage() {
             </div>
           )}
 
+          <Button className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e8ebf5] text-[11px] font-semibold text-gray-600"
+            onClick={async () => {
+                try {
+                await postApi.upVote(post.id);
+                const res = await postApi.getPost(post.id);
+                setPost(res.data);
+                toast.success("추천되었습니다.");
+                } catch (e) {
+                console.error(e);
+                }
+            }}>
+              추천
+        </Button>
+
           {user?.userId === post.userId && (
             <>
               <Link to={`/posts/${post.id}/edit`}>
@@ -112,7 +142,7 @@ export default function PostDetailPage() {
                   if (!window.confirm("이 글을 삭제할까요?")) return;
                   if (!user?.userId) return;
                   try {
-                    await postApi.deletePost(post.id, user.userId);
+                    await postApi.deletePost(user.userId, post.id);
                     toast.success("삭제되었습니다.");
                     navigate("/boards");
                   } catch (e) {
