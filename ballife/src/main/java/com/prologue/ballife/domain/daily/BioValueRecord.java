@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Daily_Calorie")
+@Table(name = "BIO_VALUE_RECORD")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,27 +27,24 @@ public class BioValueRecord {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name="DATE", nullable = false)
-    private LocalDate date;
-
-    @Column(name="TIME", nullable = false)
-    private LocalTime time;
+    @Column(name="RECORD_TIME", nullable = false)
+    private LocalDateTime recordTime;
 
     @Column(name="CATEGORY", nullable = false, length = 10)
     private String category;
 
-    @Column(name="BLOODSUGAR", nullable = false)
+    @Column(name="BLOODSUGAR", nullable = true)
     private Integer bloodSugar;
 
-    @Column(name="SYSTOLIC_BP", nullable = false)
+    @Column(name="SYSTOLIC_BP", nullable = true)
     private Integer systolicBP;
 
-    @Column(name="DIASTOLIC_BP", nullable = false)
+    @Column(name="DIASTOLIC_BP", nullable = true)
     private Integer diastolicBP;
 
-    @Column(name="WEIGHT", nullable = false)
-    private Integer weight;
+    @Column(name="WEIGHT", nullable = true)
+    private Double weight;
 
-    @Column(name="WATER_INTAKE_CUP", nullable = false)
+    @Column(name="WATER_INTAKE_CUP", nullable = true)
     private Integer waterIntakeCup;
 }

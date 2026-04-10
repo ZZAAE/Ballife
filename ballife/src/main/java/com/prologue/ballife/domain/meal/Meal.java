@@ -24,11 +24,33 @@ public class Meal {
     @Column(name = "MEAL_DATE", nullable = false)
     private LocalDate mealDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MEAL_CATEGORY", nullable = false)
+    private MealCategory mealCategory;
+
     @Column(name = "MEAL_PHOTO", length = 300)
     private String mealPhoto;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
+
+    public enum MealCategory{
+        BREAKFAST("아침식사"),
+        LUNCH("점심식사"),
+        DINNER("저녁식사"),
+        SNACK("간식");
+
+        private final String displayName;
+
+        MealCategory(String displayName){
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName(){
+            return displayName;
+        }
+
+    }
     
 }

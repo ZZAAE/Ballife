@@ -33,10 +33,10 @@ public class Comment {
     @Column(name = "PARENT_COMMENT")
     private Long parentComment;
 
-    @Column(name = "LEVEL")
+    @Column(name = "LEVEL", nullable = false)
     private Integer level;
 
-    @Column(name = "IMAGE_URL", unique = false, nullable = false, length = 300)
+    @Column(name = "IMAGE_URL", unique = false, length = 300)
     private String imageUrl;
 
     @Column(name = "CREATED_AT", nullable = false)

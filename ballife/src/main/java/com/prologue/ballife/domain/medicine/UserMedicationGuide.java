@@ -17,14 +17,10 @@ public class UserMedicationGuide {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "USER_MEDICATION_ID", nullable = false)
     private Long userMedicationId;
-
+    
     // json에서 가져오는 kd코드 
     @Column (name = "KD_CODE") 
     private String kdCode;
-
-    // 복용량
-    @Column (name = "DOSAGE", nullable = false)
-    private Integer dosage; 
 
     // 복용간격 
     @Column(name = "INTAKE_INTERVAL", length = 100, nullable = false)
@@ -37,10 +33,6 @@ public class UserMedicationGuide {
     // 며칠 먹는지 
     @Column (name = "DAY")
     private Integer day;
-
-    // 메모 사용자 입력 
-    @Column (name = "MEMO", length = 300)
-    private String memo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = true)

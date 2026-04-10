@@ -1,6 +1,7 @@
 package com.prologue.ballife.domain.medicine;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import com.prologue.ballife.domain.user.User;
 
 import jakarta.persistence.*;
@@ -27,7 +28,7 @@ public class Alarm {
 
     // 알람 시간
     @Column (name = "TIME", nullable = false) 
-    private LocalDateTime time;
+    private LocalTime time;
 
     // 알람 요일 (예: "월, 수, 금")
     @Column(name = "ALARM_DAY", length = 30, nullable = false)
@@ -38,7 +39,7 @@ public class Alarm {
     private User user;
     
     @ManyToOne
-    @JoinColumn(name = "KD_CORD")
+    @JoinColumn(name = "KD_CODE")
     private Medicine kdCode;
 
     @ManyToOne
