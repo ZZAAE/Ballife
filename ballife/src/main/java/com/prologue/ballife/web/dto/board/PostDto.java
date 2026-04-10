@@ -69,53 +69,53 @@ public class PostDto {
         }
     };
 
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        public static class PostListResponse{ //게시판 목록 구성을 위한 글 목록 정보
-            private Long id;
-            private CATEGORY category;
-            private Long userId;
-            private String userNickname;
-            private String title;
-            private Integer upVote;
-            private Integer viewCount;
-            private LocalDateTime createdAt;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PostListResponse{ //게시판 목록 구성을 위한 글 목록 정보
+        private Long id;
+        private CATEGORY category;
+        private Long userId;
+        private String userNickname;
+        private String title;
+        private Integer upVote;
+        private Integer viewCount;
+        private LocalDateTime createdAt;
 
-            public static PostListResponse from(Post post){
-                String userNickname = post.getUserId().getNickname() != null
-                                    && !post.getUserId().getNickname().isBlank()
-                                    ? post.getUserId().getNickname()
-                                    : post.getUserId().getUsername();
-                return PostListResponse.builder()
-                            .id(post.getPostId())
-                            .category(post.getCategory())
-                            .userId(post.getUserId().getUserId())
-                            .userNickname(userNickname)
-                            .upVote(post.getUpVote())
-                            .title(post.getTitle())
-                            .viewCount(post.getViewCount())
-                            .createdAt(post.getCreatedAt())
-                            .build();
-            }
-        };
-
-        //게시물 수정
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        public static class UpdateRequest{
-            @NotBlank(message = "제목은 필수입니다")
-            @Size(max = 50, message = "제목은 50자 이하여야 합니다")
-            private String title;
-
-            @NotBlank(message = "내용은 필수입니다")
-            private String content;
-
-            private Post.CATEGORY category;
-
-            private String imageUrl;
+        public static PostListResponse from(Post post){
+            String userNickname = post.getUserId().getNickname() != null
+                                && !post.getUserId().getNickname().isBlank()
+                                ? post.getUserId().getNickname()
+                                : post.getUserId().getUsername();
+            return PostListResponse.builder()
+                        .id(post.getPostId())
+                        .category(post.getCategory())
+                        .userId(post.getUserId().getUserId())
+                        .userNickname(userNickname)
+                        .upVote(post.getUpVote())
+                        .title(post.getTitle())
+                        .viewCount(post.getViewCount())
+                        .createdAt(post.getCreatedAt())
+                        .build();
         }
     };
+
+    //게시물 수정
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateRequest{
+        @NotBlank(message = "제목은 필수입니다")
+        @Size(max = 50, message = "제목은 50자 이하여야 합니다")
+        private String title;
+
+        @NotBlank(message = "내용은 필수입니다")
+        private String content;
+
+        private Post.CATEGORY category;
+
+        private String imageUrl;
+    }
+};

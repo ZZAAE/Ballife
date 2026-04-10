@@ -34,7 +34,7 @@ public class Post {
     @Column(name = "CONTENT", unique = false, nullable = false, length = 5000)
     private String content;    
 
-    @Column(name = "IMAGE_URL", unique = false, length = 300)
+    @Column(name = "IMAGE_URL", unique = false, nullable = true, length = 300)
     private String imageUrl;
 
     @Column(name = "CREATED_AT", nullable = false)

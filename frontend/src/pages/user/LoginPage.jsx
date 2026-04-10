@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import toast from 'react-hot-toast';
 import Input from '../../components/Input';
@@ -8,13 +8,14 @@ import authApi from '../../api/authApi';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         loginId: '',
         password: '',
     });
     const [errors, setErrors] = useState({});
-    const { login } = useAuth();
 
     const handleChange = (e) => {
 
@@ -58,9 +59,11 @@ function LoginPage() {
             // 토큰 저장 -> JWT 토근 발급
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data));
+            login(response.data);
             
-            toast.success(`${response.data.username}님, 환영합니다!`); //토스트 메시지 띄우기
-            navigate('/'); //메인 화면으로 바로 이동
+            toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`); //토스트 메시지 띄우기
+            const from = typeof location.state?.from === 'string' ? location.state.from : '/';
+            navigate(from, { replace: true });
 
         } catch (error) {
             console.error('로그인 실패:', error);
@@ -89,6 +92,7 @@ function LoginPage() {
                     <Input
                         label="비밀번호"
                         name="password"
+                        type="password"
                         value={formData.password}
                         onChange={handleChange}
                         placeholder="비밀번호"
