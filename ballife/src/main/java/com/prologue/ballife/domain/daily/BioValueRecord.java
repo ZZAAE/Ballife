@@ -24,7 +24,7 @@ public class BioValueRecord {
     private Long recordId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "USER_ID")
     private User user;
 
     @Column(name="DATE", nullable = false)
