@@ -41,7 +41,7 @@ const Button = ({
                 disabled={disabled}
                 className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
                 {...props}>
-            {children}ㅌ
+            {children}
         </button>
     );
 };

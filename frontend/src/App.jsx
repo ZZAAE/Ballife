@@ -2,6 +2,8 @@ import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import PostCreatePage from './pages/board/PostCreatePage';
+import PostEditPage from './pages/board/PostEditPage';
 
 
 function App() {
@@ -37,6 +39,8 @@ function App() {
           <Route path="/" element={<HomePage />} /> {/* <Routes> -> 페이지 이동 경로 */}
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/board/edit" element={<PostEditPage />} />
+          <Route path="/board/create" element={<PostCreatePage />} />
         </Routes>
       </main>
     </div>
