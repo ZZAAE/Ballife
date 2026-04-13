@@ -12,9 +12,13 @@ import com.prologue.ballife.domain.board.Post;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>{
 
+    Optional<Post> findById(Long postId);
+    Page<Post> findByContent(Long content, Pageable pageable);
+
     Optional<Post> findByUserId(Long userId);
     Page<Post> findByCategory(Post.CATEGORY Category, Pageable pageable);
     Page<Post> findByTitle(Long title, Pageable pageable);
-    Page<Post> findByContent(Long content, Pageable pageable);
+    Page<Post> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<Post> findByCategoryAndTitleContaining(Post.CATEGORY Category, String keyword, Pageable pageable);
     
 }
