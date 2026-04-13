@@ -1,4 +1,4 @@
-package com.prologue.ballife.repository;
+package com.prologue.ballife.repository.user;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;

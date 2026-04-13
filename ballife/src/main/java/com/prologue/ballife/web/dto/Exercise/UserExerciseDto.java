@@ -1,7 +1,4 @@
-package com.prologue.ballife.web.dto.Exercise;
-
-import com.prologue.ballife.domain.Exercise.ExerciseType;
-import com.prologue.ballife.domain.Exercise.UserExercise;
+package com.prologue.ballife.web.dto.exercise;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +7,9 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+
+import com.prologue.ballife.domain.exercise.ExerciseType;
+import com.prologue.ballife.domain.exercise.UserExercise;
 
 public class UserExerciseDto {
 

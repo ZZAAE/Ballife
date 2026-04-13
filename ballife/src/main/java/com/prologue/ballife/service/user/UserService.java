@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.DuplicateResourceException;
 import com.prologue.ballife.exception.ResourceNotFoundException;
-import com.prologue.ballife.repository.UserRepository;
+import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.user.UserDto;
 
 import lombok.RequiredArgsConstructor;

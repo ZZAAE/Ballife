@@ -1,11 +1,12 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import SignUpPage from './pages/SignUpPage';
-import LoginPage from './pages/LoginPage';
-
+import { Link, Route, Routes } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import BoardListPage from "./pages/board/BoardListPage";
+import PostCreatePage from "./pages/board/PostCreatePage";
+import PostDetailPage from "./pages/board/PostDetailPage";
 
 function App() {
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* 헤더 */}
@@ -19,12 +20,16 @@ function App() {
 
             {/* 메뉴 */}
             <div className="flex items-center gap-6">
-              <Link to="/login"
-                className="text-gray-600 hover:text-blue-600 transition">
+              <Link
+                to="/login"
+                className="text-gray-600 hover:text-blue-600 transition"
+              >
                 로그인
               </Link>
-              <Link to="/signup"
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+              <Link
+                to="/signup"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+              >
                 회원가입
               </Link>
             </div>
@@ -34,13 +39,18 @@ function App() {
       {/* 메인 콘텐츠*/}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <Routes>
-          <Route path="/" element={<HomePage />} /> {/* <Routes> -> 페이지 이동 경로 */}
+          <Route path="/" element={<HomePage />} />{" "}
+          {/* <Routes> -> 페이지 이동 경로 */}
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/boards" element={<BoardListPage />} />
+          <Route path="/posts/create" element={<PostCreatePage />} />
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/Exercise" element={<h1>운동 페이지</h1>} />
         </Routes>
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
