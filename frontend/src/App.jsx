@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import PostCreatePage from './pages/board/PostCreatePage';
 
 
 function App() {
@@ -27,6 +28,10 @@ function App() {
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                 회원가입
               </Link>
+              <Link to="/board/create"
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                글쓰기
+              </Link>
             </div>
           </nav>
         </div>
@@ -37,6 +42,8 @@ function App() {
           <Route path="/" element={<HomePage />} /> {/* <Routes> -> 페이지 이동 경로 */}
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/board/create" element={<PostCreatePage />} />
+          
         </Routes>
       </main>
     </div>

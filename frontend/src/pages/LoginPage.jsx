@@ -3,9 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import authApi from '../api/authApi';
 import Input from '../components/Input';
-import Button from '../components/Button';
+import Button from '../components/button';
+import { useAuth } from '../contexts/AuthContext';
 
 function LoginPage() {
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -52,10 +54,12 @@ function LoginPage() {
             setLoading(true);
             const response = await authApi.login(formData);
 
+            login(response.data); //AuthContext의 login 함수 호출하여 사용자 정보 저장
+
             // 토큰 저장 -> JWT 토근 발급
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data));
-            
+
             toast.success(`${response.data.username}님, 환영합니다!`); //토스트 메시지 띄우기
             navigate('/'); //메인 화면으로 바로 이동
 
@@ -90,6 +94,7 @@ function LoginPage() {
                         onChange={handleChange}
                         placeholder="비밀번호"
                         error={errors.password}
+                        type="password"
                     />
 
                     <Button
