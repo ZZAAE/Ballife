@@ -10,8 +10,8 @@ import RecordSummary from "./pages/recordRead/RecordSummary.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
-        {/* <RecordSummary /> */}
-        <App />
+        <RecordSummary />
+        {/* <App /> */}
         <Toaster
           position="top-right" //화면 우측 상단
           toastOptions={{
