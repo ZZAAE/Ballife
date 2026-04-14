@@ -15,8 +15,6 @@ import { forwardRef } from "react";
 //forwardRef 쓰는 이유: 자동으로 포커스가게 하거나 
 const Input = forwardRef(({
     label, //입력창 위 텍스트 (예: "이메일")
-    type = 'text', //기본값
-    placeholder, //힌트
     error, //에러메세지 문자열
     icon, //아이콘 컴포넌트
     className = '', //추가 css 코드
@@ -41,7 +39,7 @@ const Input = forwardRef(({
         )}
 
         {/* 입력 필드 */}
-        <select name="progress" value={input.progress} onChange={onChange}>
+        <select {...props}>
               <option value="">-- 선택 --</option>
               <option value="1">진행 전</option>
               <option value="2">진행 중</option>
