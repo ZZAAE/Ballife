@@ -33,8 +33,7 @@ public class BioValueRecordService {
         // 기록 생성 (ERDCLOUDE에서는 DATETIME인데 DOMAIN에는 DATE, TIME으로 나눠져있음)
         BioValueRecord bio = BioValueRecord.builder()
                 .user(user)
-                .date(request.getDate())
-                .time(request.getTime())
+                .recordTime(request.getRecordTime())
                 .category(request.getCategory())
                 .bloodSugar(request.getBloodSugar())
                 .systolicBP(request.getSystolicBP())
@@ -49,18 +48,32 @@ public class BioValueRecordService {
 
     // 생체 수치 수정
     @Transactional
-    public BioValueRecordDto.UpdateRequest updateBioValueRecord(Long userId, Long recordId, BioValueRecordDto.UpdateRequest request){
+    public BioValueRecordDto.BioResponse updateBioValueRecord(Long userId, Long recordId, BioValueRecordDto.UpdateRequest request){
         
         BioValueRecord record = bioValueRecordRepository.findByUserId(userId)
             .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", recordId));
 
         if (!record.getUser().getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 기록에 대한 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "로그인 정보 없음.");
         }
 
-        
-        
+        // 수정할 값 빼곤 null이라 그냥 다 업데이트함
+        record.setRecordTime(request.getRecordTime());
+        record.setCategory(request.getCategory());
+        record.setBloodSugar(request.getBloodSugar());
+        record.setSystolicBP(request.getSystolicBP());
+        record.setDiastolicBP(request.getDiastolicBP());
+        record.setWeight(request.getWeight());
+        record.setWaterIntakeCup(request.getWaterIntakeCup());
 
-        return BioValueRecordDto.UpdateRequest.from(bioValueRecordRepository.save(record));
+        return BioValueRecordDto.BioResponse.from(bioValueRecordRepository.save(record));
+    }
+
+    // 생체 수치 방출 (없으면 빈값으로 방출함)
+    public BioValueRecordDto.BioResponse getBioValue(Long userId){
+        return bioValueRecordRepository.findByUserId(userId)
+                .map(BioValueRecordDto.BioResponse::from)
+                .orElse(BioValueRecordDto.BioResponse.builder().build());
+        
     }
 }

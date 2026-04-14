@@ -2,9 +2,7 @@ package com.prologue.ballife.web.dto.medicine;
 
 import java.time.LocalDateTime;
 
-import com.prologue.ballife.domain.medicine.Medicine;
 import com.prologue.ballife.domain.medicine.Prescription;
-import com.prologue.ballife.domain.medicine.Supplement;
 import com.prologue.ballife.domain.medicine.UserMedicineRecord;
 
 import jakarta.validation.constraints.*;
@@ -53,15 +51,14 @@ public class UserMedicineRecordDto {
         private String medicineCategory;
         private LocalDateTime intakeTime;
         private Prescription prescriptionId;
-        private Supplement supplementId;
+        private String supplementId;
 
         public static UserMedicineRecordResponse from(UserMedicineRecord usermedinerecord) {
             return UserMedicineRecordResponse.builder()
                     .userMedicineRecordId(usermedinerecord.getUserMedicineRecordId())
                     .medicineCategory(usermedinerecord.getMedicineCategory())
                     .intakeTime(usermedinerecord.getIntakeTime())
-                    .prescriptionId(usermedinerecord.getPrescriptionId())  
-                    .supplementId(usermedinerecord.getSupplementId())  
+                    .prescriptionId(usermedinerecord.getPrescriptionId())
                     .build();
         }
     }

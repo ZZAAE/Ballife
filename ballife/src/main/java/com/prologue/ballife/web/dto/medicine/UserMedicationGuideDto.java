@@ -70,7 +70,6 @@ public class UserMedicationGuideDto {
                     .userMedicationId(usermedicationguide.getUserMedicationId())
                     .kdCode(usermedicationguide.getKdCode())
                     .intakeInterval(usermedicationguide.getIntakeInterval())
-                    .startDate(usermedicationguide.getStartDate())
                     .day(usermedicationguide.getDay())
                     .prescriptionId(usermedicationguide.getPrescriptionId())
                     .build();

@@ -7,6 +7,7 @@ import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
+import MainPage from './pages/main/MainPage';
 
 
 function App() {
@@ -68,10 +69,12 @@ function App() {
         </div>
       </header>
       {/* 메인 콘텐츠*/}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="">
         <Routes>
           <Route path="/" element={<HomePage />} />{" "}
+          
           {/* <Routes> -> 페이지 이동 경로 */}
+          <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/boards" element={<BoardListPage />} />

@@ -14,7 +14,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Alarm {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +42,7 @@ public class Alarm {
 
     @ManyToOne
     @JoinColumn(name = "SUPPLEMENT_ID")
-    private Supplement supplementId;
+    private String supplementId;
 
     public enum AlarmCategory {
     MEDICINE,
