@@ -1,6 +1,5 @@
 package com.prologue.ballife.domain.meal;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.user.User;

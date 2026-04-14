@@ -14,7 +14,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Alarm {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +40,9 @@ public class Alarm {
     @Column(name = "KD_CODE", length = 15)
     private String kdCode;
 
-    @Column(name = "SUPPLEMENT_ID")
-    private Long supplementId;
+    @ManyToOne
+    @JoinColumn(name = "SUPPLEMENT_ID")
+    private String supplementId;
 
     public enum AlarmCategory {
     MEDICINE,

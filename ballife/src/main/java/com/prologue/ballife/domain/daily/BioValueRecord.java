@@ -1,7 +1,5 @@
 package com.prologue.ballife.domain.daily;
 
-import java.math.BigInteger;
-import java.sql.Date;
 import java.time.*;
 
 import com.prologue.ballife.domain.user.User;
