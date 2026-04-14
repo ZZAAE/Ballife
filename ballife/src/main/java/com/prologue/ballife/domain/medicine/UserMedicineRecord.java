@@ -36,6 +36,6 @@ public class UserMedicineRecord {
     private Prescription prescriptionId;
 
     @Column(name = "SUPPLEMENT_ID")  
-    private Integer supplementId;
+    private Long supplementId;
     
 }
