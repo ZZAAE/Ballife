@@ -3,6 +3,7 @@ import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+import DiseasePage from './pages/user/DiseasePage';
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -15,7 +16,7 @@ function App() {
   const { user, isAuthenticated, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-white">
       {/* 헤더 */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -69,7 +70,7 @@ function App() {
         </div>
       </header>
       {/* 메인 콘텐츠*/}
-      <main className="">
+      <main className="max-w-max mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<HomePage />} />{" "}
           
@@ -77,6 +78,7 @@ function App() {
           <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/disease" element={<DiseasePage />} />
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />

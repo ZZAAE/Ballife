@@ -11,6 +11,9 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
     Optional<BioValueRecord> findByRecordId(Long recordId);
     Optional<BioValueRecord> findByUserId(Long userId);
 
+    
+    Optional<BioValueRecord> findByUserIdWithBloodsugar(Long userId);
+
     boolean existsByRecordId(Long recordId);
     boolean existsByUserId(Long userId);
     
