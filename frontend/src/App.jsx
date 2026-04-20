@@ -8,7 +8,10 @@ import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import MainPage from './pages/main/MainPage';
-
+import WeightRecord from './pages/recordRead/WeightRecord';
+import BloodPressureRecord from './pages/recordRead/BloodPressureRecord';
+import BloodSugarRecord from './pages/recordRead/BloodSugarRecord';
+import RecordPage from './pages/recordRead/RecordPage';
 
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
@@ -81,6 +84,10 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/weight" element={<WeightRecord />} />
+          <Route path="/pressure" element={<BloodPressureRecord />} />
+          <Route path="/sugar" element={<BloodSugarRecord />} />
+          <Route path="/records" element={<RecordPage />} />
         </Routes>
       </main>
     </div>
