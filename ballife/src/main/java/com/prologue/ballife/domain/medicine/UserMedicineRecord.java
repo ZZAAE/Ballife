@@ -1,6 +1,9 @@
 package com.prologue.ballife.domain.medicine;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import com.prologue.ballife.domain.user.User;
 
 import jakarta.persistence.*;
@@ -19,23 +22,32 @@ public class UserMedicineRecord {
     @Column(name = "USER_MEDICINE_RECORD_ID", nullable = false)
     private Long userMedicineRecordId;
 
-    // 복용 카테고리 (영양제, 병원약)
-    @Column (name = "MEDICINE_CATEGORY", length = 15)
-    private String medicineCategory;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
+    private Prescription prescriptionId;
+
+    // 복용 시간 
+    @Column (name = "INTAKE_DATE")
+    private LocalDate intakeDate;
 
     // 복용 시간 
     @Column (name = "INTAKE_TIME")
-    private LocalDateTime intakeTime;
-
-    @ManyToOne
-    @JoinColumn(name = "USER_ID")
-    private User user;
-    
-    @ManyToOne
-    @JoinColumn(name = "PRESCRIPTION_ID") 
-    private Prescription prescriptionId;
+    private LocalTime intakeTime;
 
     @Column(name = "SUPPLEMENT_ID")  
     private Long supplementId;
+
+    // 복용 간격
+    public enum TakenCategory {
+        MORNING,
+        LUNCH,
+        DINNER,
+        BEDTIME,
+        FASTING
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TAKEN_CATEGORY")
+    private TakenCategory takenCategory;
     
 }

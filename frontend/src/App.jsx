@@ -9,6 +9,7 @@ import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import MainPage from './pages/main/MainPage';
+import RecordPage from './pages/RecordPage';
 
 
 function App() {
@@ -70,7 +71,7 @@ function App() {
         </div>
       </header>
       {/* 메인 콘텐츠*/}
-      <main className="max-w-max mx-auto px-4 py-8">
+      <main className="mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<HomePage />} />{" "}
           
@@ -83,6 +84,7 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/record" element={<RecordPage/>} />
         </Routes>
       </main>
     </div>

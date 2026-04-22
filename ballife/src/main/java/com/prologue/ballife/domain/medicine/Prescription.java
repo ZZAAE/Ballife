@@ -25,12 +25,27 @@ public class Prescription {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    public enum Pcategory {
+        MEDICINE,
+        SUPPLEMENT
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="P_CATEGORY", nullable = false)
+    private Pcategory pCategory;
+
     @Column(name = "PRESCRIPTION_NAME", length = 30, nullable = false)
     private String prescriptionName;
 
-    @Column(name = "PRESCRIPTION_DATE", nullable = false)
+    @Column(name = "PRESCRIPTION_DATE")
     private LocalDate prescriptionDate;
+
+    @Column (name="SUPPLEMENT_ID")
+    private Long supplementId;
 
     @Column (name = "MEMO", length = 300)
     private String memo;
+
+    
+
 }
