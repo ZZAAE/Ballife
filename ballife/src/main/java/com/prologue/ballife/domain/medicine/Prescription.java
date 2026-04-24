@@ -14,6 +14,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Prescription {
 
     @Id
@@ -40,11 +41,11 @@ public class Prescription {
     @Column(name = "PRESCRIPTION_DATE")
     private LocalDate prescriptionDate;
 
-    @Column (name="SUPPLEMENT_ID")
-    private Long supplementId;
-
     @Column (name = "MEMO", length = 300)
     private String memo;
+
+    @Column(name = "INTAKEINTERVALS")
+    private String intakeIntervals;
 
     
 

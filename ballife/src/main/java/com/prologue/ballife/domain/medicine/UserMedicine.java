@@ -21,12 +21,14 @@ public class UserMedicine {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
-    private Prescription prescriptionId;
+    private Prescription prescription;
 
     @Column(name="KDCODE", nullable = false)
     private String kdCode;
 
-    @Column(name = "INTAKEINTERVALS")
-    private String intakeIntervals;
+    @Column (name="SUPPLEMENT_ID")
+    private Long supplementId;
+
+    
 
 }

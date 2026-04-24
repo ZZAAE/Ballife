@@ -1,7 +1,6 @@
 package com.prologue.ballife.web.dto.medicine;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.prologue.ballife.domain.medicine.Prescription;
@@ -61,7 +60,7 @@ public class UserMedicineRecordDto {
     @AllArgsConstructor
     public static class UserMedicineRecordResponse {
         private Long userMedicineRecordId;
-        private Prescription prescriptionId;
+        private Long prescriptionId;
         private LocalDate intakeDate;
         private LocalTime intakeTime;
         private Long supplementId;
@@ -70,7 +69,7 @@ public class UserMedicineRecordDto {
         public static UserMedicineRecordResponse from(UserMedicineRecord usermedinerecord) {
             return UserMedicineRecordResponse.builder()
                     .userMedicineRecordId(usermedinerecord.getUserMedicineRecordId())
-                    .prescriptionId(usermedinerecord.getPrescriptionId())
+                    .prescriptionId(usermedinerecord.getPrescription().getPrescriptionId())
                     .intakeDate(usermedinerecord.getIntakeDate())
                     .intakeTime(usermedinerecord.getIntakeTime())
                     .supplementId(usermedinerecord.getSupplementId())

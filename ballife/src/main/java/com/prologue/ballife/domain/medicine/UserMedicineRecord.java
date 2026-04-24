@@ -15,6 +15,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserMedicineRecord {  
 
     @Id 
@@ -24,7 +25,7 @@ public class UserMedicineRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
-    private Prescription prescriptionId;
+    private Prescription prescription;
 
     // 복용 시간 
     @Column (name = "INTAKE_DATE")
