@@ -1,6 +1,7 @@
 package com.prologue.ballife.domain.medicine;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.user.User;
 
@@ -46,6 +47,12 @@ public class Prescription {
 
     @Column(name = "INTAKEINTERVALS")
     private String intakeIntervals;
+
+    @Column(name = "IS_DELETED")
+    private boolean isDeleted;
+
+    @Column(name = "DELETED_AT")
+    private LocalDateTime deletedAt;
 
     
 

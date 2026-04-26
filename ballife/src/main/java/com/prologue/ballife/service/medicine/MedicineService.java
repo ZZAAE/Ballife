@@ -1,8 +1,11 @@
 package com.prologue.ballife.service.medicine;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,48 +58,104 @@ public class MedicineService {
 
     }
 
-    //처방전 조회 //userId 일단 지움 JWT
-    public List<PrescriptionDto.PrescriptionResponse> getPrescription(){
-        //레포 조회
-        return 
+    // 처방전 조회 //임시로 받음 userId
+    public List<PrescriptionDto.PrescriptionResponse> getPrescription(Long userId) {
+
+        List<Prescription> list = prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId);
+
+        return list.stream()
+                .map(PrescriptionDto.PrescriptionResponse::from)
+                .toList();
     }
 
-    //처방전에 따른 약 목록 조회
-    public List<UserMedicineDto.UserMedicineResponse> getUserMedicine(Long prescriptionId){
-        //유저 처방전 조회
-        //처방전 처방전 식별자 조인
-        return 
+    // 처방전에 따른 약 목록 조회
+    public List<UserMedicineDto.UserMedicineResponse> getUserMedicine(Long prescriptionId) {
+
+        List<UserMedicine> list = userMedicineRepository.findByPrescription_PrescriptionId(prescriptionId);
+
+        return list.stream()
+                .map(UserMedicineDto.UserMedicineResponse::from)
+                .toList();
     }
 
-    //처방전 수정 //userId 일단 지움 JWT
-    public PrescriptionDto.PrescriptionResponse putPrescription(Long prescriptionId, PrescriptionDto.UpdateRequest request){
-        //레포
-        return PrescriptionDto.PrescriptionResponse.from(null);
+    // 처방전 수정 //임시로 받음 userId
+    @Transactional
+    public PrescriptionDto.PrescriptionResponse putPrescription(Long userId, Long prescriptionId,
+            PrescriptionDto.UpdateRequest request) {
+
+        Prescription res = prescriptionRepository.findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
+                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+
+        res.setPrescriptionName(request.getPrescriptionName());
+        res.setPrescriptionDate(request.getPrescriptionDate());
+        res.setMemo(request.getMemo());
+        res.setIntakeIntervals(request.getIntakeIntervals());
+
+        return PrescriptionDto.PrescriptionResponse.from(res);
     }
 
-    //약 목록 수정
-    public UserMedicineDto.UserMedicineResponse putMedicine(Long UserMedicineId, Long prescriptionId, UserMedicineDto.UpdateRequest request){
-        //레포
-        return UserMedicineDto.UserMedicineResponse.from(null);
+    // 약 목록 수정
+    @Transactional
+    public UserMedicineDto.UserMedicineResponse putMedicine(Long userMedicineId, Long prescriptionId,
+            UserMedicineDto.UpdateRequest request) {
+
+        UserMedicine res = userMedicineRepository
+                .findByUserMedicineIdAndPrescription_PrescriptionId(userMedicineId, prescriptionId)
+                .orElseThrow(() -> new RuntimeException("약 없음"));
+
+        Prescription prescription = prescriptionRepository.findById(request.getPrescriptionId())
+                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+
+        res.setPrescription(prescription);
+        res.setKdCode(request.getKdCode());
+        res.setSupplementId(request.getSupplementId());
+
+        return UserMedicineDto.UserMedicineResponse.from(res);
     }
 
-    //처방전 삭제 //userId 일단 지움 JWT
-    public void deletePrescription(Long prescriptionId){
+    // 처방전 삭제 //임시로 받음 userId (소프트 삭제 구현)
+    @Transactional
+    public void deletePrescription(Long userId, Long prescriptionId) {
+        // 1. 처방전 조회 (권한 체크)
+        Prescription res = prescriptionRepository
+                .findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
+                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+
+        // 2. 약 목록 물리 삭제
+        userMedicineRepository.deleteByPrescription_PrescriptionId(prescriptionId);
+
+        // 3. 처방전 소프트 삭제
+        if (res.isDeleted()) {
+            throw new RuntimeException("이미 삭제된 처방전");
+        }
+
+        res.setDeleted(true);
+        res.setDeletedAt(LocalDateTime.now());
 
     }
 
-    //약 목록 삭제
-    public void deleteUserMedicine(Long UserMedicineId, Long prescriptionId){
+    // 약 목록 삭제 (소프트 삭제 구현)
+    @Transactional
+    public void deleteUserMedicine(Long userMedicineId, Long prescriptionId) {
+        UserMedicine res = userMedicineRepository
+                .findByUserMedicineIdAndPrescription_PrescriptionId(userMedicineId, prescriptionId)
+                .orElseThrow(() -> new RuntimeException("약 없음"));
+
+        userMedicineRepository.delete(res);
 
     }
 
-    //복용 이행률 계산
-    public Long DosageSituation(){
-        //멀 가져와야?
+    // 메모 조회
+    public Page<PrescriptionDto.PrescriptionMemoResponse> getMemo(Long userId, Pageable pageable) {
+
+        Page<PrescriptionDto.PrescriptionMemoResponse> res =
+        prescriptionRepository
+            .findByUser_UserIdAndIsDeletedFalse(userId, pageable)
+            .map(PrescriptionDto.PrescriptionMemoResponse::from);
+        
+        return res;
     }
 
-    //메모 조회
-    
-
+   
 
 }

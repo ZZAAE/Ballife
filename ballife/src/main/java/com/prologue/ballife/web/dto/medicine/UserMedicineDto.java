@@ -3,10 +3,6 @@ package com.prologue.ballife.web.dto.medicine;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import com.prologue.ballife.domain.medicine.Prescription;
 import com.prologue.ballife.domain.medicine.UserMedicine;
 
 public class UserMedicineDto {
@@ -66,4 +62,6 @@ public class UserMedicineDto {
                     .build();
         }
     }
+
+    
 }

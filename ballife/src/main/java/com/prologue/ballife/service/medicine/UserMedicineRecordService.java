@@ -32,5 +32,36 @@ public class UserMedicineRecordService {
         return UserMedicineRecordDto.UserMedicineRecordResponse.from(saveUserMedicineRecord);
     }
 
-    //
+    //기록 수정
+    @Transactional
+    public UserMedicineRecordDto.UserMedicineRecordResponse putRecord(Long userMedicineRecordId, UserMedicineRecordDto.UpdateRequest req){
+
+        UserMedicineRecord res = userMedicineRecordRepository
+            .findById(userMedicineRecordId)
+            .orElseThrow(() -> new RuntimeException("기록 없음"));
+
+        res.setSupplementId(req.getSupplementId());
+        res.setIntakeDate(req.getIntakeDate());
+        res.setIntakeTime(req.getIntakeTime());
+
+        return UserMedicineRecordDto.UserMedicineRecordResponse.from(res);
+    }
+
+    //기록 삭제
+    @Transactional
+    public void deleteRecord(Long userMedicineRecordId){
+        UserMedicineRecord record = userMedicineRecordRepository
+            .findById(userMedicineRecordId)
+            .orElseThrow(() -> new RuntimeException("기록 없음"));
+        
+        userMedicineRecordRepository.delete(record);
+    }
+
+    // 일주일 단위 아점저 약 복용 (이행률 계산)
+
+    // 복용 이행률 계산
+    @Transactional
+    public Long DosageSituation() {
+        // 멀 가져와야?
+    }
 }

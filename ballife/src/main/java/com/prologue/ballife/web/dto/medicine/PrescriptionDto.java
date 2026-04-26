@@ -3,10 +3,8 @@ package com.prologue.ballife.web.dto.medicine;
 import java.time.LocalDate;
 
 import com.prologue.ballife.domain.medicine.Prescription;
-import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -77,6 +75,23 @@ public class PrescriptionDto {
                                     .memo(pr.getMemo())
                                     .intakeIntervals(pr.getIntakeIntervals())
                                     .build();
+        }
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PrescriptionMemoResponse {
+
+        private Long prescriptionId;
+        private String memo;
+
+        public static PrescriptionMemoResponse from(Prescription pr){
+            return PrescriptionMemoResponse.builder()
+            .prescriptionId(pr.getPrescriptionId())
+                    .memo(pr.getMemo())
+                    .build();
         }
     }
 }
