@@ -156,6 +156,7 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 export default function RecordSummary() {
   const [activeNav, setActiveNav] = useState("확인");
   const [activeSidebar, setActiveSidebar] = useState("혈당");
+  const [isMealModalOpen, setMealModalOpen] = useState(false);
 
   const navItems = ["기록", "확인", "커뮤니티", "회원정보", "소개"];
   const sidebarItems = [
@@ -474,6 +475,8 @@ export default function RecordSummary() {
           </div>
         </main>
 
+        <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} />
+
         {/* Right Sidebar */}
         <aside className="w-64 bg-white border-l border-gray-200 p-5 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto flex-shrink-0">
           <h3 className="text-sm font-bold text-gray-900 mb-4">건강 지표</h3>
@@ -495,7 +498,8 @@ export default function RecordSummary() {
             ))}
           </div>
 
-          <button className="w-full bg-gray-900 text-white text-sm font-medium py-3 rounded-xl mb-6 hover:bg-gray-800 transition-colors">
+          <button className="w-full bg-gray-900 text-white text-sm font-medium py-3 rounded-xl mb-6 hover:bg-gray-800 transition-colors"
+                  onClick={() => setMealModalOpen(true)}>
             등록 하기
           </button>
 

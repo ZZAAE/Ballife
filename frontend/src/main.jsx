@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import "./index.css";
 import App from "./App.jsx";
+import RecordSummary from "./pages/recordRead/RecordSummary.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
