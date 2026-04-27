@@ -10,13 +10,18 @@ import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import MainPage from './pages/main/MainPage';
 
+import WaterRecordModal from './modals/record/waterRecordModal';
+import { useState } from 'react';
+
 
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
   const { user, isAuthenticated, logout } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(true);
 
   return (
     <div className="min-h-screen bg-white">
+      <WaterRecordModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       {/* 헤더 */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4">
