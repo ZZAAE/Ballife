@@ -1,4 +1,4 @@
-package com.prologue.ballife.web;
+package com.prologue.ballife.web.user;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,4 +47,6 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build(); 
     }
+
+    
 }

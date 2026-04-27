@@ -34,7 +34,7 @@ public class Post {
     @Column(name = "CONTENT", unique = false, nullable = false, length = 5000)
     private String content;    
 
-    @Column(name = "IMAGE_URL", unique = false, nullable = false, length = 300)
+    @Column(name = "IMAGE_URL", unique = false, nullable = true, length = 300)
     private String imageUrl;
 
     @Column(name = "CREATED_AT", nullable = false)
@@ -96,5 +96,9 @@ public class Post {
         public String getDisplayName() {
             return displayName;
         }
+    }
+
+    public void increaseUpVote() {
+    this.upVote++;
     }
 }

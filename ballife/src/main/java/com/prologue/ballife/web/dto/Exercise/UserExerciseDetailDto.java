@@ -1,12 +1,12 @@
 package com.prologue.ballife.web.dto.exercise;
 
-import com.prologue.ballife.domain.exercise.UserExercise;
-import com.prologue.ballife.domain.exercise.UserExerciseDetail;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.prologue.ballife.domain.exercise.UserExercise;
+import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 
 import jakarta.validation.constraints.Size;
 
