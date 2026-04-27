@@ -43,6 +43,7 @@ public class AuthController {
                 .token("temp-token-" + user.getUserId())
                 .userId(user.getUserId())
                 .username(user.getUsername())
+                .nickname(user.getNickname())
                 .birthDate(user.getBirthDate())
                 .gender(user.getGender())
                 .weight(user.getWeight())

@@ -35,6 +35,16 @@ const postApi = {
 
     },
 
+    // 조회수 증가
+    upViewCount: (postId) => {
+        return api.post(`/posts/${postId}/view`);
+    },
+
+    // 추천
+    upVote : (postId) => {
+        return api.post(`/posts/${postId}/upvote`);
+    }
+
 };
 
 

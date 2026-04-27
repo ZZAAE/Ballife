@@ -1,10 +1,12 @@
-import { Link, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import SignUpPage from "./pages/SignUpPage";
-import BoardListPage from "./pages/board/BoardListPage";
-import PostCreatePage from "./pages/board/PostCreatePage";
-import PostDetailPage from "./pages/board/PostDetailPage";
+import { Routes, Route, Link } from "react-router-dom";
+// import HomePage from "./pages/HomePage";
+// import LoginPage from "./pages/user/LoginPage";
+// import SignUpPage from "./pages/user/SignUpPage";
+// import BoardListPage from "./pages/board/BoardListPage";
+// import PostCreatePage from "./pages/board/PostCreatePage";
+// import PostEditPage from "./pages/board/PostEditPage";
+// import PostDetailPage from "./pages/board/PostDetailPage";
+import ExercisePage from "./pages/exercise/ExercisePage";
 
 function App() {
   return (
@@ -37,16 +39,14 @@ function App() {
         </div>
       </header>
       {/* 메인 콘텐츠*/}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main>
         <Routes>
-          <Route path="/" element={<HomePage />} />{" "}
+          {/* <Route path="/" element={<HomePage />} />{" "} */}
           {/* <Routes> -> 페이지 이동 경로 */}
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/boards" element={<BoardListPage />} />
-          <Route path="/posts/create" element={<PostCreatePage />} />
-          <Route path="/posts/:postId" element={<PostDetailPage />} />
-          <Route path="/Exercise" element={<h1>운동 페이지</h1>} />
+          {/* <Route path="/signup" element={<SignUpPage />} /> */}
+          {/* <Route path="/login" element={<LoginPage />} /> */}
+          <Route path="/" element={<ExercisePage />} />
+          {/* <Route path="/" element={<MealPage />} /> */}
         </Routes>
       </main>
     </div>

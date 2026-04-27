@@ -34,23 +34,21 @@ const Button = ({
       "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 disabled:bg-red-300",
   };
 
-  // size별 스타일
-  const sizeStyles = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
-  };
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
+    // size별 스타일
+    const sizeStyles = {
+        sm: 'px-3 py-1.5 text-sm',
+        md: 'px-4 py-2 text-base',
+        lg: 'px-6 py-3 text-lg',
+    };
+    return (
+        <button type={type}
+                onClick={onClick}
+                disabled={disabled}
+                className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+                {...props}>
+            {children}
+        </button>
+    );
 };
 
 export default Button;

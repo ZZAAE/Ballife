@@ -31,7 +31,7 @@ public class User {
      @Column(name = "NICKNAME", unique = true, nullable = false, length = 20)
     private String nickname;
 
-    @Column(name = "BIRTH_DATE")
+    @Column(name = "BIRTH_DATE", nullable = false)
     private LocalDate birthDate;
 
     @Column(name = "EMAIL", unique = true, nullable = false, length = 30)
@@ -53,16 +53,16 @@ public class User {
     private LocalDate createDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ROLE", nullable = false)
-    private Role role;
+    @Column(name = "USER_CATEGORY", nullable = false)
+    private UserCategory userCategory;
 
     @PrePersist
     protected void onCreate() {
         createDate = LocalDate.now();
-        if (role == null) role = Role.USER;
+        if (userCategory == null) userCategory = UserCategory.USER;
     }
 
-    public enum Role{
+    public enum UserCategory{
         USER,
         ADMIN
     }

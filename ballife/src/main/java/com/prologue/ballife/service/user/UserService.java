@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.DuplicateResourceException;
 import com.prologue.ballife.exception.ResourceNotFoundException;
@@ -38,6 +39,12 @@ public class UserService {
         }
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateResourceException("닉네임", request.getNickname());
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateResourceException("사용자명", request.getUsername());
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("이메일", request.getEmail());
         }
 
         // 2.회원 생성(비밀번호 암호화도 진행)
@@ -174,5 +181,7 @@ public class UserService {
     public boolean isNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
+
+    
 
 }

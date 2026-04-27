@@ -1,4 +1,4 @@
-package com.prologue.ballife.repository.board;
+package com.prologue.ballife.repository.user.board;
 
 import java.util.List;
 

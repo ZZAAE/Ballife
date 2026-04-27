@@ -16,11 +16,11 @@ public class DayIntakeMealDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class DayIntakeMealResponse{
-        
+    public static class DayIntakeMealResponse {
+
         // 하루 식별자, 칼로리, 탄수화물, 당, 나트륨, 콜레스테롤, 포화지방, 단백질
         // 유저아이디 제외 전부 반환
-        private Long dailyMealId;  
+        private Long dailyMealId;
         private Integer calorie;
         private Double carbohydrate;
         private Double sugar;
@@ -44,5 +44,21 @@ public class DayIntakeMealDto {
         }
 
     }
-    
+
 }
+
+
+
+
+/*
+
+    // // 특정 유저의 날짜별 소모칼로리 합산
+    // @Query("SELECT SUM(ue.burnedCalorie) FROM UserExercise ue " +
+    //        "WHERE ue.user.userId = :userId " +
+    //        "AND ue.exerciseDate BETWEEN :start AND :end")
+    // Integer sumBurnedCalorieByUserIdAndDateRange(
+    //     @Param("userId") Long userId,
+    //     @Param("start") LocalDateTime start,
+    //     @Param("end") LocalDateTime end
+    // );
+*/

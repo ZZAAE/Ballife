@@ -1,54 +1,43 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  Children,
-} from "react";
+import { createContext, useContext, useState } from "react";
 
-//Context 객체 생성. 로그인에 대한 정보가 필요할때마다 가져다 씀
+// Context 객체 생성
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  //children: 모든 자식 컴포넌트
+    // 시작 시 localStorage에서 사용자 정보 복원
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
 
-  const [user, setUser] = useState(null); //로그인한 사용자의 정보
-  const [loading, setLoading] = useState(true); //초기 로딩 여부
+        if (!savedUser) return null;
 
-  //시작시 localStorage에서 사용자 정보 복원
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error("사용자 정보 복원 실패:", error);
+        try {
+            return JSON.parse(savedUser);
+        } catch (error) {
+            console.error("사용자 정보 복원 실패:", error);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            return null;
+        }
+    });
+
+    const [loading] = useState(false);
+
+    // 로그인 성공 시 호출
+    const login = (userData) => {
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", userData.token);
+    };
+
+    // 로그아웃
+    const logout = () => {
+        setUser(null);
         localStorage.removeItem("user");
         localStorage.removeItem("token");
-      }
-    }
-    setLoading(false); //복원 완료
-  }, []);
+    };
 
-  //로그인 성공시 호출
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData)); //json형태로 브라우저에 저장
-    localStorage.setItem("token", userData.token); //토큰 저장
-  };
-
-  //로그아웃
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-  };
-
-  // 로그인 여부
-  const isAuthenticated = !!user; //유저의 존재여부 확인 (해당 유저가 있는지)
-
-  // 관리자 여부
-  const isAdmin = user?.role === "ADMIN";
+    const isAuthenticated = !!user;
+    const isAdmin = user?.role === "ADMIN";
 
   const value = {
     user,
@@ -59,16 +48,20 @@ export const AuthProvider = ({ children }) => {
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
-// Custom Hook 인증정보 접근
+// Custom Hook
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
 }
 
 export default AuthContext;

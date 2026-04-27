@@ -54,7 +54,7 @@ public class PostService {
         case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
         default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     };
-        return postRepository.findAll(pageable).map(PostDto.PostListResponse::from);
+        return postRepository.findByIsDeletedFalse(pageable).map(PostDto.PostListResponse::from);
     }
 
     // 카테고리별 게시글 목록 조회
@@ -64,7 +64,7 @@ public class PostService {
         case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
         default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     };
-        return postRepository.findByCategory(category, pageable).map(PostDto.PostListResponse::from);
+        return postRepository.findByCategoryAndIsDeletedFalse(category, pageable).map(PostDto.PostListResponse::from);
     }
 
     // 검색으로 게시글 목록 조회
@@ -74,7 +74,7 @@ public class PostService {
         case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
         default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     };
-        return postRepository.findByTitleContainingIgnoreCase(keyword, pageable).map(PostDto.PostListResponse::from);
+        return postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageable).map(PostDto.PostListResponse::from);
     }
 
     // 카테고리 내에서 검색으로 게시글 목록 조회
@@ -84,7 +84,7 @@ public class PostService {
         case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
         default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     };
-        return postRepository.findByCategoryAndTitleContaining(category, keyword, pageable).map(PostDto.PostListResponse::from);
+        return postRepository.findByCategoryAndTitleContainingAndIsDeletedFalse(category, keyword, pageable).map(PostDto.PostListResponse::from);
     }
 
     // 게시글 상세 조회 (조회수는 올리지 않음 — 수정 화면·React StrictMode 이중 호출과 분리)
