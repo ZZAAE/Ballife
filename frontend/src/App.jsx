@@ -10,6 +10,8 @@ import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import MainPage from './pages/main/MainPage';
 import RecordPage from './pages/RecordPage';
+import HealthIndicatorMenu from "./components/HealthMenu";
+import Header from './components/Header';
 
 
 function App() {
@@ -18,58 +20,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            {/* 로고 Link -> <a> */}
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              발리페
-            </Link>
 
-            {/* 메뉴 */}
-            <div className="flex items-center gap-6">
-              <Link 
-               to="/boards" 
-               className="text-gray-600 hover:text-blue-600 transition"
-              >
-                커뮤니티
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  {/* nickname 우선, 없으면 username 표시 */}
-                  <span className="text-gray-600">
-                    {user?.nickname || user?.username}님
-                  </span>
-                  {/* 로그아웃: AuthContext의 logout (state + localStorage 정리 등) */}
-                  <button
-                    type="button"
-                    onClick={logout}
-                    className="text-gray-600 hover:text-red-600 transition"
-                  >
-                    로그아웃
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-gray-600 hover:text-blue-600 transition"
-                  >
-                    로그인
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-                  >
-                    회원가입
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      </header>
+      <Header isLoggedIn={false} />
+
+      <div className="min-h-screen bg-white flex justify-end">
+        <HealthIndicatorMenu />
+      </div>
+      
       {/* 메인 콘텐츠*/}
       <main className="mx-auto px-4 py-8">
         <Routes>
