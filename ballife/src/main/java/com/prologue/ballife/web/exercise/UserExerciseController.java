@@ -89,7 +89,6 @@ public class UserExerciseController {
             @Parameter(description = "유저 ID") @PathVariable Long userId,
             @Parameter(description = "운동 기록 ID") @PathVariable Long userExerciseId) {
         userExerciseService.deleteUserExercise(userExerciseId);
-        // 성공적으로 삭제됐음을 알리는 204 No Content 반환
         return ResponseEntity.noContent().build();
     }
 }

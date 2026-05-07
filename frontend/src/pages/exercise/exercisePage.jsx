@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Calendar } from "lucide-react";
-import ExerciseHeader from "./components/ExerciseHeader";
+import Header from "./components/Header";
 import ExerciseSection from "./components/ExerciseSection";
 import ExerciseRecordTable from "./components/ExerciseRecordTable";
-import HealthSidebar from "./components/HealthSidebar";
+import HealthIndicatorMenu from "./components/HealthMenu";
 import Pagination from "./components/Pagination";
 import ExerciseModal from "./ExerciseModal";
 import { useExercise } from "./hooks/useExercise";
@@ -43,52 +43,49 @@ function ExercisePage() {
 
   return (
     <div className="min-h-screen bg-[#d9d9d9]">
-      <ExerciseHeader />
+      <Header />
 
-      <div className="mx-auto flex min-h-screen w-[1280px] bg-[#efefef]">
-        {/* 메인 콘텐츠 */}
-        <main className="flex-1 px-10 py-10">
-          {/* 제목 + 날짜 선택 */}
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-[24px] font-bold text-[#1f2937]">
-              운동 기록 확인
-            </h2>
-            <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2">
-              <Calendar size={16} className="text-gray-400" />
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="text-sm text-gray-600 outline-none"
-              />
+      <div className="min-h-screen w-full bg-[#efefef] pt-[70px]">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <main className="min-w-0 xl:mr-[320px]">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-[24px] font-bold text-[#1f2937]">
+                운동 기록 확인
+              </h2>
+              <div className="flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 sm:w-auto">
+                <Calendar size={16} className="shrink-0 text-gray-400" />
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="min-w-0 flex-1 text-sm text-gray-600 outline-none"
+                />
+              </div>
             </div>
-          </div>
 
-          <ExerciseSection
-            icon="🏋️"
-            title="무산소 운동 목록"
-            cards={strengthCards}
-            progressWidth="w-1/3"
-          />
+            <ExerciseSection
+              icon="🏋️"
+              title="무산소 운동 목록"
+              cards={strengthCards}
+            />
 
-          <ExerciseSection
-            icon="🚴"
-            title="유산소 운동"
-            cards={cardioCards}
-            progressWidth="w-2/3"
-          />
+            <ExerciseSection
+              icon="🚴"
+              title="유산소 운동"
+              cards={cardioCards}
+            />
 
-          <ExerciseRecordTable logs={logs} />
+            <ExerciseRecordTable logs={logs} />
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </main>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </main>
 
-        {/* 사이드바 (오른쪽) */}
-        <HealthSidebar onRegisterClick={() => setIsModalOpen(true)} />
+          <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} />
+        </div>
       </div>
 
       {/* 모달 */}

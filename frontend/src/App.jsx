@@ -1,53 +1,85 @@
-import { Routes, Route, Link } from "react-router-dom";
-// import HomePage from "./pages/HomePage";
-// import LoginPage from "./pages/user/LoginPage";
-// import SignUpPage from "./pages/user/SignUpPage";
-// import BoardListPage from "./pages/board/BoardListPage";
-// import PostCreatePage from "./pages/board/PostCreatePage";
-// import PostEditPage from "./pages/board/PostEditPage";
-// import PostDetailPage from "./pages/board/PostDetailPage";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Header from "./pages/exercise/components/Header";
+import HealthIndicatorMenu from "./pages/exercise/components/HealthMenu";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/user/LoginPage";
+import SignUpPage from "./pages/user/SignUpPage";
+import BoardListPage from "./pages/board/BoardListPage";
+import PostCreatePage from "./pages/board/PostCreatePage";
+import PostDetailPage from "./pages/board/PostDetailPage";
+import PostEditPage from "./pages/board/PostEditPage";
+// import MainPage from "./pages/MainPage";
+// import WeightRecord from "./pages/WeightRecord";
+// import BloodPressureRecord from "./pages/BloodPressureRecord";
+// import BloodSugarRecord from "./pages/BloodSugarRecord";
+// import RecordPage from "./pages/RecordPage";
+// import MainReportPage from "./pages/MainReportPage";
+// import OsteoporosisReportPage from "./pages/OsteoporosisReportPage";
+// import DiabetesReportPage from "./pages/DiabetesReportPage";
+// import GoutReportPage from "./pages/GoutReportPage";
+// import HypertensionReportPage from "./pages/HypertensionReportPage";
+// import DyslipidemiaReportPage from "./pages/DyslipidemiaReportPage";
+// import ObesityReportPage from "./pages/ObesityReportPage";
 import ExercisePage from "./pages/exercise/ExercisePage";
+import UserInformation from "./pages/user/UserInformation";
 
 function App() {
+  const location = useLocation();
+
+  const hideHealthMenu =
+    location.pathname === "/home" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/boards" ||
+    location.pathname === "/posts/create" ||
+    location.pathname === "/exercise" ||
+    location.pathname === "/member" ||
+    location.pathname.startsWith("/posts/");
+
+  const hideHeader =
+    location.pathname === "/exercise" || location.pathname === "/member";
+
+  const contentClass = [
+    hideHeader ? "flex-1" : "flex-1 pt-[70px]",
+    !hideHealthMenu ? "xl:mr-[320px]" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 헤더 */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            {/* 로고 Link -> <a> */}
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              발리페
-            </Link>
+      <main className="py-12">
+        {!hideHeader && <Header isLoggedIn={false} />}
+        <div className="flex min-h-screen justify-end bg-white">
+          <div className={contentClass}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              {/* <Route path="/home" element={<MainPage />} /> */}
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/boards" element={<BoardListPage />} />
+              <Route path="/community" element={<BoardListPage />} />
+              <Route path="/posts/create" element={<PostCreatePage />} />
+              <Route path="/posts/:id/edit" element={<PostEditPage />} />
+              <Route path="/posts/:postId" element={<PostDetailPage />} />
+              {/* <Route path="/weight" element={<WeightRecord />} /> */}
+              {/* <Route path="/pressure" element={<BloodPressureRecord />} /> */}
+              {/* <Route path="/sugar" element={<BloodSugarRecord />} /> */}
+              {/* <Route path="/records" element={<RecordPage />} /> */}
+              {/* <Route path="/mainreport" element={<MainReportPage />} /> */}
+              {/* <Route path="/osteoporosis" element={<OsteoporosisReportPage />} /> */}
+              {/* <Route path="/diabetes" element={<DiabetesReportPage />} /> */}
+              {/* <Route path="/gout" element={<GoutReportPage />} /> */}
+              {/* <Route path="/hypertension" element={<HypertensionReportPage />} /> */}
+              {/* <Route path="/dyslipidemia" element={<DyslipidemiaReportPage />} /> */}
+              {/* <Route path="/obesity" element={<ObesityReportPage />} /> */}
+              <Route path="/exercise" element={<ExercisePage />} />
+              <Route path="/member" element={<UserInformation />} />
+            </Routes>
+          </div>
 
-            {/* 메뉴 */}
-            <div className="flex items-center gap-6">
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-blue-600 transition"
-              >
-                로그인
-              </Link>
-              <Link
-                to="/signup"
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-              >
-                회원가입
-              </Link>
-            </div>
-          </nav>
+          {!hideHealthMenu && <HealthIndicatorMenu />}
         </div>
-      </header>
-      {/* 메인 콘텐츠*/}
-      <main>
-        <Routes>
-          {/* <Route path="/" element={<HomePage />} />{" "} */}
-          {/* <Routes> -> 페이지 이동 경로 */}
-          {/* <Route path="/signup" element={<SignUpPage />} /> */}
-          {/* <Route path="/login" element={<LoginPage />} /> */}
-          <Route path="/" element={<ExercisePage />} />
-          {/* <Route path="/" element={<MealPage />} /> */}
-        </Routes>
       </main>
     </div>
   );

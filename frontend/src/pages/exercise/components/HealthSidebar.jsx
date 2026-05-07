@@ -1,6 +1,6 @@
 function HealthSidebar({ onRegisterClick }) {
   return (
-    <aside className="w-[280px] shrink-0 border-l border-gray-200 bg-[#f7f8fa] px-6 py-10">
+    <aside className="w-[280px] shrink-0 bg-[#f7f8fa] px-6 py-10">
       <h3 className="mb-6 text-base font-bold text-gray-800">건강 지표</h3>
 
       <div className="mb-8 space-y-3 text-sm text-gray-600">

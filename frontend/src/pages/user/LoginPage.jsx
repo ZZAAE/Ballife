@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
-import toast from 'react-hot-toast';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import authApi from '../../api/authApi';
+import { useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import toast from "react-hot-toast";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import authApi from "../../api/authApi";
 
 function LoginPage() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { login } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        loginId: '',
-        password: '',
-    });
-    const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    loginId: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,34 +46,35 @@ function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); //기본 새로고침, 요청 막음
+    e.preventDefault();
 
-    if (!validate()) return; //유효성 검사 false면 return
+    if (!validate()) return;
 
     try {
       setLoading(true);
       const response = await authApi.login(formData);
+      login(response.data);
 
-        try {
-            setLoading(true);
-            const response = await authApi.login(formData);
-            login(response.data); //AuthContext의 login 함수 호출하여 상태 업데이트
-
-            // 토큰 저장 -> JWT 토근 발급
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data));
-            login(response.data);
-            
-            toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`); //토스트 메시지 띄우기
-            const from = typeof location.state?.from === 'string' ? location.state.from : '/';
-            navigate(from, { replace: true });
+      toast.success(
+        `${response.data.nickname || response.data.username}님, 환영합니다!`,
+      );
+      const from =
+        typeof location.state?.from === "string" ? location.state.from : "/";
+      navigate(from, { replace: true });
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      toast.error("로그인 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div>
-      <div>
-        <h1>로그인</h1>
+    <div className="mx-auto max-w-md">
+      <div className="rounded-lg bg-white p-8 shadow-md">
+        <h1 className="mb-8 text-center text-2xl font-bold">로그인</h1>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="아이디"
             name="loginId"
@@ -86,54 +87,27 @@ function LoginPage() {
           <Input
             label="비밀번호"
             name="password"
+            type="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="비밀번호"
             error={errors.password}
           />
 
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "로그인 중..." : "로그인"}
           </Button>
         </form>
 
-                <form onSubmit={handleSubmit}>
-                    <Input
-                        label="아이디"
-                        name="loginId"
-                        value={formData.loginId}
-                        onChange={handleChange}
-                        placeholder="아이디"
-                        error={errors.loginId}
-                    />
-
-                    <Input
-                        label="비밀번호"
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="비밀번호"
-                        error={errors.password}
-                    />
-
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? '로그인 중...' : '로그인'}
-                    </Button>
-                </form>
-
-                <p className="text-center mt-6 text-gray-600">
-                    계정이 없으신가요?{' '}
-                    <Link to="/signup" className="text-blue-600 hover:underline">
-                        회원가입
-                    </Link>
-                </p>
-            </div>
-        </div>
-    );
+        <p className="mt-6 text-center text-gray-600">
+          계정이 없으신가요?{" "}
+          <Link to="/signup" className="text-blue-600 hover:underline">
+            회원가입
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default LoginPage;
