@@ -1,5 +1,6 @@
 import { useState } from "react";
 import WaterRecordModal from "../modals/bloodsugarModal";
+import Chatbot from '../modals/Chatbot'
 
 function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -7,9 +8,8 @@ function HomePage() {
   return (
     <div>
       <button onClick={() => setIsModalOpen(true)}>
-        혈당 모달 열기
       </button>
-
+        <Chatbot />
       <WaterRecordModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

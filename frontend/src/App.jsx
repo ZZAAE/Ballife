@@ -1,14 +1,17 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
-// import SignUpPage from './pages/user/SignUpPage';
-// import LoginPage from './pages/user/LoginPage';
+import SignUpPage from './pages/user/SignUpPage';
+import LoginPage from './pages/user/LoginPage';
+import MedicationPage from './pages/MedicationPage';
 // import DiseasePage from './pages/user/DiseasePage';
-// import BoardListPage from './pages/board/BoardListPage';
-// import PostCreatePage from './pages/board/PostCreatePage';
+import BoardListPage from './pages/board/BoardListPage';
+import PostCreatePage from './pages/board/PostCreatePage';
 // import PostEditPage from './pages/board/PostEditPage';
 // import PostDetailPage from './pages/board/PostDetailPage';
 // import MainPage from './pages/main/MainPage';
+import Header from './components/Header'
+import HealthIndicatorMenu from './components/HealthMenu';
 
 
 function App() {
@@ -18,74 +21,25 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* 헤더 */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            {/* 로고 Link -> <a> */}
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              발리페
-            </Link>
+      <Header isLoggedIn={false} />
+<div className="flex pt-14">
 
-            {/* 메뉴 */}
-            <div className="flex items-center gap-6">
-              <Link 
-               to="/boards" 
-               className="text-gray-600 hover:text-blue-600 transition"
-              >
-                커뮤니티
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  {/* nickname 우선, 없으면 username 표시 */}
-                  <span className="text-gray-600">
-                    {user?.nickname || user?.username}님
-                  </span>
-                  {/* 로그아웃: AuthContext의 logout (state + localStorage 정리 등) */}
-                  <button
-                    type="button"
-                    onClick={logout}
-                    className="text-gray-600 hover:text-red-600 transition"
-                  >
-                    로그아웃
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-gray-600 hover:text-blue-600 transition"
-                  >
-                    로그인
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-                  >
-                    회원가입
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      </header>
       {/* 메인 콘텐츠*/}
-      <main className="max-w-max mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<HomePage />} />{" "}
-          
-          {/* <Routes> -> 페이지 이동 경로 */}
-          {/* <Route path="/home" element={<MainPage />} /> */}
-          {/* <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/disease" element={<DiseasePage />} />
-          <Route path="/boards" element={<BoardListPage />} />
-          <Route path="/posts/create" element={<PostCreatePage />} />
-          <Route path="/posts/:id/edit" element={<PostEditPage />} />
-          <Route path="/posts/:postId" element={<PostDetailPage />} /> */}
-        </Routes>
-      </main>
+      <main className="flex-1 ">
+    <Routes>
+      <Route path="/" element={<MedicationPage />} />
+
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/boards" element={<BoardListPage />} />
+      <Route path="/posts/create" element={<PostCreatePage />} />
+    </Routes>
+  </main>
+      <div className="min-h-screen bg-white flex justify-end">
+        <HealthIndicatorMenu />
+      </div>
     </div>
+  </div>
   );
 }
 

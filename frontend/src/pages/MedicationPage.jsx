@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Check, X, Sun, Moon, ChevronRight, Plus, AlertTriangle, Bold, Italic, Underline, MessageSquare, Droplets, Activity, Weight, Heart, Dumbbell, Pill, UtensilsCrossed, Menu } from "lucide-react";
+import Chatbot from '../modals/Chatbot'
 
 const checkIcon = (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -37,24 +38,8 @@ export default function MedicationPage() {
   const [time, setTime] = useState("");
 
   return (
-    <div className="w-[1920px] min-h-screen bg-gray-100" style={{ fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif" }}>
-      {/* ── Header ── */}
-      <header className="w-full h-[64px] bg-[#1B1F2A] flex items-center justify-between px-12">
-        <span className="text-white text-2xl font-bold tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Ballife
-        </span>
-        <nav className="flex items-center gap-16">
-          {["기록", "확인", "커뮤니티", "회원정보", "소개"].map((item) => (
-            <span key={item} className="text-gray-300 text-[15px] cursor-pointer hover:text-white transition-colors">
-              {item}
-            </span>
-          ))}
-          <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-            <Menu className="w-5 h-5 text-white" />
-          </button>
-        </nav>
-      </header>
-
+    <div className=" min-h-screen bg-gray-100" style={{ fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif" }}>
+        <Chatbot />
       {/* ── Body ── */}
       <div className="flex">
         {/* ── Main Content ── */}
@@ -337,75 +322,6 @@ export default function MedicationPage() {
             </div>
           </div>
         </main>
-
-        {/* ── Right Sidebar ── */}
-        <aside className="w-[280px] bg-white border-l border-gray-200 px-6 py-10 flex flex-col">
-          <h3 className="text-[16px] font-bold text-gray-900 mb-5">건강 지표</h3>
-          <nav className="flex flex-col gap-1 mb-6">
-            {[
-              { icon: <Heart className="w-4 h-4" />, label: "혈압" },
-              { icon: <Weight className="w-4 h-4" />, label: "체중" },
-              { icon: <Activity className="w-4 h-4" />, label: "혈당" },
-              { icon: <Dumbbell className="w-4 h-4" />, label: "운동" },
-              { icon: <Pill className="w-4 h-4" />, label: "약 복용", active: true },
-              { icon: <UtensilsCrossed className="w-4 h-4" />, label: "식단" },
-            ].map((item) => (
-              <button
-                key={item.label}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] transition-colors ${
-                  item.active
-                    ? "bg-gray-100 font-bold text-gray-900"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <button className="w-full h-[48px] bg-[#1B1F2A] text-white rounded-xl text-[14px] font-bold mb-8 hover:bg-[#2A2F3F] transition-colors">
-            등록 하기
-          </button>
-
-          {/* AI 추천 카드 */}
-          <div className="bg-[#1B1F2A] rounded-2xl p-5 text-white mb-4">
-            <div className="w-10 h-10 bg-[#2563EB] rounded-xl flex items-center justify-center mb-3">
-              <MessageSquare className="w-5 h-5 text-white" />
-            </div>
-            <h4 className="text-[15px] font-bold mb-2">매우 훌륭한 추세입니다!</h4>
-            <p className="text-[12px] text-gray-400 leading-relaxed mb-4">
-              이번 주 체중이 꾸준히 안정세를 보이고 있습니다. 현재의 식단과 수면 패턴이 신진대사에 긍정적인 영향을 주고 있는 것으로 분석됩니다.
-            </p>
-            <div className="border-t border-white/10 pt-3 mb-4">
-              <p className="text-[11px] text-gray-500 mb-1">전문가 추천 팁:</p>
-              <p className="text-[12px] text-gray-300 leading-relaxed">
-                목표 체중까지 약 4.4kg 남았습니다. 근력 운동 횟수를 주 1회 더 늘리면 기초대사량이 높아져 정체기를 예방할 수 있습니다.
-              </p>
-            </div>
-            <button className="w-full h-[40px] border border-[#E11D48] text-[#E11D48] rounded-xl text-[13px] font-semibold hover:bg-[#E11D48]/10 transition-colors">
-              맞춤형 식단 계획 보기
-            </button>
-          </div>
-
-          {/* 수분 섭취 카드 */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Droplets className="w-4 h-4 text-[#2563EB]" />
-              </div>
-              <span className="text-[14px] font-bold text-gray-900">수분 섭취 권장</span>
-            </div>
-            <p className="text-[12px] text-gray-400 leading-relaxed">
-              체중 감량 중에는 하루 2L 이상의 물을 마시는 것이 지방 연소에 효과적입니다.
-            </p>
-          </div>
-        </aside>
-      </div>
-
-      {/* Floating Chat Button */}
-      <div className="fixed bottom-8 right-8 w-14 h-14 bg-[#1B1F2A] rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform">
-        <MessageSquare className="w-6 h-6 text-white" />
       </div>
     </div>
   );
