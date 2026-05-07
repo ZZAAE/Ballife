@@ -1,5 +1,4 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
@@ -12,71 +11,43 @@ import WeightRecord from './pages/recordRead/WeightRecord';
 import BloodPressureRecord from './pages/recordRead/BloodPressureRecord';
 import BloodSugarRecord from './pages/recordRead/BloodSugarRecord';
 import RecordPage from './pages/recordRead/RecordPage';
+import MainReportPage from './pages/report/MainReportPage';
+import OsteoporosisReportPage from './pages/report/OsteoporosisReportPage';
+import DiabetesReportPage from './pages/report/DiabetesReportPage';
+import GoutReportPage from './pages/report/GoutReportPage';
+import HypertensionReportPage from './pages/report/HypertensionReportPage';
+import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
+import ObesityReportPage from './pages/report/ObesityReportPage';
+import Header from './components/Header';
+import HealthIndicatorMenu from './components/HealthMenu';
+import HealthCalenderPage from './pages/main/HealthCalenderPage';
 
 function App() {
-  // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
-  const { user, isAuthenticated, logout } = useAuth();
+  const hideHealthMenu =
+    location.pathname === '/home' ||
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/boards' ||
+    location.pathname === '/posts/create' ||
+    location.pathname === '/mainreport' ||
+    location.pathname === '/osteoporosis' ||
+    location.pathname === '/diabetes' ||
+    location.pathname === '/gout' ||
+    location.pathname === '/hypertension' ||
+    location.pathname === '/dyslipidemia' ||
+    location.pathname === '/obesity' ||
+
+    location.pathname.startsWith('/posts/');
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 헤더 */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <nav className="flex items-center justify-between">
-            {/* 로고 Link -> <a> */}
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              발리페
-            </Link>
-
-            {/* 메뉴 */}
-            <div className="flex items-center gap-6">
-              <Link 
-               to="/boards" 
-               className="text-gray-600 hover:text-blue-600 transition"
-              >
-                커뮤니티
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  {/* nickname 우선, 없으면 username 표시 */}
-                  <span className="text-gray-600">
-                    {user?.nickname || user?.username}님
-                  </span>
-                  {/* 로그아웃: AuthContext의 logout (state + localStorage 정리 등) */}
-                  <button
-                    type="button"
-                    onClick={logout}
-                    className="text-gray-600 hover:text-red-600 transition"
-                  >
-                    로그아웃
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-gray-600 hover:text-blue-600 transition"
-                  >
-                    로그인
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-                  >
-                    회원가입
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      </header>
-      {/* 메인 콘텐츠*/}
-      <main className="">
+      <main className="py-12">
+      <Header isLoggedIn={false} />
+      <div className="min-w-screen bg-white flex justify-end">
+        <div className="flex-1">
         <Routes>
-          <Route path="/" element={<HomePage />} />{" "}
-          
-          {/* <Routes> -> 페이지 이동 경로 */}
+
+          <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -88,7 +59,19 @@ function App() {
           <Route path="/pressure" element={<BloodPressureRecord />} />
           <Route path="/sugar" element={<BloodSugarRecord />} />
           <Route path="/records" element={<RecordPage />} />
+          <Route path="/mainreport" element={<MainReportPage />} />
+          <Route path="/osteoporosis" element={<OsteoporosisReportPage />} />
+          <Route path="/diabetes" element={<DiabetesReportPage />} />
+          <Route path="/gout" element={<GoutReportPage />} />
+          <Route path="/hypertension" element={<HypertensionReportPage />} />
+          <Route path="/dyslipidemia" element={<DyslipidemiaReportPage />} />
+          <Route path="/obesity" element={<ObesityReportPage />} />
+          <Route path="/healthcalendar" element={<HealthCalenderPage />} />
         </Routes>
+        </div>
+        {!hideHealthMenu && <HealthIndicatorMenu />}
+      </div>
+
       </main>
     </div>
   );

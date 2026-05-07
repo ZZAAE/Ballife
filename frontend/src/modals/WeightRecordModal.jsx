@@ -12,7 +12,7 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭) // 수정 필요
+  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭) // 수정 필요 (서비스에서 하던가 아님 프론트에서 해될듯)
   const calculateProgress = () => {
     const current = parseFloat(weight) || 0;
     if (current <= targetWeight) return 100;
@@ -25,6 +25,7 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
   const progress = calculateProgress();
   const weightDiff = (parseFloat(weight || 0) - targetWeight).toFixed(1);
 
+  // 체중입력에 숫자 외 다른거 걸러줌
   const handleWeightChange = (e) => {
     const value = e.target.value;
     if (/^\d*\.?\d{0,1}$/.test(value)) {
@@ -64,7 +65,7 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
               className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
             >
               <Calendar className="h-4 w-4 text-blue-500" />
-              {selectedDate} (오늘) <span className="ml-1 text-[10px] text-slate-300">▼</span>
+              {selectedDate}<span className="ml-1 text-[10px] text-slate-300">▼</span>
             </button>
           </div>
 
@@ -119,7 +120,8 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
             <p className="text-[14px] leading-relaxed text-slate-600 font-medium">
               {progress >= 100 
                 ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요." 
-                : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!`}
+                : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!
+                   이부분은 AI 조언 할건가 아니면 그냥 프로트에서 띄울것인가`}
             </p>
           </div>
 
