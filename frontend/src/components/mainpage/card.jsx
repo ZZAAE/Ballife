@@ -13,6 +13,7 @@ const Card = () => {
 
     const statusCards = [
     { 
+        link: 'sugar',
         type: '혈당', 
         value: '112 mg/dL', 
         label: '안정 범위', // bloodsugar > 140 ? 위험 범위 :  bloodsugar > 120 || bloodsugar < 80 ? 주의 요망 : 안정 범위 
@@ -23,6 +24,7 @@ const Card = () => {
         icon: 'tint' 
     },
     { 
+        link: 'press',
         type: '혈압', 
         value: '118 / 70', 
         label: '수축기 / 이완기', // systolic_bp < 80 || diastolic_bp > 120 ? 위험 : 정상
@@ -33,6 +35,7 @@ const Card = () => {
         icon: 'heart' 
     },
     { 
+        link: 'weight',
         type: '체중', 
         value: '58kg', 
         label: '정상', 
@@ -42,7 +45,48 @@ const Card = () => {
         overcolor: 'text-[#475569]', 
         icon: 'chart-line' 
     },
-    { 
+    
+    ];
+
+    const actionCards = [
+    {
+      link: 'meal',
+      type: '식단',
+      value: '오늘 식단 등록',
+      label: '총 섭취 칼로리 1300kcal',
+      color: 'bg-[#DAFFE7]',
+      labelColor: 'text-black',
+      undercolor: 'text-[#008039]',
+      overcolor: 'text-[#475569]',
+      icon: 'meal',
+    },
+    {
+      link: 'exercise',
+      type: '운동',
+      value: '오늘 운동 등록',
+      label: '소모 칼로리 300kcal',
+      color: 'bg-[#FFFEAF]',
+      labelColor: 'text-black',
+      undercolor: 'text-[#E8BA00]',
+      overcolor: 'text-[#475569]',
+      icon: 'exercise',
+    },
+    {
+      link: 'water',
+      type: '수분 섭취',
+      value: '총 400ml',
+      label: '목표량까지 3컵',
+      color: 'bg-[#D6F6FF]',
+      labelColor: 'text-black',
+      undercolor: 'text-[#2A3491]',
+      overcolor: 'text-[#475569]',
+      icon: 'water',
+    },
+  ];
+
+const medicineCard = [
+  { 
+        link: 'medicine',
         type: '복약 알림', 
         value: '2건 확인 필요', 
         label: '오전 복용 요망', 
@@ -50,52 +94,15 @@ const Card = () => {
         labelColor: 'text-black', 
         undercolor: 'text-black', 
         overcolor: 'text-white', 
-        icon: 'pill' 
+        icon: 'pill',
+        groups: [
+          {
+            name: '처방 그룹 이름',
+            items: ['혈압약', '당뇨약'],
+          },
+        ],
     },
-    ];
-
-    const actionCards = [
-  {
-    type: '식단',
-    value: '오늘 식단 등록',
-    label: '총 섭취 칼로리 1300kcal',
-    color: 'bg-[#DAFFE7]',
-    labelColor: 'text-black',
-    undercolor: 'text-[#008039]',
-    overcolor: 'text-[#475569]',
-    icon: 'meal',
-  },
-  {
-    type: '운동',
-    value: '오늘 운동 등록',
-    label: '소모 칼로리 300kcal',
-    color: 'bg-[#FFFEAF]',
-    labelColor: 'text-black',
-    undercolor: 'text-[#E8BA00]',
-    overcolor: 'text-[#475569]',
-    icon: 'exercise',
-  },
-  {
-    type: '수분 섭취',
-    value: '총 400ml',
-    label: '목표량까지 3컵',
-    color: 'bg-[#D6F6FF]',
-    labelColor: 'text-black',
-    undercolor: 'text-[#2A3491]',
-    overcolor: 'text-[#475569]',
-    icon: 'water',
-  },
-  {
-    type: '영양제',
-    value: '2건 확인 필요',
-    label: '오전 복용 요망',
-    color: 'bg-[#3C3C3C]',
-    labelColor: 'text-white',
-    undercolor: 'text-white',
-    overcolor: 'text-white/70',
-    icon: 'supplement',
-  },
-];
+]
 
     const renderIcon = (type) => {
     switch (type) {
@@ -118,39 +125,80 @@ const Card = () => {
   };
 
     return (
-        <div>
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
-          {statusCards.map((card, idx) => (
-            <Link to={`/record/${card.type.toLowerCase()}`} key={idx}>
-            <div className= {`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-4 min-h-[140px]`}>
-              <div>
-                <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
-                <p className="text-xl font-bold">{card.value}</p>
-                <p className={`text-xs mt-1 ${card.undercolor || 'text-slate-400'}`}>{card.label}</p>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-stretch">
+        <div className="space-y-4 md:space-y-8">
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {statusCards.map((card, idx) => (
+              <Link to={`/record/${card.link}`} key={idx}>
+              <div className={`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-4 min-h-[140px]`}>
+                <div>
+                  <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
+                  <p className="text-xl font-bold">{card.value}</p>
+                  <p className={`text-xs mt-1 ${card.undercolor || 'text-slate-400'}`}>{card.label}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  {renderIcon(card.icon)}
+                </div>
               </div>
-              <div className="flex-shrink-0">
-                {renderIcon(card.icon)}
-              </div>
-            </div>
-            </Link>
-          ))}
-        </section>
+              </Link>
+            ))}
+          </section>
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-4 md:py-8">
-          {actionCards.map((card, idx) => (
-            <Link to={`/record/${card.type.toLowerCase()}`} key={idx}>
-            <div className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-opacity min-h-[140px] `}>
-              <div>
-                <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
-                <p className={`text-lg font-bold ${card.labelColor || 'text-black'}`}>{card.value}</p>
-                <p className={`text-xs mt-1 ${card.undercolor || 'text-slate-400'}`}>{card.label}</p>
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {actionCards.map((card, idx) => (
+              <Link to={`/record/${card.link}`} key={idx}>
+              <div className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-opacity min-h-[140px]`}>
+                <div>
+                  <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
+                  <p className={`text-lg font-bold ${card.labelColor || 'text-black'}`}>{card.value}</p>
+                  <p className={`text-xs mt-1 ${card.undercolor || 'text-slate-400'}`}>{card.label}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  {renderActionIcon(card.icon)}
+                </div>
               </div>
-              <div className="flex-shrink-0">
-                {renderActionIcon(card.icon)}
+              </Link>
+            ))}
+          </section>
+        </div>
+
+        <section className="lg:h-full">
+          {medicineCard.map((card, idx) => (
+            <Link to={`/record/${card.link}`} key={idx} className="block h-full">
+            <div className={`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
+                  <p className="text-xl font-bold">{card.value}</p>
+                  <p className={`text-xs mt-1 ${card.undercolor || 'text-slate-400'}`}>{card.label}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  {renderIcon(card.icon)}
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {card.groups?.map((group) => (
+                  <div key={group.name} className="space-y-3">
+                    <p className="text-xs font-semibold text-[#475569]">{group.name}</p>
+                    <div className="space-y-2">
+                      {group.items.map((item) => (
+                        <div
+                          key={item}
+                          className="rounded-xl bg-white/80 px-4 py-3 text-sm font-medium text-slate-700"
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             </Link>
           ))}
+          <div>
+          </div>
         </section>
         </div>
     );

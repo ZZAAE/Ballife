@@ -83,6 +83,14 @@ public class MealItemService {
         mealItemRepository.delete(mealItem);
     }
 
+    // 한끼 식단 검색
+    public MealItemDto.MealItemResponse getMealItemInMeal(Long mealId){
+        MealItem mealItem = mealItemRepository.findById(mealId)
+            .orElseThrow(() -> new ResourceNotFoundException("식사", mealId));
+
+        return MealItemDto.MealItemResponse.from(mealItem);
+    }
+
     // 식단 검색(하나, 식단 수정 제공용)
     public MealItemDto.MealItemResponse getMealItem(Long mealItemId){
         MealItem mealItem = mealItemRepository.findById(mealItemId)
@@ -100,7 +108,7 @@ public class MealItemService {
     }
 
     // 한끼 영양소
-    public List<Double> getMealTotalNut(Long mealId){
+    public List<Double> getMealTotalNutInItem(Long mealId){
         List<Double> totalNut = mealItemRepository.sumMealNutrientByMealId(mealId);
 
         return totalNut;

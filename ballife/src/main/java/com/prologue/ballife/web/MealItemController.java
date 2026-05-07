@@ -1,20 +1,18 @@
 package com.prologue.ballife.web;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.prologue.ballife.service.meal.MealItemService;
-import com.prologue.ballife.web.dto.meal.MealDto;
 import com.prologue.ballife.web.dto.meal.MealItemDto;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "Member", description = "회원 API")
@@ -64,6 +62,23 @@ public class MealItemController {
         return ResponseEntity.ok(response);
     }
 
-    
+    @Operation(summary = "하루 영양소 조회", description = "userId, date로 하루 영양소 조회.")
+    @GetMapping("/Nut")
+    public List<Double> getMealTotalNut(
+        @RequestParam Long userId,
+        @RequestParam LocalDate date
+    ){
+        List<Double> response = mealItemService.getMealTotalNut(userId, date);
+        return response;
+    }
+
+    @Operation(summary = "한끼 영양소 조회", description = "mealId로 한끼 영양소 조회.")
+    @GetMapping("/Nut/{id}")
+    public List<Double> getMealTotalNutInItem(
+        @PathVariable Long id
+    ){
+        List<Double> response = mealItemService.getMealTotalNutInItem(id);
+        return response;
+    }
 
 }

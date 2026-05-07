@@ -6,6 +6,22 @@ import ChartSection from '../../components/mainpage/chart.jsx';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
+const bloodPressureData = [
+  { date: "03-01", systolic: 128, diastolic: 82 },
+  { date: "03-05", systolic: 125, diastolic: 80 },
+  { date: "03-10", systolic: 130, diastolic: 84 },
+  { date: "03-15", systolic: 122, diastolic: 79 },
+  { date: "03-20", systolic: 118, diastolic: 76 },
+  { date: "03-25", systolic: 119, diastolic: 77 },
+  { date: "03-31", systolic: 116, diastolic: 74 },
+  { date: "04-05", systolic: 121, diastolic: 78 },
+  { date: "04-12", systolic: 118, diastolic: 75 },
+  { date: "04-20", systolic: 115, diastolic: 73 },
+  { date: "04-28", systolic: 117, diastolic: 76 },
+  { date: "05-01", systolic: 114, diastolic: 72 },
+  { date: "05-06", systolic: 112, diastolic: 70 },
+];
+
 const MainPage = () => {
   // 샘플 데이터
   const userStats = {
@@ -42,7 +58,7 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 font-sans text-slate-900 px-8 py-10">
+    <div className="min-h-screen bg-white p-6 font-sans text-slate-900 px-36 py-10">
       <div className="max-w-auto mx-auto space-y-10">
         
         {/* Header & User Stats */}
@@ -70,9 +86,15 @@ const MainPage = () => {
           {/* Chart Placeholder Card */}
           <ChartSection
             title="주간 건강 추이"
+            data={bloodPressureData}
+            legends={[
+              { label: "수축기", color: "#2563eb" },
+              { label: "이완기", color: "#06b6d4" },
+            ]}
           >
+            {(filteredData) => (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={[10,20,30,40]} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
@@ -83,15 +105,15 @@ const MainPage = () => {
                       <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} tickFormatter={(v) => `2026-${v}`} />
-                  <YAxis domain={[0, 150]} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[60, 150]} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   <Area type="monotone" dataKey="systolic" name="수축기" stroke="#2563eb" strokeWidth={3} fill="url(#systolicGrad)" dot={{ fill: "#2563eb", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
                   <Area type="monotone" dataKey="diastolic" name="이완기" stroke="#06b6d4" strokeWidth={3} fill="url(#diastolicGrad)" dot={{ fill: "#06b6d4", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </AreaChart>
               </ResponsiveContainer>
+            )}
           </ChartSection>
         </section>
 

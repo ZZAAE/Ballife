@@ -1,5 +1,35 @@
 import { useMemo, useState } from "react";
 
+const ringColors = [
+  "stroke-red-400",
+  "stroke-indigo-400",
+  "stroke-blue-400",
+  "stroke-green-400",
+  "stroke-orange-400",
+  "stroke-pink-400",
+  "stroke-slate-400",
+];
+
+function RingChart() {
+  return (
+    <svg viewBox="0 0 36 36" className="mx-auto mt-1.5 h-9 w-9">
+      {ringColors.map((color, i) => (
+        <circle
+          key={color}
+          cx="18"
+          cy="18"
+          r="15"
+          fill="transparent"
+          strokeWidth="3.2"
+          className={color}
+          strokeDasharray="11 89"
+          strokeDashoffset={i * -14}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function Calendar() {
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1));
@@ -32,31 +62,20 @@ function Calendar() {
     const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
 
     if (!isCurrentMonth) {
-      return <div key={`empty-${index}`} className="h-16 rounded-xl bg-slate-50/60" />;
+      return <div key={`empty-${index}`} className="h-20 rounded-xl bg-slate-50/60" />;
     }
 
     return (
       <button
         key={`day-${dayNumber}`}
         type="button"
-        className="group h-16 rounded-xl border border-slate-100 bg-white p-2 transition hover:border-slate-200 hover:shadow-sm"
+        className="group h-20 rounded-xl border border-slate-100 bg-white p-2 transition hover:border-slate-200 hover:shadow-sm"
         onClick={() => console.log(`Clicked on day ${dayNumber}`)}
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-600">{dayNumber}</span>
         </div>
-        <div className="mt-2 grid grid-cols-4 gap-1">
-          <span className="h-1.5 rounded-full bg-red-400" />
-          <span className="h-1.5 rounded-full bg-indigo-400" />
-          <span className="h-1.5 rounded-full bg-blue-400" />
-          <span className="h-1.5 rounded-full bg-green-400" />
-        </div>
-        <div className="mt-2 grid grid-cols-4 gap-1">
-          <span className="h-1.5 rounded-full bg-red-400" />
-          <span className="h-1.5 rounded-full bg-indigo-400" />
-          <span className="h-1.5 rounded-full bg-blue-400" />
-          <span className="h-1.5 rounded-full bg-green-400" />
-        </div>
+        <RingChart />
       </button>
     );
   };
