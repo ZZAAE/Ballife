@@ -23,9 +23,9 @@ function App() {
 
       <Header isLoggedIn={false} />
 
-      <div className="min-h-screen bg-white flex justify-end">
+      {/* <div className="min-h-screen bg-white flex justify-end">
         <HealthIndicatorMenu />
-      </div>
+      </div> */}
       
       {/* 메인 콘텐츠*/}
       <main className="mx-auto px-4 py-8">

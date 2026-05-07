@@ -1,296 +1,240 @@
 import React, { useRef, useState } from "react";
+
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
 import Excercise from "../assets/Record/Excercise.svg";
 import Meal from "../assets/Record/Meal.svg";
+import Meal2 from "../assets/Record/Meal2.svg";
 import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
-import { Calendar } from 'lucide-react';
+import Plus from "../assets/Record/Plus.svg";
 
-function RecordPage() {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const dateInputRef = useRef(null)
+function formatKoreanDate(dateString) {
+  const date = new Date(dateString);
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
 
+function PlusButton({ size = 52 }) {
   return (
-    /* .ballife-dashboard-container */
-    <div className="max-w-[1280px] mx-auto p-[40px_20px] flex flex-col gap-[40px] font-sans text-[#333333] bg-white">
-      {/* .main-content */}
-      <div className="w-full">
-        {/* .section-title */}
-        <h1 className="text-[28px] font-bold mb-[30px] text-[#111111]">
-          전체 기록 관리
-        </h1>
-        {/* 날짜 들어가야함 */}
-        <div className="relative">
-          <input
-            type="date"
-            ref={dateInputRef}
-            className="absolute opacity-0 pointer-events-none"
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          <button
-            onClick={() => dateInputRef.current.showPicker()}
-            className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
-          >
-            {/* <Calendar className="h-4 w-4 text-blue-500" /> */}
-            {selectedDate}
-            <span className="ml-1 text-[10px] text-slate-300">▼</span>
-          </button>
-        </div>
+    <button
+      type="button"
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
+      style={{ width: size, height: size }}
+      aria-label="기록 추가"
+    >
+      <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
+    </button>
+  );
+}
 
-        {/* .card-row (Row 1: 혈압, 혈당) */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-[20px] mb-[20px] w-full">
-          {/* 혈압 카드 */}
-          <div className="relative flex-1 bg-white rounded-[12px] pl-1 p-[20px] flex min-h-[180px] overflow-hidden border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full">
-            <div className="absolute left-0 top-0 w-[6px] h-full bg-[#FF4D4F]"></div>
-            <div className="flex flex-end justify-start self-center m-[30px] gap-[20px]">
-              <div className="flex items-center mb-[8px]">
-                <img src={Bp} alt="혈압 아이콘" className="w-[40px] h-[40px]" />
-              </div>
-              <div className="items-center mb-[8px]">
-                <div className="text-[15px] font-semibold">혈압</div>
-                <div className="text-[11px] text-[#888888] whitespace-nowrap">
-                  최근 기록 없음
-                </div>
-              </div>
-            </div>
-            {/* .record-area */}
-            <div className="flex-1 border border-dashed border-[#D1D5DB] rounded-[8px] bg-[#F9FAFB] flex flex-col items-center justify-center gap-[12px]">
-              <div className="w-[36px] h-[36px] rounded-full border border-[#DDDDDD] bg-white flex items-center justify-center cursor-pointer">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#999"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-[14px] font-semibold text-[#444444] mb-[2px]">
-                  혈압 기록
-                </p>
-                <p className="text-[12px] text-[#999999]">
-                  아직 기록되지 않았습니다.
-                </p>
-              </div>
-            </div>
-          </div>
+function LargeRecordCard({
+  icon,
+  title,
+  subText,
+  recordTitle,
+  color,
+  wide = false,
+}) {
+  return (
+    <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+      <div
+        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        style={{ backgroundColor: color }}
+      />
 
-          {/* 혈당 카드 */}
-          <div className="relative flex-1 bg-white rounded-[12px] pl-1 p-[20px] flex min-h-[180px] overflow-hidden border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full">
-            <div className="absolute left-0 top-0 w-[6px] h-full bg-[#FF9C27]"></div>
-            <div className="flex flex-end justify-start self-center m-[30px] gap-[20px]">
-              <div className="flex items-center mb-[8px]">
-                <img
-                  src={Blood}
-                  alt="혈당 아이콘"
-                  className="w-[40px] h-[40px]"
-                />
-              </div>
-              <div className="items-center mb-[8px]">
-                <div className="text-[15px] font-semibold">혈당</div>
-                <div className="text-[11px] text-[#888888] whitespace-nowrap">
-                  최근 기록 없음
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 border border-dashed border-[#D1D5DB] rounded-[8px] bg-[#F9FAFB] flex flex-col items-center justify-center gap-[12px]">
-              <div className="w-[36px] h-[36px] rounded-full border border-[#DDDDDD] bg-white flex items-center justify-center cursor-pointer">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#999"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-[14px] font-semibold text-[#444444] mb-[2px]">
-                  혈당 기록
-                </p>
-                <p className="text-[12px] text-[#999999]">
-                  아직 기록되지 않았습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="flex w-[185px] shrink-0 items-center justify-center gap-[16px] pl-[16px]">
+        <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
-        {/* Row 2: (체중 + 수분) | 활동량 요약 */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-[20px] mb-[20px] w-full">
-          {/* .double-sub-wrapper */}
-          <div className="flex flex-col xl:flex-row gap-[20px] w-full">
-            {/* 체중 (small-card) */}
-            <div className="relative flex-1 bg-white rounded-[12px] p-[20px] flex min-h-[180px] overflow-hidden border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full">
-              <div className="absolute left-0 top-0 w-[6px] h-full bg-[#1890FF]"></div>
-              <div className="w-[80px] flex flex-col justify-start self-center m-[10px]">
-                <div className="flex items-center gap-[20px] mb-[8px]">
-                  <img
-                    src={Weight}
-                    alt="체중 아이콘"
-                    className="w-[40px] h-[40px]"
-                  />
-                  <span className="text-[15px] font-semibold">체중</span>
-                </div>
-              </div>
-              <div className="flex-1 border border-dashed border-[#D1D5DB] rounded-[8px] bg-[#F9FAFB] flex flex-col items-center justify-center gap-[12px]">
-                <div className="w-[36px] h-[36px] rounded-full border border-[#DDDDDD] bg-white flex items-center justify-center cursor-pointer">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#999"
-                    strokeWidth="2"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </div>
-                <p className="text-[13px] font-semibold text-[#444444]">
-                  체중 기록
-                </p>
-              </div>
-            </div>
-
-            {/* 수분 (small-card) */}
-            <div className="relative flex-1 bg-white rounded-[12px] p-[20px] flex min-h-[180px] overflow-hidden border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full">
-              <div className="absolute left-0 top-0 w-[6px] h-full bg-[#13C2C2]"></div>
-              <div className="w-[80px] flex flex-col justify-start self-center m-[10px]">
-                <div className="flex items-center gap-[20px] mb-[8px]">
-                  <img
-                    src={Water}
-                    alt="수분 아이콘"
-                    className="w-[40px] h-[40px]"
-                  />
-                  <span className="text-[15px] font-semibold">수분</span>
-                </div>
-              </div>
-              <div className="flex-1 border border-dashed border-[#D1D5DB] rounded-[8px] bg-[#F9FAFB] flex flex-col items-center justify-center gap-[12px]">
-                <div className="w-[36px] h-[36px] rounded-full border border-[#DDDDDD] bg-white flex items-center justify-center cursor-pointer">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#999"
-                    strokeWidth="2"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </div>
-                <p className="text-[13px] font-semibold text-[#444444]">
-                  섭취 기록
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 활동 요약 */}
-          <div className="relative flex-1 bg-white rounded-[12px] pl-1 p-[20px] flex min-h-[180px] overflow-hidden border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] w-full">
-            <div className="absolute left-0 top-0 w-[6px] h-full bg-[#52C41A]"></div>
-            <div className="flex flex-end justify-start self-center m-[30px] gap-[20px]">
-              <div className="flex items-center mb-[8px]">
-                <img
-                  src={Excercise}
-                  alt="활동 아이콘"
-                  className="w-[40px] h-[40px]"
-                />
-              </div>
-              <div className="items-center mb-[8px]">
-                <div className="text-[15px] font-semibold">활동 요약</div>
-                <div className="text-[11px] text-[#888888] whitespace-nowrap">
-                  최근 기록 없음
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 border border-dashed border-[#D1D5DB] rounded-[8px] bg-[#F9FAFB] flex flex-col items-center justify-center gap-[12px]">
-              <div className="w-[36px] h-[36px] rounded-full border border-[#DDDDDD] bg-white flex items-center justify-center cursor-pointer">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#999"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-[14px] font-semibold text-[#444444] mb-[2px]">
-                  운동 기록
-                </p>
-                <p className="text-[12px] text-[#999999]">
-                  아직 기록되지 않았습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* .meal-section */}
-        <div className="relative bg-white border border-[#EEEEEE] rounded-[12px] p-[30px] shadow-[0_4px_20px_rgba(0,0,0,0.02)] w-full">
-          {/* 보라색 인디케이터 (Indicator.purple) */}
-          <div className="absolute left-0 top-0 w-[4px] h-full bg-[#722ED1] rounded-[12px_0_0_12px]"></div>
-
-          <div className="flex items-center gap-[20px] mb-[30px] pl-[10px]">
-            <img src={Meal} alt="식사 아이콘" className="w-[40px] h-[40px]" />
-            <div className="flex flex-col">
-              <span className="text-[16px] font-bold">오늘의 식단</span>
-              <span className="text-[12px] text-[#999999]">
-                식단 기록 대기 중
-              </span>
-            </div>
-          </div>
-
-          {/* .meal-grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-            {["아침 식사", "점심 식사", "저녁 식사", "간식"].map(
-              (meal, idx) => (
-                /* .meal-box */
-                <div
-                  key={idx}
-                  className="bg-[#F5F6F8] rounded-[12px] h-[220px] flex items-center justify-center"
-                >
-                  {/* .meal-dashed-inner */}
-                  <div className="w-[90%] h-[85%] border border-dashed border-[#D1D5DB] rounded-[8px] flex flex-col items-center justify-center gap-[10px]">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="#CCCCCC"
-                    >
-                      <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-10.03C11.34 11.84 13 10.12 13 8V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"></path>
-                    </svg>
-                    <div className="text-center">
-                      <p className="text-[14px] font-semibold text-[#444444]">
-                        {meal}
-                      </p>
-                      <p className="text-[12px] text-[#999999]">
-                        아직 기록되지 않았습니다.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
+        <div>
+          <p className="text-[14px] font-bold leading-none text-[#252A31]">
+            {title}
+          </p>
+          <p className="mt-[7px] whitespace-nowrap text-[10px] font-medium leading-none text-[#8D949E]">
+            {subText}
+          </p>
         </div>
       </div>
+
+      <div className="flex flex-1 items-center pr-[40px]">
+        <div
+          className={[
+            "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px]",
+            "border border-dashed border-[#D2D9E3] bg-[#EEF3F9]",
+          ].join(" ")}
+        >
+          <PlusButton size={50} />
+
+          <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
+            {recordTitle}
+          </p>
+          <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
+            아직 기록되지 않았습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SmallRecordCard({ icon, title, recordTitle, color }) {
+  return (
+    <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+      <div
+        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        style={{ backgroundColor: color }}
+      />
+
+      <div className="flex w-[98px] shrink-0 flex-col items-center justify-center">
+        <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
+        <p className="mt-[17px] text-[14px] font-bold leading-none text-[#252A31]">
+          {title}
+        </p>
+      </div>
+
+      <div className="flex flex-1 items-center pr-[10px]">
+        <div className="flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
+          <PlusButton size={50} />
+
+          <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
+            {recordTitle}
+          </p>
+          <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
+            아직 기록되지 않았습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MealPlaceholderIcon() {
+  return (
+    <div className="flex h-[50px] w-[50px] items-center justify-center rounded-[13px] bg-[#E2E8F0]">
+      <img src={Meal2} alt="" className="h-[20px] w-[20px] object-contain" />
     </div>
+  );
+}
+
+function MealBox({ title }) {
+  return (
+    <div className="flex h-[285px] items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
+      <div className="flex flex-col items-center justify-center">
+        <MealPlaceholderIcon />
+
+        <p className="mt-[22px] text-[16px] font-bold leading-none text-[#303740]">
+          {title}
+        </p>
+        <p className="mt-[10px] text-[11px] font-medium leading-none text-[#3F4650]">
+          아직 기록되지 않았습니다.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RecordPage() {
+  const [selectedDate, setSelectedDate] = useState("2026-04-30");
+  const dateInputRef = useRef(null);
+
+
+  return (
+    <main className="min-h-[calc(100vh-70px)] w-[calc(100vw-360px)] bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
+      <div className="ml-[150px] w-[1270px] pt-[104px] pb-[40px]">
+        <div className="mb-[50px] flex items-center justify-between">
+          <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+            전체 기록 관리
+          </h1>
+
+          {/* 날짜 들어가야함 */}
+          <div className="relative">
+            <input
+              type="date"
+              ref={dateInputRef}
+              className="absolute opacity-0 pointer-events-none"
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
+            <button
+              onClick={() => dateInputRef.current.showPicker()}
+              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
+            >
+              {/* <Calendar className="h-4 w-4 text-blue-500" /> */}
+              {selectedDate}
+              <span className="ml-1 text-[10px] text-slate-300">▼</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-[30px] gap-y-[22px]">
+          <LargeRecordCard
+            icon={Bp}
+            title="혈압"
+            subText="최근 기록 없음"
+            recordTitle="혈압 기록"
+            color="#FF3B5F"
+          />
+
+          <LargeRecordCard
+            icon={Blood}
+            title="혈당"
+            subText="최근 기록 없음"
+            recordTitle="혈당 기록"
+            color="#FF8A2A"
+          />
+
+          <div className="grid grid-cols-2 gap-[18px]">
+            <SmallRecordCard
+              icon={Weight}
+              title="체중"
+              recordTitle="체중 기록"
+              color="#2E86FF"
+            />
+
+            <SmallRecordCard
+              icon={Water}
+              title="수분 섭취"
+              recordTitle="섭취 기록"
+              color="#55D7DF"
+            />
+          </div>
+
+          <LargeRecordCard
+            icon={Excercise}
+            title="활동량 요약"
+            subText="오늘의 활동 없음"
+            recordTitle="운동 기록"
+            color="#20D36B"
+          />
+        </div>
+
+        <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px] shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+          <div className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px] bg-[#A142FF]" />
+
+          <div className="mb-[34px] flex items-center justify-center gap-[15px]">
+            <img
+              src={Meal}
+              alt=""
+              className="h-[34px] w-[34px] object-contain"
+            />
+
+            <div>
+              <p className="text-[14px] font-extrabold leading-none text-[#252A31]">
+                오늘의 식단
+              </p>
+              <p className="mt-[8px] text-[10px] font-medium leading-none text-[#8D949E]">
+                식단 기록 대기 중
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-[34px]">
+            <MealBox title="아침 식사" />
+            <MealBox title="점심 식사" />
+            <MealBox title="저녁 식사" />
+            <MealBox title="간식" />
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
 

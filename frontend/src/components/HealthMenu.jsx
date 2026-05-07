@@ -27,7 +27,7 @@ export default function HealthIndicatorMenu() {
   return (
     <aside className="min-h-screen w-[365px] bg-white px-[28px] pt-[50px] pb-[40px] font-['Noto_Sans_KR']">
       {/* 상단 제목 */}
-      <div className="flex items-center gap-[13px]">
+      <div className="flex items-center gap-[20px]">
         <img
           src={characteristicIcon}
           alt=""

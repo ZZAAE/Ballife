@@ -47,14 +47,14 @@ export default function Header({ isLoggedIn = false }) {
       onMouseLeave={() => setHoveredMenu(null)}
     >
       {/* 상단바 */}
-      <div className="flex h-[70px] w-full items-center bg-[#202020] px-[38px]">
+      <div className="flex h-[55px] w-full items-center bg-[#202020] px-[38px]">
         {/* 로고 */}
         <div className="flex w-[260px] items-center">
           <Link to="/" className="block">
             <img
               src={ballifeLogo}
               alt="Ballife"
-              className="h-[52px] w-auto object-contain"
+              className="h-[45px] w-auto object-contain"
             />
           </Link>
         </div>
@@ -66,7 +66,7 @@ export default function Header({ isLoggedIn = false }) {
               key={item.key}
               to={item.path}
               onMouseEnter={() => setHoveredMenu(item.dropdown ? item.key : null)}
-              className="flex h-[70px] items-center px-[20px] text-[18px] font-bold tracking-[-0.3px] text-white no-underline"
+              className="flex h-[70px] items-center px-[20px] text-[18px] font-semibold tracking-[-0.3px] text-white no-underline"
             >
               {item.label}
             </Link>
@@ -77,7 +77,7 @@ export default function Header({ isLoggedIn = false }) {
         <div className="flex w-[180px] justify-end">
           <Link
             to={isLoggedIn ? "/logout" : "/login"}
-            className="flex h-[34px] items-center rounded-[8px] bg-white px-[17px] text-[14px] font-bold tracking-[-0.2px] text-[#222222] no-underline hover:bg-[#F2F2F2]"
+            className="flex h-[34px] items-center rounded-[8px] bg-white px-[17px] text-[14px] font-semibold tracking-[-0.2px] text-[#222222] no-underline hover:bg-[#F2F2F2]"
           >
             {isLoggedIn ? "로그아웃" : "로그인"}
           </Link>
@@ -87,7 +87,7 @@ export default function Header({ isLoggedIn = false }) {
       {/* 드롭다운 */}
       {activeDropdown?.dropdown && (
         <div
-          className="flex h-[68px] w-full border-t border-white bg-white shadow-[0_1px_0_rgba(0,0,0,0.2)]"
+          className="flex h-[65px] w-full border-t border-white bg-white shadow-[0_1px_0_rgba(0,0,0,0.2)]"
           onMouseEnter={() => setHoveredMenu(activeDropdown.key)}
         >
           {/* 왼쪽 현재 메뉴 표시 */}
@@ -98,12 +98,12 @@ export default function Header({ isLoggedIn = false }) {
           </div>
 
           {/* 드롭다운 메뉴 */}
-          <div className="flex h-full flex-1 items-center justify-start gap-[100px] pl-[45px] pr-[20px]">
+          <div className="flex h-full flex-1 items-center justify-start gap-[120px] pl-[45px] pr-[20px]">
             {activeDropdown.dropdown.map((item) => (
               <Link
                     key={item.label}
                     to={item.path}
-                    className="flex h-[24px] items-center border-l-[3px] border-black pl-[18px] text-[18px] font-bold tracking-[-0.3px] text-black no-underline"
+                    className="flex h-[20px] items-center border-l-[2px] border-black pl-[18px] text-[18px] font-medium tracking-[-0.3px] text-black no-underline"
                     >
                     <span>{item.label}</span>
                 </Link>
