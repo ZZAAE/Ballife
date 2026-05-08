@@ -1,9 +1,11 @@
 package com.prologue.ballife.web.dto.medicine;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.prologue.ballife.domain.medicine.Prescription;
 import com.prologue.ballife.domain.medicine.UserMedicineRecord;
+import com.prologue.ballife.domain.medicine.UserMedicineRecord.TakenCategory;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -17,14 +19,19 @@ public class UserMedicineRecordDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CreateRequest {
-        @NotBlank(message = "약품 카테고리를 선택해주세요")
-        private String medicineCategory;
+
+        @NotNull(message = "기록할 약/영양제를 선택해주세요")
+        private Long precriptionId;
+
+        @NotNull(message = "복용 날짜를 입력해주세요")
+        private LocalDate intakeDate;
 
         @NotNull(message = "복용 시간을 입력해주세요")
-        private LocalDateTime intakeTime;
+        private LocalTime intakeTime;
 
-        private String kdCode;  // 약품 카테고리가 '병원약'인 경우에만 사용
-        private Long supplementId;  // 약품 카테고리가 '영양제'인 경우에만 사용
+        private Long supplementId;
+
+        private TakenCategory takenCategory;
     }
 
     @Data
@@ -32,14 +39,19 @@ public class UserMedicineRecordDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest {
-        @NotBlank(message = "약품 카테고리를 선택해주세요")
-        private String medicineCategory;
+        
+        @NotNull(message = "기록할 약/영양제를 선택해주세요")
+        private Long precriptionId;
+
+        @NotNull(message = "복용 날짜를 입력해주세요")
+        private LocalDate intakeDate;
 
         @NotNull(message = "복용 시간을 입력해주세요")
-        private LocalDateTime intakeTime;
+        private LocalTime intakeTime;
 
-        private String kdCode;  // 약품 카테고리가 '병원약'인 경우에만 사용
-        private Long supplementId;  // 약품 카테고리가 '영양제'
+        private Long supplementId;
+
+        private TakenCategory takenCategory;
     }
 
     @Data
@@ -48,17 +60,20 @@ public class UserMedicineRecordDto {
     @AllArgsConstructor
     public static class UserMedicineRecordResponse {
         private Long userMedicineRecordId;
-        private String medicineCategory;
-        private LocalDateTime intakeTime;
-        private Prescription prescriptionId;
-        private String supplementId;
+        private Long prescriptionId;
+        private LocalDate intakeDate;
+        private LocalTime intakeTime;
+        private Long supplementId;
+        private TakenCategory takenCategory;
 
         public static UserMedicineRecordResponse from(UserMedicineRecord usermedinerecord) {
             return UserMedicineRecordResponse.builder()
                     .userMedicineRecordId(usermedinerecord.getUserMedicineRecordId())
-                    .medicineCategory(usermedinerecord.getMedicineCategory())
+                    .prescriptionId(usermedinerecord.getPrescription().getPrescriptionId())
+                    .intakeDate(usermedinerecord.getIntakeDate())
                     .intakeTime(usermedinerecord.getIntakeTime())
-                    .prescriptionId(usermedinerecord.getPrescriptionId())
+                    .supplementId(usermedinerecord.getSupplementId())
+                    .takenCategory(usermedinerecord.getTakenCategory())
                     .build();
         }
     }

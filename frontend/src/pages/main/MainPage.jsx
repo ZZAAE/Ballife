@@ -1,8 +1,30 @@
+import React from 'react';
 
-function MainPage(){
+import Card from '../../components/mainpage/card.jsx';
+import Calendar from '../../components/mainpage/calendar.jsx';
+import ChartSection from '../../components/mainpage/chart.jsx';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-  // 더미데이터
-    const userStats = {
+
+const bloodPressureData = [
+  { date: "03-01", systolic: 128, diastolic: 82 },
+  { date: "03-05", systolic: 125, diastolic: 80 },
+  { date: "03-10", systolic: 130, diastolic: 84 },
+  { date: "03-15", systolic: 122, diastolic: 79 },
+  { date: "03-20", systolic: 118, diastolic: 76 },
+  { date: "03-25", systolic: 119, diastolic: 77 },
+  { date: "03-31", systolic: 116, diastolic: 74 },
+  { date: "04-05", systolic: 121, diastolic: 78 },
+  { date: "04-12", systolic: 118, diastolic: 75 },
+  { date: "04-20", systolic: 115, diastolic: 73 },
+  { date: "04-28", systolic: 117, diastolic: 76 },
+  { date: "05-01", systolic: 114, diastolic: 72 },
+  { date: "05-06", systolic: 112, diastolic: 70 },
+];
+
+const MainPage = () => {
+  // 샘플 데이터
+  const userStats = {
     ageGender: "45세 / 남성",
     height: "175cm",
     weight: "78kg",
@@ -10,36 +32,34 @@ function MainPage(){
     bmiColor: "text-red-500",
   };
 
-  const statusCards = [
-    { type: '혈당', value: '112 mg/dL', label: '안정 범위', labelColor: 'text-green-500', icon: 'tint' },
-    { type: '혈압', value: '118 / 70', label: '수축기 / 이완기', icon: 'heart' },
-    { type: '체중', value: '58kg', label: '정상', labelColor: 'text-green-500', icon: 'chart-line' },
-    { type: '복약 알림', value: '2건 확인 필요', label: '오전 복용 요망', icon: 'pill' },
-  ];
-
-  const actionCards = [
-    { type: '식단', title: '오늘 식단 등록', value: '총 섭취 칼로리 1300kcal', color: 'bg-green-100', icon: '🍽️' },
-    { type: '운동', title: '오늘 운동 등록', value: '소모 칼로리 300kcal', color: 'bg-yellow-100', icon: '💪' },
-    { type: '수분 섭취', value: '총 400ml', label: '목표량까지 3컵', color: 'bg-blue-100', icon: '💧' },
-    { type: '영양제', title: '영양제', value: '2건 확인 필요', label: '오전 복용 요망', color: 'bg-gray-800', textColor: 'text-white', icon: '💊' },
-  ];
-
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
-
-  // HTML 엔티티 또는 유니코드로 대체 아이콘 표시
-  const renderIcon = (type) => {
-    switch (type) {
-      case 'tint': return <span className="text-red-500 text-3xl">&#128167;</span>; // 물방울 (혈당)
-      case 'heart': return <span className="text-red-700 text-3xl">&#9829;</span>;   // 하트 (혈압)
-      case 'chart-line': return <div className="w-16 h-8 bg-blue-100 rounded flex items-center justify-center"><div className="w-12 h-0.5 bg-blue-500 rotate-[-15deg]"></div></div>; // 선 차트 모양 (체중)
-      case 'pill': return <div className="w-12 h-6 bg-red-400 rounded-full flex p-1"><div className="w-4 h-4 bg-white rounded-full"></div></div>; // 알약 모양 (복약)
-      default: return null;
-    }
+  const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          background: "#fff",
+          border: "1px solid #e2e8f0",
+          borderRadius: 10,
+          padding: "10px 16px",
+          fontSize: 13,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        <p style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}>{`2026-${label}`}</p>
+        {payload.map((p) => (
+          <p key={p.dataKey} style={{ color: p.color, margin: "2px 0" }}>
+            {p.name}: <strong>{p.value}</strong> mmHg
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 p-6 md:p-10 font-sans text-slate-900">
-      <div className="w-full space-y-10">
+    <div className="min-h-screen bg-white p-6 font-sans text-slate-900 px-36 py-10">
+      <div className="max-w-auto mx-auto space-y-10">
         
         {/* Header & User Stats */}
         <header className="flex items-center justify-between pb-4 border-b border-slate-200">
@@ -53,88 +73,48 @@ function MainPage(){
         </header>
 
         {/* Status Cards (Top Row) */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statusCards.map((card, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs text-slate-400 mb-1">{card.type}</p>
-                <p className="text-xl font-bold">{card.value}</p>
-                <p className={`text-xs mt-1 ${card.labelColor || 'text-slate-400'}`}>{card.label}</p>
-              </div>
-              <div className="flex-shrink-0">
-                {renderIcon(card.icon)}
-              </div>
-            </div>
-          ))}
-        </section>
+        <Card />
 
         {/* Action Cards (Second Row) */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {actionCards.map((card, idx) => (
-            <div key={idx} className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-opacity`}>
-              <div>
-                <p className="text-xs opacity-70 mb-1">{card.type}</p>
-                {card.title && <p className="text-lg font-bold mb-1">{card.title}</p>}
-                <p className="text-xs opacity-70">{card.value}</p>
-                {card.label && <p className="text-xs opacity-70 mt-1">{card.label}</p>}
-              </div>
-              <div className="text-4xl flex-shrink-0">
-                {card.icon}
-              </div>
-            </div>
-          ))}
-        </section>
+        
 
         {/* Calendar & Chart Section */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Calendar Card */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-            <div className="flex items-center gap-2 mb-8">
-              <span className="text-3xl">&#128197;</span> {/* 달력 이모지 */}
-              <h2 className="text-xl font-bold">3월</h2>
-            </div>
-            <div className="grid grid-cols-7 gap-x-2 gap-y-6 text-center text-sm">
-              {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-                <div key={idx} className={`font-bold ${idx === 0 ? 'text-red-500' : 'text-slate-400'}`}>{day}</div>
-              ))}
-              {/* 3월 1일 시작 위치 맞추기 (예: 수요일 시작) */}
-              {[...Array(3)].map((_, i) => <div key={`empty-${i}`}></div>)} 
-              {days.map(day => (
-                <div key={day} className="flex flex-col items-center gap-1 group">
-                  <span className="text-xs text-slate-500 font-medium">{day}</span>
-                  {/* 여러 지표 원형 모양 (간단 버전) */}
-                  <div className="w-10 h-10 rounded-full border border-slate-100 grid grid-cols-2 grid-rows-2 gap-0.5 p-1 transition-transform group-hover:scale-110">
-                    <div className="bg-red-400 rounded-full"></div>
-                    <div className="bg-indigo-400 rounded-full"></div>
-                    <div className="bg-blue-400 rounded-full"></div>
-                    <div className="bg-green-400 rounded-full"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Calendar />
 
           {/* Chart Placeholder Card */}
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2">
-                <span className="text-blue-500 text-xl">&#128200;</span> {/* 차트 이모지 */}
-                <h2 className="text-xl font-bold">주간 건강 추이</h2>
-              </div>
-              <div className="flex gap-1 text-xs text-slate-500">
-                {['체중', '혈당', '혈압'].map((item, idx) => (
-                  <button key={idx} className={`px-3 py-1.5 rounded-full ${idx === 0 ? 'bg-slate-100 font-bold text-slate-900' : 'hover:bg-slate-50'}`}>{item}</button>
-                ))}
-              </div>
-            </div>
-            {/* 차트 영역 (플레이스홀더) */}
-            <div className="flex-grow flex items-center justify-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
-              <p className="text-slate-400 text-sm">여기에 차트 컴포넌트(예: Recharts)가 들어갑니다.</p>
-            </div>
-            <div className="flex justify-between text-xs text-slate-400 mt-4 px-4">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-            </div>
-          </div>
+          <ChartSection
+            title="주간 건강 추이"
+            data={bloodPressureData}
+            legends={[
+              { label: "수축기", color: "#2563eb" },
+              { label: "이완기", color: "#06b6d4" },
+            ]}
+          >
+            {(filteredData) => (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} tickFormatter={(v) => `2026-${v}`} />
+                  <YAxis domain={[60, 150]} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="systolic" name="수축기" stroke="#2563eb" strokeWidth={3} fill="url(#systolicGrad)" dot={{ fill: "#2563eb", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                  <Area type="monotone" dataKey="diastolic" name="이완기" stroke="#06b6d4" strokeWidth={3} fill="url(#diastolicGrad)" dot={{ fill: "#06b6d4", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </ChartSection>
         </section>
 
         {/* 건강 뉴스 섹션 */}
@@ -163,5 +143,6 @@ function MainPage(){
       </div>
     </div>
   );
-}
+};
+
 export default MainPage;

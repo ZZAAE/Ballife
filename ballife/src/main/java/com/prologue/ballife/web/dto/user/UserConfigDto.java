@@ -39,7 +39,7 @@ public class UserConfigDto {
     @AllArgsConstructor
     public static class ConfigUpdateRequest {
 
-        private Long targetWeight;
+        private Double targetWeight;
         private Integer targetDailyCaloriesBurned;
         private Integer targetDailyCaloriesIntake;
         private Integer targetDailyWaterIntake;
@@ -58,6 +58,7 @@ public class UserConfigDto {
     @AllArgsConstructor
     public static class UserConfigResponse {
         private Long userConfigId;
+        private Long userId;
         private Double targetWeight;
         private Integer targetDailyCaloriesBurned;
         private Integer targetDailyCaloriesIntake;
@@ -71,6 +72,7 @@ public class UserConfigDto {
         public static UserConfigResponse from(UserConfig userConfig) {
             return UserConfigResponse.builder()
                     .userConfigId(userConfig.getUserConfigId())
+                    .userId(userConfig.getUser().getUserId())
                     .targetWeight(userConfig.getTargetWeight())
                     .targetDailyCaloriesBurned(userConfig.getTargetDailyCaloriesBurned())
                     .targetDailyCaloriesIntake(userConfig.getTargetDailyCaloriesIntake())

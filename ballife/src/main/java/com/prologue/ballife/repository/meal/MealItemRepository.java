@@ -41,11 +41,12 @@ public interface MealItemRepository extends JpaRepository<MealItem, Long> {
         @Param("mealCategory") MealCategory mealCategory
     );
 
-    // 하루 영양성분 하루 총합
+    // 전체 영양성분 하루 총합
     @Query("SELECT SUM(mi.calorie), SUM(mi.carbohydrate), SUM(mi.sugar), SUM(mi.sodium), SUM(mi.cholesterol), SUM(mi.saturatedFat), SUM(mi.protein) FROM MealItem mi WHERE mi.meal.mealId IN :mealIds ") 
     List<Double> sumTotalDayNutrientByMealIds(@Param("mealIds") List<Long> mealIds);
 
     // 한끼 전체 영상성분 
-    @Query("SELECT SUM(mi.calorie), SUM(mi.carbohydrate), SUM(mi.sugar), SUM(mi.sodium), SUM(mi.cholesterol), SUM(mi.saturatedFat), SUM(mi.protein) FROM MealItem mi WHERE mi.meal.mealId IN :mealIds ")
-    List<Double> sumMealNutrientByMealIds(@Param("mealIds") Long mealIds);
+    @Query("SELECT SUM(mi.calorie), SUM(mi.carbohydrate), SUM(mi.sugar), SUM(mi.sodium), SUM(mi.cholesterol), SUM(mi.saturatedFat), SUM(mi.protein) FROM MealItem mi WHERE mi.meal.mealId  IN :mealId ")
+    List<Double> sumMealNutrientByMealId(@Param("mealId") Long mealId);
+
 }

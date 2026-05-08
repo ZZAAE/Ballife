@@ -33,7 +33,13 @@ import {
   Coffee,
   Moon,
   Apple,
+  TrendingUp,
 } from "lucide-react";
+
+import SummaryCard from "../../components/SummaryCard";
+import MealRecordCard from "../../components/MealRecordCard";
+import MealRegisterModal from "../../modals/MealRegisterModal";
+import DailyTimelineModal from "../../modals/DailyTimelineModal";
 
 const bloodSugarData = [
   { time: "아침", fasting: 95, postMeal: 120 },
@@ -52,20 +58,24 @@ const meals = [
     time: "08:30 AM",
     label: "아침",
     color: "from-slate-600 to-slate-800",
+    image: "https://i.namu.wiki/i/9KlMwPdJc3xUwfQ01bKzEQVphEly7igr380JpMSBfg5yyWtYNAWvqsQaMsdzJIMPSeUjNVk_lXuZnAbX9esdeA.webp",
     items: [
       {
         name: "그릭 요거트와 블루베리",
         kcal: 245,
-        macros: { carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5 },
+        carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5, na: 2
       },
       {
         name: "아몬드 한 줌",
         kcal: 160,
-        macros: { carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0 },
+        carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0, na: 0
+      },
+      {
+        name: "라면 큰거",
+        kcal: 400,
+        carb: 28, protein: 6, fat: 19, sugar: 1, chol: 5, na: 11
       },
     ],
-    total: 405,
-    totalMacros: { carb: 24, protein: 18, fat: 22, sugar: 5, chol: 5 },
   },
   {
     time: "12:45 PM",
@@ -75,16 +85,14 @@ const meals = [
       {
         name: "연어 샐러드",
         kcal: 480,
-        macros: { carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45 },
+        carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, na: 1
       },
       {
         name: "현미밥 반 공기",
         kcal: 150,
-        macros: { carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0 },
+        carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0, na: 0
       },
     ],
-    total: 630,
-    totalMacros: { carb: 44, protein: 37, fat: 29, sugar: 3, chol: 45 },
   },
   {
     time: "07:15 PM",
@@ -94,16 +102,14 @@ const meals = [
       {
         name: "닭가슴살 구이",
         kcal: 310,
-        macros: { carb: 0, protein: 47, fat: 12, sugar: 0, chol: 75 },
+        carb: 0, protein: 47, fat: 12, sugar: 0, chol: 75, na: 0
       },
       {
         name: "구운 고구마와 야채",
         kcal: 220,
-        macros: { carb: 45, protein: 4, fat: 1, sugar: 0, chol: 0 },
+        carb: 45, protein: 4, fat: 1, sugar: 0, chol: 0, na: 0
       },
     ],
-    total: 530,
-    totalMacros: { carb: 45, protein: 46, fat: 13, sugar: 8, chol: 75 },
   },
   {
     time: "04:00 PM",
@@ -113,16 +119,31 @@ const meals = [
       {
         name: "사과와 땅콩버터",
         kcal: 190,
-        macros: { carb: 22, protein: 4, fat: 11, sugar: 15 },
+        carb: 22, protein: 4, fat: 11, sugar: 15
       },
       {
         name: "단백질 쉐이크",
         kcal: 120,
-        macros: { carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15 },
+        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
       },
     ],
-    total: 310,
-    totalMacros: { carb: 25, protein: 28, fat: 12, sugar: 16, chol: 15 },
+  },
+  {
+    time: "04:00 PM",
+    label: "간식",
+    color: "from-violet-500 to-violet-700",
+    items: [
+      {
+        name: "사과와 땅콩버터",
+        kcal: 190,
+        carb: 22, protein: 4, fat: 11, sugar: 15
+      },
+      {
+        name: "단백질 쉐이크",
+        kcal: 120,
+        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
+      },
+    ],
   },
 ];
 
@@ -134,46 +155,12 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 );
 
 export default function RecordSummary() {
-  const [activeNav, setActiveNav] = useState("확인");
-  const [activeSidebar, setActiveSidebar] = useState("혈당");
-
-  const navItems = ["기록", "확인", "커뮤니티", "회원정보", "소개"];
-  const sidebarItems = [
-    { icon: Heart, label: "혈압" },
-    { icon: Scale, label: "체중" },
-    { icon: Activity, label: "혈당" },
-    { icon: Dumbbell, label: "운동" },
-    { icon: Pill, label: "약 복용" },
-    { icon: Utensils, label: "식단" },
-  ];
+  const [isMealModalOpen, setMealModalOpen] = useState(false);
+  const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
-      {/* Navigation */}
-      <nav className="bg-gray-900 px-12 py-4 flex items-center sticky top-0 z-50">
-        <span className="text-2xl font-bold tracking-tight text-white mr-auto">
-          Ballife
-        </span>
-        <div className="flex items-center gap-40">
-          {navItems.map((item) => (
-            <button
-              key={item}
-              onClick={() => setActiveNav(item)}
-              className={`text-sm font-medium transition-colors ${
-                activeNav === item
-                  ? "text-white"
-                  : "text-gray-400 hover:text-gray-200"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <button className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-700 text-white ml-auto">
-          <Menu size={18} />
-        </button>
-      </nav>
-
+      
       <div className="flex">
         {/* Main Content */}
         <main className="flex-1 p-8">
@@ -186,88 +173,61 @@ export default function RecordSummary() {
               하루의 신체 변화를 분석한 결과입니다.
             </p>
           </div>
-
           {/* Summary Cards */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {/* 식단 Card */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-start justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center">
-                  <Utensils size={20} className="text-purple-600" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-purple-600 bg-purple-50 rounded-full px-3 py-1">
-                  식단
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mb-1">오늘의 섭취 kcal</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-gray-900">1,450</span>
-                <span className="text-base text-slate-400 font-medium">
-                  / 2,100 kcal
-                </span>
-              </div>
-            </div>
+            <SummaryCard
+              Icon={Utensils}
+              colorText="text-purple-600"
+              colorBackgorund="bg-purple-50"
+              labelName="식단"
+              description="오늘의 섭취 kcal"
+              record="1,450"
+              unit="/ 2,100 kcal"
+              bottomLabel="테스트입니다"
+              BottomIcon={TrendingUp}
+              bottomeLabelColor="text-red-600"
+            />
 
             {/* 운동 Card */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-start justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Dumbbell size={20} className="text-emerald-600" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 bg-emerald-50 rounded-full px-3 py-1">
-                  운동
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mb-1">오늘의 활동 시간</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-gray-900">45</span>
-                <span className="text-base text-slate-400 font-medium">분</span>
-              </div>
-              <p className="text-[11px] text-emerald-600 font-medium mt-1">
-                총 소모칼로리 500 kcal
-              </p>
-            </div>
+            <SummaryCard
+              Icon={Dumbbell}
+              colorText="text-emerald-600"
+              colorBackgorund="bg-emerald-50"
+              labelName="운동"
+              description="오늘의 활동 시간"
+              record="45"
+              unit="분"
+              bottomLabel="총 소모칼로리 500 kcal"
+              //BottomIcon = {TrendingUp}
+              bottomeLabelColor="text-emerald-600"
+            />
 
             {/* 체중 Card */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-start justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Scale size={20} className="text-blue-600" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-blue-600 bg-blue-50 rounded-full px-3 py-1">
-                  체중
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mb-1">현재 체중 및 추세</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-gray-900">72.4</span>
-                <span className="text-base text-slate-400 font-medium">kg</span>
-              </div>
-              <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-0.5">
-                <TrendingDown size={12} /> 지난주 대비 -0.8kg
-              </p>
-            </div>
+            <SummaryCard
+              Icon={Scale}
+              colorText="text-blue-600"
+              colorBackgorund="bg-blue-50"
+              labelName="체중"
+              description="현재 체중 및 추세"
+              record="72.4"
+              unit="kg"
+              bottomLabel="지난주 대비 -0.8kg"
+              BottomIcon={TrendingDown}
+              bottomeLabelColor="text-emerald-600"
+            />
 
             {/* 수분 Card */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-start justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-sky-50 flex items-center justify-center">
-                  <Droplets size={20} className="text-sky-600" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-sky-600 bg-sky-50 rounded-full px-3 py-1">
-                  수분
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mb-1">오늘의 수분 섭취량</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-gray-900">1.6</span>
-                <span className="text-base text-slate-400 font-medium">
-                  / 2.5 L
-                </span>
-              </div>
-            </div>
+            <SummaryCard
+              Icon={Droplets}
+              colorText="text-sky-600"
+              colorBackgorund="bg-sky-50"
+              labelName="수분"
+              description="오늘의 수분 섭취량"
+              record="1.6"
+              unit="/ 2.5 L"
+            />
           </div>
-
           {/* Charts Section */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             {/* 혈당 Chart */}
@@ -288,11 +248,7 @@ export default function RecordSummary() {
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={240}>
-                <BarChart
-                  data={bloodSugarData}
-                  barCategoryGap="30%"
-                  barGap={4}
-                >
+                <BarChart data={bloodSugarData} barCategoryGap="30%" barGap={4}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
@@ -412,7 +368,6 @@ export default function RecordSummary() {
               </ResponsiveContainer>
             </div>
           </div>
-
           {/* 복용 일정 */}
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 mb-8">
             <div className="flex items-center justify-between mb-5">
@@ -473,151 +428,22 @@ export default function RecordSummary() {
               </div>
             </div>
           </div>
-
-          {/* Meal Cards */}
-          <div className="grid grid-cols-4 gap-4">
-            {meals.map((meal, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-              >
-                {/* Meal Image Header */}
-                <div
-                  className={`h-24 bg-gradient-to-br ${meal.color} relative p-3 flex flex-col justify-end`}
-                >
-                  <span className="text-[10px] text-white/70 font-medium">
-                    {meal.time}
-                  </span>
-                  <span className="text-lg font-bold text-white">
-                    {meal.label}
-                  </span>
-                </div>
-
-                <div className="p-3.5">
-                  {meal.items.map((item, i) => (
-                    <div key={i} className="mb-2.5">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-800">
-                          {item.name}
-                        </span>
-                        <span className="text-xs font-bold text-blue-600">
-                          {item.kcal} kcal
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        <MacroBadge label="탄" value={item.macros.carb} />
-                        <MacroBadge label="단" value={item.macros.protein} />
-                        <MacroBadge label="지" value={item.macros.fat} />
-                        {item.macros.sugar !== undefined && (
-                          <MacroBadge label="당" value={item.macros.sugar} />
-                        )}
-                        {item.macros.chol !== undefined && item.macros.chol > 0 && (
-                          <MacroBadge
-                            label="콜"
-                            value={item.macros.chol}
-                            unit="mg"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Total */}
-                  <div className="border-t border-gray-100 pt-2 mt-2">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-gray-500">합계</span>
-                      <span className="text-sm font-bold text-gray-900">
-                        {meal.total} kcal
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      <MacroBadge label="탄" value={meal.totalMacros.carb} />
-                      <MacroBadge
-                        label="단"
-                        value={meal.totalMacros.protein}
-                      />
-                      <MacroBadge label="지" value={meal.totalMacros.fat} />
-                      <MacroBadge label="당" value={meal.totalMacros.sugar} />
-                      {meal.totalMacros.chol !== undefined && (
-                        <MacroBadge
-                          label="콜"
-                          value={meal.totalMacros.chol}
-                          unit="mg"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto pb-2">
+            <div className="flex gap-4">
+              {meals.map((meal, idx) => (
+                <MealRecordCard
+                  key={idx}
+                  {...meal}
+                  className="min-w-[calc(26%-10px)] flex-shrink-0"
+                />
+              ))}
+            </div>
           </div>
         </main>
 
-        {/* Right Sidebar */}
-        <aside className="w-64 bg-white border-l border-gray-200 p-5 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto flex-shrink-0">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">건강 지표</h3>
+        <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} />
+        <DailyTimelineModal isOpen={isTimeLineModalOpen} onClose={()=>setTimeLineModelOpen(false)}/>
 
-          <div className="space-y-1 mb-6">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => setActiveSidebar(item.label)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  activeSidebar === item.label
-                    ? "bg-gray-100 text-gray-900 font-semibold"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
-              >
-                <item.icon size={16} />
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <button className="w-full bg-gray-900 text-white text-sm font-medium py-3 rounded-xl mb-6 hover:bg-gray-800 transition-colors">
-            등록 하기
-          </button>
-
-          {/* AI Recommendation */}
-          <div className="bg-gradient-to-b from-indigo-600 to-indigo-700 rounded-2xl p-5 text-white mb-4">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-3">
-              <Bot size={20} />
-            </div>
-            <h4 className="font-bold text-sm mb-2">
-              매우 훌륭한 추세입니다!
-            </h4>
-            <p className="text-xs text-indigo-200 leading-relaxed mb-3">
-              이번 주 체중이 꾸준히 안정세를 보이고 있습니다. 현재의 식단과 수면
-              패턴이 신진대사에 긍정적인 영향을 주고 있는 것으로 분석됩니다.
-            </p>
-            <p className="text-xs font-semibold mb-1">전문가 추천 팁:</p>
-            <p className="text-xs text-indigo-200 leading-relaxed mb-4">
-              목표 체중까지 약 4.4kg 남았습니다. 근력 운동 횟수를 주 1회 더
-              늘리면 기초대사량이 높아져 정체기를 해결할 수 있습니다.
-            </p>
-            <button className="w-full bg-white text-indigo-700 text-xs font-semibold py-2.5 rounded-lg hover:bg-indigo-50 transition-colors">
-              맞춤형 식단 계획 보기
-            </button>
-          </div>
-
-          {/* 수분 섭취 권장 */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-4">
-            <div className="flex items-start gap-2.5 mb-2">
-              <div className="w-8 h-8 bg-sky-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Droplets size={15} className="text-sky-500" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900 mb-1">
-                  수분 섭취 권장
-                </h4>
-                <p className="text-[11px] text-gray-400 leading-relaxed">
-                  체중 감량 중에는 하루 2L 이상의 물을 마시는 것이 지방 연소에
-                  효과적입니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );

@@ -1,0 +1,208 @@
+/* Layout */
+.ballife-dashboard-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column; /* 메인 영역만 구현하므로 column으로 변경 */
+  gap: 40px;
+  font-family: 'Pretendard', sans-serif;
+  color: #333333;
+  background-color: #FFFFFF;
+}
+
+.main-content {
+  width: 100%;
+}
+
+/* Typography */
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #111111;
+}
+
+/* Grid Layout Logic */
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 50% : 50% 분할 */
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* 체중과 수분 섭취를 50% 영역 안에서 다시 나누는 래퍼 */
+.double-sub-wrapper {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.dashboard-card {
+  position: relative;
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  min-height: 180px;
+  overflow: hidden;
+  border: 1px solid #F0F0F0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.card-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+}
+
+.card-indicator.red { background-color: #FF4D4F; }
+.card-indicator.orange { background-color: #FF9C27; }
+.card-indicator.blue { background-color: #1890FF; }
+.card-indicator.cyan { background-color: #13C2C2; }
+.card-indicator.green { background-color: #52C41A; }
+.card-indicator.purple { background-color: #722ED1; width: 4px; border-radius: 12px 0 0 12px; }
+
+.card-left {
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: center;
+  margin: 15px;
+}
+
+/* 체중, 수분 섭취 카드 전용 스타일 */
+.small-card .card-left {
+  width: 80px;
+  margin: 10px;
+}
+
+.card-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.card-sub-label {
+  font-size: 11px;
+  color: #888888;
+  white-space: nowrap;
+}
+
+/* Recording Area */
+.record-area {
+  flex: 1;
+  border: 1px dashed #D1D5DB;
+  border-radius: 8px;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.plus-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #DDDDDD;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.record-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444444;
+  margin-bottom: 2px;
+}
+
+.record-desc {
+  font-size: 12px;
+  color: #999999;
+}
+
+/* Meal Section */
+.meal-section {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #EEEEEE;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.meal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding-left: 10px;
+}
+
+.meal-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.meal-status {
+  font-size: 12px;
+  color: #999999;
+}
+
+.meal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.meal-box {
+  background: #F5F6F8;
+  border-radius: 12px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-dashed-inner {
+  width: 90%;
+  height: 85%;
+  border: 1px dashed #D1D5DB;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .card-row {
+    grid-template-columns: 1fr;
+  }
+  .double-sub-wrapper {
+    flex-direction: column;
+  }
+}
