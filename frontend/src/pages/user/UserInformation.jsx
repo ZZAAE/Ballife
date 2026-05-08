@@ -1,6 +1,3 @@
-import Header from "../exercise/components/Header";
-import HealthIndicatorMenu from "../exercise/components/HealthMenu";
-
 const dummy = {
   name: "천지수",
   username: "ballife-wkjgpho2enj",
@@ -94,24 +91,22 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
 
 function UserInformation() {
   return (
-    <div className="min-h-screen bg-[#f7f8fa] w-full">
-      <Header />
-
-      <div className="min-h-screen w-full pt-[70px]">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen w-full bg-[#d9d9d9]">
+      <div className="min-h-screen w-full bg-[#efefef]">
+        <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* 메인 콘텐츠 */}
-          <main className="min-w-0 xl:mr-[320px]">
+          <main className="min-w-0 flex-1 xl:mx-auto xl:w-full xl:max-w-[1120px]">
             {/* 프로필 헤더 */}
-            <div className="mb-8 flex items-center gap-6">
+            <div className="mb-8 flex flex-col gap-5 rounded-[28px] bg-white px-6 py-6 shadow-sm sm:flex-row sm:items-center sm:px-8">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-300 text-4xl text-gray-500">
                 👤
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {dummy.name}
                 </h2>
                 <p className="text-sm text-gray-400">{dummy.username}</p>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <button className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors">
                     프로필 수정
                   </button>
@@ -125,9 +120,9 @@ function UserInformation() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr]">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
               {/* 좌측 패널 */}
-              <div className="flex flex-col gap-5 pr-8">
+              <div className="flex flex-col gap-5 xl:pr-4">
                 {/* 회원 정보 카드 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <h3 className="mb-4 text-sm font-bold text-gray-800">
@@ -216,7 +211,7 @@ function UserInformation() {
               </div>
 
               {/* 우측 콘텐츠 */}
-              <div className="flex flex-col gap-5">
+              <div className="flex min-w-0 w-full flex-col gap-5 lg:mx-auto lg:max-w-[760px]">
                 {/* 목표 지표 2×2 */}
                 <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
                   <MetricCard
@@ -256,7 +251,7 @@ function UserInformation() {
                 </div>
 
                 {/* 약 등록 + 하루 생활 루틴 */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 w-full">
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                   {/* 약 등록 */}
                   <div className="flex min-h-[460px] flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:min-h-[600px]">
                     <div className="mb-3 flex items-center justify-between">
@@ -309,9 +304,6 @@ function UserInformation() {
               </div>
             </div>
           </main>
-
-          {/* 우측 사이드바 */}
-          <HealthIndicatorMenu />
         </div>
       </div>
     </div>

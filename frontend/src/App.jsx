@@ -25,6 +25,8 @@ import UserInformation from "./pages/user/UserInformation";
 
 function App() {
   const location = useLocation();
+  const isExercisePage = location.pathname === "/exercise";
+  const isMemberPage = location.pathname === "/member";
 
   const hideHealthMenu =
     location.pathname === "/home" ||
@@ -32,17 +34,11 @@ function App() {
     location.pathname === "/signup" ||
     location.pathname === "/boards" ||
     location.pathname === "/posts/create" ||
-    location.pathname === "/exercise" ||
-    location.pathname === "/member" ||
     location.pathname.startsWith("/posts/");
 
-  const hideHeader =
-    location.pathname === "/exercise" || location.pathname === "/member";
+  const hideHeader = false;
 
-  const contentClass = [
-    hideHeader ? "flex-1" : "flex-1 pt-[70px]",
-    !hideHealthMenu ? "xl:mr-[320px]" : "",
-  ]
+  const contentClass = [hideHeader ? "flex-1" : "flex-1 pt-[70px]"]
     .filter(Boolean)
     .join(" ");
 
@@ -78,7 +74,18 @@ function App() {
             </Routes>
           </div>
 
-          {!hideHealthMenu && <HealthIndicatorMenu />}
+          {!hideHealthMenu && (
+            <HealthIndicatorMenu
+              onRegisterClick={
+                isExercisePage
+                  ? () => window.dispatchEvent(new Event("open-exercise-modal"))
+                  : undefined
+              }
+              activeMenu={
+                isExercisePage ? "exercise" : isMemberPage ? "all" : undefined
+              }
+            />
+          )}
         </div>
       </main>
     </div>

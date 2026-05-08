@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
-import Header from "./components/Header";
 import ExerciseSection from "./components/ExerciseSection";
 import ExerciseRecordTable from "./components/ExerciseRecordTable";
-import HealthIndicatorMenu from "./components/HealthMenu";
 import Pagination from "./components/Pagination";
 import ExerciseModal from "./ExerciseModal";
 import { useExercise } from "./hooks/useExercise";
@@ -13,6 +11,16 @@ function ExercisePage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+
+  useEffect(() => {
+    const openModal = () => setIsModalOpen(true);
+
+    window.addEventListener("open-exercise-modal", openModal);
+
+    return () => {
+      window.removeEventListener("open-exercise-modal", openModal);
+    };
+  }, []);
   const {
     anaerobicCards,
     aerobicCards,
@@ -43,11 +51,9 @@ function ExercisePage() {
 
   return (
     <div className="min-h-screen bg-[#d9d9d9]">
-      <Header />
-
-      <div className="min-h-screen w-full bg-[#efefef] pt-[70px]">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <main className="min-w-0 xl:mr-[320px]">
+      <div className="min-h-screen w-full bg-[#efefef]">
+        <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <main className="min-w-0 xl:mx-auto xl:w-full xl:max-w-[1120px]">
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-[24px] font-bold text-[#1f2937]">
                 운동 기록 확인
@@ -83,8 +89,6 @@ function ExercisePage() {
               onPageChange={handlePageChange}
             />
           </main>
-
-          <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} />
         </div>
       </div>
 
