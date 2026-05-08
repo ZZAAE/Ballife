@@ -9,10 +9,10 @@ import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
 
-function formatKoreanDate(dateString) {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-}
+// function formatKoreanDate(dateString) {
+//   const date = new Date(dateString);
+//   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+// }
 
 function PlusButton({ size = 52 }) {
   return (
@@ -132,7 +132,7 @@ function MealBox({ title }) {
   );
 }
 
-function RecordPage() {
+function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
 
@@ -238,4 +238,4 @@ function RecordPage() {
   );
 }
 
-export default RecordPage;
+export default AllRecordPage;

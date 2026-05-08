@@ -13,6 +13,7 @@ import MainPage from './pages/main/MainPage';
 import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
+import AllRecordPage from './pages/AllRecordPage';
 
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           {/* <Route path="/posts/:id/edit" element={<PostEditPage />} /> */}
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/allRecord" element={<AllRecordPage />} />
         </Routes>
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
