@@ -8,32 +8,39 @@ import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
+import RecordSummary from './pages/recordRead/RecordSummary';
 import MainPage from './pages/main/MainPage';
-import HealthCalenderPage from './pages/main/HealthCalenderPage';
-import Header from './components/Header';
+import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
+import SummaryCard from './components/SummaryCard';
+
 
 function App() {
+  // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
+  const { user, isAuthenticated, logout } = useAuth();
 
   const hideHealthMenu =
-    location.pathname === '/' ||
+    location.pathname === '/home' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname.startsWith('/posts/'); 
+    location.pathname.startsWith('/posts/');
+   // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
 
   return (
-  <div className="min-h-screen bg-white flex flex-col">
-    <main className="py-12">
-    <Header isLoggedIn={false} />
+    <div className="min-h-screen bg-white flex flex-col">
+      <main className="py-12">
+      <Header isLoggedIn={false} />
 
-    <div className="min-w-screen bg-white flex justify-end">
-      <div className="flex-1">
-      {/* 메인 콘텐츠*/}
-      <Routes>
-        {/* <Routes> -> 페이지 이동 경로 */}
-        <Route path="/" element={<MainPage />} />
+      <div className="min-w-screen bg-white flex justify-end">
+        <div className="flex-1"></div>
+        {/* 메인 콘텐츠*/}
+        <Routes>
+          <Route path="/" element={<RecordSummary />} />
+          
+          {/* <Routes> -> 페이지 이동 경로 */}
+          <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/disease" element={<DiseasePage />} />
@@ -41,14 +48,12 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
-          <Route path="/calender" element={<HealthCalenderPage />} />
-      </Routes>
+        </Routes>
+        {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
-      {!hideHealthMenu && <HealthIndicatorMenu />}
+      </main>
     </div>
-    </main>
-  </div>
-);
+  );
 }
 
 export default App;

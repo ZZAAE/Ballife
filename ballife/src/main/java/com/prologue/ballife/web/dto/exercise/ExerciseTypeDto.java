@@ -27,8 +27,8 @@ public class ExerciseTypeDto {
     // Lombok: 모든 필드를 파라미터로 받는 생성자 자동 생성
     public static class Response {
 
-        // 운동 종류 식별자
-        private Long exerciseTypeId;
+        // 운동 종류 식별자 (MongoDB ObjectId)
+        private String exerciseTypeId;
         // 설명:
         // - exercise_type 테이블의 기본키(PK)
         // - DB에서는 exercise_type_id 컬럼과 연결되는 값
@@ -38,13 +38,12 @@ public class ExerciseTypeDto {
         private String exerciseName;
         // 운동 카테고리
         private String exerciseCategory;
-       
+
         // 칼로리 계산 기준
         private String calorieUnit;
-        
+
         // 단위당 소모 칼로리
         private Integer caloriePerUnit;
-       
 
         // 엔티티(ExerciseType) -> DTO(Response) 변환 메서드
         // 서비스나 컨트롤러에서 엔티티를 그대로 반환하지 않고,

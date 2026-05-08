@@ -6,7 +6,6 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import authApi from '../../api/authApi';
 
-
 function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
