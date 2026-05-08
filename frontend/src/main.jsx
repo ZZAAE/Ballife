@@ -10,8 +10,8 @@ import RecordSummary from "./pages/recordRead/RecordSummary.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
-        <MedicationPage />
-
+        {/* <RecordSummary /> */}
+        <App />
         <Toaster
           position="top-right"
           toastOptions={{
