@@ -21,6 +21,7 @@ import ObesityReportPage from './pages/report/ObesityReportPage';
 import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
+import AllRecordPage from './pages/AllRecordPage';
 
 function App() {
   const hideHealthMenu =
@@ -67,6 +68,7 @@ function App() {
           <Route path="/dyslipidemia" element={<DyslipidemiaReportPage />} />
           <Route path="/obesity" element={<ObesityReportPage />} />
           <Route path="/healthcalendar" element={<HealthCalenderPage />} />
+          <Route path="/allrecords" element={<AllRecordPage />} />
         </Routes>
         </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}

@@ -8,6 +8,10 @@ import Meal2 from "../assets/Record/Meal2.svg";
 import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
+import { Link } from "react-router-dom";
+import WeightRecordModal from "../modals/WeightRecordModal";
+
+
 
 function formatKoreanDate(dateString) {
   const date = new Date(dateString);
@@ -132,7 +136,7 @@ function MealBox({ title }) {
   );
 }
 
-function RecordPage() {
+function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
 
@@ -182,12 +186,14 @@ function RecordPage() {
           />
 
           <div className="grid grid-cols-2 gap-[18px]">
+            
             <SmallRecordCard
               icon={Weight}
               title="체중"
               recordTitle="체중 기록"
               color="#2E86FF"
             />
+            
 
             <SmallRecordCard
               icon={Water}
@@ -238,4 +244,4 @@ function RecordPage() {
   );
 }
 
-export default RecordPage;
+export default AllRecordPage;
