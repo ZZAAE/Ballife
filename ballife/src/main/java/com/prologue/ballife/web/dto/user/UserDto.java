@@ -92,6 +92,7 @@ public class UserDto {
         private String token;
         private long userId;      
         private String username;
+        private String nickname;
         private LocalDate birthDate; // 메인페이지에서 나이 계산 필요
         private String email;
         private String gender;
