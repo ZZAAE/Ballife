@@ -13,20 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 public class CommentDto {
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> origin/sjs/0507
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-<<<<<<< HEAD
-    public static class CreateRequest{
-=======
     public static class CreateRequest {
->>>>>>> origin/sjs/0507
         @NotBlank(message = "내용은 필수입니다")
         @Size(max = 500, message = "댓글길이는 500자 이하여야 합니다.")
         private String content;
@@ -42,11 +33,7 @@ public class CommentDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-<<<<<<< HEAD
-    public static class CommentResponse { //글을 클릭했을 때 주는 상세 정보
-=======
     public static class CommentResponse { // 글을 클릭했을 때 주는 상세 정보
->>>>>>> origin/sjs/0507
         private Long id;
         private Long userId;
         private Post postId;
