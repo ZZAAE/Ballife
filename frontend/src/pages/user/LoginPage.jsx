@@ -5,7 +5,10 @@ import toast from 'react-hot-toast';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import authApi from '../../api/authApi';
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/jisoo0508
 
 function LoginPage() {
     const navigate = useNavigate();

@@ -25,11 +25,16 @@ public class BioValueRecord {
     @JoinColumn(name = "USER_ID")
     private User user;
 
+<<<<<<< HEAD
     @Column(name="RECORD_DATE", nullable = false)
     private LocalDate recordDate;
 
     @Column(name="RECORD_TIME", nullable = false)
     private LocalTime recordTime;
+=======
+    @Column(name="RECORD_TIME", nullable = false)
+    private LocalDateTime recordTime;
+>>>>>>> origin/jisoo0508
 
     @Column(name="CATEGORY", nullable = false, length = 10)
     private String category;

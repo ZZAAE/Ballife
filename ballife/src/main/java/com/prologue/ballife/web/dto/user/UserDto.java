@@ -35,7 +35,6 @@ public class UserDto {
         @Size(min = 6, message = "비밀번호는 6자 이상이여야 합니다")
         private String password;
 
-        @NotBlank(message = "닉네임을 입력해주세요")
         @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
         private String nickname;
 
@@ -98,7 +97,11 @@ public class UserDto {
         private String gender;
         private Double weight;
         private Double height;
+<<<<<<< HEAD
         private User.UserCategory category;
+=======
+        private User.UserCategory role;
+>>>>>>> origin/jisoo0508
         //private String diseaseIndex; 26.03.31 기준 메인페이지에 질병은 안나와있음 메인에 질병 표시할거면 주석제거
 
     //     public static LoginResponse from(User user) { 필요없음
@@ -131,7 +134,11 @@ public class UserDto {
         private Double weight;
         private Double height;
         private String diseaseIndex;
+<<<<<<< HEAD
         private User.UserCategory category;
+=======
+        private User.UserCategory role;
+>>>>>>> origin/jisoo0508
 
         // 엔티티 → DTO 변환 메서드
         public static UserResponse from(User user) {
@@ -145,7 +152,11 @@ public class UserDto {
                     .height(user.getHeight())
                     .diseaseIndex(user.getDiseaseIndex())
                     .email(user.getEmail())
+<<<<<<< HEAD
                     .category(user.getUserCategory())
+=======
+                    .role(user.getUserCategory())
+>>>>>>> origin/jisoo0508
                     .build();
         }
     }

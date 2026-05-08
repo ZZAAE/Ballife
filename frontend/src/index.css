@@ -35,4 +35,9 @@ body {
   .btn-secondary {
     @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300;
   }
+
+  .table_center > table {
+    margin: auto;
+  }
+
 }

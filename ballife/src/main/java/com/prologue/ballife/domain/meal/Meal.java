@@ -1,5 +1,9 @@
 package com.prologue.ballife.domain.meal;
 
+<<<<<<< HEAD
+=======
+import java.time.LocalDate;
+>>>>>>> origin/jisoo0508
 import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.user.User;

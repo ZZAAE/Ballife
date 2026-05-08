@@ -40,9 +40,8 @@ public class Alarm {
     @Column(name = "KD_CODE", length = 15)
     private String kdCode;
 
-    @ManyToOne
-    @JoinColumn(name = "SUPPLEMENT_ID")
-    private String supplementId;
+    @Column(name = "SUPPLEMENT_ID")
+    private Long supplementId;
 
     public enum AlarmCategory {
     MEDICINE,

@@ -5,7 +5,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.prologue.ballife.domain.daily.BioValueRecord;
+<<<<<<< HEAD
 import com.prologue.ballife.web.dto.daily.BioValueRecordDto.BioResponse;
+=======
+>>>>>>> origin/jisoo0508
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -64,7 +67,10 @@ public class BioValueRecordDto {
         private Integer waterIntakeCup;
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/jisoo0508
     // 생체기록 응답 DTO
     @Data
     @Builder
@@ -72,20 +78,34 @@ public class BioValueRecordDto {
     @AllArgsConstructor
     public static class BioResponse {
         private Long recordId;
+<<<<<<< HEAD
         private LocalDate recordDate;
         private LocalTime recordTime;
+=======
+        private LocalDate date;
+        private LocalTime time;
+>>>>>>> origin/jisoo0508
         private String category;
         private Integer bloodSugar;
         private Integer systolicBP;
         private Integer diastolicBP;
+<<<<<<< HEAD
         private Double weight;
+=======
+        private Integer weight;
+>>>>>>> origin/jisoo0508
         private Integer waterIntakeCup;
 
             public static BioResponse from(BioValueRecord bio) {
                 return BioResponse.builder()
                         .recordId(bio.getRecordId())
+<<<<<<< HEAD
                         .recordDate(bio.getRecordDate())
                         .recordTime(bio.getRecordTime())
+=======
+                        .date(bio.getDate())
+                        .time(bio.getTime())
+>>>>>>> origin/jisoo0508
                         .category(bio.getCategory())
                         .bloodSugar(bio.getBloodSugar())
                         .systolicBP(bio.getSystolicBP())
@@ -96,6 +116,7 @@ public class BioValueRecordDto {
             }
     }
 
+<<<<<<< HEAD
     // @Data
     // @Builder
     // @NoArgsConstructor 
@@ -104,4 +125,6 @@ public class BioValueRecordDto {
 
     // }
 
+=======
+>>>>>>> origin/jisoo0508
 }
