@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+<<<<<<< HEAD
 import DiseasePage from './pages/user/DiseasePage';
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
@@ -15,6 +16,17 @@ import MainPage from './pages/main/MainPage';
 import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
+=======
+import MedicationPage from './pages/MedicationPage';
+// import DiseasePage from './pages/user/DiseasePage';
+import BoardListPage from './pages/board/BoardListPage';
+import PostCreatePage from './pages/board/PostCreatePage';
+// import PostEditPage from './pages/board/PostEditPage';
+// import PostDetailPage from './pages/board/PostDetailPage';
+// import MainPage from './pages/main/MainPage';
+import Header from './components/Header'
+import HealthIndicatorMenu from './components/HealthMenu';
+>>>>>>> origin/LYJ0507
 
 =======
 // import HomePage from './pages/HomePage';
@@ -57,6 +69,7 @@ function App() {
    // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-white flex flex-col">
       <main className="py-12">
       <Header isLoggedIn={false} />
@@ -186,6 +199,30 @@ function App() {
     </main>
   </div>
 );
+=======
+    <div className="min-h-screen bg-white">
+      {/* 헤더 */}
+      <Header isLoggedIn={false} />
+<div className="flex pt-14">
+
+      {/* 메인 콘텐츠*/}
+      <main className="flex-1 ">
+    <Routes>
+      <Route path="/" element={<MedicationPage />} />
+
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/boards" element={<BoardListPage />} />
+      <Route path="/posts/create" element={<PostCreatePage />} />
+    </Routes>
+  </main>
+      <div className="min-h-screen bg-white flex justify-end">
+        <HealthIndicatorMenu />
+      </div>
+    </div>
+  </div>
+  );
+>>>>>>> origin/LYJ0507
 }
 
 export default App;

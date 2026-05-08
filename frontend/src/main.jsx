@@ -13,6 +13,7 @@ import MedicationPage from "./pages/MedicationPage.jsx";
 
 >>>>>>> origin/jisoo0508
 
+
 ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>

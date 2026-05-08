@@ -2,11 +2,11 @@ package com.prologue.ballife.repository.user;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.prologue.ballife.domain.user.User;
 
 import java.sql.Date;
 import java.util.Optional;
+
 
 // Repository - DB접근 전용
 // JpaRepository를 상속 받겠다는 의미(이미 DB 작업에 필요한 기능들이 있음)
@@ -14,18 +14,18 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
    
     // userRepository - DB를 조회하는는 저장소 객체(User(엔티티) 테이블에 접근해서 데이터를 찾음)
-    // Optional<User> - User 테이블에 해당 user가 있으면 반환 
-    Optional<User> findByUserId(Long userId);  
+    // Optional<User> - User 테이블에 해당 user가 있으면 반환  
     Optional<User> findByLoginId(String loginId);
     Optional<User> findByUsername(String username);
     Optional<User> findByNickname(String nickname);
     Optional<User> findByBirthDate(Date birthdate);
     Optional<User> findByDiseaseIndex(String diseaseindex);
-
+    
     // existsBy - 값이 DB에 있는지 검사 하는 메서드
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
     boolean existsByLoginId(String loginId);
     boolean existsByNickname(String nickname);
+
 
 }
