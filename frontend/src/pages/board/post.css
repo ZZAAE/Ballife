@@ -1,0 +1,113 @@
+.post-page {
+  min-height: calc(100vh - 9rem);
+  background-color: #f1f5f9;
+  padding: 2.5rem 0;
+}
+
+.post-wrap {
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.post-header {
+  margin-bottom: 1.5rem;
+}
+
+.post-title {
+  margin: 0;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+
+.post-subtitle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.post-form {
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background-color: #ffffff;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.post-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.post-field-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.post-input,
+.post-select,
+.post-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  color: #334155;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-input,
+.post-select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.post-textarea {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  resize: vertical;
+}
+
+.post-input::placeholder,
+.post-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.post-input:focus,
+.post-select:focus,
+.post-textarea:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.4);
+}
+
+.post-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.post-btn {
+  min-width: 6rem;
+}
+
+.post-btn-submit {
+  background-color: #0f172a !important;
+}
+
+.post-btn-submit:hover {
+  background-color: #1e293b !important;
+}
+
+@media (min-width: 640px) {
+  .post-form {
+    padding: 1.75rem;
+  }
+}

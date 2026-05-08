@@ -1,4 +1,4 @@
-package com.prologue.ballife.repository;
+package com.prologue.ballife.repository.user;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // existsBy - 값이 DB에 있는지 검사 하는 메서드
     boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
     boolean existsByLoginId(String loginId);
     boolean existsByNickname(String nickname);
 

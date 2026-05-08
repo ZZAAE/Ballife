@@ -15,7 +15,7 @@ import com.prologue.ballife.domain.user.User;
 
 public class UserDto {
 
-    //회원가입1
+    //회원가입
     @Data
     @Builder
     @NoArgsConstructor
@@ -35,7 +35,6 @@ public class UserDto {
         @Size(min = 6, message = "비밀번호는 6자 이상이여야 합니다")
         private String password;
 
-        @NotBlank(message = "닉네임을 입력해주세요")
         @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
         private String nickname;
 
@@ -91,12 +90,13 @@ public class UserDto {
         private String token;
         private long userId;      
         private String username;
+        private String nickname;
         private LocalDate birthDate; // 메인페이지에서 나이 계산 필요
         private String email;
         private String gender;
         private Double weight;
         private Double height;
-        private User.Role role;
+        private User.UserCategory role;
         //private String diseaseIndex; 26.03.31 기준 메인페이지에 질병은 안나와있음 메인에 질병 표시할거면 주석제거
 
     //     public static LoginResponse from(User user) { 필요없음
@@ -129,7 +129,7 @@ public class UserDto {
         private Double weight;
         private Double height;
         private String diseaseIndex;
-        private User.Role role;
+        private User.UserCategory role;
 
         // 엔티티 → DTO 변환 메서드
         public static UserResponse from(User user) {
@@ -143,7 +143,7 @@ public class UserDto {
                     .height(user.getHeight())
                     .diseaseIndex(user.getDiseaseIndex())
                     .email(user.getEmail())
-                    .role(user.getRole())
+                    .role(user.getUserCategory())
                     .build();
         }
     }

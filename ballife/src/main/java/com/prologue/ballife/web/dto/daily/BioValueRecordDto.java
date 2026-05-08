@@ -3,6 +3,8 @@ package com.prologue.ballife.web.dto.daily;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.prologue.ballife.domain.daily.BioValueRecord;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -59,6 +61,37 @@ public class BioValueRecordDto {
         private Integer diastolicBP;
         private Integer weight;
         private Integer waterIntakeCup;
+    }
+
+    // 생체기록 응답 DTO
+    @Data
+    @Builder
+    @NoArgsConstructor 
+    @AllArgsConstructor
+    public static class BioResponse {
+        private Long recordId;
+        private LocalDate date;
+        private LocalTime time;
+        private String category;
+        private Integer bloodSugar;
+        private Integer systolicBP;
+        private Integer diastolicBP;
+        private Integer weight;
+        private Integer waterIntakeCup;
+
+            public static BioResponse from(BioValueRecord bio) {
+                return BioResponse.builder()
+                        .recordId(bio.getRecordId())
+                        .date(bio.getDate())
+                        .time(bio.getTime())
+                        .category(bio.getCategory())
+                        .bloodSugar(bio.getBloodSugar())
+                        .systolicBP(bio.getSystolicBP())
+                        .diastolicBP(bio.getDiastolicBP())
+                        .weight(bio.getWeight())
+                        .waterIntakeCup(bio.getWaterIntakeCup())
+                        .build();
+            }
     }
 
 }

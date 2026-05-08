@@ -59,11 +59,9 @@ public class UserMedicationGuideDto {
 
         private Long userMedicationId;
         private String kdCode;
-        private Integer dosage;
         private String intakeInterval;
         private LocalDate startDate;
         private Integer day;
-        private String memo;
         private Prescription prescriptionId;
 
 
@@ -71,11 +69,9 @@ public class UserMedicationGuideDto {
             return UserMedicationGuideResponse.builder()
                     .userMedicationId(usermedicationguide.getUserMedicationId())
                     .kdCode(usermedicationguide.getKdCode())
-                    .dosage(usermedicationguide.getDosage())
                     .intakeInterval(usermedicationguide.getIntakeInterval())
                     .startDate(usermedicationguide.getStartDate())
                     .day(usermedicationguide.getDay())
-                    .memo(usermedicationguide.getMemo())
                     .prescriptionId(usermedicationguide.getPrescriptionId())
                     .build();
         }

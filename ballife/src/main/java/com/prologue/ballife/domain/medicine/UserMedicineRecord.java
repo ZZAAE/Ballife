@@ -16,8 +16,8 @@ public class UserMedicineRecord {
 
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_SUPPLEMENT_ID", nullable = false)
-    private Long userSupplementId;
+    @Column(name = "USER_MEDICINE_RECORD_ID", nullable = false)
+    private Long userMedicineRecordId;
 
     // 복용 카테고리 (영양제, 병원약)
     @Column (name = "MEDICINE_CATEGORY", length = 15)
@@ -32,11 +32,10 @@ public class UserMedicineRecord {
     private User user;
     
     @ManyToOne
-    @JoinColumn(name = "KD_CODE") 
-    private Medicine kdCode;
+    @JoinColumn(name = "PRESCRIPTION_ID") 
+    private Prescription prescriptionId;
 
-    @ManyToOne
-    @JoinColumn(name = "SUPPLEMENT_ID")  
-    private Supplement supplementId;
+    @Column(name = "SUPPLEMENT_ID")  
+    private Integer supplementId;
     
 }
