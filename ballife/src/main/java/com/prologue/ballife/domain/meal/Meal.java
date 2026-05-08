@@ -23,10 +23,10 @@ public class Meal {
     private Long mealId;
 
     @Column(name = "MEAL_DATE", nullable = false)
-    private  mealDate;
+    private LocalDate mealDate;
 
     @Column(name = "MEAL_TIME", nullable = false)
-    private  mealTime;
+    private LocalTime mealTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MEAL_CATEGORY", nullable = false)
@@ -55,7 +55,7 @@ public class Meal {
             return displayName;
         }
 
-
+        
     }
     
 }
