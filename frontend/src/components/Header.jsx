@@ -9,6 +9,7 @@ const navItems = [
     label: "확인",
     path: "/check",
     dropdown: [
+<<<<<<< HEAD
       { label: "전체", path: "/check/all" },
       { label: "식단", path: "/check/meal" },
       { label: "약", path: "/check/medicine" },
@@ -16,6 +17,15 @@ const navItems = [
       { label: "체중", path: "/check/weight" },
       { label: "혈당", path: "/check/blood-sugar" },
       { label: "혈압", path: "/check/blood-pressure" },
+=======
+      { label: "전체", path: "/all" },
+      { label: "식단", path: "/meal" },
+      { label: "약", path: "/medicine" },
+      { label: "운동", path: "/exercise" },
+      { label: "체중", path: "/weight" },
+      { label: "혈당", path: "/sugar" },
+      { label: "혈압", path: "/pressure" },
+>>>>>>> origin/LMH0507
     ],
   },
   { key: "community", label: "커뮤니티", path: "/community" },
@@ -25,6 +35,7 @@ const navItems = [
     label: "소개",
     path: "/intro",
     dropdown: [
+<<<<<<< HEAD
       { label: "웹 소개", path: "/intro/web" },
       { label: "고지혈증", path: "/intro/hyperlipidemia" },
       { label: "고혈압", path: "/intro/hypertension" },
@@ -32,6 +43,15 @@ const navItems = [
       { label: "당뇨", path: "/intro/diabetes" },
       { label: "비만", path: "/intro/obesity" },
       { label: "통풍", path: "/intro/gout" },
+=======
+      { label: "웹 소개", path: "/mainreport" },
+      { label: "고지혈증", path: "/dyslipidemia" },
+      { label: "고혈압", path: "/hypertension" },
+      { label: "골다공증", path: "/osteoporosis" },
+      { label: "당뇨", path: "/diabetes" },
+      { label: "비만", path: "/obesity" },
+      { label: "통풍", path: "/gout" },
+>>>>>>> origin/LMH0507
     ],
   },
 ];

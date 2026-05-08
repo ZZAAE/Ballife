@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -8,23 +7,11 @@ import Button from "../../components/Button";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
-=======
-import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuth } from "../contexts/AuthContext";
-import postApi from "../api/postApi";
-import Button from "../components/Button";
-
-export default function PostDetailPage() {
-  const { postid } = useParams();
->>>>>>> origin/jisoo0508
   const navigate = useNavigate();
   const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
   const categories  = [
         { value: '', label: '게시판을 선택' },
         { value: 'GENERAL', label: '자유게시판' },
@@ -37,55 +24,32 @@ export default function PostDetailPage() {
         { value: 'QNA', label: '질문' },
     ];
 
-=======
->>>>>>> origin/jisoo0508
   //게시글 불러오기
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-<<<<<<< HEAD
         await postApi.upViewCount(postId);
         const res = await postApi.getPost(postId);
         setPost(res.data);
       } catch (e) {
         console.error("게시글 요청 실패:", e);
         navigate("/boards"); //실패하면 목록으로 이동
-=======
-        const res = await postApi.getPost(postid);
-        setPost(res.data);
-        try {
-          await postApi.recordView(postid); // 조회수를 DB에 1을 증가 시키는 API 요청을 보내고 완료 돨때 까지 기다림
-          setPost((p) => (p ? { ...p, viewCount: (p.viewCount ?? 0) + 1 } : p)); //조회수 증가
-        } catch {
-          /* 조회수 API 실패 시 글은 그대로 표시 */
-        }
-      } catch (e) {
-        console.error("게시글 요청 실패:", e);
-       // navigate("post(미정)"); //실패하면 목록으로 이동
->>>>>>> origin/jisoo0508
       } finally {
         setLoading(false);
       }
     })();
-<<<<<<< HEAD
   }, [postId, navigate]);
-=======
-  }, [postid, navigate]);
->>>>>>> origin/jisoo0508
 
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
 
-<<<<<<< HEAD
   // 작성일 포맷팅
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 
-=======
->>>>>>> origin/jisoo0508
   return (
     <div className="min-h-screen bg-[#ececec] px-6 py-10">
       <main className="mx-auto max-w-6xl">
@@ -93,7 +57,6 @@ export default function PostDetailPage() {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <p className="text-[15px] font-semibold text-gray-700">
-<<<<<<< HEAD
               <Link to="/boards" className="hover:text-blue-600">
                 커뮤니티
               </Link>
@@ -101,24 +64,13 @@ export default function PostDetailPage() {
               <Link to="/boards" state={{ category: post.category }} className="font-bold text-blue-500">
               {categories.find(c => c.value === post.category)?.label}
               </Link>
-=======
-              <Link to="/community" className="hover:text-blue-950">
-                커뮤니티
-              </Link>
-              <span> &gt; </span>
-              <span className="font-bold text-blue-950">{post.category}</span>
->>>>>>> origin/jisoo0508
             </p>
             <p className="mt-1 text-[11px] text-gray-500">
               건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
             </p>
           </div>
 
-<<<<<<< HEAD
           <Link to="/boards">
-=======
-          <Link to={`/board/${post.boardId}/posts`}>
->>>>>>> origin/jisoo0508
             <button
               type="button"
               className="rounded-md border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
@@ -136,27 +88,16 @@ export default function PostDetailPage() {
 
           <div className="mt-4 flex items-center gap-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e8ebf5] text-[11px] font-semibold text-gray-600">
-<<<<<<< HEAD
               {post.userNickname?.[0] || "익"}
-=======
-              {post.authorName?.[0] || "익"}
->>>>>>> origin/jisoo0508
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-[12px] text-gray-500">
               <span className="font-medium text-gray-700">
-<<<<<<< HEAD
                 {post.userNickname}
               </span>
               {post.createdAt && <span>{formatDate(post.createdAt)}</span>}
               <span>조회 {post.viewCount ?? 0}</span>
               <span>추천 {post.upVote ?? 0}</span>
-=======
-                {post.authorName}
-              </span>
-              {post.createdAt && <span>{post.createdAt}</span>}
-              <span>조회 {post.viewCount ?? 0}</span>
->>>>>>> origin/jisoo0508
             </div>
           </div>
 
@@ -174,7 +115,6 @@ export default function PostDetailPage() {
             </div>
           )}
 
-<<<<<<< HEAD
           <Button className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e8ebf5] text-[11px] font-semibold text-gray-600"
             onClick={async () => {
                 try {
@@ -214,32 +154,6 @@ export default function PostDetailPage() {
               </Button>
             </>
           )}
-=======
-            {user?.id === post.authorId && (
-              <>
-                <Link to={`/posts/${post.id}/edit`}>
-                  <Button>수정</Button>
-                </Link>
-
-                <Button
-                  variant="danger"
-                  onClick={async () => {
-                    if (!window.confirm("이 글을 삭제할까요?")) return;
-                    if (!user?.id) return;
-                    try {
-                      await postApi.deletePost(post.id, user.id);
-                      toast.success("삭제되었습니다.");
-                      navigate(`/boards/${post.boardId}/posts`);
-                    } catch (e) {
-                      console.error(e);
-                    }
-                  }}
-                >
-                  삭제
-                </Button>
-              </>
-            )}
->>>>>>> origin/jisoo0508
         </article>
       </main>
     </div>
