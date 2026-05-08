@@ -1,5 +1,8 @@
 package com.prologue.ballife.web.dto.meal;
 
+import java.util.List;
+
+import com.prologue.ballife.domain.meal.Meal;
 import com.prologue.ballife.domain.meal.MealItem;
 
 import jakarta.validation.constraints.Digits;
@@ -20,6 +23,8 @@ public class MealItemDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MealItemSaveRequest{
+
+        private Meal meal;
 
         @NotBlank(message = "음식이름을 입력해주세요")
         @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
@@ -72,6 +77,8 @@ public class MealItemDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MealItemUpdateRequest{
+
+        private Meal meal;
 
         @NotBlank(message = "음식이름을 입력해주세요")
         @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
@@ -126,6 +133,7 @@ public class MealItemDto {
         
         // 음식 식별자, 음식 이름, 칼로리, 탄수화물, 당, 나트륨, 콜레스테롤, 포화지방, 단백질
         private Long mealItemId;
+        private Meal meal;
         private String foodName;
         private Integer calorie;
         private Double carbohydrate;
@@ -139,6 +147,7 @@ public class MealItemDto {
         public static MealItemResponse from(MealItem mealItem) {
             return MealItemResponse.builder()
                     .mealItemId(mealItem.getMealItemId())
+                    .meal(mealItem.getMeal())
                     .foodName(mealItem.getFoodName())
                     .calorie(mealItem.getCalorie())
                     .carbohydrate(mealItem.getCarbohydrate())
@@ -150,6 +159,23 @@ public class MealItemDto {
                     .build();
         }
 
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MealItemSummaryResponse {
+        // 해당 조회 조건(예: 하루/카테고리)에 맞는 식단 아이템 목록
+        private List<MealItemResponse> items;
+        private Integer totalCalorie;
+
+        public static MealItemSummaryResponse of(List<MealItemResponse> items, Integer totalCalorie) {
+            return MealItemSummaryResponse.builder()
+                    .items(items)
+                    .totalCalorie(totalCalorie == null ? 0 : totalCalorie)
+                    .build();
+        }
     }
 
 }

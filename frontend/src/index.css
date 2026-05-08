@@ -1,3 +1,4 @@
+
 /* Tailwind CSS 기본 스타일 */
 @tailwind base;
 @tailwind components;
@@ -5,7 +6,7 @@
 
 /* 전역 커스텀 스타일 (선택사항) */
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 /* 커스텀 유틸리티 클래스 */
@@ -35,4 +36,9 @@ body {
   .btn-secondary {
     @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300;
   }
+
+  .table_center > table {
+    margin: auto;
+  }
+
 }

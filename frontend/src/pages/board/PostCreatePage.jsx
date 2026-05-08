@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import postApi from '../../api/postApi';
-import Input from '../../components/Input';
+import postApi from '../../api/boardApi';
 import Button from '../../components/Button';
 import './post.css';
 
@@ -11,16 +10,18 @@ function PostCreatePage() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({ category: 'FREE', title: '', content: '' });
+    const [formData, setFormData] = useState({ category: '', title: '', content: '' });
 
     const categories  = [
-        { value: '자유게시판', label: '자유게시판' },
-        { value: '당뇨', label: '당뇨' },
-        { value: '비만', label: '비만' },
-        { value: '골다공증', label: '골다공증' },
-        { value: '고지혈증', label: '고지혈증' },
-        { value: '고혈압', label: '고혈압' },
-        { value: '통풍', label: '통풍' },
+        { value: '', label: '게시판을 선택' },
+        { value: 'GENERAL', label: '자유게시판' },
+        { value: 'HYPERLIPIDEMIA', label: '고지혈증' },
+        { value: 'HYPERTENSION', label: '고혈압' },
+        { value: 'OSTEOPOROSIS', label: '골다공증' },
+        { value: 'DIABETES', label: '당뇨' },
+        { value: 'OBESITY', label: '비만' },
+        { value: 'GOUT', label: '통풍' },
+        { value: 'QNA', label: '질문' },
     ];
 
     const handleChange = (e) => {
@@ -58,7 +59,7 @@ function PostCreatePage() {
             setLoading(true);
             const res = await postApi.createPost(user.userId, formData);
             toast.success('등록되었습니다.');
-            navigate(`/posts/${res.data.userId}`);
+            navigate(`/posts/${res.data.id}`);
         } catch (error) {
             console.error('게시글 등록 실패:', error);
             toast.error('게시글 등록 중 오류가 발생했습니다.');

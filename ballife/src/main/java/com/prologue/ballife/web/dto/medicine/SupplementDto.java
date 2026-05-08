@@ -1,6 +1,6 @@
 package com.prologue.ballife.web.dto.medicine;
 
-import com.prologue.ballife.domain.medicine.Supplement;
+// import com.prologue.ballife.domain.medicine.Supplement;
 import lombok.*;
 
 public class SupplementDto {

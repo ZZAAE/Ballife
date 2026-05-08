@@ -32,7 +32,10 @@ const postApi = {
     // 게시글 삭제 
     deletePost: (userId, postId) => {
         return api.delete(`/posts/${postId}`, {params: { userId } })
+<<<<<<< HEAD
 
+=======
+>>>>>>> c582ae677c4b30d45b956cdc25e6d22436a56d74
     },
 
 };

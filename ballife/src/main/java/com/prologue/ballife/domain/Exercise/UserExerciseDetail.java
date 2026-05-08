@@ -1,10 +1,11 @@
-package com.prologue.ballife.domain.exercise;
+package com.prologue.ballife.domain.Exercise;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "user_exercise_detail")
+// MongoDB user_exercise_detail 컬렉션과 매핑되는 도큐먼트 클래스
+@Document(collection = "user_exercise_detail")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,28 +13,21 @@ import lombok.*;
 @Builder
 public class UserExerciseDetail {
 
+    // MongoDB _id 필드 (ObjectId -> String 으로 자동 변환)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_exercise_detail_id")
-    private Long userExerciseDetailId;
+    private String userExerciseDetailId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_exercise_id", nullable = false)
-    private UserExercise userExerciseId;//수정 2지우기
+    // MySQL UserExercise 의 PK 를 참조 (FK 제약 없이 ID 만 저장)
+    private Long userExerciseId;
 
-    //시간
-    @Column(name = "exercise_min")
+    // 운동 시간 (분)
     private Integer exerciseMin;
-    //세트수
-    @Column(name = "exercise_set")
+    // 세트 수
     private Integer exerciseSet;
-    //반복수
-    @Column(name = "exercise_reps")
+    // 반복 수
     private Integer exerciseReps;
-    //무게
-    @Column(name = "exercise_weight")
+    // 무게
     private Integer exerciseWeight;
-    //강도
-    @Column(name = "exercise_hard", length = 10)
+    // 운동 강도
     private String exerciseHard;
 }
