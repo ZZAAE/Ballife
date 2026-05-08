@@ -5,7 +5,7 @@
 
 /* 전역 커스텀 스타일 (선택사항) */
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 /* 커스텀 유틸리티 클래스 */

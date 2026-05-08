@@ -1,6 +1,5 @@
 package com.prologue.ballife.service.daily;
 
-<<<<<<< HEAD
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-=======
->>>>>>> origin/jisoo0508
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,13 +42,8 @@ public class BioValueRecordService {
         // 기록 생성 (ERDCLOUDE에서는 DATETIME인데 DOMAIN에는 DATE, TIME으로 나눠져있음)
         BioValueRecord bio = BioValueRecord.builder()
                 .user(user)
-<<<<<<< HEAD
                 .recordDate(request.getRecordDate())
                 .recordTime(request.getRecordTime())
-=======
-                .date(request.getDate())
-                .time(request.getTime())
->>>>>>> origin/jisoo0508
                 .category(request.getCategory())
                 .bloodSugar(request.getBloodSugar())
                 .systolicBP(request.getSystolicBP())
@@ -66,7 +58,6 @@ public class BioValueRecordService {
 
     // 생체 수치 수정
     @Transactional
-<<<<<<< HEAD
     public BioValueRecordDto.BioResponse updateBioValueRecord(Long recordId, BioValueRecordDto.UpdateRequest request){
         
         BioValueRecord record = bioValueRecordRepository.findByRecordId(recordId)
@@ -202,20 +193,5 @@ public class BioValueRecordService {
         BioValueRecord record = bioValueRecordRepository.findById(recordId)
                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 정보", recordId));
         bioValueRecordRepository.delete(record);
-=======
-    public BioValueRecordDto.UpdateRequest updateBioValueRecord(Long userId, Long recordId, BioValueRecordDto.UpdateRequest request){
-        
-        BioValueRecord record = bioValueRecordRepository.findByUserId(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", recordId));
-
-        if (!record.getUser().getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 기록에 대한 권한이 없습니다.");
-        }
-
-        
-        
-
-        return BioValueRecordDto.UpdateRequest.from(bioValueRecordRepository.save(record));
->>>>>>> origin/jisoo0508
     }
 }

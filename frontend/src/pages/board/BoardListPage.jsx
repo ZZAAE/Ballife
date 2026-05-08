@@ -222,4 +222,8 @@ function BoardListPage(){
     );
 }
 
+<<<<<<< HEAD
 export default BoardListPage;
+=======
+export default BoardListPage;
+>>>>>>> origin/sjs/0507
