@@ -11,6 +11,7 @@ import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import RecordSummary from './pages/recordRead/RecordSummary';
 import MainPage from './pages/main/MainPage';
+<<<<<<< HEAD
 import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
@@ -37,10 +38,21 @@ function App() {
 
   const hideHealthMenu =
     location.pathname === '/home' ||
+=======
+import HealthCalenderPage from './pages/main/HealthCalenderPage';
+import Header from './components/Header';
+import HealthIndicatorMenu from './components/HealthMenu';
+
+function App() {
+
+  const hideHealthMenu =
+    location.pathname === '/' ||
+>>>>>>> origin/PHH0507
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
+<<<<<<< HEAD
     location.pathname.startsWith('/posts/');
    // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
 
@@ -133,10 +145,27 @@ function App() {
           <Route path="/" element={<HomePage />} />{" "}
           {/* <Routes> -> 페이지 이동 경로 */}
           {/* <Route path="/signup" element={<SignUpPage />} />
+=======
+    location.pathname.startsWith('/posts/'); 
+
+  return (
+  <div className="min-h-screen bg-white flex flex-col">
+    <main className="py-12">
+    <Header isLoggedIn={false} />
+
+    <div className="min-w-screen bg-white flex justify-end">
+      <div className="flex-1">
+      {/* 메인 콘텐츠*/}
+      <Routes>
+        {/* <Routes> -> 페이지 이동 경로 */}
+        <Route path="/" element={<MainPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+>>>>>>> origin/PHH0507
           <Route path="/login" element={<LoginPage />} />
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
+<<<<<<< HEAD
           <Route path="/posts/:postId" element={<PostDetailPage />} /> */}
           <Route path="/medication" element={<MedicationPage />} />
           <Route path="/blood-pressure" element={<BloodPressureRecordModal />} />
@@ -146,8 +175,17 @@ function App() {
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
       </main>
+=======
+          <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/calender" element={<HealthCalenderPage />} />
+      </Routes>
+      </div>
+      {!hideHealthMenu && <HealthIndicatorMenu />}
+>>>>>>> origin/PHH0507
     </div>
-  );
+    </main>
+  </div>
+);
 }
 
 export default App;
