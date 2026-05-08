@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
     const isAuthenticated = !!user;
     const isAdmin = user?.role === "ADMIN";
 
-<<<<<<< HEAD
     const value = {
         user,
         loading,
@@ -48,16 +47,6 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
     };
-=======
-  const value = {
-    user,
-    loading,
-    isAuthenticated,
-    isAdmin,
-    login,
-    logout,
-  };
->>>>>>> origin/sjs/0507
 
     return (
         <AuthContext.Provider value={value}>
