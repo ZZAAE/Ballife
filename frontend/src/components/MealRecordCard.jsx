@@ -9,7 +9,7 @@ const MacroBadge = ({ label, value, unit = "g", textColor }) => (
   </span>
 );
 
-const MealRecordCard = ({ time, label, items, image, className = "" }) => {
+const MealRecordCard = ({ time, label, items, image, onClick, className = "" }) => {
   const visibleItems = items.slice(0, 2);
   const hiddenCount = items.length - 2;
 
@@ -30,6 +30,7 @@ const MealRecordCard = ({ time, label, items, image, className = "" }) => {
 
   return (
     <div
+      onClick={onClick}
       className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${className}`}
     >
       {/* Meal Image Header */}
