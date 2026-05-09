@@ -10,7 +10,7 @@ import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
 import { Link } from "react-router-dom";
 import WeightRecordModal from "../modals/WeightRecordModal";
-import WaterRecordModal from "../modals/waterRecordModal";
+import WaterRecordModal from "../modals/WaterRecordModal";
 
 
 
