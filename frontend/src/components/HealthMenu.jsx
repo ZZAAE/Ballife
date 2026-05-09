@@ -10,11 +10,12 @@ import weightIcon from "../assets/icons/weight.svg";
 import exerciseIcon from "../assets/icons/exercise.svg";
 import mealIcon from "../assets/icons/meal.svg";
 import pillIcon from "../assets/icons/pill.svg";
+import { Link } from "react-router-dom";
 
 const menuItems = [
   { key: "all", label: "전체보기", icon: allIcon },
-  { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon },
-  { key: "bloodSugar", label: "혈당", icon: bloodIcon },
+  { key: "pressure", label: "혈압", icon: bloodPressureIcon },
+  { key: "sugar", label: "혈당", icon: bloodIcon },
   { key: "weight", label: "체중", icon: weightIcon },
   { key: "exercise", label: "운동", icon: exerciseIcon },
   { key: "meal", label: "식단", icon: mealIcon },
@@ -50,6 +51,7 @@ export default function HealthIndicatorMenu() {
           const isActive = activeMenu === item.key;
 
           return (
+            <Link key={item.key} to={`/${item.key}`}>
             <button
               key={item.key}
               type="button"
@@ -77,6 +79,7 @@ export default function HealthIndicatorMenu() {
                 {item.label}
               </span>
             </button>
+            </Link>
           );
         })}
       </nav>
