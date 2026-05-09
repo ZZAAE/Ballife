@@ -10,9 +10,11 @@ import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import RecordSummary from './pages/recordRead/RecordSummary';
 import MainPage from './pages/main/MainPage';
+import MedicationPage from './pages/MedicationPage';
 import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
+
 
 
 function App() {
@@ -25,6 +27,7 @@ function App() {
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
+    location.pathname === '/medication' ||
     location.pathname.startsWith('/posts/');
    // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
 
@@ -48,6 +51,7 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/medication" element={<MedicationPage />} />
         </Routes>
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
