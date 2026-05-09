@@ -8,25 +8,30 @@ import Meal2 from "../assets/Record/Meal2.svg";
 import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
-import { Link } from "react-router-dom";
-import WeightRecordModal from "../modals/WeightRecordModal";
-import WaterRecordModal from "../modals/WaterRecordModal";
 
-
+import WaterRecordModal from "../modals/waterRecordModal";
 
 function formatKoreanDate(dateString) {
   const date = new Date(dateString);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-function PlusButton({ size = 52, onClickprop }) {
+function OpenModal(name){
+  const [isWaterModalOpen, setIsWaterModalOpen] = useState(true);
+  if(name == "water"){
+    <WaterRecordModal isOpen={isWaterModalOpen} onClose={() => setIsWaterModalOpen(false)} />
+  }
+  
+}
+
+function PlusButton({ size = 52, name }) {
   return (
     <button
       type="button"
       className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
-      onClick={() => onClickprop?.()}
+      onClick={() => OpenModal(name)}
     >
       <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
     </button>
@@ -39,6 +44,7 @@ function LargeRecordCard({
   subText,
   recordTitle,
   color,
+  name,
   wide = false,
 }) {
   return (
@@ -68,7 +74,7 @@ function LargeRecordCard({
             "border border-dashed border-[#D2D9E3] bg-[#EEF3F9]",
           ].join(" ")}
         >
-          <PlusButton size={50} />
+          <PlusButton size={50} name={name} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -82,7 +88,7 @@ function LargeRecordCard({
   );
 }
 
-function SmallRecordCard({ icon, title, recordTitle, color, onAddClick}) {
+function SmallRecordCard({ icon, title, recordTitle, color, name }) {
   return (
     <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
       <div
@@ -99,7 +105,7 @@ function SmallRecordCard({ icon, title, recordTitle, color, onAddClick}) {
 
       <div className="flex flex-1 items-center pr-[10px]">
         <div className="flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
-          <PlusButton size={50} onClickprop={() => onAddClick?.(name)} />
+          <PlusButton size={50} name={name} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -141,8 +147,6 @@ function MealBox({ title }) {
 function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
-  const [openModal, setOpenModal] = useState(false); // 체중 기록 모달 열기 상태
-  
 
 
   return (
@@ -190,24 +194,19 @@ function AllRecordPage() {
           />
 
           <div className="grid grid-cols-2 gap-[18px]">
-            
             <SmallRecordCard
               icon={Weight}
               title="체중"
               recordTitle="체중 기록"
               color="#2E86FF"
-              name = "weight"
-              onAddClick={() => setOpenModal(true)}
             />
-            
 
             <SmallRecordCard
               icon={Water}
               title="수분 섭취"
               recordTitle="섭취 기록"
               color="#55D7DF"
-              name = "water"
-              onAddClick={() => setOpenModal(true)}
+              name="water"
             />
           </div>
 
@@ -248,18 +247,6 @@ function AllRecordPage() {
           </div>
         </section>
       </div>
-      {openModal && (
-        <WeightRecordModal 
-          isOpen={openModal} 
-          onClose={() => setOpenModal(false)} 
-        />
-      )}
-      {openModal && (
-        <WaterRecordModal 
-          isOpen={openModal} 
-          onClose={() => setOpenModal(false)} 
-        />
-      )}
     </main>
   );
 }

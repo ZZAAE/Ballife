@@ -9,18 +9,29 @@ import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
 
+import WaterRecordModal from "../modals/waterRecordModal";
+
 function formatKoreanDate(dateString) {
   const date = new Date(dateString);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-function PlusButton({ size = 52 }) {
+function OpenModal(name){
+  const [isWaterModalOpen, setIsWaterModalOpen] = useState(true);
+  if(name == "water"){
+    <WaterRecordModal isOpen={isWaterModalOpen} onClose={() => setIsWaterModalOpen(false)} />
+  }
+  
+}
+
+function PlusButton({ size = 52, name }) {
   return (
     <button
       type="button"
       className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
+      onClick={() => OpenModal(name)}
     >
       <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
     </button>
@@ -33,6 +44,7 @@ function LargeRecordCard({
   subText,
   recordTitle,
   color,
+  name,
   wide = false,
 }) {
   return (
@@ -62,7 +74,7 @@ function LargeRecordCard({
             "border border-dashed border-[#D2D9E3] bg-[#EEF3F9]",
           ].join(" ")}
         >
-          <PlusButton size={50} />
+          <PlusButton size={50} name={name} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -76,7 +88,7 @@ function LargeRecordCard({
   );
 }
 
-function SmallRecordCard({ icon, title, recordTitle, color }) {
+function SmallRecordCard({ icon, title, recordTitle, color, name }) {
   return (
     <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
       <div
@@ -93,7 +105,7 @@ function SmallRecordCard({ icon, title, recordTitle, color }) {
 
       <div className="flex flex-1 items-center pr-[10px]">
         <div className="flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
-          <PlusButton size={50} />
+          <PlusButton size={50} name={name} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -135,6 +147,7 @@ function MealBox({ title }) {
 function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
+
 
 
   return (
@@ -194,6 +207,7 @@ function AllRecordPage() {
               title="수분 섭취"
               recordTitle="섭취 기록"
               color="#55D7DF"
+              name="water"
             />
           </div>
 
