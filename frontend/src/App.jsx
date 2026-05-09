@@ -37,6 +37,7 @@ function App() {
     location.pathname === '/hypertension' ||
     location.pathname === '/dyslipidemia' ||
     location.pathname === '/obesity' ||
+    location.pathname === '/AllRecordPage' ||
 
     location.pathname.startsWith('/posts/');
 
