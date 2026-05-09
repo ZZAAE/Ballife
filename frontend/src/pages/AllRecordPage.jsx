@@ -9,29 +9,27 @@ import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
 
-import WaterRecordModal from "../modals/waterRecordModal";
+import WaterRecordModal from "../modals/WaterRecordModal";
+import ExersiceRecordModal from "../modals/ExerciseModalHeader";
+import SugarRecordModal from "../modals/BloodPressureRecordModal";
+import BpRecordModal from "../modals/BloodPressureRecordModal";
+import WeightRecordModal from "../modals/WeightRecordModal";
 
 function formatKoreanDate(dateString) {
   const date = new Date(dateString);
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
-function OpenModal(name){
-  const [isWaterModalOpen, setIsWaterModalOpen] = useState(true);
-  if(name == "water"){
-    <WaterRecordModal isOpen={isWaterModalOpen} onClose={() => setIsWaterModalOpen(false)} />
-  }
-  
-}
 
-function PlusButton({ size = 52, name }) {
+
+function PlusButton({ size = 52, onClickprop }) {
   return (
     <button
       type="button"
       className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
-      onClick={() => OpenModal(name)}
+      onClick={() => onClickprop?.()}
     >
       <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
     </button>
@@ -46,6 +44,7 @@ function LargeRecordCard({
   color,
   name,
   wide = false,
+  onAddClick,
 }) {
   return (
     <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
@@ -74,7 +73,7 @@ function LargeRecordCard({
             "border border-dashed border-[#D2D9E3] bg-[#EEF3F9]",
           ].join(" ")}
         >
-          <PlusButton size={50} name={name} />
+          <PlusButton size={50} onClickprop={() => onAddClick?.(name)} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -88,7 +87,7 @@ function LargeRecordCard({
   );
 }
 
-function SmallRecordCard({ icon, title, recordTitle, color, name }) {
+function SmallRecordCard({ icon, title, recordTitle, color, name, onAddClick }) {
   return (
     <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
       <div
@@ -105,7 +104,7 @@ function SmallRecordCard({ icon, title, recordTitle, color, name }) {
 
       <div className="flex flex-1 items-center pr-[10px]">
         <div className="flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
-          <PlusButton size={50} name={name} />
+          <PlusButton size={50} onClickprop={() => onAddClick?.(name)} />
 
           <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
             {recordTitle}
@@ -148,6 +147,29 @@ function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
 
+  const [isWaterModalOpen, setIsWaterModalOpen] = useState(false);
+  const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
+  const [isSugarModalOpen, setIsSugarModalOpen] = useState(false);
+  const [isBpModalOpen, setIsBpModalOpen] = useState(false);
+  const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
+
+  function OpenModal(name){
+  if(name == "water"){
+    setIsWaterModalOpen(true);
+  }
+  else if(name == "exercise"){
+    setIsExerciseModalOpen(true);
+  }
+  else if(name == "sugar"){
+    setIsSugarModalOpen(true);
+  }
+  else if(name == "bp"){
+    setIsBpModalOpen(true);
+  }
+  else if(name == "weight"){
+    setIsWeightModalOpen(true);
+  }
+}
 
   return (
     <main className="min-h-[calc(100vh-70px)] w-[calc(100vw-360px)] bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
@@ -178,11 +200,13 @@ function AllRecordPage() {
 
         <div className="grid grid-cols-2 gap-x-[30px] gap-y-[22px]">
           <LargeRecordCard
-            icon={Bp}
-            title="혈압"
-            subText="최근 기록 없음"
-            recordTitle="혈압 기록"
-            color="#FF3B5F"
+              icon={Bp}
+              title="혈압"
+              subText="최근 기록 없음"
+              recordTitle="혈압 기록"
+              color="#FF3B5F"
+              name="bp"
+              onAddClick={OpenModal}
           />
 
           <LargeRecordCard
@@ -191,6 +215,8 @@ function AllRecordPage() {
             subText="최근 기록 없음"
             recordTitle="혈당 기록"
             color="#FF8A2A"
+              name="sugar"
+              onAddClick={OpenModal}
           />
 
           <div className="grid grid-cols-2 gap-[18px]">
@@ -199,6 +225,8 @@ function AllRecordPage() {
               title="체중"
               recordTitle="체중 기록"
               color="#2E86FF"
+              name="weight"
+              onAddClick={OpenModal}
             />
 
             <SmallRecordCard
@@ -207,6 +235,7 @@ function AllRecordPage() {
               recordTitle="섭취 기록"
               color="#55D7DF"
               name="water"
+              onAddClick={OpenModal}
             />
           </div>
 
@@ -216,6 +245,8 @@ function AllRecordPage() {
             subText="오늘의 활동 없음"
             recordTitle="운동 기록"
             color="#20D36B"
+            name="exercise"
+            onAddClick={OpenModal}
           />
         </div>
 
@@ -247,6 +278,41 @@ function AllRecordPage() {
           </div>
         </section>
       </div>
+
+      {isWaterModalOpen && (
+        <WaterRecordModal
+          isOpen={isWaterModalOpen}
+          onClose={() => setIsWaterModalOpen(false)}
+        />
+      )}
+
+      {isExerciseModalOpen && (
+        <ExerciseRecordModal
+          isOpen={isExerciseModalOpen}
+          onClose={() => setIsExerciseModalOpen(false)}
+        />
+      )}
+
+      {isSugarModalOpen && (
+        <SugarRecordModal
+          isOpen={isSugarModalOpen}
+          onClose={() => setIsSugarModalOpen(false)}
+        />
+      )}
+
+      {isBpModalOpen && (
+        <BpRecordModal
+          isOpen={isBpModalOpen}
+          onClose={() => setIsBpModalOpen(false)}
+        />
+      )}
+
+      {isWeightModalOpen && (
+        <WeightRecordModal
+          isOpen={isWeightModalOpen}
+          onClose={() => setIsWeightModalOpen(false)}
+        />
+      )}
     </main>
   );
 }
