@@ -23,6 +23,7 @@ import HealthIndicatorMenu from './components/HealthMenu';
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
 import AllRecordPage from './pages/AllRecordPage';
 
+
 function App() {
   const hideHealthMenu =
     location.pathname === '/home' ||

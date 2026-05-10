@@ -443,9 +443,9 @@ export default function RecordSummary() {
           </div>
         </main>
 
-        {/* <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} /> */}
+        <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} />
         <DailyTimelineModal isOpen={isTimeLineModalOpen} onClose={()=>setTimeLineModelOpen(false)}/>
-        <MealDetailModal isOpen = {isMealModalOpen} onClose={() => setMealModalOpen(false)}/>
+        {/* <MealDetailModal isOpen = {isMealModalOpen} onClose={() => setMealModalOpen(false)}/> */}
 
       </div>
     </div>

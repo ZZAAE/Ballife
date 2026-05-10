@@ -86,7 +86,7 @@ const Card = () => {
 
 const medicineCard = [
   { 
-        link: 'medicine',
+        link: '/medication',
         type: '복약 알림', 
         value: '2건 확인 필요', 
         label: '오전 복용 요망', 
@@ -164,7 +164,7 @@ const medicineCard = [
 
         <section className="lg:h-full">
           {medicineCard.map((card, idx) => (
-            <Link to={`/record/${card.link}`} key={idx} className="block h-full">
+            <Link to={card.link.startsWith('/') ? card.link : `/record/${card.link}`} key={idx} className="block h-full">
             <div className={`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10`}>
               <div className="flex items-start justify-between gap-4">
                 <div>

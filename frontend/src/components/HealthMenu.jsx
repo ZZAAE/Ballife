@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import characteristicIcon from "../assets/icons/characteristic.svg";
 import aiIcon from "../assets/icons/ai.svg";
@@ -13,13 +14,13 @@ import pillIcon from "../assets/icons/pill.svg";
 import { Link } from "react-router-dom";
 
 const menuItems = [
-  { key: "all", label: "전체보기", icon: allIcon },
-  { key: "pressure", label: "혈압", icon: bloodPressureIcon },
-  { key: "sugar", label: "혈당", icon: bloodIcon },
-  { key: "weight", label: "체중", icon: weightIcon },
-  { key: "exercise", label: "운동", icon: exerciseIcon },
-  { key: "meal", label: "식단", icon: mealIcon },
-  { key: "pill", label: "복용", icon: pillIcon },
+  { key: "all", label: "전체보기", icon: allIcon, path: "/check/all" },
+  { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon, path: "/check/blood-pressure" },
+  { key: "bloodSugar", label: "혈당", icon: bloodIcon, path: "/check/blood-sugar" },
+  { key: "weight", label: "체중", icon: weightIcon, path: "/check/weight" },
+  { key: "exercise", label: "운동", icon: exerciseIcon, path: "/check/exercise" },
+  { key: "meal", label: "식단", icon: mealIcon, path: "/check/meal" },
+  { key: "pill", label: "복용", icon: pillIcon, path: "/medication" },
 ];
 
 export default function HealthIndicatorMenu() {
@@ -51,13 +52,12 @@ export default function HealthIndicatorMenu() {
           const isActive = activeMenu === item.key;
 
           return (
-            <Link key={item.key} to={`/${item.key}`}>
-            <button
+            <Link
               key={item.key}
-              type="button"
+              to={item.path}
               onClick={() => setActiveMenu(item.key)}
               className={[
-                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none",
+                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none no-underline",
                 isActive
                   ? "bg-[#E8E8E8] pl-[20px]"
                   : "bg-transparent pl-[23px]",
@@ -78,7 +78,6 @@ export default function HealthIndicatorMenu() {
               <span className="text-[14px] font-medium leading-none tracking-[-0.2px] text-[#111111]">
                 {item.label}
               </span>
-            </button>
             </Link>
           );
         })}
