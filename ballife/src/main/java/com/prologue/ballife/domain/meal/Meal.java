@@ -24,14 +24,14 @@ public class Meal {
     private Long mealId;
 
     @Column(name = "MEAL_DATE", nullable = false)
-    private LocalDate mealDate;
-
-    @Column(name = "MEAL_TIME", nullable = false)
-    private LocalTime mealTime;
+    private LocalDateTime mealDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MEAL_CATEGORY", nullable = false)
     private MealCategory mealCategory;
+
+    @Column(name = "MEAL_TIME", nullable = false)
+    private LocalTime mealTime;
 
     @Column(name = "MEAL_PHOTO", length = 300)
     private String mealPhoto;

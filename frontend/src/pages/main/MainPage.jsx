@@ -26,7 +26,7 @@ const bloodPressureData = [
 const MainPage = () => {
   // 샘플 데이터
   const userStats = {
-    ageGender: "45세 / 남성ㅋ",
+    ageGender: "45세 / 남성",
     height: "175cm",
     weight: "78kg",
     bmi: "25.5 (과체중)",
