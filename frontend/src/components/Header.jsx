@@ -18,7 +18,7 @@ const navItems = [
       { label: "혈압", path: "/check/blood-pressure" },
     ],
   },
-  { key: "community", label: "커뮤니티", path: "/community" },
+  { key: "community", label: "커뮤니티", path: "/boards" },
   { key: "member", label: "회원정보", path: "/member" },
   {
     key: "intro",
@@ -65,7 +65,9 @@ export default function Header({ isLoggedIn = false }) {
             <Link
               key={item.key}
               to={item.path}
-              onMouseEnter={() => setHoveredMenu(item.dropdown ? item.key : null)}
+              onMouseEnter={() =>
+                setHoveredMenu(item.dropdown ? item.key : null)
+              }
               className="flex h-[70px] items-center px-[20px] text-[18px] font-semibold tracking-[-0.3px] text-white no-underline"
             >
               {item.label}
@@ -101,12 +103,12 @@ export default function Header({ isLoggedIn = false }) {
           <div className="flex h-full flex-1 items-center justify-start gap-[120px] pl-[45px] pr-[20px]">
             {activeDropdown.dropdown.map((item) => (
               <Link
-                    key={item.label}
-                    to={item.path}
-                    className="flex h-[20px] items-center border-l-[2px] border-black pl-[18px] text-[18px] font-medium tracking-[-0.3px] text-black no-underline"
-                    >
-                    <span>{item.label}</span>
-                </Link>
+                key={item.label}
+                to={item.path}
+                className="flex h-[20px] items-center border-l-[2px] border-black pl-[18px] text-[18px] font-medium tracking-[-0.3px] text-black no-underline"
+              >
+                <span>{item.label}</span>
+              </Link>
             ))}
           </div>
         </div>

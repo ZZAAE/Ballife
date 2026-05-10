@@ -37,8 +37,8 @@ function App() {
   // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <main className="py-12">
+    <div className="flex min-h-screen flex-col bg-white">
+      <main className="flex-1">
         {!usePageLayout && <Header isLoggedIn={isAuthenticated} />}
 
         {usePageLayout ? (
@@ -59,25 +59,25 @@ function App() {
             <Route path="/posts/:postId" element={<PostDetailPage />} />
           </Routes>
         ) : (
-          <div className="min-w-screen bg-white flex justify-end">
-            <div className="flex-1"></div>
-            {/* 메인 콘텐츠*/}
-            <Routes>
-              <Route path="/" element={<RecordSummary />} />
+          <div className="flex min-h-screen w-full bg-white pt-[55px]">
+            <div className="min-w-0 flex-1">
+              <Routes>
+                <Route path="/" element={<RecordSummary />} />
 
-              {/* <Routes> -> 페이지 이동 경로 */}
-              <Route path="/home" element={<MainPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/disease" element={<DiseasePage />} />
-              <Route path="/member" element={<UserInformation />} />
-              <Route path="/exercise" element={<ExercisePage />} />
-              <Route path="/check/exercise" element={<ExercisePage />} />
-              <Route path="/boards" element={<BoardListPage />} />
-              <Route path="/posts/create" element={<PostCreatePage />} />
-              <Route path="/posts/:id/edit" element={<PostEditPage />} />
-              <Route path="/posts/:postId" element={<PostDetailPage />} />
-            </Routes>
+                {/* <Routes> -> 페이지 이동 경로 */}
+                <Route path="/home" element={<MainPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/disease" element={<DiseasePage />} />
+                <Route path="/member" element={<UserInformation />} />
+                <Route path="/exercise" element={<ExercisePage />} />
+                <Route path="/check/exercise" element={<ExercisePage />} />
+                <Route path="/boards" element={<BoardListPage />} />
+                <Route path="/posts/create" element={<PostCreatePage />} />
+                <Route path="/posts/:id/edit" element={<PostEditPage />} />
+                <Route path="/posts/:postId" element={<PostDetailPage />} />
+              </Routes>
+            </div>
             {!hideHealthMenu && <HealthIndicatorMenu />}
           </div>
         )}
