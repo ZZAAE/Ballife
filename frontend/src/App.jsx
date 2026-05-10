@@ -7,10 +7,10 @@ import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
 import PostDetailPage from './pages/board/PostDetailPage';
 import MainPage from './pages/main/MainPage';
-import WeightRecord from './pages/recordRead/WeightRecord';
-import BloodPressureRecord from './pages/recordRead/BloodPressureRecord';
-import BloodSugarRecord from './pages/recordRead/BloodSugarRecord';
-import RecordPage from './pages/recordRead/RecordPage';
+import WeightRecord from './pages/AllRecordRead/WeightRecord';
+import BloodPressureRecord from './pages/AllRecordRead/BloodPressureRecord';
+import BloodSugarRecord from './pages/AllRecordRead/BloodSugarRecord';
+import RecordPage from './pages/AllRecordRead/RecordPage';
 import MainReportPage from './pages/report/MainReportPage';
 import OsteoporosisReportPage from './pages/report/OsteoporosisReportPage';
 import DiabetesReportPage from './pages/report/DiabetesReportPage';
@@ -58,6 +58,7 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/allRecord" element={<AllRecordPage />} />
           <Route path="/weight" element={<WeightRecord />} />
           <Route path="/pressure" element={<BloodPressureRecord />} />
           <Route path="/sugar" element={<BloodSugarRecord />} />

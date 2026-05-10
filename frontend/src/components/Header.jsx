@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
 
 const navItems = [
-  { key: "record", label: "기록", path: "/record" },
+  { key: "record", label: "기록", path: "/allRecord" },
   {
     key: "check",
     label: "확인",
