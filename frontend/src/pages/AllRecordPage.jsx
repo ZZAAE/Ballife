@@ -9,29 +9,6 @@ import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";
 
-<<<<<<< HEAD
-import WaterRecordModal from "../modals/WaterRecordModal";
-import ExersiceRecordModal from "../modals/ExerciseModalHeader";
-import SugarRecordModal from "../modals/BloodPressureRecordModal";
-import BpRecordModal from "../modals/BloodPressureRecordModal";
-import WeightRecordModal from "../modals/WeightRecordModal";
-
-function formatKoreanDate(dateString) {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-}
-
-
-
-function PlusButton({ size = 52, onClickprop }) {
-  return (
-    <button
-      type="button"
-      className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
-      style={{ width: size, height: size }}
-      aria-label="기록 추가"
-      onClick={() => onClickprop?.()}
-=======
 import BloodsugarModal from "../modals/bloodsugarModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import MealRegisterModal from "../modals/MealRegisterModal";
@@ -55,15 +32,12 @@ function PlusButton({ size = 52, onClick }) {
       className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
->>>>>>> origin/LJH0510
     >
       <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
     </button>
   );
 }
 
-<<<<<<< HEAD
-=======
 function AddRecordBar({ onClick }) {
   return (
     <button
@@ -97,28 +71,18 @@ function EmptyRecordArea({ recordTitle, onAddClick }) {
   );
 }
 
->>>>>>> origin/LJH0510
 function LargeRecordCard({
   icon,
   title,
   subText,
   recordTitle,
   color,
-<<<<<<< HEAD
-  name,
-  wide = false,
-  onAddClick,
-}) {
-  return (
-    <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
-=======
   onAddClick,
   children,
   hasRecords = false,
 }) {
   return (
     <section className="relative flex h-[250px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
->>>>>>> origin/LJH0510
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -128,11 +92,7 @@ function LargeRecordCard({
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
         <div>
-<<<<<<< HEAD
-          <p className="text-[14px] font-bold leading-none text-[#252A31]">
-=======
           <p className="text-[14px] font-[600] leading-none text-[#252A31]">
->>>>>>> origin/LJH0510
             {title}
           </p>
           <p className="mt-[7px] whitespace-nowrap text-[10px] font-medium leading-none text-[#8D949E]">
@@ -141,23 +101,6 @@ function LargeRecordCard({
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="flex flex-1 items-center pr-[40px]">
-        <div
-          className={[
-            "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px]",
-            "border border-dashed border-[#D2D9E3] bg-[#EEF3F9]",
-          ].join(" ")}
-        >
-          <PlusButton size={50} onClickprop={() => onAddClick?.(name)} />
-
-          <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
-            {recordTitle}
-          </p>
-          <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
-            아직 기록되지 않았습니다.
-          </p>
-=======
       <div className="flex flex-1 items-center pr-[34px]">
         <div
           className={
@@ -169,18 +112,12 @@ function LargeRecordCard({
           {children ?? (
             <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
           )}
->>>>>>> origin/LJH0510
         </div>
       </div>
     </section>
   );
 }
 
-<<<<<<< HEAD
-function SmallRecordCard({ icon, title, recordTitle, color, name, onAddClick }) {
-  return (
-    <section className="relative flex h-[235px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
-=======
 function SmallRecordCard({
   icon,
   title,
@@ -192,7 +129,6 @@ function SmallRecordCard({
 }) {
   return (
     <section className="relative flex h-[250px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
->>>>>>> origin/LJH0510
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -200,28 +136,13 @@ function SmallRecordCard({
 
       <div className="flex w-[98px] shrink-0 flex-col items-center justify-center">
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
-<<<<<<< HEAD
-        <p className="mt-[17px] text-[14px] font-bold leading-none text-[#252A31]">
-=======
 
         <p className="mt-[17px] text-[14px] font-[600] leading-none text-[#252A31]">
->>>>>>> origin/LJH0510
           {title}
         </p>
       </div>
 
       <div className="flex flex-1 items-center pr-[10px]">
-<<<<<<< HEAD
-        <div className="flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
-          <PlusButton size={50} onClickprop={() => onAddClick?.(name)} />
-
-          <p className="mt-[15px] text-[14px] font-bold leading-none text-[#303740]">
-            {recordTitle}
-          </p>
-          <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
-            아직 기록되지 않았습니다.
-          </p>
-=======
         <div
           className={
             hasRecords
@@ -232,7 +153,6 @@ function SmallRecordCard({
           {children ?? (
             <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
           )}
->>>>>>> origin/LJH0510
         </div>
       </div>
     </section>
@@ -247,17 +167,6 @@ function MealPlaceholderIcon() {
   );
 }
 
-<<<<<<< HEAD
-function MealBox({ title }) {
-  return (
-    <div className="flex h-[285px] items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]">
-      <div className="flex flex-col items-center justify-center">
-        <MealPlaceholderIcon />
-
-        <p className="mt-[22px] text-[16px] font-bold leading-none text-[#303740]">
-          {title}
-        </p>
-=======
 function MealBox({ title, onClick }) {
   return (
     <button
@@ -272,300 +181,122 @@ function MealBox({ title, onClick }) {
           {title}
         </p>
 
->>>>>>> origin/LJH0510
         <p className="mt-[10px] text-[11px] font-medium leading-none text-[#3F4650]">
           아직 기록되지 않았습니다.
         </p>
       </div>
-<<<<<<< HEAD
-    </div>
-=======
     </button>
->>>>>>> origin/LJH0510
   );
 }
 
 function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
+  const [modalType, setModalType] = useState(null);
   const dateInputRef = useRef(null);
 
-<<<<<<< HEAD
-  const [isWaterModalOpen, setIsWaterModalOpen] = useState(false);
-  const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
-  const [isSugarModalOpen, setIsSugarModalOpen] = useState(false);
-  const [isBpModalOpen, setIsBpModalOpen] = useState(false);
-  const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
-
-  function OpenModal(name){
-  if(name == "water"){
-    setIsWaterModalOpen(true);
-  }
-  else if(name == "exercise"){
-    setIsExerciseModalOpen(true);
-  }
-  else if(name == "sugar"){
-    setIsSugarModalOpen(true);
-  }
-  else if(name == "bp"){
-    setIsBpModalOpen(true);
-  }
-  else if(name == "weight"){
-    setIsWeightModalOpen(true);
-  }
-}
-
-  return (
-    <main className="min-h-[calc(100vh-70px)] w-[calc(100vw-360px)] bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-      <div className="ml-[150px] w-[1270px] pt-[104px] pb-[40px]">
-        <div className="mb-[50px] flex items-center justify-between">
-          <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
-            전체 기록 관리
-          </h1>
-
-          {/* 날짜 들어가야함 */}
-          <div className="relative">
-            <input
-              type="date"
-              ref={dateInputRef}
-              className="absolute opacity-0 pointer-events-none"
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button
-              onClick={() => dateInputRef.current.showPicker()}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
-            >
-              {/* <Calendar className="h-4 w-4 text-blue-500" /> */}
-              {selectedDate}
-              <span className="ml-1 text-[10px] text-slate-300">▼</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-x-[30px] gap-y-[22px]">
-          <LargeRecordCard
-              icon={Bp}
-              title="혈압"
-              subText="최근 기록 없음"
-              recordTitle="혈압 기록"
-              color="#FF3B5F"
-              name="bp"
-              onAddClick={OpenModal}
-          />
-
-          <LargeRecordCard
-            icon={Blood}
-            title="혈당"
-            subText="최근 기록 없음"
-            recordTitle="혈당 기록"
-            color="#FF8A2A"
-              name="sugar"
-              onAddClick={OpenModal}
-          />
-
-          <div className="grid grid-cols-2 gap-[18px]">
-            <SmallRecordCard
-              icon={Weight}
-              title="체중"
-              recordTitle="체중 기록"
-              color="#2E86FF"
-              name="weight"
-              onAddClick={OpenModal}
-            />
-
-            <SmallRecordCard
-              icon={Water}
-              title="수분 섭취"
-              recordTitle="섭취 기록"
-              color="#55D7DF"
-              name="water"
-              onAddClick={OpenModal}
-            />
-          </div>
-
-          <LargeRecordCard
-            icon={Excercise}
-            title="활동량 요약"
-            subText="오늘의 활동 없음"
-            recordTitle="운동 기록"
-            color="#20D36B"
-            name="exercise"
-            onAddClick={OpenModal}
-          />
-        </div>
-
-        <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px] shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
-          <div className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px] bg-[#A142FF]" />
-
-          <div className="mb-[34px] flex items-center justify-center gap-[15px]">
-            <img
-              src={Meal}
-              alt=""
-              className="h-[34px] w-[34px] object-contain"
-            />
-
-            <div>
-              <p className="text-[14px] font-extrabold leading-none text-[#252A31]">
-                오늘의 식단
-              </p>
-              <p className="mt-[8px] text-[10px] font-medium leading-none text-[#8D949E]">
-                식단 기록 대기 중
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-[34px]">
-            <MealBox title="아침 식사" />
-            <MealBox title="점심 식사" />
-            <MealBox title="저녁 식사" />
-            <MealBox title="간식" />
-          </div>
-        </section>
-      </div>
-
-      {isWaterModalOpen && (
-        <WaterRecordModal
-          isOpen={isWaterModalOpen}
-          onClose={() => setIsWaterModalOpen(false)}
-        />
-      )}
-
-      {isExerciseModalOpen && (
-        <ExerciseRecordModal
-          isOpen={isExerciseModalOpen}
-          onClose={() => setIsExerciseModalOpen(false)}
-        />
-      )}
-
-      {isSugarModalOpen && (
-        <SugarRecordModal
-          isOpen={isSugarModalOpen}
-          onClose={() => setIsSugarModalOpen(false)}
-        />
-      )}
-
-      {isBpModalOpen && (
-        <BpRecordModal
-          isOpen={isBpModalOpen}
-          onClose={() => setIsBpModalOpen(false)}
-        />
-      )}
-
-      {isWeightModalOpen && (
-        <WeightRecordModal
-          isOpen={isWeightModalOpen}
-          onClose={() => setIsWeightModalOpen(false)}
-        />
-      )}
-    </main>
-  );
-}
-
-export default AllRecordPage;
-=======
-  const [modalType, setModalType] = useState(null);
-
   // 더미데이터: 기록 컴포넌트 디자인 확인용
-const [bloodPressureRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침 식전",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "09:30:00",
-    mealTiming: "아침 식후",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:30:00",
-    mealTiming: "점심 식전",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:30:00",
-    mealTiming: "점심 식후",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "18:30:00",
-    mealTiming: "저녁 식전",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-]);
+  const [bloodPressureRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침 식전",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "09:30:00",
+      mealTiming: "아침 식후",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:30:00",
+      mealTiming: "점심 식전",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:30:00",
+      mealTiming: "점심 식후",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "18:30:00",
+      mealTiming: "저녁 식전",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+  ]);
 
-const [bloodSugarRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침 식전",
-    bloodsugar: 120,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "09:30:00",
-    mealTiming: "아침 식후",
-    bloodsugar: 120,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:30:00",
-    mealTiming: "점심 식전",
-    bloodsugar: 120,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:30:00",
-    mealTiming: "점심 식후",
-    bloodsugar: 120,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "18:30:00",
-    mealTiming: "저녁 식전",
-    bloodsugar: 120,
-  },
-]);
+  const [bloodSugarRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침 식전",
+      bloodsugar: 120,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "09:30:00",
+      mealTiming: "아침 식후",
+      bloodsugar: 120,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:30:00",
+      mealTiming: "점심 식전",
+      bloodsugar: 120,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:30:00",
+      mealTiming: "점심 식후",
+      bloodsugar: 120,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "18:30:00",
+      mealTiming: "저녁 식전",
+      bloodsugar: 120,
+    },
+  ]);
 
-const [exerciseRecords] = useState([
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "러닝",
-    kcal: 120,
-  },
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "스쿼트",
-    kcal: 120,
-  },
-]);
+  const [exerciseRecords] = useState([
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "러닝",
+      kcal: 120,
+    },
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "스쿼트",
+      kcal: 120,
+    },
+  ]);
 
-const [weightRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    weight: 78.2,
-  },
-]);
+  const [weightRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      weight: 78.2,
+    },
+  ]);
 
-const [waterRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    amount: 1400,
-  },
-]);
+  const [waterRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      amount: 1400,
+    },
+  ]);
+
   const closeModal = () => {
     setModalType(null);
   };
@@ -802,4 +533,4 @@ const [waterRecords] = useState([
 }
 
 export default AllRecordPage;
->>>>>>> origin/LJH0510
+

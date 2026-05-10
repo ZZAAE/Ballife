@@ -11,8 +11,12 @@ import MainPage from './pages/main/MainPage';
 import WeightRecord from './pages/AllRecordRead/WeightRecord';
 import BloodPressureRecord from './pages/AllRecordRead/BloodPressureRecord';
 import BloodSugarRecord from './pages/AllRecordRead/BloodSugarRecord';
+import ExercisePage from './pages/exercise/exercisePage';
 import RecordPage from './pages/AllRecordRead/RecordPage';
+import RecordSummary from './pages/AllRecordRead/RecordSummary';
+import MealPage from './pages/MealPage';
 import MainReportPage from './pages/report/MainReportPage';
+import MedicationPage from './pages/MedicationPage'
 import OsteoporosisReportPage from './pages/report/OsteoporosisReportPage';
 import DiabetesReportPage from './pages/report/DiabetesReportPage';
 import GoutReportPage from './pages/report/GoutReportPage';
@@ -23,6 +27,7 @@ import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
 import AllRecordPage from './pages/AllRecordPage';
+import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
@@ -51,28 +56,37 @@ function App() {
         <div className="flex-1">
         <Routes>
 
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<MainPage />} />
+          <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+
           <Route path="/allRecord" element={<AllRecordPage />} />
-          <Route path="/weight" element={<WeightRecord />} />
-          <Route path="/pressure" element={<BloodPressureRecord />} />
-          <Route path="/sugar" element={<BloodSugarRecord />} />
+          
+          <Route path="/check/all" element={< RecordSummary/>} />
+          <Route path="/check/meal" element={<MealPage />} />
+          <Route path="/check/weight" element={<WeightRecord />} />
+          <Route path="/check/blood-pressure" element={<BloodPressureRecord />} />
+          <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
+          <Route path="/check/exercise" element={<ExercisePage />} />
+          <Route path="/check/medicine" element={<MedicationPage />} />
+
+          <Route path="/member" element={<UserInformation />} />
+
           <Route path="/records" element={<RecordPage />} />
-          <Route path="/mainreport" element={<MainReportPage />} />
-          <Route path="/osteoporosis" element={<OsteoporosisReportPage />} />
-          <Route path="/diabetes" element={<DiabetesReportPage />} />
-          <Route path="/gout" element={<GoutReportPage />} />
-          <Route path="/hypertension" element={<HypertensionReportPage />} />
-          <Route path="/dyslipidemia" element={<DyslipidemiaReportPage />} />
-          <Route path="/obesity" element={<ObesityReportPage />} />
+          <Route path="/intro/web" element={<MainReportPage />} />
+          <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
+          <Route path="/intro/diabetes" element={<DiabetesReportPage />} />
+          <Route path="/intro/gout" element={<GoutReportPage />} />
+          <Route path="/intro/hypertension" element={<HypertensionReportPage />} />
+          <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
+          <Route path="/intro/obesity" element={<ObesityReportPage />} />
           <Route path="/healthcalendar" element={<HealthCalenderPage />} />
-          <Route path="/allrecords" element={<AllRecordPage />} />
+
         </Routes>
         </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}

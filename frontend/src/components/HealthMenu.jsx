@@ -11,7 +11,6 @@ import weightIcon from "../assets/icons/weight.svg";
 import exerciseIcon from "../assets/icons/exercise.svg";
 import mealIcon from "../assets/icons/meal.svg";
 import pillIcon from "../assets/icons/pill.svg";
-import { Link } from "react-router-dom";
 
 const menuItems = [
   { key: "all", label: "전체보기", icon: allIcon, path: "/check/all" },
@@ -20,7 +19,7 @@ const menuItems = [
   { key: "weight", label: "체중", icon: weightIcon, path: "/check/weight" },
   { key: "exercise", label: "운동", icon: exerciseIcon, path: "/check/exercise" },
   { key: "meal", label: "식단", icon: mealIcon, path: "/check/meal" },
-  { key: "pill", label: "복용", icon: pillIcon, path: "/medication" },
+  { key: "pill", label: "복용", icon: pillIcon, path: "/check/medicine" },
 ];
 
 export default function HealthIndicatorMenu() {
