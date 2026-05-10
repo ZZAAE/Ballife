@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { Check, Circle, Moon, Sun, Triangle, X } from "lucide-react";
 import { weekData } from "./medicationData";
 
 export default function WeeklyCalendarCard() {
@@ -9,14 +9,14 @@ export default function WeeklyCalendarCard() {
   ];
 
   return (
-    <div className="flex-1 bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 overflow-x-auto">
+    <div className="flex-1 overflow-x-auto rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
       <div className="min-w-[600px]">
         {/* 상단 날짜 헤더 */}
-        <div className="grid grid-cols-[repeat(7,85px)] justify-center items-start mb-6">
+        <div className="mb-6 grid grid-cols-[repeat(7,85px)] items-start justify-center">
           {weekData.map((item) => (
             <div key={item.day} className="flex flex-col items-center">
               <span
-                className={`text-[13px] font-semibold mb-1 ${
+                className={`mb-1 text-[13px] font-semibold ${
                   item.weekend ? "text-[#E64563]" : "text-gray-500"
                 }`}
               >
@@ -38,30 +38,29 @@ export default function WeeklyCalendarCard() {
         <div className="space-y-5">
           {rows.map((row) => {
             const RowIcon = row.icon;
+            const labelText = row.label.match(/^[^\(]+/)?.[0].trim();
+            const timeText = row.label.match(/\([^\)]+\)/)?.[0];
 
             return (
               <div key={row.key}>
-                {/* 아침 / 점심 / 저녁 라벨 - 첫 번째 도형 위치에 맞춤 */}
-                <div className="mb-1 grid grid-cols-[repeat(7,85px)] justify-center items-center">
-                  <div className="flex items-center justify-between text-[14px] text-gray-600 font-semibold gap-2">
+                {/* 아침 / 점심 / 저녁 라벨 */}
+                <div className="mb-1 grid grid-cols-[repeat(7,85px)] items-center justify-center">
+                  <div className="flex items-center justify-between gap-2 text-[14px] font-semibold text-gray-600">
                     <div className="flex items-center gap-2 whitespace-nowrap">
-                      <RowIcon
-                        className="w-4 h-4 text-gray-400"
-                        strokeWidth={1.8}
-                      />
-                      <span>{row.label.match(/^[^\(]+/)?.[0].trim()}</span>
+                      <RowIcon className="h-4 w-4 text-gray-400" strokeWidth={1.8} />
+                      <span>{labelText}</span>
                     </div>
-                    <span className="text-gray-400 text-[12px] w-[50px] text-right whitespace-nowrap">{row.label.match(/\([^\)]+\)/)?.[0]}</span>
+
+                    <span className="w-[50px] whitespace-nowrap text-right text-[12px] text-gray-400">
+                      {timeText}
+                    </span>
                   </div>
                 </div>
 
                 {/* 체크 도형들 */}
-                <div className="grid grid-cols-[repeat(7,85px)] justify-center items-start mb-6">
+                <div className="mb-6 grid grid-cols-[repeat(7,85px)] items-start justify-center">
                   {weekData.map((item, index) => (
-                    <div
-                      key={`${row.key}-${index}`}
-                      className="flex justify-center "
-                    >
+                    <div key={`${row.key}-${index}`} className="flex justify-center">
                       <MedicationStatusIcon status={item[row.key]} />
                     </div>
                   ))}
@@ -72,7 +71,7 @@ export default function WeeklyCalendarCard() {
         </div>
 
         {/* 범례 */}
-        <div className="mt-6 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-center gap-20 text-[13px] text-gray-600">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-20 border-t border-gray-200 pt-8 text-[13px] text-gray-600">
           <div className="flex items-center gap-3">
             <MedicationStatusIcon status="done" size="sm" />
             <span>복용 완료</span>
@@ -97,135 +96,52 @@ export default function WeeklyCalendarCard() {
 function MedicationStatusIcon({ status, size = "md" }) {
   const isSmall = size === "sm";
 
-  if (isSmall) {
-    if (status === "done") {
-      return (
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" fill="#315BFF" />
-          <path
-            d="M13.5 20.5L17.5 24.5L26.5 15.5"
-            stroke="white"
-            strokeWidth="2.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
-    }
-
-    if (status === "partial") {
-      return (
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" fill="#F2A35B" />
-          <path
-            d="M20 12L28 26H12L20 12Z"
-            stroke="#8A4B14"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-            fill="none"
-          />
-        </svg>
-      );
-    }
-
-    if (status === "miss") {
-      return (
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" fill="#F45074" />
-          <path
-            d="M14.5 14.5L25.5 25.5M25.5 14.5L14.5 25.5"
-            stroke="#1F2937"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-    }
-
-    return (
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-        <circle
-          cx="20"
-          cy="20"
-          r="13.5"
-          stroke="#D1D5DB"
-          strokeWidth="2.3"
-          fill="white"
-        />
-        <circle
-          cx="20"
-          cy="20"
-          r="5.3"
-          stroke="#D1D5DB"
-          strokeWidth="2"
-          fill="white"
-        />
-      </svg>
-    );
-  }
+  const wrapperSize = isSmall ? "h-5 w-5" : "h-9 w-9";
+  const checkSize = isSmall ? "h-3 w-3" : "h-5 w-5";
+  const triangleSize = isSmall ? "h-3 w-3" : "h-5 w-5";
+  const xSize = isSmall ? "h-3 w-3" : "h-5 w-5";
 
   if (status === "done") {
     return (
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="19" fill="#315BFF" />
-        <path
-          d="M12.8 20.3L17.4 24.9L27.2 15.1"
-          stroke="white"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <div
+        className={`${wrapperSize} flex items-center justify-center rounded-full bg-[#315BFF]`}
+      >
+        <Check className={`${checkSize} text-white`} strokeWidth={3} />
+      </div>
     );
   }
 
   if (status === "partial") {
     return (
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="19" fill="#F2A35B" />
-        <path
-          d="M20 12L28 26H12L20 12Z"
-          stroke="#8A4B14"
-          strokeWidth="2"
-          strokeLinejoin="round"
-          fill="none"
+      <div
+        className={`${wrapperSize} flex items-center justify-center rounded-full bg-[#F2A35B]`}
+      >
+        <Triangle
+          className={`${triangleSize} text-[#8A4B14]`}
+          strokeWidth={2.4}
         />
-      </svg>
+      </div>
     );
   }
 
   if (status === "miss") {
     return (
-      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="19" fill="#F45074" />
-        <path
-          d="M14.5 14.5L25.5 25.5M25.5 14.5L14.5 25.5"
-          stroke="#1F2937"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-        />
-      </svg>
+      <div
+        className={`${wrapperSize} flex items-center justify-center rounded-full bg-[#F45074]`}
+      >
+        <X className={`${xSize} text-gray-800`} strokeWidth={2.8} />
+      </div>
     );
   }
 
   return (
-    <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-      <circle
-        cx="20"
-        cy="20"
-        r="14.5"
-        stroke="#D1D5DB"
-        strokeWidth="2.2"
-        fill="white"
+    <div
+      className={`${wrapperSize} flex items-center justify-center rounded-full border-2 border-gray-300 bg-white`}
+    >
+      <Circle
+        className={`${isSmall ? "h-2 w-2" : "h-3 w-3"} text-gray-300`}
+        strokeWidth={2.5}
       />
-      <circle
-        cx="20"
-        cy="20"
-        r="6"
-        stroke="#D1D5DB"
-        strokeWidth="2"
-        fill="white"
-      />
-    </svg>
+    </div>
   );
 }
