@@ -1,10 +1,7 @@
 package com.prologue.ballife.web.dto.exercise;
-<<<<<<< HEAD:ballife/src/main/java/com/prologue/ballife/web/dto/exercise/UserExerciseDto.java
-=======
 
 import java.time.LocalDate;
 import java.time.LocalTime;
->>>>>>> origin/sjs/0507:ballife/src/main/java/com/prologue/ballife/web/dto/Exercise/UserExerciseDto.java
 
 import com.prologue.ballife.domain.exercise.UserExercise;
 

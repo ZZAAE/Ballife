@@ -5,10 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-<<<<<<< HEAD:ballife/src/main/java/com/prologue/ballife/web/dto/exercise/UserExerciseDetailDto.java
-import com.prologue.ballife.domain.exercise.UserExercise;
-=======
->>>>>>> origin/sjs/0507:ballife/src/main/java/com/prologue/ballife/web/dto/Exercise/UserExerciseDetailDto.java
 import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 
 import jakarta.validation.constraints.Size;

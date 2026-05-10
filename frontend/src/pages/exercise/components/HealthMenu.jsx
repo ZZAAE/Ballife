@@ -25,7 +25,7 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
   const [activeMenu, setActiveMenu] = useState("exercise");
 
   return (
-    <aside className="w-full rounded-2xl bg-white px-5 py-6 font-['Noto_Sans_KR'] shadow-sm xl:fixed xl:right-0 xl:top-[70px] xl:z-40 xl:h-[calc(100vh-70px)] xl:w-[320px] xl:overflow-y-auto xl:rounded-none xl:px-[24px] xl:py-[40px] xl:shadow-none">
+    <aside className="w-full rounded-2xl bg-white px-5 py-6 font-['Noto_Sans_KR'] shadow-sm xl:w-[320px] xl:self-start xl:px-[24px] xl:py-[40px]">
       {/* 상단 제목 */}
       <div className="flex items-center gap-4 xl:gap-[20px]">
         <img

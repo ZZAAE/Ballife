@@ -98,9 +98,9 @@ function UserInformation() {
       <Header />
 
       <div className="min-h-screen w-full pt-[70px]">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-8">
           {/* 메인 콘텐츠 */}
-          <main className="min-w-0 xl:mr-[320px]">
+          <main className="min-w-0 xl:w-full xl:max-w-[1248px] xl:justify-self-end">
             {/* 프로필 헤더 */}
             <div className="mb-8 flex items-center gap-6">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-300 text-4xl text-gray-500">
