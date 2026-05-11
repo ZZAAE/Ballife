@@ -303,9 +303,6 @@ function UserInformation() {
             </div>
           </div>
         </main>
-
-        {/* 우측 사이드바 */}
-        <HealthIndicatorMenu />
       </div>
     </div>
   );

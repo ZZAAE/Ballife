@@ -1,13 +1,14 @@
 import React, { useRef, useState } from "react";
 
-import Blood from "../assets/Record/Blood.svg";
-import Bp from "../assets/Record/Bp.svg";
-import Excercise from "../assets/Record/Excercise.svg";
-import Meal from "../assets/Record/Meal.svg";
-import Meal2 from "../assets/Record/Meal2.svg";
-import Water from "../assets/Record/Water.svg";
-import Weight from "../assets/Record/Weight.svg";
-import Plus from "../assets/Record/Plus.svg";
+import Blood from "../../assets/Record/Blood.svg";
+import Bp from "../../assets/Record/Bp.svg";
+import Excercise from "../../assets/Record/Excercise.svg";
+import Meal from "../../assets/Record/Meal.svg";
+import Meal2 from "../../assets/Record/Meal2.svg";
+import Water from "../../assets/Record/Water.svg";
+import Weight from "../../assets/Record/Weight.svg";
+import Plus from "../../assets/Record/Plus.svg";
+import BloodSugarModal from "../../modals/bloodsugarModal";
 
 function formatKoreanDate(dateString) {
   const date = new Date(dateString);
@@ -132,12 +133,14 @@ function MealBox({ title }) {
   );
 }
 
-function RecordPage() {
+function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
   const dateInputRef = useRef(null);
+  const [openModal, setOpenModal] = useState(false);
 
 
   return (
+    <>
     <main className="min-h-[calc(100vh-70px)] w-[calc(100vw-360px)] bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
       <div className="ml-[150px] w-[1270px] pt-[104px] pb-[40px]">
         <div className="mb-[50px] flex items-center justify-between">
@@ -173,6 +176,7 @@ function RecordPage() {
             color="#FF3B5F"
           />
 
+        <div onClick={() => setOpenModal(true)}>
           <LargeRecordCard
             icon={Blood}
             title="혈당"
@@ -180,6 +184,7 @@ function RecordPage() {
             recordTitle="혈당 기록"
             color="#FF8A2A"
           />
+          </div>
 
           <div className="grid grid-cols-2 gap-[18px]">
             <SmallRecordCard
@@ -235,7 +240,15 @@ function RecordPage() {
         </section>
       </div>
     </main>
-  );
+
+{openModal && (
+  <BloodSugarModal
+    isOpen={openModal}
+    onClose={() => setOpenModal(false)}
+  />
+)}
+</>
+);
 }
 
-export default RecordPage;
+export default AllRecordPage;

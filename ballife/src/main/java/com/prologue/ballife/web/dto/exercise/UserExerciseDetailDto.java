@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.prologue.ballife.domain.exercise.UserExercise;
 import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 
 import jakarta.validation.constraints.Size;

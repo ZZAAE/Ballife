@@ -40,7 +40,6 @@ import SummaryCard from "../../components/SummaryCard";
 import MealRecordCard from "../../components/MealRecordCard";
 import MealRegisterModal from "../../modals/MealRegisterModal";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
-import MealDetailModal from "../../modals/MealDetailModal";
 
 const bloodSugarData = [
   { time: "아침", fasting: 95, postMeal: 120 },
@@ -435,7 +434,6 @@ export default function RecordSummary() {
                 <MealRecordCard
                   key={idx}
                   {...meal}
-                  onClick={() => setMealModalOpen(true)}
                   className="min-w-[calc(26%-10px)] flex-shrink-0"
                 />
               ))}
@@ -443,9 +441,8 @@ export default function RecordSummary() {
           </div>
         </main>
 
-        {/* <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} /> */}
+        <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} />
         <DailyTimelineModal isOpen={isTimeLineModalOpen} onClose={()=>setTimeLineModelOpen(false)}/>
-        <MealDetailModal isOpen = {isMealModalOpen} onClose={() => setMealModalOpen(false)}/>
 
       </div>
     </div>

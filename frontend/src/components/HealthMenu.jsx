@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import characteristicIcon from "../assets/icons/characteristic.svg";
 import aiIcon from "../assets/icons/ai.svg";
@@ -13,30 +13,38 @@ import mealIcon from "../assets/icons/meal.svg";
 import pillIcon from "../assets/icons/pill.svg";
 
 const menuItems = [
-  { key: "all", label: "전체보기", icon: allIcon },
-  { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon },
-  { key: "bloodSugar", label: "혈당", icon: bloodIcon },
-  { key: "weight", label: "체중", icon: weightIcon },
+  { key: "all", label: "전체보기", icon: allIcon, path: "/check/all" },
+  {
+    key: "bloodPressure",
+    label: "혈압",
+    icon: bloodPressureIcon,
+    path: "/check/blood-pressure",
+  },
+  {
+    key: "bloodSugar",
+    label: "혈당",
+    icon: bloodIcon,
+    path: "/check/blood-sugar",
+  },
+  { key: "weight", label: "체중", icon: weightIcon, path: "/check/weight" },
   {
     key: "exercise",
     label: "운동",
     icon: exerciseIcon,
     path: "/check/exercise",
   },
-  { key: "meal", label: "식단", icon: mealIcon },
-  { key: "pill", label: "복용", icon: pillIcon },
+  { key: "meal", label: "식단", icon: mealIcon, path: "/check/meal" },
+  { key: "pill", label: "복용", icon: pillIcon, path: "/check/medicine" },
 ];
 
 export default function HealthIndicatorMenu({ onRegisterClick }) {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [activeMenu, setActiveMenu] = useState("exercise");
   const currentMenu = useMemo(() => {
     const matchedItem = menuItems.find(
       (item) => item.path === location.pathname,
     );
-    return matchedItem?.key ?? activeMenu;
-  }, [activeMenu, location.pathname]);
+    return matchedItem?.key ?? null;
+  }, [location.pathname]);
 
   return (
     <aside className="min-h-full w-[365px] shrink-0 bg-white px-[28px] pt-[50px] pb-[40px] font-['Noto_Sans_KR']">
@@ -64,17 +72,11 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
           const isActive = currentMenu === item.key;
 
           return (
-            <button
+            <Link
               key={item.key}
-              type="button"
-              onClick={() => {
-                setActiveMenu(item.key);
-                if (item.path) {
-                  navigate(item.path);
-                }
-              }}
+              to={item.path}
               className={[
-                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none",
+                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none no-underline",
                 isActive
                   ? "bg-[#E8E8E8] pl-[20px]"
                   : "bg-transparent pl-[23px]",
@@ -95,7 +97,7 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
               <span className="text-[14px] font-medium leading-none tracking-[-0.2px] text-[#111111]">
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </nav>

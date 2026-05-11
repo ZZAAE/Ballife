@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
 
 const navItems = [
-  { key: "record", label: "기록", path: "/record" },
+  { key: "record", label: "기록", path: "/allRecord" },
   {
     key: "check",
     label: "확인",
-    path: "/check",
+    path: "/check/all",
     dropdown: [
       { label: "전체", path: "/check/all" },
       { label: "식단", path: "/check/meal" },
@@ -23,7 +23,7 @@ const navItems = [
   {
     key: "intro",
     label: "소개",
-    path: "/intro",
+    path: "/intro/web",
     dropdown: [
       { label: "웹 소개", path: "/intro/web" },
       { label: "고지혈증", path: "/intro/hyperlipidemia" },

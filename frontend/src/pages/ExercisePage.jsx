@@ -45,7 +45,7 @@ function ExercisePage() {
 
   return (
     <div className="min-h-screen bg-[#efefef]">
-      <Header />
+      {/* <Header /> */}
 
       <div className="flex min-h-screen w-full bg-[#efefef] pt-[55px]">
         <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
@@ -92,7 +92,7 @@ function ExercisePage() {
             onPageChange={handlePageChange}
           />
         </main>
-        <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} />
+        {/* <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} /> */}
       </div>
 
       <ExerciseModal

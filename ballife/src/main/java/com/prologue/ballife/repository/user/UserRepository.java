@@ -15,6 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
    
     // userRepository - DB를 조회하는는 저장소 객체(User(엔티티) 테이블에 접근해서 데이터를 찾음)
     // Optional<User> - User 테이블에 해당 user가 있으면 반환  
+    Optional<User> findByUserId(Long userId);
     Optional<User> findByLoginId(String loginId);
     Optional<User> findByUsername(String username);
     Optional<User> findByNickname(String nickname);
