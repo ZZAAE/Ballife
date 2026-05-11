@@ -83,6 +83,7 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
       </nav>
 
       {/* 기록하기 버튼 */}
+      <Link to="/allRecord" >
       <button
         type="button"
         onClick={onRegisterClick}
@@ -90,7 +91,7 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
       >
         기록하기
       </button>
-
+      </Link>
       {/* 파란 조언 카드 */}
       <section className="mt-[86px] rounded-[10px] bg-[#0057E5] px-[24px] pt-[24px] pb-[24px] text-white shadow-[0_18px_32px_rgba(0,0,0,0.14)]">
         <div className="flex h-[40px] w-[40px] items-center justify-center rounded-[8px] bg-white/20">

@@ -1,6 +1,6 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import HomePage from './pages/HomePage';
+
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
 import BoardListPage from './pages/board/BoardListPage';
@@ -31,8 +31,8 @@ import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
+  const location = useLocation();
   const hideHealthMenu =
-    location.pathname === '/home' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
@@ -90,7 +90,7 @@ function App() {
 
         </Routes>
         </div>
-        {hideHealthMenu && <HealthIndicatorMenu />}
+        {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
 
       </main>
