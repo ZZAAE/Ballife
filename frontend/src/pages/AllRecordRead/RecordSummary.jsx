@@ -185,9 +185,8 @@ export default function RecordSummary() {
               description="오늘의 섭취 kcal"
               record="1,450"
               unit="/ 2,100 kcal"
-              bottomLabel="테스트입니다"
-              BottomIcon={TrendingUp}
-              bottomeLabelColor="text-red-600"
+              bottomLabel="남은 섭취 칼로리 650kcal"
+              bottomeLabelColor="text-purple-600"
             />
 
             {/* 운동 Card */}
@@ -227,6 +226,8 @@ export default function RecordSummary() {
               description="오늘의 수분 섭취량"
               record="1.6"
               unit="/ 2.5 L"
+              bottomLabel="남은 수분 섭취량 0.9L"
+              bottomeLabelColor="text-sky-600"
             />
           </div>
           {/* Charts Section */}
