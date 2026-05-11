@@ -1,4 +1,5 @@
 import { Routes, Route, Link } from 'react-router-dom';
+import { useState } from "react";
 import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
@@ -16,10 +17,12 @@ import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
 import AllRecordPage from './pages/recordRead/AllRecordPage'
 import MealPage from './pages/MealPage'
+import Chatbot from './modals/Chatbot'
 
 
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
 
   const hideHealthMenu =
@@ -33,6 +36,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <Chatbot />
+      
       <main className="py-12">
       <Header isLoggedIn={false} />
 

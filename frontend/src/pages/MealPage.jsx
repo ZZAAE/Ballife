@@ -50,6 +50,7 @@ const nutrientColors = {
   fat: { label: "지", color: "#9b3f00", bg: "rgba(155,63,0,0.08)" },
   sugar: { label: "당", color: "#e91e63", bg: "rgba(233,30,99,0.08)" },
   chol: { label: "콜", color: "#795548", bg: "rgba(121,85,72,0.08)" },
+  sodium: { label: "나", color: "#00a86b", bg: "rgba(0,168,107,0.08)" },
 };
 
 const sidebarItems = [
@@ -159,9 +160,9 @@ function NutrientBadge({ type, value, unit = "g" }) {
 function NutrientPill({ type, value, unit = "g" }) {
   const n = nutrientColors[type];
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 4px", borderRadius: 12, background: n.bg, minWidth: 42 }}>
-      <span style={{ fontSize: 9, fontWeight: 700, color: n.color }}>{n.label}</span>
-      <span style={{ fontSize: 10, fontWeight: 700, color: "#191c1e" }}>{value}{unit}</span>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, padding: "5px 3px", borderRadius: 10, background: n.bg, minWidth: 36, flex: "1 1 auto" }}>
+      <span style={{ fontSize: 8, fontWeight: 700, color: n.color }}>{n.label}</span>
+      <span style={{ fontSize: 9, fontWeight: 700, color: "#191c1e" }}>{value}{unit}</span>
     </div>
   );
 }
@@ -174,6 +175,7 @@ function MealCard({ meal, onClick }) {
     fat: meal.items.reduce((s, i) => s + i.fat, 0),
     sugar: meal.items.reduce((s, i) => s + i.sugar, 0),
     chol: meal.items.reduce((s, i) => s + i.chol, 0),
+    sodium: meal.items.reduce((s, i) => s + (i.sodium || 0), 0),
   };
 
   return (
@@ -230,6 +232,7 @@ function MealCard({ meal, onClick }) {
               <NutrientBadge type="fat" value={item.fat} />
               <NutrientBadge type="sugar" value={item.sugar} />
               <NutrientBadge type="chol" value={item.chol} unit="mg" />
+              <NutrientBadge type="sodium" value={item.sodium} unit="mg" />
             </div>
           </div>
         ))}
@@ -248,6 +251,7 @@ function MealCard({ meal, onClick }) {
           <NutrientPill type="fat" value={totals.fat} />
           <NutrientPill type="sugar" value={totals.sugar} />
           <NutrientPill type="chol" value={totals.chol} unit="mg" />
+          <NutrientPill type="sodium" value={totals.sodium} unit="mg" />
         </div>
       </div>
     </div>
