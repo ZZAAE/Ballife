@@ -1,6 +1,5 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
 import BoardListPage from './pages/board/BoardListPage';
@@ -32,7 +31,7 @@ import UserInformation from './pages/user/UserInformation'
 
 function App() {
   const hideHealthMenu =
-    location.pathname === '/home' ||
+    location.pathname === '/' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
@@ -44,7 +43,7 @@ function App() {
     location.pathname === '/hypertension' ||
     location.pathname === '/dyslipidemia' ||
     location.pathname === '/obesity' ||
-    location.pathname === '/AllRecordPage';
+    location.pathname === '/AllRecord';
 
     location.pathname.startsWith('/posts/');
 
