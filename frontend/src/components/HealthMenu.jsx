@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import characteristicIcon from "../assets/icons/characteristic.svg";
 import aiIcon from "../assets/icons/ai.svg";
@@ -16,13 +17,26 @@ const menuItems = [
   { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon },
   { key: "bloodSugar", label: "혈당", icon: bloodIcon },
   { key: "weight", label: "체중", icon: weightIcon },
-  { key: "exercise", label: "운동", icon: exerciseIcon },
+  {
+    key: "exercise",
+    label: "운동",
+    icon: exerciseIcon,
+    path: "/check/exercise",
+  },
   { key: "meal", label: "식단", icon: mealIcon },
   { key: "pill", label: "복용", icon: pillIcon },
 ];
 
 export default function HealthIndicatorMenu({ onRegisterClick }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("exercise");
+  const currentMenu = useMemo(() => {
+    const matchedItem = menuItems.find(
+      (item) => item.path === location.pathname,
+    );
+    return matchedItem?.key ?? activeMenu;
+  }, [activeMenu, location.pathname]);
 
   return (
     <aside className="min-h-full w-[365px] shrink-0 bg-white px-[28px] pt-[50px] pb-[40px] font-['Noto_Sans_KR']">
@@ -47,13 +61,18 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
       {/* 메뉴 리스트 */}
       <nav className="mt-[22px] flex flex-col gap-[9px]">
         {menuItems.map((item) => {
-          const isActive = activeMenu === item.key;
+          const isActive = currentMenu === item.key;
 
           return (
             <button
               key={item.key}
               type="button"
-              onClick={() => setActiveMenu(item.key)}
+              onClick={() => {
+                setActiveMenu(item.key);
+                if (item.path) {
+                  navigate(item.path);
+                }
+              }}
               className={[
                 "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none",
                 isActive

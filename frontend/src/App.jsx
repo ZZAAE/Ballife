@@ -16,6 +16,7 @@ import Header from "./components/Header";
 import HealthIndicatorMenu from "./components/HealthMenu";
 import SummaryCard from "./components/SummaryCard";
 
+
 function App() {
   // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
   const { isAuthenticated } = useAuth();
@@ -57,6 +58,10 @@ function App() {
             <Route path="/posts/create" element={<PostCreatePage />} />
             <Route path="/posts/:id/edit" element={<PostEditPage />} />
             <Route path="/posts/:postId" element={<PostDetailPage />} />
+            <Route path="/check" element={<SummaryCard />} />
+            <Route path="/check/weight" element={<SummaryCard />} />
+            <Route path="/check/blood-sugar" element={<SummaryCard />} />
+            <Route path="/check/blood-pressure" element={<SummaryCard />} />
           </Routes>
         ) : (
           <div className="flex min-h-screen w-full bg-white pt-[55px]">

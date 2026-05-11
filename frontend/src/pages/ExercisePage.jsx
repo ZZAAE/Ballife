@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Calendar } from "lucide-react";
+import React, { useRef, useState } from "react";
 import Header from "../components/Header";
 import ExerciseSection from "./exercise/components/ExerciseSection";
 import ExerciseRecordTable from "./exercise/components/ExerciseRecordTable";
@@ -13,6 +12,7 @@ function ExercisePage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
+  const dateInputRef = useRef(null);
   const {
     activeTab,
     anaerobicCards,
@@ -48,19 +48,27 @@ function ExercisePage() {
       <Header />
 
       <div className="flex min-h-screen w-full bg-[#efefef] pt-[55px]">
-        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:py-8 xl:px-[150px]">
+        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
           <div className="mb-8 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[24px] font-bold text-[#1f2937]">
+            <h2 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               운동 기록 확인
             </h2>
-            <div className="flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 sm:w-auto">
-              <Calendar size={16} className="shrink-0 text-gray-400" />
+            <div className="relative sm:w-auto">
               <input
                 type="date"
+                ref={dateInputRef}
                 value={selectedDate}
                 onChange={(event) => setSelectedDate(event.target.value)}
-                className="min-w-0 flex-1 text-sm text-gray-600 outline-none"
+                className="pointer-events-none absolute opacity-0"
               />
+              <button
+                type="button"
+                onClick={() => dateInputRef.current?.showPicker()}
+                className="flex w-full items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm sm:w-auto"
+              >
+                {selectedDate}
+                <span className="ml-1 text-[10px] text-slate-300">▼</span>
+              </button>
             </div>
           </div>
 
