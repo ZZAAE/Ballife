@@ -1,14 +1,11 @@
 import React, { useRef, useState } from "react";
-import Header from "../components/Header";
 import ExerciseSection from "./exercise/components/ExerciseSection";
 import ExerciseRecordTable from "./exercise/components/ExerciseRecordTable";
-import HealthIndicatorMenu from "../components/HealthMenu";
 import Pagination from "./exercise/components/Pagination";
 import ExerciseModal from "../modals/ExerciseModal";
 import { useExercise } from "./exercise/hooks/useExercise";
 
-function ExercisePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+function ExercisePage({ isModalOpen, onCloseModal }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
@@ -45,12 +42,10 @@ function ExercisePage() {
 
   return (
     <div className="min-h-screen bg-[#efefef]">
-      {/* <Header /> */}
-
-      <div className="flex min-h-screen w-full bg-[#efefef] pt-[55px]">
-        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
+      <div className="min-h-screen w-full bg-[#efefef] pt-[55px]">
+        <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
           <div className="mb-8 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+            <h2 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               운동 기록 확인
             </h2>
             <div className="relative sm:w-auto">
@@ -92,13 +87,9 @@ function ExercisePage() {
             onPageChange={handlePageChange}
           />
         </main>
-        {/* <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} /> */}
       </div>
 
-      <ExerciseModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <ExerciseModal isOpen={isModalOpen} onClose={onCloseModal} />
     </div>
   );
 }
