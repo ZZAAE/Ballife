@@ -467,5 +467,6 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
           </button>
         </div>
     </div>
+    </div>
   );
 }
