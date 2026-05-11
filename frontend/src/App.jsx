@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
@@ -30,6 +30,8 @@ import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
+  const { pathname } = useLocation();
+
   const hideHealthMenu =
     location.pathname === '/' ||
     location.pathname === '/login' ||
@@ -43,8 +45,6 @@ function App() {
     location.pathname === '/hypertension' ||
     location.pathname === '/dyslipidemia' ||
     location.pathname === '/obesity' ||
-    location.pathname === '/AllRecord';
-
     location.pathname.startsWith('/posts/');
 
   return (
