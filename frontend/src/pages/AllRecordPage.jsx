@@ -82,7 +82,7 @@ function LargeRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -101,11 +101,11 @@ function LargeRecordCard({
         </div>
       </div>
 
-      <div className="flex flex-1 items-center pr-[34px]">
+      <div className="flex min-w-0 flex-1 items-center pr-[20px] md:pr-[34px]">
         <div
           className={
             hasRecords
-              ? "flex h-[215px] w-full flex-col justify-start overflow-y-auto"
+              ? "flex h-[215px] w-full min-w-0 flex-col justify-start overflow-y-auto"
               : "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9] p-[14px]"
           }
         >
@@ -128,7 +128,7 @@ function SmallRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -142,7 +142,7 @@ function SmallRecordCard({
         </p>
       </div>
 
-      <div className="flex flex-1 items-center pr-[10px]">
+      <div className="flex min-w-0 flex-1 items-center pr-[10px]">
         <div
           className={
             hasRecords
@@ -200,37 +200,23 @@ const [bloodPressureRecords] = useState([
   {
     recordDate: "2026-05-09",
     recordTime: "08:30:00",
-    mealTiming: "아침 식전",
+    mealTiming: "아침",
+    systolicBp: 160,
+    diastolicBp: 96,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "12:11:00",
+    mealTiming: "점심",
     systolicBp: 120,
     diastolicBp: 80,
   },
   {
     recordDate: "2026-05-09",
-    recordTime: "09:30:00",
-    mealTiming: "아침 식후",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:30:00",
-    mealTiming: "점심 식전",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:30:00",
-    mealTiming: "점심 식후",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "18:30:00",
-    mealTiming: "저녁 식전",
-    systolicBp: 120,
-    diastolicBp: 80,
+    recordTime: "20:42:00",
+    mealTiming: "저녁",
+    systolicBp: 123,
+    diastolicBp: 88,
   },
 ]);
 
@@ -239,31 +225,31 @@ const [bloodSugarRecords] = useState([
     recordDate: "2026-05-09",
     recordTime: "08:30:00",
     mealTiming: "아침 식전",
-    bloodsugar: 120,
+    bloodsugar: 100,
   },
   {
     recordDate: "2026-05-09",
     recordTime: "09:30:00",
     mealTiming: "아침 식후",
-    bloodsugar: 120,
+    bloodsugar: 150,
   },
   {
     recordDate: "2026-05-09",
     recordTime: "12:30:00",
     mealTiming: "점심 식전",
-    bloodsugar: 120,
+    bloodsugar: 95,
   },
   {
     recordDate: "2026-05-09",
     recordTime: "13:30:00",
     mealTiming: "점심 식후",
-    bloodsugar: 120,
+    bloodsugar: 128,
   },
   {
     recordDate: "2026-05-09",
     recordTime: "18:30:00",
     mealTiming: "저녁 식전",
-    bloodsugar: 120,
+    bloodsugar: 89,
   },
 ]);
 
@@ -271,14 +257,20 @@ const [exerciseRecords] = useState([
   {
     exerciseDate: "2026-05-09",
     exerciseTypeId: 3,
-    exerciseName: "러닝",
+    exerciseName: "걷기",
+    kcal: 609,
+  },
+  {
+    exerciseDate: "2026-05-09",
+    exerciseTypeId: 3,
+    exerciseName: "줄넘기",
     kcal: 120,
   },
   {
     exerciseDate: "2026-05-09",
     exerciseTypeId: 3,
-    exerciseName: "스쿼트",
-    kcal: 120,
+    exerciseName: "사이클",
+    kcal: 430,
   },
 ]);
 
@@ -311,8 +303,8 @@ const [waterRecords] = useState([
 
   return (
     <>
-      <main className="min-h-[calc(100vh-70px)] bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="ml-[150px] mr-[150px] pt-[104px] pb-[40px]">
+      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
+        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[104px] md:px-[60px] xl:px-[150px]">
           <div className="mb-[50px] flex items-center justify-between">
             <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               전체 기록 관리
@@ -338,7 +330,7 @@ const [waterRecords] = useState([
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-[30px] gap-y-[22px]">
+          <div className="grid w-full max-w-full grid-cols-1 gap-x-[30px] gap-y-[22px] xl:grid-cols-2">
             <LargeRecordCard
               icon={Bp}
               title="혈압"
@@ -387,7 +379,7 @@ const [waterRecords] = useState([
               ) : null}
             </LargeRecordCard>
 
-            <div className="grid grid-cols-2 gap-[18px]">
+            <div className="grid min-w-0 grid-cols-1 gap-[18px] md:grid-cols-2">
               <SmallRecordCard
                 icon={Weight}
                 title="체중"
@@ -477,7 +469,7 @@ const [waterRecords] = useState([
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-[34px]">
+            <div className="grid grid-cols-1 gap-[34px] md:grid-cols-2">
               <MealBox
                 title="아침 식사"
                 onClick={() => setModalType("meal")}
