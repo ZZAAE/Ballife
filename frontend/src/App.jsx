@@ -38,13 +38,7 @@ function App() {
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname === '/mainreport' ||
-    location.pathname === '/osteoporosis' ||
-    location.pathname === '/diabetes' ||
-    location.pathname === '/gout' ||
-    location.pathname === '/hypertension' ||
-    location.pathname === '/dyslipidemia' ||
-    location.pathname === '/obesity' ||
+    location.pathname.startsWith('/intro/') ||
     location.pathname.startsWith('/posts/');
 
   return (
