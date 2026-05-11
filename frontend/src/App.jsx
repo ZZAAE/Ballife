@@ -1,6 +1,5 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
 import BoardListPage from './pages/board/BoardListPage';
@@ -31,7 +30,10 @@ import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
+  const { pathname } = useLocation();
+
   const hideHealthMenu =
+<<<<<<< HEAD
     location.pathname === '/allRecord' ||
     location.pathname === '/check/all' ||
     location.pathname === '/check/meal' ||
@@ -42,6 +44,20 @@ function App() {
     location.pathname === '/check/medicine' ||
     location.pathname === '/AllRecordPage';
 
+=======
+    location.pathname === '/' ||
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/boards' ||
+    location.pathname === '/posts/create' ||
+    location.pathname === '/mainreport' ||
+    location.pathname === '/osteoporosis' ||
+    location.pathname === '/diabetes' ||
+    location.pathname === '/gout' ||
+    location.pathname === '/hypertension' ||
+    location.pathname === '/dyslipidemia' ||
+    location.pathname === '/obesity' ||
+>>>>>>> origin/PHH0511-2
     location.pathname.startsWith('/posts/');
 
   return (

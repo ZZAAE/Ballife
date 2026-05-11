@@ -24,7 +24,7 @@ public class Meal {
     private Long mealId;
 
     @Column(name = "MEAL_DATE", nullable = false)
-    private LocalDateTime mealDate;
+    private LocalDate mealDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MEAL_CATEGORY", nullable = false)
