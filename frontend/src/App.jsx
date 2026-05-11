@@ -63,6 +63,8 @@ function App() {
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/page/Medication" element={<MedicationPage />} />
+          
         </Routes>
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
