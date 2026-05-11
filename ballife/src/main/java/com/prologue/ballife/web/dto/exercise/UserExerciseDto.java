@@ -1,5 +1,4 @@
 package com.prologue.ballife.web.dto.exercise;
-<<<<<<< HEAD
 
 import java.time.LocalDate;
 import java.time.LocalTime;
