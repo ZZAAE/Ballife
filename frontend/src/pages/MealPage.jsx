@@ -1,4 +1,5 @@
-// import { useState } from "react";
+import { useState } from "react";
+import MealDetailModal from "../modals/MealDetailModal";
 
 const meals = [
   {
@@ -7,8 +8,8 @@ const meals = [
     time: "08:30 AM",
     img: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400&h=300&fit=crop",
     items: [
-      { name: "그릭 요거트와 블루베리", kcal: 245, carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5 },
-      { name: "아몬드 한 줌", kcal: 160, carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0 },
+      { name: "그릭 요거트와 블루베리", kcal: 245, carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5, sodium: 80 },
+      { name: "아몬드 한 줌", kcal: 160, carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0, sodium: 0 },
     ],
   },
   {
@@ -17,8 +18,8 @@ const meals = [
     time: "12:45 PM",
     img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
     items: [
-      { name: "연어 샐러드", kcal: 480, carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45 },
-      { name: "현미밥 반 공기", kcal: 150, carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0 },
+      { name: "연어 샐러드", kcal: 480, carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, sodium: 60 },
+      { name: "현미밥 반 공기", kcal: 150, carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0, sodium: 10 },
     ],
   },
   {
@@ -27,8 +28,8 @@ const meals = [
     time: "07:15 PM",
     img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
     items: [
-      { name: "닭가슴살 구이", kcal: 310, carb: 0, protein: 42, fat: 12, sugar: 0, chol: 75 },
-      { name: "구운 고구마와 야채", kcal: 220, carb: 45, protein: 4, fat: 1, sugar: 8, chol: 0 },
+      { name: "닭가슴살 구이", kcal: 310, carb: 0, protein: 42, fat: 12, sugar: 0, chol: 75, sodium: 120 },
+      { name: "구운 고구마와 야채", kcal: 220, carb: 45, protein: 4, fat: 1, sugar: 8, chol: 0, sodium: 30 },
     ],
   },
   {
@@ -37,8 +38,8 @@ const meals = [
     time: "04:00 PM",
     img: "https://images.unsplash.com/photo-1568702846914-96b305d2uj38?w=400&h=300&fit=crop",
     items: [
-      { name: "사과와 땅콩버터", kcal: 190, carb: 22, protein: 4, fat: 11, sugar: 15, chol: 0 },
-      { name: "단백질 쉐이크", kcal: 120, carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15 },
+      { name: "사과와 땅콩버터", kcal: 190, carb: 22, protein: 4, fat: 11, sugar: 15, chol: 0, sodium: 70 },
+      { name: "단백질 쉐이크", kcal: 120, carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, sodium: 50 },
     ],
   },
 ];
@@ -68,6 +69,40 @@ const nutritionSummary = [
   { label: "나트륨", current: 1120, target: 2000, unit: "mg", over: false },
   { label: "콜레스테롤", current: 150, target: 300, unit: "mg", over: false },
 ];
+
+// ★ MealPage의 meal 데이터를 MealDetailModal이 기대하는 형식으로 변환
+function buildMealData(meal) {
+  if (!meal) return null;
+
+  const sum = (key) => meal.items.reduce((s, i) => s + (i[key] || 0), 0);
+
+  return {
+    mealType: `${meal.label} 식사`,
+    foods: meal.items.map((item, idx) => ({
+      id: idx + 1,
+      name: item.name,
+      calories: item.kcal,
+      nutrition: {
+        carbs: item.carb,
+        protein: item.protein,
+        fat: item.fat,
+        sugar: item.sugar,
+        cholesterol: item.chol,
+        sodium: item.sodium || 0,
+      },
+      image: meal.img, // 음식별 개별 이미지가 없으니 식사 대표 이미지 사용
+    })),
+    totalNutrition: {
+      carbs: sum("carb"),
+      protein: sum("protein"),
+      fat: sum("fat"),
+      sugar: sum("sugar"),
+      cholesterol: sum("chol"),
+      sodium: sum("sodium"),
+    },
+    totalCalories: sum("kcal"),
+  };
+}
 
 function SidebarIcon({ type }) {
   const icons = {
@@ -131,7 +166,7 @@ function NutrientPill({ type, value, unit = "g" }) {
   );
 }
 
-function MealCard({ meal }) {
+function MealCard({ meal, onClick }) {
   const totalKcal = meal.items.reduce((s, i) => s + i.kcal, 0);
   const totals = {
     carb: meal.items.reduce((s, i) => s + i.carb, 0),
@@ -142,7 +177,37 @@ function MealCard({ meal }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", background: "#fff", border: "1px solid #eceef0", minWidth: 260, flex: "1 1 260px" }}>
+    <div
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 12,
+        overflow: "hidden",
+        background: "#fff",
+        border: "1px solid #eceef0",
+        minWidth: 260,
+        flex: "1 1 260px",
+        cursor: "pointer",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.08)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+    >
       <div style={{ position: "relative", height: 150, overflow: "hidden" }}>
         <img src={meal.img} alt={meal.label} style={{ width: "100%", height: "100%", objectFit: "cover" }}
           onError={(e) => { e.target.style.display = "none"; e.target.parentElement.style.background = "linear-gradient(135deg, #2d3335 0%, #1a1a2e 100%)"; }} />
@@ -199,6 +264,8 @@ function ProgressBar({ current, target, over }) {
 }
 
 export default function MealPage() {
+  const [selectedMeal, setSelectedMeal] = useState(null);
+
   const totalCal = 1420;
   const targetCal = 2100;
   const burned = 350;
@@ -206,6 +273,7 @@ export default function MealPage() {
   const achievement = Math.round((totalCal / targetCal) * 100);
 
   return (
+<<<<<<< HEAD
     <div style={{ fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#f2f2f2", minHeight: "100vh", color: "#2d3335" }}>
       {/* Header */}
       {/* <header style={{ background: "#121b2b", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", height: 64, position: "sticky", top: 0, zIndex: 100 }}>
@@ -224,11 +292,43 @@ export default function MealPage() {
       </header> */}
 
       <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
+=======
+    <div
+      style={{
+        fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        background: "#f2f2f2",
+        minHeight: "100vh",
+        color: "#2d3335",
+        // ★ 부모(App.jsx)의 flex 제약에서 벗어나 창 너비에 맞춰 반응
+        width: "100vw",
+        marginLeft: "calc(50% - 50vw)",
+        // ★ App.jsx의 <main className="py-12"> 상하 패딩 상쇄
+        marginBottom: "-48px",
+      }}
+    >
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+>>>>>>> origin/LYJ0511
         {/* Main Content */}
-        <main style={{ flex: 1, padding: "32px 40px", width: "100%", overflow: "auto" }}>
+        <main
+          style={{
+            flex: 1,
+            padding: "32px 40px",
+            width: "100%",
+            minWidth: 0,
+            overflow: "auto",
+          }}
+        >
           {/* Page Title */}
           <div style={{ marginBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+            >
               <div>
                 <h1 style={{ fontSize: 28, fontWeight: 600, margin: 0, color: "#2d3335" }}>오늘의 식단 기록 확인</h1>
                 <p style={{ fontSize: 15, color: "#5a6062", margin: "6px 0 0" }}>지난 신체 변화를 분석한 결과입니다.</p>
@@ -240,9 +340,27 @@ export default function MealPage() {
           </div>
 
           {/* Summary Cards Row */}
-          <div style={{ display: "flex", gap: 20, marginBottom: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 20,
+              marginBottom: 32,
+              flexWrap: "wrap",
+            }}
+          >
             {/* Calorie Donut */}
-            <div style={{ background: "#fff", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 240 }}>
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: 16,
+                padding: 24,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                minWidth: 240,
+                flex: "0 0 auto",
+              }}
+            >
               <div style={{ position: "relative", width: 160, height: 160, marginBottom: 16 }}>
                 <DonutChart value={totalCal} max={targetCal} size={160} strokeWidth={10} color="#111" />
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
@@ -261,7 +379,19 @@ export default function MealPage() {
             </div>
 
             {/* Score Card */}
-            <div style={{ background: "#fff", borderRadius: 16, padding: 28, flex: 1, display: "flex", gap: 28, alignItems: "center" }}>
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: 16,
+                padding: 28,
+                flex: "1 1 320px",
+                display: "flex",
+                gap: 28,
+                alignItems: "center",
+                minWidth: 0,
+                flexWrap: "wrap",
+              }}
+            >
               <div style={{ position: "relative", width: 160, height: 160, flexShrink: 0 }}>
                 <DonutChart value={85} max={100} size={160} strokeWidth={10} color="#10B981" />
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
@@ -270,12 +400,12 @@ export default function MealPage() {
                   <span style={{ fontSize: 13, fontWeight: 500, color: "#10B981" }}>훌륭한 균형</span>
                 </div>
               </div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: "1 1 280px", minWidth: 0 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 500, color: "#040d1b", margin: "0 0 10px" }}>영양 성분이 아주 조화롭습니다.</h3>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#45474c", lineHeight: 1.6, margin: "0 0 14px" }}>
                   현재까지 섭취한 영양소 비율이 권장 가이드라인에 매우 근접해 있습니다. 특히 단백질과 지방의 비율이 안정적이며, 남은 하루 동안 식이섬유 보충에만 신경 쓰시면 완벽한 하루가 될 것 같습니다.
                 </p>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {["#단백질_충분", "#저당_식단"].map((tag) => (
                     <span key={tag} style={{ padding: "4px 12px", borderRadius: 999, background: "#ecfdf5", border: "1px solid #d1fae5", fontSize: 12, fontWeight: 500, color: "#047857" }}>{tag}</span>
                   ))}
@@ -288,14 +418,24 @@ export default function MealPage() {
           <h2 style={{ fontSize: 20, fontWeight: 500, color: "#040d1b", margin: "0 0 16px" }}>오늘의 식단 기록 확인</h2>
           <div style={{ display: "flex", gap: 16, marginBottom: 36, flexWrap: "wrap" }}>
             {meals.map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
+              <MealCard
+                key={meal.id}
+                meal={meal}
+                onClick={() => setSelectedMeal(meal)}
+              />
             ))}
           </div>
 
           {/* Nutrition Analysis */}
           <div style={{ background: "#fff", borderRadius: 16, padding: 28 }}>
             <h3 style={{ fontSize: 20, fontWeight: 500, color: "#040d1b", margin: "0 0 24px" }}>오늘의 영양 성분 분석</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px 48px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "24px 48px",
+              }}
+            >
               {nutritionSummary.map((n) => (
                 <div key={n.label} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -311,6 +451,7 @@ export default function MealPage() {
             </div>
           </div>
         </main>
+<<<<<<< HEAD
 
         {/* Right Sidebar */}
         {/* <aside style={{ width: 280, background: "rgba(196,196,196,0.3)", padding: "28px 20px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
@@ -364,7 +505,16 @@ export default function MealPage() {
             </div>
           </div>
         </aside> */}
+=======
+>>>>>>> origin/LYJ0511
       </div>
+
+      {/* ★ 모달 - props 이름(isOpen, mealData, onClose)과 데이터 구조 맞춤 */}
+      <MealDetailModal
+        isOpen={!!selectedMeal}
+        mealData={buildMealData(selectedMeal)}
+        onClose={() => setSelectedMeal(null)}
+      />
     </div>
   );
 }

@@ -2,6 +2,11 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+<<<<<<< HEAD
+=======
+import UserInformation from './pages/user/UserInformation';
+import DiseasePage from './pages/user/DiseasePage';
+>>>>>>> origin/LYJ0511
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -24,9 +29,15 @@ import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
 import ObesityReportPage from './pages/report/ObesityReportPage';
 import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
+<<<<<<< HEAD
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
 import AllRecordPage from './pages/AllRecordPage';
 import UserInformation from './pages/user/UserInformation'
+=======
+import SummaryCard from './components/SummaryCard';
+import AllRecordPage from './pages/recordRead/AllRecordPage'
+import MealPage from './pages/MealPage'
+>>>>>>> origin/LYJ0511
 
 
 function App() {
@@ -58,11 +69,17 @@ function App() {
           <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+<<<<<<< HEAD
 
+=======
+          <Route path="/member" element={<UserInformation />} />
+          <Route path="/disease" element={<DiseasePage />} />
+>>>>>>> origin/LYJ0511
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+<<<<<<< HEAD
 
           <Route path="/allRecord" element={<AllRecordPage />} />
           
@@ -86,6 +103,10 @@ function App() {
           <Route path="/intro/obesity" element={<ObesityReportPage />} />
           <Route path="/healthcalendar" element={<HealthCalenderPage />} />
 
+=======
+          <Route path="/record" element={<AllRecordPage/>}/>
+          <Route path="/check/meal" element={<MealPage/>}/>
+>>>>>>> origin/LYJ0511
         </Routes>
         </div>
         {hideHealthMenu && <HealthIndicatorMenu />}
