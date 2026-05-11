@@ -45,8 +45,20 @@ function App() {
     location.pathname === '/dyslipidemia' ||
     location.pathname === '/obesity' ||
     location.pathname === '/AllRecordPage'||
-    location.pathname === '/';
+    location.pathname === '/' ||
+    location.pathname.startsWith('/posts/');
 
+  const hideChatbot =
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/boards' ||
+    location.pathname === '/mainreport' ||
+    location.pathname === '/osteoporosis' ||
+    location.pathname === '/diabetes' ||
+    location.pathname === '/gout' ||
+    location.pathname === '/hypertension' ||
+    location.pathname === '/dyslipidemia' ||
+    location.pathname === '/obesity' ||
     location.pathname.startsWith('/posts/');
 
   return (
@@ -91,6 +103,7 @@ function App() {
         </Routes>
         </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}
+        
       </div>
 
       </main>
