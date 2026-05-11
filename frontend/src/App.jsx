@@ -90,7 +90,7 @@ function App() {
 
         </Routes>
         </div>
-        {!hideHealthMenu && <HealthIndicatorMenu />}
+        {hideHealthMenu && <HealthIndicatorMenu />}
       </div>
 
       </main>
