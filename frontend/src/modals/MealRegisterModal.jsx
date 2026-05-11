@@ -313,6 +313,7 @@ export default function MealRegisterModal({
   return (
     isOpen && (
       <div
+        onClick={onClose}
         className="fixed inset-0 z-[100] flex items-center justify-center p-5 antialiased"
         style={{
           background: "rgba(15, 19, 32, 0.5)",

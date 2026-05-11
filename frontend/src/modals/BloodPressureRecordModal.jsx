@@ -32,6 +32,7 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
     }
   };
 
+
   const bpInfo = useMemo(() => {
     const s = Number(systolic);
     const d = Number(diastolic);
@@ -88,7 +89,8 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+      
       <div className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
@@ -102,11 +104,10 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#334155] transition hover:bg-[#F8FAFC]"
-            >
+            <button onClick={onClose} style={{
+            background: "none", border: "none", cursor: "pointer", padding: 4,
+            color: "#bbb", fontSize: 20, lineHeight: 1,
+            }}>
               <svg
                 width="18"
                 height="18"

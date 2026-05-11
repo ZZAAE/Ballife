@@ -11,7 +11,7 @@ function ExerciseModal({ isOpen, onClose }) {
   if (!isOpen) return null; 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="flex h-[785px] w-[672px] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
         {/* 고정 상단 영역 */}
         <div className="flex-shrink-0">
