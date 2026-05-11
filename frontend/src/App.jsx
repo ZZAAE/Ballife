@@ -30,7 +30,7 @@ import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   const hideHealthMenu =
     location.pathname === '/' ||
@@ -39,13 +39,8 @@ function App() {
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
     location.pathname === '/mainreport' ||
-    location.pathname === '/osteoporosis' ||
-    location.pathname === '/diabetes' ||
-    location.pathname === '/gout' ||
-    location.pathname === '/hypertension' ||
-    location.pathname === '/dyslipidemia' ||
-    location.pathname === '/obesity' ||
-    location.pathname.startsWith('/posts/');
+    location.pathname.startsWith('/posts/') ||
+    location.pathname.startsWith('/intro/');
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -58,7 +53,7 @@ function App() {
           <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-
+          <Route path="/member" element={<UserInformation />} />
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
@@ -74,8 +69,6 @@ function App() {
           <Route path="/check/exercise" element={<ExercisePage />} />
           <Route path="/check/medicine" element={<MedicationPage />} />
 
-          <Route path="/member" element={<UserInformation />} />
-
           <Route path="/records" element={<RecordPage />} />
           <Route path="/intro/web" element={<MainReportPage />} />
           <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
@@ -88,7 +81,7 @@ function App() {
 
         </Routes>
         </div>
-        {hideHealthMenu && <HealthIndicatorMenu />}
+        {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
 
       </main>
