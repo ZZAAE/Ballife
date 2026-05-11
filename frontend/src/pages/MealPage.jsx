@@ -273,26 +273,6 @@ export default function MealPage() {
   const achievement = Math.round((totalCal / targetCal) * 100);
 
   return (
-<<<<<<< HEAD
-    <div style={{ fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#f2f2f2", minHeight: "100vh", color: "#2d3335" }}>
-      {/* Header */}
-      {/* <header style={{ background: "#121b2b", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", height: 64, position: "sticky", top: 0, zIndex: 100 }}>
-        <span style={{ fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: -0.5 }}>Ballife</span>
-        <nav style={{ display: "flex", gap: 40 }}>
-          {["기록", "확인", "커뮤니티", "회원정보", "소개"].map((item) => (
-            <a key={item} href="#" style={{ color: "#fff", fontSize: 15, fontWeight: 500, textDecoration: "none", opacity: 0.85 }}
-              onMouseEnter={(e) => (e.target.style.opacity = 1)} onMouseLeave={(e) => (e.target.style.opacity = 0.85)}>
-              {item}
-            </a>
-          ))}
-        </nav>
-        <button style={{ width: 36, height: 36, borderRadius: "50%", background: "#252f43", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M1 1h16M1 7h16M1 13h16" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
-        </button>
-      </header> */}
-
-      <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
-=======
     <div
       style={{
         fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -307,7 +287,6 @@ export default function MealPage() {
       }}
     >
       <div style={{ display: "flex", minHeight: "100vh" }}>
->>>>>>> origin/LYJ0511
         {/* Main Content */}
         <main
           style={{
@@ -451,62 +430,6 @@ export default function MealPage() {
             </div>
           </div>
         </main>
-<<<<<<< HEAD
-
-        {/* Right Sidebar */}
-        {/* <aside style={{ width: 280, background: "rgba(196,196,196,0.3)", padding: "28px 20px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 500, color: "#000", margin: "0 0 12px", paddingLeft: 16 }}>건강 지표</h3>
-          {sidebarItems.map((item) => (
-            <div key={item.label}
-              style={{
-                display: "flex", alignItems: "center", gap: 12, padding: "12px 20px",
-                borderRadius: item.active ? "0 999px 999px 0" : "0 999px 999px 0",
-                background: item.active ? "#fff" : "transparent",
-                boxShadow: item.active ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-                cursor: "pointer", transition: "background 0.2s",
-                color: "#000", fontSize: 15, fontWeight: 400,
-              }}
-              onMouseEnter={(e) => { if (!item.active) e.currentTarget.style.background = "rgba(255,255,255,0.5)"; }}
-              onMouseLeave={(e) => { if (!item.active) e.currentTarget.style.background = "transparent"; }}
-            >
-              <span style={{ width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <SidebarIcon type={item.icon} />
-              </span>
-              <span>{item.label}</span>
-            </div>
-          ))}
-
-          <button style={{
-            display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", marginTop: 8,
-            borderRadius: "0 999px 999px 0", background: "#131c2c", border: "none",
-            color: "#fff", fontSize: 15, fontWeight: 500, cursor: "pointer", width: "100%",
-          }}>
-            등록 하기
-          </button>
-
-          {/* AI Suggestion */}
-          {/* <div style={{ marginTop: "auto", padding: 22, borderRadius: 20, background: "#fff", border: "1.5px solid #004ddf", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-              <svg width="14" height="18" viewBox="0 0 15 20" fill="none"><path d="M7.5 20a2 2 0 01-2-2h4a2 2 0 01-2 2zm-4-3v-2h8v2h-8zm.25-3C2.6 13.317 1.688 12.4 1.013 11.25.337 10.1 0 8.85 0 7.5 0 5.417.729 3.646 2.188 2.188 3.646.729 5.417 0 7.5 0s3.854.729 5.313 2.188C14.27 3.646 15 5.417 15 7.5c0 1.35-.337 2.6-1.013 3.75C13.313 12.4 12.4 13.317 11.25 14h-7.5z" fill="#004DDF"/></svg>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#004ddf", textTransform: "uppercase", letterSpacing: 0.5 }}>AI 다음 식단 제안</span>
-            </div>
-            <h4 style={{ fontSize: 16, fontWeight: 500, color: "#040d1b", margin: "0 0 8px" }}>식이섬유 보충이 필요해요!</h4>
-            <p style={{ fontSize: 13, fontWeight: 500, color: "#45474c", lineHeight: 1.6, margin: "0 0 14px" }}>
-              오늘 식이섬유 섭취량이 부족합니다. 저녁 식사 전 간식으로 <span style={{ color: "#004ddf" }}>사과 한 개</span>나 <span style={{ color: "#004ddf" }}>당근 스틱</span>을 드시는 건 어떨까요?
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, borderRadius: 12, background: "rgba(0,77,223,0.05)" }}>
-              <div style={{ width: 42, height: 42, borderRadius: 8, background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="14" height="18" viewBox="0 0 14 19" fill="none"><path d="M7 19c-1.95 0-3.604-.679-4.963-2.037C.68 15.604 0 13.95 0 12c0-1.567.463-2.971 1.388-4.213a7.51 7.51 0 013.637-2.494A4.96 4.96 0 014.05 4.93a5.1 5.1 0 01-.85-1.612C3.03 2.56 2.992 1.79 3.075 1.006c.783-.083 1.554-.046 2.313.113.758.158 1.412.512 1.962 1.062.383.383.663.817.838 1.3.175.483.287.992.337 1.525a9.68 9.68 0 01.788-1.462 8.67 8.67 0 011.037-1.263c.183-.183.417-.275.7-.275.283 0 .517.092.7.275.183.183.275.417.275.7s-.092.517-.275.7c-.367.367-.692.771-.975 1.212a7.34 7.34 0 00-.625 1.413c1.467.467 2.65 1.312 3.55 2.537.9 1.225 1.35 2.604 1.35 4.138 0 1.95-.679 3.604-2.038 4.962C11.604 18.321 9.95 19 8 19z" fill="#004DDF"/></svg>
-              </div>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 500, color: "#45474c", margin: 0 }}>기대 효과</p>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "#040d1b", margin: "2px 0 0" }}>소화 개선 및 혈당 조절</p>
-              </div>
-            </div>
-          </div>
-        </aside> */}
-=======
->>>>>>> origin/LYJ0511
       </div>
 
       {/* ★ 모달 - props 이름(isOpen, mealData, onClose)과 데이터 구조 맞춤 */}
