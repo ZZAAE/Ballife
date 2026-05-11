@@ -3,6 +3,7 @@ import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+import UserInformation from './pages/user/UserInformation';
 import DiseasePage from './pages/user/DiseasePage';
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
@@ -13,6 +14,8 @@ import MainPage from './pages/main/MainPage';
 import Header from './components/Header'
 import HealthIndicatorMenu from './components/HealthMenu';
 import SummaryCard from './components/SummaryCard';
+import AllRecordPage from './pages/recordRead/AllRecordPage'
+import MealPage from './pages/MealPage'
 
 
 function App() {
@@ -43,11 +46,14 @@ function App() {
           <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/member" element={<UserInformation />} />
           <Route path="/disease" element={<DiseasePage />} />
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/record" element={<AllRecordPage/>}/>
+          <Route path="/check/meal" element={<MealPage/>}/>
         </Routes>
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
