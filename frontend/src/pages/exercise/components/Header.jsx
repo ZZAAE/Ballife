@@ -18,7 +18,7 @@ const navItems = [
       { label: "혈압", path: "/check/blood-pressure" },
     ],
   },
-  { key: "community", label: "커뮤니티", path: "/community" },
+  { key: "community", label: "커뮤니티", path: "/boards" },
   { key: "member", label: "회원정보", path: "/member" },
   {
     key: "intro",
