@@ -8,6 +8,7 @@ class BallifeApplicationTests {
 
 	@Test
 	void contextLoads() {
+		
 	}
 
 }
