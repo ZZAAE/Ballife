@@ -11,7 +11,7 @@ import MainPage from './pages/main/MainPage';
 import WeightRecord from './pages/AllRecordRead/WeightRecord';
 import BloodPressureRecord from './pages/AllRecordRead/BloodPressureRecord';
 import BloodSugarRecord from './pages/AllRecordRead/BloodSugarRecord';
-import ExercisePage from './pages/exercise/exercisePage';
+import ExercisePage from './pages/ExercisePage';
 import RecordPage from './pages/AllRecordRead/RecordPage';
 import RecordSummary from './pages/AllRecordRead/RecordSummary';
 import MealPage from './pages/MealPage';
