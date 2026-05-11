@@ -48,6 +48,8 @@ const prescriptionDetailMap = {
   },
 };
 
+
+
 function MedicineThumb({ type }) {
   if (type === "yellow") {
     return (
