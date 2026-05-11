@@ -1,12 +1,7 @@
 package com.prologue.ballife.web.dto.exercise;
-<<<<<<< HEAD:ballife/src/main/java/com/prologue/ballife/web/dto/exercise/UserExerciseDto.java
-=======
 
 import java.time.LocalDate;
 import java.time.LocalTime;
->>>>>>> origin/sjs/0507:ballife/src/main/java/com/prologue/ballife/web/dto/Exercise/UserExerciseDto.java
-
-import com.prologue.ballife.domain.exercise.UserExercise;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -16,9 +11,7 @@ import lombok.NoArgsConstructor;
 
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
-
 public class UserExerciseDto {
-
     // 사용자 운동 기록 등록 요청 DTO
     @Data
     @Builder

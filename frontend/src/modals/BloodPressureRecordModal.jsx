@@ -88,7 +88,9 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+    <div 
+    onClick={onClose}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
       <div className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">

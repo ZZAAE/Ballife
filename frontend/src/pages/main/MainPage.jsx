@@ -1,5 +1,6 @@
 import React from 'react';
-
+import Header from '../../components/Header';
+import HealthMenu from '../../components/HealthMenu';
 import Card from '../../components/mainpage/card.jsx';
 import Calendar from '../../components/mainpage/calendar.jsx';
 import ChartSection from '../../components/mainpage/chart.jsx';
@@ -25,7 +26,7 @@ const bloodPressureData = [
 const MainPage = () => {
   // 샘플 데이터
   const userStats = {
-    ageGender: "45세 / 남성ㅋ",
+    ageGender: "45세 / 남성",
     height: "175cm",
     weight: "78kg",
     bmi: "25.5 (과체중)",
@@ -58,8 +59,11 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 font-sans text-slate-900 px-36 py-10">
-      <div className="max-w-auto mx-auto space-y-10">
+    <div className="min-h-screen bg-white font-sans text-slate-900 ml-[150px] mr-[150px]">
+      <Header />
+      <div className="flex">
+        <main className="flex-1 p-6 px-12 py-10">
+          <div className="max-w-auto mx-auto space-y-10">
         
         {/* Header & User Stats */}
         <header className="flex items-center justify-between pb-4 border-b border-slate-200">
@@ -140,6 +144,8 @@ const MainPage = () => {
           </div>
         </section>
 
+          </div>
+        </main>
       </div>
     </div>
   );

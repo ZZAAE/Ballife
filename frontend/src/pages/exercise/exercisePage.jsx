@@ -14,11 +14,13 @@ function ExercisePage() {
     new Date().toISOString().split("T")[0],
   );
   const {
+    activeTab,
     anaerobicCards,
     aerobicCards,
     logs,
     currentPage,
     totalPages,
+    handleTabChange,
     handlePageChange,
   } = useExercise();
 
@@ -43,11 +45,9 @@ function ExercisePage() {
 
   return (
     <div className="min-h-screen bg-[#d9d9d9]">
-      <Header />
-
       <div className="min-h-screen w-full bg-[#efefef] pt-[70px]">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <main className="min-w-0 xl:mr-[320px]">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-8">
+          <main className="min-w-0 xl:w-full xl:max-w-[1248px] xl:justify-self-end">
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-[24px] font-bold text-[#1f2937]">
                 운동 기록 확인
@@ -75,7 +75,11 @@ function ExercisePage() {
               cards={cardioCards}
             />
 
-            <ExerciseRecordTable logs={logs} />
+            <ExerciseRecordTable
+              activeTab={activeTab}
+              logs={logs}
+              onTabChange={handleTabChange}
+            />
 
             <Pagination
               currentPage={currentPage}
@@ -83,8 +87,7 @@ function ExercisePage() {
               onPageChange={handlePageChange}
             />
           </main>
-
-          <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} />
+          {/* <HealthIndicatorMenu onRegisterClick={() => setIsModalOpen(true)} /> */}
         </div>
       </div>
 

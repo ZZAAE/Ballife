@@ -9,20 +9,15 @@ export default function WeeklyCalendarCard() {
   ];
 
   return (
-    <div className="flex-1 bg-white rounded-2xl p-6 lg:p-7 shadow-sm border border-gray-100 overflow-x-auto">
-      <div className="min-w-[720px]">
+    <div className="flex-1 bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 overflow-x-auto">
+      <div className="min-w-[600px]">
         {/* 상단 날짜 헤더 */}
-        <div className="grid grid-cols-[150px_repeat(7,minmax(0,1fr))] items-start mb-8">
-          <div />
+        <div className="grid grid-cols-[repeat(7,85px)] justify-center items-start mb-6">
           {weekData.map((item) => (
             <div key={item.day} className="flex flex-col items-center">
               <span
                 className={`text-[13px] font-semibold mb-1 ${
-                  item.today
-                    ? "text-gray-500"
-                    : item.weekend
-                      ? "text-[#E64563]"
-                      : "text-gray-500"
+                  item.weekend ? "text-[#E64563]" : "text-gray-500"
                 }`}
               >
                 {item.day}
@@ -30,11 +25,7 @@ export default function WeeklyCalendarCard() {
 
               <span
                 className={`text-[15px] font-bold ${
-                  item.today
-                    ? "text-gray-800"
-                    : item.weekend
-                      ? "text-[#E64563]"
-                      : "text-gray-800"
+                  item.weekend ? "text-[#E64563]" : "text-gray-800"
                 }`}
               >
                 {item.date}
@@ -44,38 +35,44 @@ export default function WeeklyCalendarCard() {
         </div>
 
         {/* 아침 / 점심 / 저녁 */}
-        <div className="space-y-10">
+        <div className="space-y-5">
           {rows.map((row) => {
             const RowIcon = row.icon;
 
             return (
-              <div
-                key={row.key}
-                className="grid grid-cols-[150px_repeat(7,minmax(0,1fr))] items-center"
-              >
-                <div className="flex items-center gap-2 text-[14px] text-gray-600 font-semibold">
-                  <RowIcon
-                    className="w-4 h-4 text-gray-400"
-                    strokeWidth={1.8}
-                  />
-                  <span>{row.label}</span>
+              <div key={row.key}>
+                {/* 아침 / 점심 / 저녁 라벨 - 첫 번째 도형 위치에 맞춤 */}
+                <div className="mb-1 grid grid-cols-[repeat(7,85px)] justify-center items-center">
+                  <div className="flex items-center justify-between text-[14px] text-gray-600 font-semibold gap-2">
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      <RowIcon
+                        className="w-4 h-4 text-gray-400"
+                        strokeWidth={1.8}
+                      />
+                      <span>{row.label.match(/^[^\(]+/)?.[0].trim()}</span>
+                    </div>
+                    <span className="text-gray-400 text-[12px] w-[50px] text-right whitespace-nowrap">{row.label.match(/\([^\)]+\)/)?.[0]}</span>
+                  </div>
                 </div>
 
-                {weekData.map((item, index) => (
-                  <div
-                    key={`${row.key}-${index}`}
-                    className="flex justify-center"
-                  >
-                    <MedicationStatusIcon status={item[row.key]} />
-                  </div>
-                ))}
+                {/* 체크 도형들 */}
+                <div className="grid grid-cols-[repeat(7,85px)] justify-center items-start mb-6">
+                  {weekData.map((item, index) => (
+                    <div
+                      key={`${row.key}-${index}`}
+                      className="flex justify-center "
+                    >
+                      <MedicationStatusIcon status={item[row.key]} />
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}
         </div>
 
         {/* 범례 */}
-        <div className="mt-10 pt-6 border-t border-gray-200 flex flex-wrap items-center justify-center gap-20 text-[13px] text-gray-600">
+        <div className="mt-6 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-center gap-20 text-[13px] text-gray-600">
           <div className="flex items-center gap-3">
             <MedicationStatusIcon status="done" size="sm" />
             <span>복용 완료</span>
@@ -169,7 +166,7 @@ function MedicationStatusIcon({ status, size = "md" }) {
 
   if (status === "done") {
     return (
-      <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
         <circle cx="20" cy="20" r="19" fill="#315BFF" />
         <path
           d="M12.8 20.3L17.4 24.9L27.2 15.1"
@@ -184,7 +181,7 @@ function MedicationStatusIcon({ status, size = "md" }) {
 
   if (status === "partial") {
     return (
-      <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
         <circle cx="20" cy="20" r="19" fill="#F2A35B" />
         <path
           d="M20 12L28 26H12L20 12Z"
@@ -199,7 +196,7 @@ function MedicationStatusIcon({ status, size = "md" }) {
 
   if (status === "miss") {
     return (
-      <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
         <circle cx="20" cy="20" r="19" fill="#F45074" />
         <path
           d="M14.5 14.5L25.5 25.5M25.5 14.5L14.5 25.5"
@@ -212,7 +209,7 @@ function MedicationStatusIcon({ status, size = "md" }) {
   }
 
   return (
-    <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+    <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
       <circle
         cx="20"
         cy="20"

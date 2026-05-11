@@ -1,23 +1,37 @@
 function ExerciseSection({ icon, title, cards }) {
+  const useScrollLayout = cards.length > 3;
+
   return (
     <section className="mb-10">
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex w-full items-center gap-2">
         <span className="text-lg">{icon}</span>
         <h3 className="text-lg font-bold text-[#1f2937] sm:text-[20px]">
           {title}
         </h3>
       </div>
 
-      <div className="w-full rounded-[24px] bg-white px-3 py-4 shadow-sm sm:px-4 sm:py-6">
-        <div className="mx-auto w-full overflow-x-auto xl:max-w-[948px]">
-          <div className="flex w-max gap-6">
+      <div className="w-full rounded-[24px] bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
+        <div
+          className={useScrollLayout ? "w-full overflow-x-auto pb-2" : "w-full"}
+        >
+          <div
+            className={
+              useScrollLayout
+                ? "grid min-w-full grid-flow-col auto-cols-[calc((100%-2.5rem)/3)] gap-5"
+                : "grid w-full gap-5 md:grid-cols-2 xl:grid-cols-3"
+            }
+          >
             {cards.map((card, index) => (
               <div
                 key={`${card.name}-${index}`}
-                className="w-[260px] shrink-0 rounded-[18px] border border-[#e5e7eb] bg-[#fcfcfc] px-4 py-4 shadow-sm sm:w-[280px] sm:px-5 sm:py-5 lg:w-[300px]"
+                className={
+                  useScrollLayout
+                    ? "w-full rounded-[18px] border border-[#e5e7eb] bg-[#fcfcfc] px-5 py-5 shadow-sm"
+                    : "w-full rounded-[18px] border border-[#e5e7eb] bg-[#fcfcfc] px-5 py-5 shadow-sm"
+                }
               >
                 <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#eef2ff] text-base">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#eef2ff] text-[18px]">
                     {card.icon}
                   </div>
                   <span className="text-lg font-semibold text-[#1f2937] sm:text-[20px]">

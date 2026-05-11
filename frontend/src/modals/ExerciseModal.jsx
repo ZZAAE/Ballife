@@ -1,14 +1,14 @@
 import { useState } from "react";
-import ExerciseModalHeader from "../../modals/ExerciseModalHeader";
-import ExerciseModalTabs from "../../modals/ExerciseModalTabs";
-import ExerciseDetailSection from "../../modals/ExerciseDetailSection";
-import ExpectedCalorieCard from "../../modals/ExpectedCalorieCard";
-import ExerciseSubmitButton from "../../modals/ExerciseSubmitButton";
+import ExerciseModalHeader from "./ExerciseModalHeader";
+import ExerciseModalTabs from "./ExerciseModalTabs";
+import ExerciseDetailSection from "./ExerciseDetailSection";
+import ExpectedCalorieCard from "./ExpectedCalorieCard";
+import ExerciseSubmitButton from "./ExerciseSubmitButton";
 
 function ExerciseModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("anaerobic");
 
-  if (!isOpen) return null; 
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
