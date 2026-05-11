@@ -11,9 +11,7 @@ export default function TodayScheduleCard() {
           </span>
         </div>
 
-        <span className="text-[13px] text-gray-400 cursor-pointer hover:text-gray-600 flex items-center gap-1">
-          알림 설정 변경 <ChevronRight className="w-4 h-4" />
-        </span>
+        
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
