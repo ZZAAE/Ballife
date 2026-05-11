@@ -1,9 +1,8 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
-import UserInformation from './pages/user/UserInformation';
-import DiseasePage from './pages/user/DiseasePage';
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -26,26 +25,40 @@ import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
 import ObesityReportPage from './pages/report/ObesityReportPage';
 import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
-import SummaryCard from './components/SummaryCard';
-import AllRecordPage from './pages/recordRead/AllRecordPage'
+import HealthCalenderPage from './pages/main/HealthCalenderPage';
+import AllRecordPage from './pages/AllRecordPage';
+import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
-  const { pathname } = useLocation();
-
+  const location = useLocation();
   const hideHealthMenu =
-    location.pathname === '/' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname === '/mainreport' ||
-    location.pathname === '/osteoporosis' ||
-    location.pathname === '/diabetes' ||
-    location.pathname === '/gout' ||
-    location.pathname === '/hypertension' ||
-    location.pathname === '/dyslipidemia' ||
-    location.pathname === '/obesity' ||
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
+    location.pathname === '/AllRecordPage'||
+    location.pathname === '/' ||
+    location.pathname.startsWith('/posts/');
+
+  const hideChatbot =
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/boards' ||
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
     location.pathname.startsWith('/posts/');
 
   return (
@@ -59,17 +72,38 @@ function App() {
           <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/member" element={<UserInformation />} />
-          <Route path="/disease" element={<DiseasePage />} />
+
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
-          <Route path="/allRecord" element={<AllRecordPage/>}/>
-          <Route path="/check/meal" element={<MealPage/>}/>
+
+          <Route path="/allRecord" element={<AllRecordPage />} />
+          
+          <Route path="/check/all" element={< RecordSummary/>} />
+          <Route path="/check/meal" element={<MealPage />} />
+          <Route path="/check/weight" element={<WeightRecord />} />
+          <Route path="/check/blood-pressure" element={<BloodPressureRecord />} />
+          <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
+          <Route path="/check/exercise" element={<ExercisePage />} />
+          <Route path="/check/medicine" element={<MedicationPage />} />
+
+          <Route path="/member" element={<UserInformation />} />
+
+          <Route path="/records" element={<RecordPage />} />
+          <Route path="/intro/web" element={<MainReportPage />} />
+          <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
+          <Route path="/intro/diabetes" element={<DiabetesReportPage />} />
+          <Route path="/intro/gout" element={<GoutReportPage />} />
+          <Route path="/intro/hypertension" element={<HypertensionReportPage />} />
+          <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
+          <Route path="/intro/obesity" element={<ObesityReportPage />} />
+          <Route path="/healthcalendar" element={<HealthCalenderPage />} />
+
         </Routes>
         </div>
-        {hideHealthMenu && <HealthIndicatorMenu />}
+        {!hideHealthMenu && <HealthIndicatorMenu />}
+        
       </div>
 
       </main>

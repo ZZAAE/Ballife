@@ -289,6 +289,69 @@ const [waterRecords] = useState([
     amount: 1400,
   },
 ]);
+
+const [mealRecords] = useState({
+  breakfast: {
+    time: "08:30",
+    label: "아침 식사",
+    image: "",
+    items: [
+      {
+        name: "닭가슴살 샐러드",
+        kcal: 320,
+        carb: 22,
+        protein: 35,
+        fat: 8,
+        sugar: 5,
+        chol: 40,
+        na: 300,
+      },
+      {
+        name: "고구마",
+        kcal: 180,
+        carb: 38,
+        protein: 2,
+        fat: 0,
+        sugar: 9,
+        chol: 0,
+        na: 20,
+      },
+    ],
+  },
+
+  lunch: null,
+
+  dinner: {
+    time: "18:40",
+    label: "저녁 식사",
+    image: "",
+    items: [
+      {
+        name: "현미밥",
+        kcal: 250,
+        carb: 52,
+        protein: 5,
+        fat: 2,
+        sugar: 1,
+        chol: 0,
+        na: 10,
+      },
+      {
+        name: "된장찌개",
+        kcal: 180,
+        carb: 12,
+        protein: 14,
+        fat: 8,
+        sugar: 3,
+        chol: 25,
+        na: 720,
+      },
+    ],
+  },
+
+  snack: null,
+});
+
   const closeModal = () => {
     setModalType(null);
   };
