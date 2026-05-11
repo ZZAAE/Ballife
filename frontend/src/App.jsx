@@ -11,7 +11,7 @@ import PostEditPage from "./pages/board/PostEditPage";
 import PostDetailPage from "./pages/board/PostDetailPage";
 import RecordSummary from "./pages/AllRecordRead/RecordSummary";
 import MainPage from "./pages/main/MainPage";
-import ExercisePage from "./pages/exercise/exercisePage";
+import ExercisePage from "./pages/ExercisePage";
 import Header from "./components/Header";
 import HealthIndicatorMenu from "./components/HealthMenu";
 import SummaryCard from "./components/SummaryCard";

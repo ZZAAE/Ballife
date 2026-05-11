@@ -4,7 +4,7 @@ function ExerciseRecordTable({ activeTab, logs, onTabChange }) {
   const isAnaerobic = activeTab === "anaerobic";
 
   return (
-    <section className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <section className="w-full overflow-hidden rounded-2xl bg-white shadow-sm">
       <div className="px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         <h3 className="text-lg font-semibold text-[#1f2937]">운동 기록</h3>
       </div>

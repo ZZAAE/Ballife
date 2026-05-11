@@ -75,6 +75,22 @@ const DUMMY_AEROBIC_CARDS = [
     intensity: "중간",
     calories: "200 kcal",
   },
+  {
+    id: 4,
+    name: "사이클링",
+    iconType: "cycling",
+    duration: "25분",
+    intensity: "중간",
+    calories: "200 kcal",
+  },
+  {
+    id: 5,
+    name: "사이클링",
+    iconType: "cycling",
+    duration: "25분",
+    intensity: "중간",
+    calories: "200 kcal",
+  },
 ];
 
 // 운동 기록 테이블 더미 데이터
@@ -118,21 +134,21 @@ const DUMMY_AEROBIC_LOGS = [
     id: 1,
     date: "오늘 14:00",
     duration: "30분",
-    intensity: "가벼움",
+    intensity: "보통",
     calories: "180 kcal",
   },
   {
     id: 2,
     date: "어제 09:00",
     duration: "45분",
-    intensity: "중간",
+    intensity: "강함",
     calories: "250 kcal",
   },
   {
     id: 3,
     date: "어제 09:00",
     duration: "20분",
-    intensity: "격렬함",
+    intensity: "약함",
     calories: "320 kcal",
   },
 ];
