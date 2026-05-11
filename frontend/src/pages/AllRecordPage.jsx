@@ -15,6 +15,7 @@ import MealRegisterModal from "../modals/MealRegisterModal";
 import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
+import MealRecordCard from "../components/MealRecordCard";
 
 import {
   BloodPressureRecordItem,
@@ -172,7 +173,7 @@ function MealBox({ title, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[285px] w-full items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+      className="flex h-[380px] w-full items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
     >
       <div className="flex flex-col items-center justify-center">
         <MealPlaceholderIcon />
@@ -289,6 +290,69 @@ const [waterRecords] = useState([
     amount: 1400,
   },
 ]);
+
+const [mealRecords] = useState({
+  breakfast: {
+    time: "08:30",
+    label: "아침 식사",
+    image: "",
+    items: [
+      {
+        name: "닭가슴살 샐러드",
+        kcal: 320,
+        carb: 22,
+        protein: 35,
+        fat: 8,
+        sugar: 5,
+        chol: 40,
+        na: 300,
+      },
+      {
+        name: "고구마",
+        kcal: 180,
+        carb: 38,
+        protein: 2,
+        fat: 0,
+        sugar: 9,
+        chol: 0,
+        na: 20,
+      },
+    ],
+  },
+
+  lunch: null,
+
+  dinner: {
+    time: "18:40",
+    label: "저녁 식사",
+    image: "",
+    items: [
+      {
+        name: "현미밥",
+        kcal: 250,
+        carb: 52,
+        protein: 5,
+        fat: 2,
+        sugar: 1,
+        chol: 0,
+        na: 10,
+      },
+      {
+        name: "된장찌개",
+        kcal: 180,
+        carb: 12,
+        protein: 14,
+        fat: 8,
+        sugar: 3,
+        chol: 25,
+        na: 720,
+      },
+    ],
+  },
+
+  snack: null,
+});
+
   const closeModal = () => {
     setModalType(null);
   };
@@ -470,22 +534,77 @@ const [waterRecords] = useState([
             </div>
 
             <div className="grid grid-cols-1 gap-[34px] md:grid-cols-2">
-              <MealBox
-                title="아침 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.breakfast ? (
+                <button
+                  type="button"
+                  onClick={() => setModalType("meal")}
+                  className="h-[380px] w-full text-left"
+                >
+                  <MealRecordCard
+                    time={mealRecords.breakfast.time}
+                    label={mealRecords.breakfast.label}
+                    image={mealRecords.breakfast.image}
+                    items={mealRecords.breakfast.items}
+                    className="h-full"
+                  />
+                </button>
+              ) : (
+                <MealBox title="아침 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox
-                title="점심 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.lunch ? (
+                <button
+                  type="button"
+                  onClick={() => setModalType("meal")}
+                  className="h-[380px] w-full text-left"
+                >
+                  <MealRecordCard
+                    time={mealRecords.lunch.time}
+                    label={mealRecords.lunch.label}
+                    image={mealRecords.lunch.image}
+                    items={mealRecords.lunch.items}
+                    className="h-full"
+                  />
+                </button>
+              ) : (
+                <MealBox title="점심 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox
-                title="저녁 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.dinner ? (
+                <button
+                  type="button"
+                  onClick={() => setModalType("meal")}
+                  className="h-[380px] w-full text-left"
+                >
+                  <MealRecordCard
+                    time={mealRecords.dinner.time}
+                    label={mealRecords.dinner.label}
+                    image={mealRecords.dinner.image}
+                    items={mealRecords.dinner.items}
+                    className="h-full"
+                  />
+                </button>
+              ) : (
+                <MealBox title="저녁 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox title="간식" onClick={() => setModalType("meal")} />
+              {mealRecords.snack ? (
+                <button
+                  type="button"
+                  onClick={() => setModalType("meal")}
+                  className="h-[380px] w-full text-left"
+                >
+                  <MealRecordCard
+                    time={mealRecords.snack.time}
+                    label={mealRecords.snack.label}
+                    image={mealRecords.snack.image}
+                    items={mealRecords.snack.items}
+                    className="h-full"
+                  />
+                </button>
+              ) : (
+                <MealBox title="간식" onClick={() => setModalType("meal")} />
+              )}
             </div>
           </section>
         </div>
