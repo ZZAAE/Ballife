@@ -1,5 +1,6 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
 import BoardListPage from './pages/board/BoardListPage';
@@ -58,16 +59,34 @@ import UserInformation from "./pages/user/UserInformation";
 
 function App() {
   const location = useLocation();
-
   const hideHealthMenu =
-    location.pathname === '/' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname === '/mainreport' ||
-    location.pathname.startsWith('/posts/') ||
-    location.pathname.startsWith('/intro/');
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
+    location.pathname === '/AllRecordPage'||
+    location.pathname === '/' ||
+    location.pathname.startsWith('/posts/');
+
+  const hideChatbot =
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/boards' ||
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
+    location.pathname.startsWith('/posts/');
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -83,7 +102,7 @@ function App() {
           <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/member" element={<UserInformation />} />
+
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
@@ -108,6 +127,8 @@ function App() {
               />
               <Route path="/check/medicine" element={<MedicationPage />} />
 
+          <Route path="/member" element={<UserInformation />} />
+
           <Route path="/records" element={<RecordPage />} />
           <Route path="/intro/web" element={<MainReportPage />} />
           <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
@@ -121,6 +142,7 @@ function App() {
         </Routes>
         </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}
+        
       </div>
 
       </main>

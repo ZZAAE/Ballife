@@ -521,10 +521,9 @@ export default function MealPage() {
         minHeight: "100vh",
         color: "#2d3335",
         // ★ 부모(App.jsx)의 flex 제약에서 벗어나 창 너비에 맞춰 반응
-        width: "100vw",
-        marginLeft: "calc(50% - 50vw)",
-        // ★ App.jsx의 <main className="py-12"> 상하 패딩 상쇄
-        marginBottom: "-48px",
+        width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
       }}
     >
       <div style={{ display: "flex", minHeight: "100vh" }}>

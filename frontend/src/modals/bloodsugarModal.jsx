@@ -12,12 +12,47 @@ const MEALS = [
 const TIMINGS = ["식전", "식후"];
 
 const getStatusInfo = (value) => {
-  if (value <= 100) return { label: "정상 범위 내에 있습니다", color: "#34c759" };
-  if (value <= 180) return { label: "주의 범위에 있습니다", color: "#f5a623" };
-  return { label: "경고 범위에 있습니다", color: "#ff3b30" };
+  if (value <= 100) 
+    return { 
+      label: "정상 범위 내에 있습니다", 
+      color: "#22C55E",
+      badge: "bg-[#ECFDF3] text-[#16A34A]"
+    };
+  if (value <= 180) 
+    return { 
+      label: "주의 범위에 있습니다", 
+      color: "#FB923C",
+      badge: "bg-[#FFF7ED] text-[#EA580C]"
+    };
+  return { 
+    label: "경고 범위에 있습니다", 
+    color: "#F87171",
+    badge: "bg-[#FEF2F2] text-[#DC2626]"
+  };
 };
 
-export default function WaterRecordModal({ isOpen, onClose }) {
+const getCurrentTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+};
+
+const makeDefaultRecord = () => ({
+  pct: 0,
+  value: "00.0",
+  time: getCurrentTime(),
+  saved: false,
+});
+
+export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const dateInputRef = useRef(null);
+
+  const [activeMeal, setActiveMeal] = useState("공복");
+  const [activeTiming, setActiveTiming] = useState("식전");
+
+  const [recordsByDate, setRecordsByDate] = useState({});
 
   const [activeTab, setActiveTab] = useState(0);
   const [tabData, setTabData] = useState({
@@ -31,7 +66,6 @@ export default function WaterRecordModal({ isOpen, onClose }) {
   const sliderRef = useRef(null);
   const inputRef = useRef(null);
 
-  // 시간 인라인 편집
   const [timeEditing, setTimeEditing] = useState(false);
   const [timeInput, setTimeInput] = useState("");
   const timeInputRef = useRef(null);
@@ -136,13 +170,11 @@ export default function WaterRecordModal({ isOpen, onClose }) {
   };
 
   const handleSave = () => {
-    // 값이 0보다 클 때만 저장 처리 → 글씨 진하게
     if (currentVal > 0) {
       updateCurrentRecord({ saved: true });
     }
   };
 
-  // 시간 편집 시작/완료
   const startTimeEdit = () => {
     setTimeInput(timeValue);
     setTimeEditing(true);
@@ -158,11 +190,9 @@ export default function WaterRecordModal({ isOpen, onClose }) {
       hours = h;
       minutes = m;
     } else if (/^\d{4}$/.test(raw)) {
-      // 1430 -> 14:30
       hours = parseInt(raw.slice(0, 2));
       minutes = parseInt(raw.slice(2));
     } else if (/^\d{3}$/.test(raw)) {
-      // 930 -> 9:30
       hours = parseInt(raw.slice(0, 1));
       minutes = parseInt(raw.slice(1));
     } else if (/^\d{1,2}$/.test(raw)) {
@@ -179,7 +209,6 @@ export default function WaterRecordModal({ isOpen, onClose }) {
     setTimeEditing(false);
   };
 
-  // 시간 편집 모드 진입 시 자동 포커스 + 전체 선택
   useEffect(() => {
     if (timeEditing && timeInputRef.current) {
       timeInputRef.current.focus();
@@ -187,13 +216,11 @@ export default function WaterRecordModal({ isOpen, onClose }) {
     }
   }, [timeEditing]);
 
-  // 탭/날짜 바뀌면 포커스 상태 해제
   useEffect(() => {
     setIsFocused(false);
     setTimeEditing(false);
   }, [activeMeal, activeTiming, selectedDate]);
 
-  // 모달이 닫힐 때 드래그/편집 상태 초기화 (이벤트 누수 방지)
   useEffect(() => {
     if (!isOpen) {
       setIsDragging(false);
@@ -205,414 +232,236 @@ export default function WaterRecordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.35)",
-        fontFamily:
-          "'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
-        zIndex: 1000,
-        overflowY: "auto",
-        padding: "20px 0",
-      }}
-    >
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css"
-      />
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+      <div className="relative flex w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]" onClick={(e) => e.stopPropagation()}>
+        
+        {/* 헤더 */}
+        <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
+                혈당 기록하기
+              </h2>
+              <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
+                오늘의 혈당을 기록하세요.
+              </p>
+            </div>
 
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 672,
-          maxWidth: "95vw",
-          background: "#fff",
-          borderRadius: 20,
-          padding: "44px 40px 32px",
-          position: "relative",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.18)",
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 22,
-                fontWeight: 700,
-                color: "#1a1a1a",
-                letterSpacing: -0.3,
-              }}
-            >
-              혈당 기록하기
-            </h2>
-            <p
-              style={{
-                margin: "5px 0 14px",
-                fontSize: 14,
-                color: "#999",
-                fontWeight: 400,
-              }}
-            >
-              오늘의 혈당을 기록하세요.
+            <button onClick={onClose} style={{
+              background: "none", border: "none", cursor: "pointer", padding: 4,
+              color: "#bbb", fontSize: 20, lineHeight: 1,
+            }}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* 안내 박스 */}
+          <div className="mt-5 space-y-1.5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
+            <p className="text-[13px] leading-relaxed text-[#64748B]">
+              정상 혈당: 100mg/dL 미만
+            </p>
+            <p className="text-[13px] leading-relaxed text-[#64748B]">
+              주의 범위: 100 ~ 180mg/dL
+            </p>
+            <p className="text-[13px] leading-relaxed text-[#64748B]">
+              경고 범위: 180mg/dL 이상
             </p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 4,
-              color: "#bbb",
-              fontSize: 20,
-              lineHeight: 1,
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M5 5l10 10M15 5L5 15"
-                stroke="#bbb"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
         </div>
 
-       
-
-          {/* 시간 - 클릭하면 직접 입력 */}
-          {timeEditing ? (
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          
+          {/* 시간 선택 */}
+          <div className="flex gap-3 items-center mb-6">
             <input
-              ref={timeInputRef}
-              type="text"
-              inputMode="numeric"
-              value={timeInput}
-              onChange={(e) => setTimeInput(e.target.value)}
-              onBlur={commitTimeEdit}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commitTimeEdit();
-                }
-                if (e.key === "Escape") setTimeEditing(false);
-              }}
-              placeholder="HH:MM"
-              className="rounded-xl bg-white px-5 py-2.5 text-[14px] font-semibold
-               text-slate-700 border border-blue-400 shadow-sm outline-none w-[120px]
-               tracking-wider"
-              style={{ fontFamily: "inherit" }}
+              type="date"
+              ref={dateInputRef}
+              className="absolute opacity-0 pointer-events-none"
+              onChange={(e) => setSelectedDate(e.target.value)}
+              value={selectedDate}
             />
-          ) : (
-            <button
-              onClick={startTimeEdit}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold
-               text-slate-600 border border-slate-100 shadow-sm hover:border-slate-200 transition-colors"
-            >
-              <Clock className="h-4 w-4 text-blue-500" />
-              {timeValue}
-              <span className="ml-1 text-[10px] text-slate-300">✎</span>
-            </button>
-          )}
-        </div>
 
-        {/* 식사 탭 */}
-        <div
-          style={{
-            marginTop: 20,
-            display: "flex",
-            borderBottom: "1px solid #f0f0f0",
-          }}
-        >
-          {MEALS.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setActiveMeal(m.id)}
-              style={{
-                flex: 1,
-                padding: "15px 0",
-                background: "none",
-                border: "none",
-                borderBottom:
-                  activeMeal === m.id
-                    ? "2.5px solid #222"
-                    : "2.5px solid transparent",
-                fontSize: 14,
-                fontWeight: activeMeal === m.id ? 700 : 400,
-                color: activeMeal === m.id ? "#222" : "#bbb",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                fontFamily: "inherit",
-                letterSpacing: -0.2,
-              }}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 식전/식후 토글 (식사 시간일 때만 표시) */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 8,
-            marginTop: meal.hasTiming ? 16 : 0,
-            height: meal.hasTiming ? 36 : 8,
-            transition: "all 0.2s ease",
-            overflow: "hidden",
-          }}
-        >
-          {meal.hasTiming &&
-            TIMINGS.map((t) => (
-              <button
-                key={t}
-                onClick={() => setActiveTiming(t)}
-                style={{
-                  padding: "8px 28px",
-                  borderRadius: 20,
-                  border:
-                    activeTiming === t
-                      ? "1.5px solid #1a1a2e"
-                      : "1.5px solid #e5e7eb",
-                  background: activeTiming === t ? "#1a1a2e" : "#fff",
-                  color: activeTiming === t ? "#fff" : "#666",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  transition: "all 0.15s ease",
+            {timeEditing ? (
+              <input
+                ref={timeInputRef}
+                type="text"
+                inputMode="numeric"
+                value={timeInput}
+                onChange={(e) => setTimeInput(e.target.value)}
+                onBlur={commitTimeEdit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitTimeEdit();
+                  }
+                  if (e.key === "Escape") setTimeEditing(false);
                 }}
-              >
-                {t}
-              </button>
-            ))}
-        </div>
-
-        {/* 수치 입력 영역 */}
-        <div
-          style={{
-            marginTop: meal.hasTiming ? 24 : 28,
-            textAlign: "center",
-            marginBottom: 8,
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "center",
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            inputMode="decimal"
-            value={display}
-            onChange={handleInputChange}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-            style={{
-              fontSize: 64,
-              fontWeight: isSaved ? 600 : 200,
-              color: isFocused ? "#333" : isSaved ? "#1a1a2e" : "#d0d4dc",
-              letterSpacing: 3,
-              fontVariantNumeric: "tabular-nums",
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              textAlign: "right",
-              width: 220,
-              fontFamily: "inherit",
-              caretColor: "#8b5cf6",
-              padding: 17,
-              transition: "color 0.2s ease, font-weight 0.2s ease",
-            }}
-            placeholder="00.0"
-          />
-          <span
-            style={{
-              fontSize: 18,
-              color: "#aab0bc",
-              fontWeight: 400,
-              marginLeft: 12,
-            }}
-          >
-            mg/dL
-          </span>
-        </div>
-
-        {/* 슬라이더 */}
-        <div style={{ marginTop: 24, padding: "0 2px" }}>
-          <div
-            ref={sliderRef}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            style={{
-              position: "relative",
-              height: 12,
-              borderRadius: 6,
-              background:
-                "linear-gradient(to right, #86efac 0%, #4ade80 15%, #a3e635 30%, #fde047 50%, #fbbf24 65%, #fb923c 78%, #f87171 90%, #ef4444 100%)",
-              cursor: "pointer",
-              touchAction: "none",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: `${sliderPct}%`,
-                transform: "translate(-50%, -50%)",
-                width: 24,
-                height: 24,
-                borderRadius: "50%",
-                background: "#fff",
-                border: "2.5px solid #e0e0e0",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                transition: isDragging ? "none" : "left 0.15s ease",
-                zIndex: 2,
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 10,
-              fontSize: 12,
-              color: "#b0b0b0",
-              fontWeight: 400,
-            }}
-          >
-            <span>정상</span>
-            <span>주의</span>
-            <span>경고</span>
-          </div>
-        </div>
-
-        {/* 상태 표시 */}
-        <div
-          style={{
-            marginTop: 18,
-            textAlign: "center",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 5,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: status.color,
-              display: "inline-block",
-            }}
-          />
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: status.color,
-              display: "inline-block",
-              opacity: 0.45,
-            }}
-          />
-          <span
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#333",
-              marginLeft: 4,
-            }}
-          >
-            {status.label}
-          </span>
-        </div>
-
-        {/* AI 인사이트 카드 */}
-        <div
-          style={{
-            marginTop: 22,
-            background: "#f6f7f9",
-            borderRadius: 14,
-            padding: "18px 22px",
-            display: "flex",
-            gap: 14,
-            alignItems: "flex-start",
-          }}
-        >
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 11,
-              background: "linear-gradient(135deg, #ede9fe, #ddd6fe)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M9 2l1.8 3.6L15 6.5l-2.8 2.7.7 3.8L9 11l-3.9 2l.7-3.8L3 6.5l4.2-.9L9 2z"
-                fill="#8b5cf6"
+                placeholder="HH:MM"
+                className="rounded-[16px] bg-white px-4 py-2.5 text-[13px] font-semibold text-[#1E293B] border-2 border-[#2563EB] shadow-sm outline-none w-[130px] tracking-wider"
               />
-            </svg>
+            ) : (
+              <button
+                onClick={startTimeEdit}
+                className="flex items-center gap-2 rounded-[16px] bg-[#F1F5F9] px-4 py-2.5 text-[13px] font-semibold text-[#64748B] border border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC] transition-colors"
+              >
+                <Clock className="h-4 w-4 text-[#2563EB]" />
+                {timeValue}
+              </button>
+            )}
           </div>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              color: "#555",
-              lineHeight: 1.7,
-              fontWeight: 400,
-            }}
-          >
-            지난번 대비{" "}
-            <strong style={{ fontWeight: 700, color: "#333" }}>5mg/dL</strong>{" "}
-            감소했습니다. 식후 혈당이 약간
-            <br />
-            높으니 가벼운 산책 15분 추천드립니다.
-          </p>
+
+          {/* 식사 탭 */}
+          <div className="pt-0 mb-6">
+            <div className="grid grid-cols-5 rounded-2xl bg-[#F1F5F9] p-1.5 gap-1">
+              {MEALS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveMeal(tab.id)}
+                  className={`rounded-xl px-2 py-2.5 text-[12px] font-semibold transition-all ${
+                    activeMeal === tab.id
+                      ? "bg-white text-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.12)]"
+                      : "text-[#64748B]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 식전/식후 토글 */}
+          {meal.hasTiming && (
+            <div className="flex justify-center gap-3 mb-6">
+              {TIMINGS.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setActiveTiming(t)}
+                  className={`px-6 py-2.5 rounded-[14px] text-[13px] font-semibold transition-all ${
+                    activeTiming === t
+                      ? "bg-[#1a1a2e] text-white shadow-[0_4px_12px_rgba(26,26,46,0.2)]"
+                      : "bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* 수치 입력 */}
+          <div className="mb-6 text-center">
+            <div className="flex items-baseline justify-center gap-1">
+              <input
+                ref={inputRef}
+                type="text"
+                inputMode="decimal"
+                value={display}
+                onChange={handleInputChange}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder="00.0"
+                className="text-[72px] font-bold leading-none tracking-[-0.04em] bg-transparent border-none outline-none placeholder:text-[#CBD5E1] focus:placeholder:text-[#94A3B8] transition-colors"
+                style={{ 
+                  width: isFocused ? "auto" : "200px", 
+                  textAlign: "center",
+                  color: isSaved ? "#0F172A" : "#CBD5E1"
+                }}
+              />
+              <span className="text-[18px] font-semibold text-[#94A3B8] ml-1">mg/dL</span>
+            </div>
+          </div>
+
+          {/* 혈당 상태 */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[15px] font-bold text-[#1E293B]">혈당 상태</span>
+              <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${status.badge}`}>
+                {statusVal <= 100 ? "정상" : statusVal <= 180 ? "주의" : "경고"}
+              </span>
+            </div>
+
+            {/* 슬라이더 */}
+            <div className="relative h-[12px] w-full overflow-visible rounded-full mb-3">
+              <div className="flex h-full overflow-hidden rounded-full">
+                <div className="w-1/3 bg-[#22C55E]" />
+                <div className="w-1/3 bg-[#FB923C]" />
+                <div className="w-1/3 bg-[#F87171]" />
+              </div>
+
+              <div
+                ref={sliderRef}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                className="absolute inset-0 cursor-pointer"
+                style={{ touchAction: "none" }}
+              >
+                <div
+                  className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-white shadow-[0_4px_12px_rgba(15,23,42,0.18)]"
+                  style={{
+                    left: `${sliderPct}%`,
+                    transition: isDragging ? "none" : "left 0.15s ease",
+                    zIndex: 2,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between px-0.5 text-[11px] font-medium text-[#94A3B8]">
+              <span>정상</span>
+              <span>주의</span>
+              <span>경고</span>
+            </div>
+          </div>
+
+          {/* 안내 카드 */}
+          <div className="overflow-hidden rounded-[24px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z" />
+                </svg>
+              </div>
+
+              <div>
+                <p className="text-[13px] leading-relaxed text-[#475569]">
+                  {status.label}
+                </p>
+                <p className="mt-1.5 text-[12px] text-[#94A3B8]">
+                  {statusVal <= 100 
+                    ? "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요."
+                    : statusVal <= 180
+                    ? "혈당이 주의 범위에 있습니다. 가벼운 운동이나 건강한 간식을 권장합니다."
+                    : "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다."}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 저장 버튼 */}
-        <div style={{ paddingTop: 16 }}>
+        <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
           <button
             onClick={handleSave}
-            style={{
-              width: "100%",
-              borderRadius: 24,
-              background: isSaved ? "#0f172a" : "#1a1a2e",
-              padding: "18px 0",
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              boxShadow: "0 8px 24px rgba(26,26,46,0.18)",
-              transition: "all 0.15s ease",
-            }}
+            className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl ${
+              isSaved
+                ? "bg-[#0f172a] text-white hover:bg-[#1a1a2e] active:scale-[0.98]"
+                : "bg-[#1a1a2e] text-white hover:bg-[#25253d] active:scale-[0.98]"
+            }`}
           >
             {isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
           </button>
