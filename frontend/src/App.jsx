@@ -33,18 +33,6 @@ function App() {
   const { pathname } = useLocation();
 
   const hideHealthMenu =
-<<<<<<< HEAD
-    location.pathname === '/allRecord' ||
-    location.pathname === '/check/all' ||
-    location.pathname === '/check/meal' ||
-    location.pathname === '/check/weight' ||
-    location.pathname === '/check/blood-pressure' ||
-    location.pathname === '/check/blood-sugar' ||
-    location.pathname === '/check/exercise' ||
-    location.pathname === '/check/medicine' ||
-    location.pathname === '/AllRecordPage';
-
-=======
     location.pathname === '/' ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
@@ -57,7 +45,6 @@ function App() {
     location.pathname === '/hypertension' ||
     location.pathname === '/dyslipidemia' ||
     location.pathname === '/obesity' ||
->>>>>>> origin/PHH0511-2
     location.pathname.startsWith('/posts/');
 
   return (
