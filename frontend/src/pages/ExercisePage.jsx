@@ -207,7 +207,7 @@ function ExercisePage() {
             </div>
           </main>
 
-          <aside className="w-[320px] bg-[#d3d3d3] px-7 py-12">
+          {/* <aside className="w-[320px] bg-[#d3d3d3] px-7 py-12">
             <h3 className="mb-6 text-lg font-semibold text-[#1f2937]">
               건강 지표
             </h3>
@@ -263,7 +263,7 @@ function ExercisePage() {
                 💬
               </button>
             </div>
-          </aside>
+          </aside> */}
         </div>
       </div>
     </div>

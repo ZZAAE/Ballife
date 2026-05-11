@@ -146,7 +146,6 @@ const MainPage = () => {
 
           </div>
         </main>
-        <HealthMenu />
       </div>
     </div>
   );

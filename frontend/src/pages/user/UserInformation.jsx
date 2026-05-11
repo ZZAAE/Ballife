@@ -95,7 +95,7 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
 function UserInformation() {
   return (
     <div className="min-h-screen bg-[#f7f8fa] w-full">
-      <Header />
+
 
       <div className="min-h-screen w-full pt-[70px]">
         <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-8">

@@ -208,7 +208,7 @@ export default function MealPage() {
   return (
     <div style={{ fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#f2f2f2", minHeight: "100vh", color: "#2d3335" }}>
       {/* Header */}
-      <header style={{ background: "#121b2b", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", height: 64, position: "sticky", top: 0, zIndex: 100 }}>
+      {/* <header style={{ background: "#121b2b", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", height: 64, position: "sticky", top: 0, zIndex: 100 }}>
         <span style={{ fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: -0.5 }}>Ballife</span>
         <nav style={{ display: "flex", gap: 40 }}>
           {["기록", "확인", "커뮤니티", "회원정보", "소개"].map((item) => (
@@ -221,7 +221,7 @@ export default function MealPage() {
         <button style={{ width: 36, height: 36, borderRadius: "50%", background: "#252f43", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M1 1h16M1 7h16M1 13h16" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
         </button>
-      </header>
+      </header> */}
 
       <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
         {/* Main Content */}
@@ -313,7 +313,7 @@ export default function MealPage() {
         </main>
 
         {/* Right Sidebar */}
-        <aside style={{ width: 280, background: "rgba(196,196,196,0.3)", padding: "28px 20px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+        {/* <aside style={{ width: 280, background: "rgba(196,196,196,0.3)", padding: "28px 20px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
           <h3 style={{ fontSize: 18, fontWeight: 500, color: "#000", margin: "0 0 12px", paddingLeft: 16 }}>건강 지표</h3>
           {sidebarItems.map((item) => (
             <div key={item.label}
@@ -344,7 +344,7 @@ export default function MealPage() {
           </button>
 
           {/* AI Suggestion */}
-          <div style={{ marginTop: "auto", padding: 22, borderRadius: 20, background: "#fff", border: "1.5px solid #004ddf", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+          {/* <div style={{ marginTop: "auto", padding: 22, borderRadius: 20, background: "#fff", border: "1.5px solid #004ddf", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
               <svg width="14" height="18" viewBox="0 0 15 20" fill="none"><path d="M7.5 20a2 2 0 01-2-2h4a2 2 0 01-2 2zm-4-3v-2h8v2h-8zm.25-3C2.6 13.317 1.688 12.4 1.013 11.25.337 10.1 0 8.85 0 7.5 0 5.417.729 3.646 2.188 2.188 3.646.729 5.417 0 7.5 0s3.854.729 5.313 2.188C14.27 3.646 15 5.417 15 7.5c0 1.35-.337 2.6-1.013 3.75C13.313 12.4 12.4 13.317 11.25 14h-7.5z" fill="#004DDF"/></svg>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#004ddf", textTransform: "uppercase", letterSpacing: 0.5 }}>AI 다음 식단 제안</span>
@@ -363,7 +363,7 @@ export default function MealPage() {
               </div>
             </div>
           </div>
-        </aside>
+        </aside> */}
       </div>
     </div>
   );

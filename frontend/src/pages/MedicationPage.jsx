@@ -74,15 +74,6 @@ export default function MedicationPage() {
           <div className="mt-10">
             <PrescriptionListCard onSelectGroup={openPrescriptionModal} />
           </div>
-
-          <div className="mt-8">
-            <button
-              className="w-full h-[45px] bg-[#1B1F2A] text-white rounded-xl text-[14px] font-bold hover:bg-[#2A2F3F] transition-colors"
-              onClick={() => setIsBloodPressureModalOpen(true)}
-            >
-              혈압 모달
-            </button>
-          </div>
         </main>
       </div>
 
