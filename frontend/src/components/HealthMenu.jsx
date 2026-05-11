@@ -19,7 +19,7 @@ const menuItems = [
   { key: "weight", label: "체중", icon: weightIcon, path: "/check/weight" },
   { key: "exercise", label: "운동", icon: exerciseIcon, path: "/check/exercise" },
   { key: "meal", label: "식단", icon: mealIcon, path: "/check/meal" },
-  { key: "pill", label: "복용", icon: pillIcon, path: "/medication" },
+  { key: "pill", label: "복용", icon: pillIcon, path: "/check/medicine" },
 ];
 
 export default function HealthIndicatorMenu({ onRegisterClick }) {
