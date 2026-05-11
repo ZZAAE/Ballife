@@ -29,15 +29,9 @@ import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
 import ObesityReportPage from './pages/report/ObesityReportPage';
 import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
-<<<<<<< HEAD
-import HealthCalenderPage from './pages/main/HealthCalenderPage';
-import AllRecordPage from './pages/AllRecordPage';
-import UserInformation from './pages/user/UserInformation'
-=======
 import SummaryCard from './components/SummaryCard';
 import AllRecordPage from './pages/recordRead/AllRecordPage'
 import MealPage from './pages/MealPage'
->>>>>>> origin/LYJ0511
 
 
 function App() {
@@ -69,44 +63,14 @@ function App() {
           <Route path="/" element={<MainPage/>} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-<<<<<<< HEAD
-
-=======
           <Route path="/member" element={<UserInformation />} />
           <Route path="/disease" element={<DiseasePage />} />
->>>>>>> origin/LYJ0511
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
-<<<<<<< HEAD
-
-          <Route path="/allRecord" element={<AllRecordPage />} />
-          
-          <Route path="/check/all" element={< RecordSummary/>} />
-          <Route path="/check/meal" element={<MealPage />} />
-          <Route path="/check/weight" element={<WeightRecord />} />
-          <Route path="/check/blood-pressure" element={<BloodPressureRecord />} />
-          <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
-          <Route path="/check/exercise" element={<ExercisePage />} />
-          <Route path="/check/medicine" element={<MedicationPage />} />
-
-          <Route path="/member" element={<UserInformation />} />
-
-          <Route path="/records" element={<RecordPage />} />
-          <Route path="/intro/web" element={<MainReportPage />} />
-          <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
-          <Route path="/intro/diabetes" element={<DiabetesReportPage />} />
-          <Route path="/intro/gout" element={<GoutReportPage />} />
-          <Route path="/intro/hypertension" element={<HypertensionReportPage />} />
-          <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
-          <Route path="/intro/obesity" element={<ObesityReportPage />} />
-          <Route path="/healthcalendar" element={<HealthCalenderPage />} />
-
-=======
           <Route path="/record" element={<AllRecordPage/>}/>
           <Route path="/check/meal" element={<MealPage/>}/>
->>>>>>> origin/LYJ0511
         </Routes>
         </div>
         {hideHealthMenu && <HealthIndicatorMenu />}
