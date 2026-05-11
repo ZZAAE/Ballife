@@ -74,6 +74,8 @@ const WaterRecordModal = ({
         </div>
 
         <div className="flex-1 flex flex-col justify-between">
+          
+
           <div className="relative py-2">
             <div className="absolute right-0 top-2 text-right">
               <div className="flex items-end justify-end gap-3 leading-none">
