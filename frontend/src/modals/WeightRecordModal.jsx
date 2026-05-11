@@ -3,9 +3,6 @@ import { X, Calendar } from 'lucide-react';
 
 const WeightRecordModal = ({ isOpen, onClose }) => {
   const [weight, setWeight] = useState("70.5");
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const dateInputRef = useRef(null);
-
   // 목표 관련 설정값 (나중에는 UserConfig에서 불러옴)
   const targetWeight = 68.0;
   const startWeight = 75.0; // 시작 체중 (전날 체중으로 먼저 띄워줘도 될듯?)
@@ -52,22 +49,6 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="flex-1 flex flex-col justify-between">
-          {/* Date Selector */}
-          <div className="relative">
-            <input
-              type="date"
-              ref={dateInputRef}
-              className="absolute opacity-0 pointer-events-none"
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button 
-              onClick={() => dateInputRef.current.showPicker()}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              {selectedDate}<span className="ml-1 text-[10px] text-slate-300">▼</span>
-            </button>
-          </div>
 
           {/* Weight Input */}
           <div className="flex flex-col items-center justify-center py-2">

@@ -17,31 +17,15 @@ const getStatusInfo = (value) => {
   return { label: "경고 범위에 있습니다", color: "#ff3b30" };
 };
 
-const getCurrentTime = () => {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-};
+export default function WaterRecordModal({ isOpen, onClose }) {
 
-const makeDefaultRecord = () => ({
-  pct: 0,
-  value: "00.0",
-  time: getCurrentTime(),
-  saved: false,
-});
-
-export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const dateInputRef = useRef(null);
-
-  const [activeMeal, setActiveMeal] = useState("공복");
-  const [activeTiming, setActiveTiming] = useState("식전");
-
-  // 날짜별 / 식사별로 분리해서 보관
-  // recordsByDate[date][key] = { pct, value, time, saved }
-  const [recordsByDate, setRecordsByDate] = useState({});
-
+  const [activeTab, setActiveTab] = useState(0);
+  const [tabData, setTabData] = useState({
+    0: { pct: 0, value: "00.0", saved: false },
+    1: { pct: 0, value: "00.0", saved: false },
+    2: { pct: 0, value: "00.0", saved: false },
+    3: { pct: 0, value: "00.0", saved: false },
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const sliderRef = useRef(null);
@@ -311,25 +295,7 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
           </button>
         </div>
 
-        {/* 날짜 + 시간 선택 */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          {/* 날짜 */}
-          <div className="relative">
-            <input
-              type="date"
-              ref={dateInputRef}
-              className="absolute opacity-0 pointer-events-none"
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button 
-              onClick={() => dateInputRef.current.showPicker()}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold
-               text-slate-600 border border-slate-100 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              {selectedDate}<span className="ml-1 text-[10px] text-slate-300">▼</span>
-            </button>
-          </div>
+       
 
           {/* 시간 - 클릭하면 직접 입력 */}
           {timeEditing ? (
@@ -651,7 +617,6 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
             {isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
           </button>
         </div>
-      </div>
     </div>
   );
 }
