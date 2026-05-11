@@ -1,19 +1,12 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Calendar } from "lucide-react";
 
-function getTodayLocalDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 function BloodPressureRecordModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("아침");
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
-  const [selectedDate, setSelectedDate] = useState(getTodayLocalDate());
+
 
   const dateInputRef = useRef(null);
 
@@ -31,6 +24,7 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
       dateInputRef.current?.focus();
     }
   };
+
 
   const bpInfo = useMemo(() => {
     const s = Number(systolic);
@@ -88,10 +82,9 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div 
-    onClick={onClose}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
-      <div className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+      
+      <div className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]"  onClick={(e) => e.stopPropagation()}>
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
@@ -104,11 +97,10 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#334155] transition hover:bg-[#F8FAFC]"
-            >
+            <button onClick={onClose} style={{
+            background: "none", border: "none", cursor: "pointer", padding: 4,
+            color: "#bbb", fontSize: 20, lineHeight: 1,
+            }}>
               <svg
                 width="18"
                 height="18"
@@ -122,28 +114,6 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </button>
-          </div>
-
-          {/* 캘린더 */}
-          <div className="relative mt-4">
-            <input
-              type="date"
-              ref={dateInputRef}
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="absolute inset-0 opacity-0 pointer-events-none"
-              tabIndex={-1}
-            />
-
-            <button
-              type="button"
-              onClick={handleOpenDatePicker}
-              className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              <span>{selectedDate}</span>
-              <span className="ml-1 text-[10px] text-slate-300">▼</span>
             </button>
           </div>
 

@@ -30,8 +30,6 @@ const WaterRecordModal = ({
 }) => {
   const clipPathId = useId();
   const [inputAmount, setInputAmount] = useState(() => String(currentAmount));
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const dateInputRef = useRef(null);
 
 
   const parsedCurrentAmount = Number(inputAmount) || 0;
@@ -76,24 +74,6 @@ const WaterRecordModal = ({
         </div>
 
         <div className="flex-1 flex flex-col justify-between">
-          <div className="relative">
-            <input
-              type="date"
-              ref={dateInputRef}
-              className="absolute opacity-0 pointer-events-none"
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => dateInputRef.current?.showPicker()}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 border border-slate-100 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              {selectedDate}<span className="ml-1 text-[10px] text-slate-300">▼</span>
-            </button>
-          </div>
-
-
           <div className="relative py-2">
             <div className="absolute right-0 top-2 text-right">
               <div className="flex items-end justify-end gap-3 leading-none">
