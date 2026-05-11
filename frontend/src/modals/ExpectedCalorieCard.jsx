@@ -10,7 +10,8 @@ function ExpectedCalorieCard() {
           예상 소모 칼로리
         </p>
         <p className="text-xl font-bold text-gray-900">
-          142 <span className="text-sm font-normal text-gray-500">kcal</span>
+          {/* 142 */}
+          <span className="text-sm font-normal text-gray-500">kcal</span>
         </p>
       </div>
     </div>
