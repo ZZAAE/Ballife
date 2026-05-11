@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import characteristicIcon from "../assets/icons/characteristic.svg";
 import aiIcon from "../assets/icons/ai.svg";
@@ -12,20 +13,20 @@ import mealIcon from "../assets/icons/meal.svg";
 import pillIcon from "../assets/icons/pill.svg";
 
 const menuItems = [
-  { key: "all", label: "전체보기", icon: allIcon },
-  { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon },
-  { key: "bloodSugar", label: "혈당", icon: bloodIcon },
-  { key: "weight", label: "체중", icon: weightIcon },
-  { key: "exercise", label: "운동", icon: exerciseIcon },
-  { key: "meal", label: "식단", icon: mealIcon },
-  { key: "pill", label: "복용", icon: pillIcon },
+  { key: "all", label: "전체보기", icon: allIcon, path: "/check/all" },
+  { key: "bloodPressure", label: "혈압", icon: bloodPressureIcon, path: "/check/blood-pressure" },
+  { key: "bloodSugar", label: "혈당", icon: bloodIcon, path: "/check/blood-sugar" },
+  { key: "weight", label: "체중", icon: weightIcon, path: "/check/weight" },
+  { key: "exercise", label: "운동", icon: exerciseIcon, path: "/check/exercise" },
+  { key: "meal", label: "식단", icon: mealIcon, path: "/check/meal" },
+  { key: "pill", label: "복용", icon: pillIcon, path: "/check/medicine" },
 ];
 
-export default function HealthIndicatorMenu() {
+export default function HealthIndicatorMenu({ onRegisterClick }) {
   const [activeMenu, setActiveMenu] = useState("exercise");
 
   return (
-    <aside className="min-h-screen w-[365px] bg-white px-[28px] pt-[50px] pb-[40px] font-['Noto_Sans_KR']">
+    <aside className="min-h-full w-[365px] shrink-0 bg-white px-[28px] pt-[50px] pb-[40px] font-['Noto_Sans_KR']">
       {/* 상단 제목 */}
       <div className="flex items-center gap-[20px]">
         <img
@@ -50,12 +51,12 @@ export default function HealthIndicatorMenu() {
           const isActive = activeMenu === item.key;
 
           return (
-            <button
+            <Link
               key={item.key}
-              type="button"
+              to={item.path}
               onClick={() => setActiveMenu(item.key)}
               className={[
-                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none",
+                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none no-underline",
                 isActive
                   ? "bg-[#E8E8E8] pl-[20px]"
                   : "bg-transparent pl-[23px]",
@@ -76,7 +77,7 @@ export default function HealthIndicatorMenu() {
               <span className="text-[14px] font-medium leading-none tracking-[-0.2px] text-[#111111]">
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -84,6 +85,7 @@ export default function HealthIndicatorMenu() {
       {/* 기록하기 버튼 */}
       <button
         type="button"
+        onClick={onRegisterClick}
         className="mt-[31px] h-[55px] w-full rounded-[6px] bg-[#050505] text-[15px] font-bold tracking-[-0.2px] text-white"
       >
         기록하기
@@ -104,8 +106,8 @@ export default function HealthIndicatorMenu() {
         </h2>
 
         <p className="mt-[20px] text-[13px] font-normal leading-[1.65] tracking-[-0.25px] text-white/95">
-          이번 주 체중이 꾸준히 안정세를 보이고 있습니다. 현재의 식단과
-          수면 패턴이 신진대사에 긍정적인 영향을 주고 있는 것으로 분석됩니다.
+          이번 주 체중이 꾸준히 안정세를 보이고 있습니다. 현재의 식단과 수면
+          패턴이 신진대사에 긍정적인 영향을 주고 있는 것으로 분석됩니다.
         </p>
 
         <div className="mt-[20px] border-t border-white/15 pt-[12px]">
@@ -114,8 +116,8 @@ export default function HealthIndicatorMenu() {
           </p>
 
           <p className="mt-[9px] text-[11px] font-normal leading-[1.55] tracking-[-0.2px] text-white/95">
-            목표 체중까지 약 4.4kg 남았습니다. 근력 운동 횟수를 주 1회 더
-            늘리면 기초대사량이 높아져 정체기를 예방할 수 있습니다.
+            목표 체중까지 약 4.4kg 남았습니다. 근력 운동 횟수를 주 1회 더 늘리면
+            기초대사량이 높아져 정체기를 예방할 수 있습니다.
           </p>
         </div>
 

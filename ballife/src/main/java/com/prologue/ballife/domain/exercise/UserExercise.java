@@ -1,4 +1,4 @@
-package com.prologue.ballife.domain.Exercise;
+package com.prologue.ballife.domain.exercise;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
 package com.prologue.ballife.repository.exercise;
 
-import com.prologue.ballife.domain.Exercise.UserExercise;
+import com.prologue.ballife.domain.exercise.UserExercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,6 +1,6 @@
 package com.prologue.ballife.repository.exercise;
 
-import com.prologue.ballife.domain.Exercise.UserExerciseDetail;
+import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
