@@ -2,8 +2,6 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
-import UserInformation from './pages/user/UserInformation';
-import DiseasePage from './pages/user/DiseasePage';
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -26,13 +24,13 @@ import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
 import ObesityReportPage from './pages/report/ObesityReportPage';
 import Header from './components/Header';
 import HealthIndicatorMenu from './components/HealthMenu';
-import SummaryCard from './components/SummaryCard';
-import AllRecordPage from './pages/recordRead/AllRecordPage'
+import HealthCalenderPage from './pages/main/HealthCalenderPage';
+import AllRecordPage from './pages/AllRecordPage';
+import UserInformation from './pages/user/UserInformation'
 
 
 function App() {
-  // AuthProvider가 내려주는 값: 로그인 사용자, 여부, 로그아웃 함수 등
-  const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
 
   const hideHealthMenu =
     location.pathname === '/home' ||
@@ -40,8 +38,9 @@ function App() {
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname.startsWith('/posts/');
-   // 앞으로 추가할 페이지 중 우측바 안뜨는 페이지는 location으로 경로설정
+    location.pathname === '/mainreport' ||
+    location.pathname.startsWith('/posts/') ||
+    location.pathname.startsWith('/intro/');
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -58,14 +57,34 @@ function App() {
           <Route path="/home" element={<MainPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/disease" element={<DiseasePage />} />
+          <Route path="/member" element={<UserInformation />} />
           <Route path="/boards" element={<BoardListPage />} />
           <Route path="/posts/create" element={<PostCreatePage />} />
           <Route path="/posts/:id/edit" element={<PostEditPage />} />
           <Route path="/posts/:postId" element={<PostDetailPage />} />
-          <Route path="/page/Medication" element={<MedicationPage />} />
+
+          <Route path="/allRecord" element={<AllRecordPage />} />
           
+          <Route path="/check/all" element={< RecordSummary/>} />
+          <Route path="/check/meal" element={<MealPage />} />
+          <Route path="/check/weight" element={<WeightRecord />} />
+          <Route path="/check/blood-pressure" element={<BloodPressureRecord />} />
+          <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
+          <Route path="/check/exercise" element={<ExercisePage />} />
+          <Route path="/check/medicine" element={<MedicationPage />} />
+
+          <Route path="/records" element={<RecordPage />} />
+          <Route path="/intro/web" element={<MainReportPage />} />
+          <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
+          <Route path="/intro/diabetes" element={<DiabetesReportPage />} />
+          <Route path="/intro/gout" element={<GoutReportPage />} />
+          <Route path="/intro/hypertension" element={<HypertensionReportPage />} />
+          <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
+          <Route path="/intro/obesity" element={<ObesityReportPage />} />
+          <Route path="/healthcalendar" element={<HealthCalenderPage />} />
+
         </Routes>
+      
         {!hideHealthMenu && <HealthIndicatorMenu />}
       </div>
       </main>
