@@ -1,19 +1,12 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Calendar } from "lucide-react";
 
-function getTodayLocalDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 function BloodPressureRecordModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState("아침");
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
-  const [selectedDate, setSelectedDate] = useState(getTodayLocalDate());
+
 
   const dateInputRef = useRef(null);
 
@@ -121,28 +114,6 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </button>
-          </div>
-
-          {/* 캘린더 */}
-          <div className="relative mt-4">
-            <input
-              type="date"
-              ref={dateInputRef}
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="absolute inset-0 opacity-0 pointer-events-none"
-              tabIndex={-1}
-            />
-
-            <button
-              type="button"
-              onClick={handleOpenDatePicker}
-              className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              <span>{selectedDate}</span>
-              <span className="ml-1 text-[10px] text-slate-300">▼</span>
             </button>
           </div>
 

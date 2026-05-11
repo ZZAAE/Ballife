@@ -37,13 +37,13 @@ function App() {
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
-    location.pathname === '/mainreport' ||
-    location.pathname === '/osteoporosis' ||
-    location.pathname === '/diabetes' ||
-    location.pathname === '/gout' ||
-    location.pathname === '/hypertension' ||
-    location.pathname === '/dyslipidemia' ||
-    location.pathname === '/obesity' ||
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
     location.pathname === '/' ||
     location.pathname.startsWith('/posts/');
@@ -52,13 +52,13 @@ function App() {
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
-    location.pathname === '/mainreport' ||
-    location.pathname === '/osteoporosis' ||
-    location.pathname === '/diabetes' ||
-    location.pathname === '/gout' ||
-    location.pathname === '/hypertension' ||
-    location.pathname === '/dyslipidemia' ||
-    location.pathname === '/obesity' ||
+    location.pathname === '/intro/web' ||
+    location.pathname === '/intro/osteoporosis' ||
+    location.pathname === '/intro/diabetes' ||
+    location.pathname === '/intro/gout' ||
+    location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/dyslipidemia' ||
+    location.pathname === '/intro/obesity' ||
     location.pathname.startsWith('/posts/');
 
   return (

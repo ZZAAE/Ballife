@@ -10,8 +10,7 @@ const getStatusInfo = (value) => {
 };
 
 export default function WaterRecordModal({ isOpen, onClose }) {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const dateInputRef = useRef(null);
+
   const [activeTab, setActiveTab] = useState(0);
   const [tabData, setTabData] = useState({
     0: { pct: 0, value: "00.0", saved: false },
@@ -136,22 +135,7 @@ export default function WaterRecordModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="relative">
-            <input
-              type="date"
-              ref={dateInputRef}
-              className="absolute opacity-0 pointer-events-none"
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button 
-              onClick={() => dateInputRef.current.showPicker()}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-5 py-2.5 text-[14px] font-semibold
-               text-slate-600 border border-slate-100 shadow-sm"
-            >
-              <Calendar className="h-4 w-4 text-blue-500" />
-              {selectedDate}<span className="ml-1 text-[10px] text-slate-300">▼</span>
-            </button>
-          </div>
+       
 
         {/* Tabs */}
         <div style={{
