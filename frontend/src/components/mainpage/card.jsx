@@ -86,7 +86,7 @@ const Card = () => {
 
 const medicineCard = [
   { 
-        link: 'medicine',
+        link: '/medication',
         type: '복약 알림', 
         value: '2건 확인 필요', 
         label: '오전 복용 요망', 

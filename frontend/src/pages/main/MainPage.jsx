@@ -60,7 +60,7 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 ml-[150px] mr-[150px]">
-      <Header />
+      {/* <Header /> */}
       <div className="flex">
         <main className="flex-1 p-6 px-12 py-10">
           <div className="max-w-auto mx-auto space-y-10">

@@ -191,112 +191,104 @@ function MealBox({ title, onClick }) {
 
 function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-30");
-  const [modalType, setModalType] = useState(null);
   const dateInputRef = useRef(null);
 
+  const [modalType, setModalType] = useState(null);
+
   // 더미데이터: 기록 컴포넌트 디자인 확인용
-  const [bloodPressureRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "08:30:00",
-      mealTiming: "아침 식전",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "09:30:00",
-      mealTiming: "아침 식후",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "12:30:00",
-      mealTiming: "점심 식전",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:30:00",
-      mealTiming: "점심 식후",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "18:30:00",
-      mealTiming: "저녁 식전",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-  ]);
+const [bloodPressureRecords] = useState([
+  {
+    recordDate: "2026-05-09",
+    recordTime: "08:30:00",
+    mealTiming: "아침",
+    systolicBp: 160,
+    diastolicBp: 96,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "12:11:00",
+    mealTiming: "점심",
+    systolicBp: 120,
+    diastolicBp: 80,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "20:42:00",
+    mealTiming: "저녁",
+    systolicBp: 123,
+    diastolicBp: 88,
+  },
+]);
 
-  const [bloodSugarRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "08:30:00",
-      mealTiming: "아침 식전",
-      bloodsugar: 120,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "09:30:00",
-      mealTiming: "아침 식후",
-      bloodsugar: 120,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "12:30:00",
-      mealTiming: "점심 식전",
-      bloodsugar: 120,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:30:00",
-      mealTiming: "점심 식후",
-      bloodsugar: 120,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "18:30:00",
-      mealTiming: "저녁 식전",
-      bloodsugar: 120,
-    },
-  ]);
+const [bloodSugarRecords] = useState([
+  {
+    recordDate: "2026-05-09",
+    recordTime: "08:30:00",
+    mealTiming: "아침 식전",
+    bloodsugar: 100,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "09:30:00",
+    mealTiming: "아침 식후",
+    bloodsugar: 150,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "12:30:00",
+    mealTiming: "점심 식전",
+    bloodsugar: 95,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "13:30:00",
+    mealTiming: "점심 식후",
+    bloodsugar: 128,
+  },
+  {
+    recordDate: "2026-05-09",
+    recordTime: "18:30:00",
+    mealTiming: "저녁 식전",
+    bloodsugar: 89,
+  },
+]);
 
-  const [exerciseRecords] = useState([
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "러닝",
-      kcal: 120,
-    },
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "스쿼트",
-      kcal: 120,
-    },
-  ]);
+const [exerciseRecords] = useState([
+  {
+    exerciseDate: "2026-05-09",
+    exerciseTypeId: 3,
+    exerciseName: "걷기",
+    kcal: 609,
+  },
+  {
+    exerciseDate: "2026-05-09",
+    exerciseTypeId: 3,
+    exerciseName: "줄넘기",
+    kcal: 120,
+  },
+  {
+    exerciseDate: "2026-05-09",
+    exerciseTypeId: 3,
+    exerciseName: "사이클",
+    kcal: 430,
+  },
+]);
 
-  const [weightRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:33:00",
-      weight: 78.2,
-    },
-  ]);
+const [weightRecords] = useState([
+  {
+    recordDate: "2026-05-09",
+    recordTime: "13:33:00",
+    weight: 78.2,
+  },
+]);
 
-  const [waterRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:33:00",
-      amount: 1400,
-    },
-  ]);
-
+const [waterRecords] = useState([
+  {
+    recordDate: "2026-05-09",
+    recordTime: "13:33:00",
+    amount: 1400,
+  },
+]);
   const closeModal = () => {
     setModalType(null);
   };
@@ -533,4 +525,3 @@ function AllRecordPage() {
 }
 
 export default AllRecordPage;
-
