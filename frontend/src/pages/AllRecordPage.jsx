@@ -304,7 +304,7 @@ function AllRecordPage() {
       image: "",
       items: [
         {
-          name: "닭가슴살 샐러드",
+          name: "닭가슴살 샐러드 🥗",
           kcal: 320,
           carb: 22,
           protein: 35,
@@ -314,7 +314,7 @@ function AllRecordPage() {
           na: 300,
         },
         {
-          name: "고구마",
+          name: "고구마 🍠",
           kcal: 180,
           carb: 38,
           protein: 2,
@@ -334,7 +334,7 @@ function AllRecordPage() {
       image: "",
       items: [
         {
-          name: "현미밥",
+          name: "현미밥 🍚",
           kcal: 250,
           carb: 52,
           protein: 5,
@@ -344,7 +344,7 @@ function AllRecordPage() {
           na: 10,
         },
         {
-          name: "된장찌개",
+          name: "된장찌개 🍲",
           kcal: 180,
           carb: 12,
           protein: 14,
@@ -374,7 +374,7 @@ function AllRecordPage() {
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[104px] md:px-[60px] xl:px-[150px]">
+        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
           <div className="mb-[50px] flex items-center justify-between">
             <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               전체 기록 관리

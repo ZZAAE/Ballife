@@ -49,7 +49,7 @@ const MealRecordCard = ({
           <img src={image} alt={label} className="h-full w-full object-cover" />
         ) : (
           <img
-            src="https://cdn-icons-png.flaticon.com/512/1405/1405021.png"
+            src="https://saladpanda.co.kr/web/product/extra/big/202407/a039af315a7e721c8e8cb37b387fe90f.jpg"
             alt={label}
             className="h-full w-full object-cover"
           />
@@ -65,18 +65,18 @@ const MealRecordCard = ({
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="py-3 px-6">
         <div>
           {visibleItems.map((item, i) => (
             <div
               key={i}
-              className="flex items-center justify-between border-b border-gray-100 py-2 last:border-b-0"
+              className="flex items-center justify-between border-gray-100 py-2 last:border-b-0 mb-1"
             >
-              <span className="min-w-0 truncate text-[16px] font-[700] text-gray-800">
+              <span className="min-w-0 truncate text-[16px] font-[600] text-gray-800">
                 {item.name}
               </span>
 
-              <span className="ml-3 shrink-0 text-[15px] font-[700] text-[#323232]">
+              <span className="ml-3 shrink-0 text-[16px] font-[600] text-[#5172dc]">
                 {item.kcal} kcal
               </span>
             </div>
@@ -93,11 +93,11 @@ const MealRecordCard = ({
 
         <div className="border-t border-gray-100 pt-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[15px] font-semibold text-[#363636]">
+            <span className="text-[13px] font-[800] text-[#363636]">
               합계
             </span>
 
-            <span className="text-lg font-[800] text-[#5172dc]">
+            <span className="text-[17px] font-[700] text-[#323232]">
               {totals.kcal} kcal
             </span>
           </div>
