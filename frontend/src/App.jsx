@@ -45,6 +45,7 @@ function App() {
     location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
+    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/AllRecordPage'||
     location.pathname === '/' ||
     location.pathname.startsWith('/posts/');
@@ -60,6 +61,7 @@ function App() {
     location.pathname === '/intro/hypertension' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
+    -
     location.pathname.startsWith('/posts/');
 
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
