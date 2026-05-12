@@ -454,7 +454,7 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
         </div>
 
         {/* 저장 버튼 */}
-        <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
+        <div onClick={onClose} className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
           <button
             onClick={handleSave}
             className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl ${

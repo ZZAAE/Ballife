@@ -31,7 +31,7 @@ function ExerciseModal({ isOpen, onClose }) {
         </div>
 
         {/* 고정 하단 버튼 */}
-        <div className="flex-shrink-0 p-6 pt-0 xl:px-8 xl:pb-8">
+        <div onClick={onClose} className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
           <ExerciseSubmitButton />
         </div>
       </div>
