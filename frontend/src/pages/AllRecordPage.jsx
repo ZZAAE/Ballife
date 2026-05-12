@@ -15,6 +15,7 @@ import MealRegisterModal from "../modals/MealRegisterModal";
 import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
+import MealRecordCard from "../components/MealRecordCard";
 
 import {
   BloodPressureRecordItem,
@@ -110,7 +111,10 @@ function LargeRecordCard({
           }
         >
           {children ?? (
-            <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
+            <EmptyRecordArea
+              recordTitle={recordTitle}
+              onAddClick={onAddClick}
+            />
           )}
         </div>
       </div>
@@ -151,7 +155,10 @@ function SmallRecordCard({
           }
         >
           {children ?? (
-            <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
+            <EmptyRecordArea
+              recordTitle={recordTitle}
+              onAddClick={onAddClick}
+            />
           )}
         </div>
       </div>
@@ -172,7 +179,7 @@ function MealBox({ title, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[285px] w-full items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+      className="flex h-[380px] w-full items-center justify-center rounded-[12px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
     >
       <div className="flex flex-col items-center justify-center">
         <MealPlaceholderIcon />
@@ -196,99 +203,162 @@ function AllRecordPage() {
   const [modalType, setModalType] = useState(null);
 
   // 더미데이터: 기록 컴포넌트 디자인 확인용
-const [bloodPressureRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침",
-    systolicBp: 160,
-    diastolicBp: 96,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:11:00",
-    mealTiming: "점심",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "20:42:00",
-    mealTiming: "저녁",
-    systolicBp: 123,
-    diastolicBp: 88,
-  },
-]);
+  const [bloodPressureRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침",
+      systolicBp: 160,
+      diastolicBp: 96,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:11:00",
+      mealTiming: "점심",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "20:42:00",
+      mealTiming: "저녁",
+      systolicBp: 123,
+      diastolicBp: 88,
+    },
+  ]);
 
-const [bloodSugarRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침 식전",
-    bloodsugar: 100,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "09:30:00",
-    mealTiming: "아침 식후",
-    bloodsugar: 150,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:30:00",
-    mealTiming: "점심 식전",
-    bloodsugar: 95,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:30:00",
-    mealTiming: "점심 식후",
-    bloodsugar: 128,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "18:30:00",
-    mealTiming: "저녁 식전",
-    bloodsugar: 89,
-  },
-]);
+  const [bloodSugarRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침 식전",
+      bloodsugar: 100,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "09:30:00",
+      mealTiming: "아침 식후",
+      bloodsugar: 150,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:30:00",
+      mealTiming: "점심 식전",
+      bloodsugar: 95,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:30:00",
+      mealTiming: "점심 식후",
+      bloodsugar: 128,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "18:30:00",
+      mealTiming: "저녁 식전",
+      bloodsugar: 89,
+    },
+  ]);
 
-const [exerciseRecords] = useState([
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "걷기",
-    kcal: 609,
-  },
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "줄넘기",
-    kcal: 120,
-  },
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "사이클",
-    kcal: 430,
-  },
-]);
+  const [exerciseRecords] = useState([
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "걷기",
+      kcal: 609,
+    },
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "줄넘기",
+      kcal: 120,
+    },
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "사이클",
+      kcal: 430,
+    },
+  ]);
 
-const [weightRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    weight: 78.2,
-  },
-]);
+  const [weightRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      weight: 78.2,
+    },
+  ]);
 
-const [waterRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    amount: 1400,
-  },
-]);
+  const [waterRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      amount: 1400,
+    },
+  ]);
+
+  const [mealRecords] = useState({
+    breakfast: {
+      time: "08:30",
+      label: "아침 식사",
+      image: "",
+      items: [
+        {
+          name: "닭가슴살 샐러드",
+          kcal: 320,
+          carb: 22,
+          protein: 35,
+          fat: 8,
+          sugar: 5,
+          chol: 40,
+          na: 300,
+        },
+        {
+          name: "고구마",
+          kcal: 180,
+          carb: 38,
+          protein: 2,
+          fat: 0,
+          sugar: 9,
+          chol: 0,
+          na: 20,
+        },
+      ],
+    },
+
+    lunch: null,
+
+    dinner: {
+      time: "18:40",
+      label: "저녁 식사",
+      image: "",
+      items: [
+        {
+          name: "현미밥",
+          kcal: 250,
+          carb: 52,
+          protein: 5,
+          fat: 2,
+          sugar: 1,
+          chol: 0,
+          na: 10,
+        },
+        {
+          name: "된장찌개",
+          kcal: 180,
+          carb: 12,
+          protein: 14,
+          fat: 8,
+          sugar: 3,
+          chol: 25,
+          na: 720,
+        },
+      ],
+    },
+
+    snack: null,
+  });
+
   const closeModal = () => {
     setModalType(null);
   };
@@ -470,22 +540,57 @@ const [waterRecords] = useState([
             </div>
 
             <div className="grid grid-cols-1 gap-[34px] md:grid-cols-2">
-              <MealBox
-                title="아침 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.breakfast ? (
+                <MealRecordCard
+                  time={mealRecords.breakfast.time}
+                  label={mealRecords.breakfast.label}
+                  image={mealRecords.breakfast.image}
+                  items={mealRecords.breakfast.items}
+                  className="h-[380px]"
+                  onClick={() => setModalType("meal")}
+                />
+              ) : (
+                <MealBox title="아침 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox
-                title="점심 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.lunch ? (
+                <MealRecordCard
+                  time={mealRecords.lunch.time}
+                  label={mealRecords.lunch.label}
+                  image={mealRecords.lunch.image}
+                  items={mealRecords.lunch.items}
+                  className="h-[380px]"
+                  onClick={() => setModalType("meal")}
+                />
+              ) : (
+                <MealBox title="점심 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox
-                title="저녁 식사"
-                onClick={() => setModalType("meal")}
-              />
+              {mealRecords.dinner ? (
+                <MealRecordCard
+                  time={mealRecords.dinner.time}
+                  label={mealRecords.dinner.label}
+                  image={mealRecords.dinner.image}
+                  items={mealRecords.dinner.items}
+                  className="h-[380px]"
+                  onClick={() => setModalType("meal")}
+                />
+              ) : (
+                <MealBox title="저녁 식사" onClick={() => setModalType("meal")} />
+              )}
 
-              <MealBox title="간식" onClick={() => setModalType("meal")} />
+              {mealRecords.snack ? (
+                <MealRecordCard
+                  time={mealRecords.snack.time}
+                  label={mealRecords.snack.label}
+                  image={mealRecords.snack.image}
+                  items={mealRecords.snack.items}
+                  className="h-[380px]"
+                  onClick={() => setModalType("meal")}
+                />
+              ) : (
+                <MealBox title="간식" onClick={() => setModalType("meal")} />
+              )}
             </div>
           </section>
         </div>
@@ -496,30 +601,15 @@ const [waterRecords] = useState([
         onClose={closeModal}
       />
 
-      <BloodsugarModal
-        isOpen={modalType === "blood"}
-        onClose={closeModal}
-      />
+      <BloodsugarModal isOpen={modalType === "blood"} onClose={closeModal} />
 
-      <MealRegisterModal
-        isOpen={modalType === "meal"}
-        onClose={closeModal}
-      />
+      <MealRegisterModal isOpen={modalType === "meal"} onClose={closeModal} />
 
-      <WaterRecordModal
-        isOpen={modalType === "water"}
-        onClose={closeModal}
-      />
+      <WaterRecordModal isOpen={modalType === "water"} onClose={closeModal} />
 
-      <WeightRecordModal
-        isOpen={modalType === "weight"}
-        onClose={closeModal}
-      />
+      <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
 
-      <ExerciseModal
-        isOpen={modalType === "exercise"}
-        onClose={closeModal}
-      />
+      <ExerciseModal isOpen={modalType === "exercise"} onClose={closeModal} />
     </>
   );
 }
