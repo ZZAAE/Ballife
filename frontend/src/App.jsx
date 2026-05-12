@@ -42,6 +42,7 @@ function App() {
     location.pathname === '/intro/diabetes' ||
     location.pathname === '/intro/gout' ||
     location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
