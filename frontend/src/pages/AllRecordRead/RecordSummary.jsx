@@ -162,13 +162,13 @@ export default function RecordSummary() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
       
-      <div className="flex">
+      <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1 p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              전체 기록 관리
+            <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+              오늘의 기록 보기
             </h1>
             <p className="text-sm text-gray-400">
               하루의 신체 변화를 분석한 결과입니다.
