@@ -39,14 +39,14 @@ export default function WeightRecord() {
   const [endDate] = useState("2023.10.31");
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-gray-50 text-gray-900 pt-[55px]">
 
       {/* ───────── Body ───────── */}
       <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
         {/* ───────── Main Content ───────── */}
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           {/* Header */}
-          <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+          <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
             체중 기록 확인
           </h1>
           <p className="mb-8 text-sm text-gray-500">
