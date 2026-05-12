@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import MealDetailModal from "../modals/MealDetailModal";
 
 const meals = [
@@ -134,7 +134,6 @@ const nutritionSummary = [
   { label: "콜레스테롤", current: 150, target: 300, unit: "mg", over: false },
 ];
 
-// ★ MealPage의 meal 데이터를 MealDetailModal이 기대하는 형식으로 변환
 function buildMealData(meal) {
   if (!meal) return null;
 
@@ -154,7 +153,7 @@ function buildMealData(meal) {
         cholesterol: item.chol,
         sodium: item.sodium || 0,
       },
-      image: meal.img, // 음식별 개별 이미지가 없으니 식사 대표 이미지 사용
+      image: meal.img,
     })),
     totalNutrition: {
       carbs: sum("carb"),
@@ -166,59 +165,6 @@ function buildMealData(meal) {
     },
     totalCalories: sum("kcal"),
   };
-}
-
-function SidebarIcon({ type }) {
-  const icons = {
-    blood_pressure: (
-      <svg width="16" height="19" viewBox="0 0 16 19" fill="none">
-        <path
-          d="M8 19C5.783 19 3.896 18.233 2.338 16.7.779 15.167 0 13.3 0 11.1c0-1.083.208-2.096.625-3.038A8.463 8.463 0 012.35 5.55L8 0l5.65 5.55a8.463 8.463 0 011.725 1.513c.417.941.625 1.954.625 3.037 0 2.2-.779 4.067-2.338 5.6C12.104 18.233 10.217 19 8 19zM2.05 12h11.85c.2-1.2.088-2.225-.338-3.075-.425-.85-.862-1.492-1.312-1.925L8 2.8 3.75 7c-.45.433-.892 1.075-1.325 1.925S1.867 10.8 2.05 12z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    weight: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path
-          d="M9 9a3 3 0 100-6 3 3 0 000 6zM2 18a2 2 0 01-2-2V2a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H2zm0-2h14V2H2v14z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    blood_sugar: (
-      <svg width="16" height="19" viewBox="0 0 16 19" fill="none">
-        <path
-          d="M8 19C5.783 19 3.896 18.233 2.338 16.7.779 15.167 0 13.3 0 11.1c0-1.083.208-2.096.625-3.038A8.463 8.463 0 012.35 5.55L8 0l5.65 5.55a8.463 8.463 0 011.725 1.513c.417.941.625 1.954.625 3.037 0 2.2-.779 4.067-2.338 5.6C12.104 18.233 10.217 19 8 19z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    exercise: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M11.3 19.8l-1.4-1.4 3.55-3.55-8.5-8.5L1.4 9.9 0 8.5l1.4-1.45L0 5.65l2.1-2.1L.7 2.1 2.1.7l1.45 1.4L5.65 0l1.4 1.4L8.5 0l1.4 1.4-3.55 3.55 8.5 8.5 3.55-3.55 1.4 1.4-1.4 1.45 1.4 1.4-2.1 2.1 1.4 1.45-1.4 1.4-1.45-1.4-2.1 2.1-1.4-1.4L11.3 19.8z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    medicine: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="1" y="7" width="16" height="4" rx="2" fill="currentColor" />
-        <rect x="7" y="1" width="4" height="16" rx="2" fill="currentColor" />
-      </svg>
-    ),
-    diet: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2C5.6 2 2 5.6 2 10s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
-          fill="currentColor"
-        />
-        <circle cx="10" cy="10" r="3" fill="currentColor" />
-      </svg>
-    ),
-  };
-  return icons[type] || null;
 }
 
 function DonutChart({
@@ -289,9 +235,26 @@ function NutrientBadge({ type, value, unit = "g" }) {
 function NutrientPill({ type, value, unit = "g" }) {
   const n = nutrientColors[type];
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, padding: "5px 3px", borderRadius: 10, background: n.bg, minWidth: 36, flex: "1 1 auto" }}>
-      <span style={{ fontSize: 8, fontWeight: 700, color: n.color }}>{n.label}</span>
-      <span style={{ fontSize: 9, fontWeight: 700, color: "#191c1e" }}>{value}{unit}</span>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1.5,
+        padding: "5px 3px",
+        borderRadius: 10,
+        background: n.bg,
+        minWidth: 36,
+        flex: "1 1 auto",
+      }}
+    >
+      <span style={{ fontSize: 8, fontWeight: 700, color: n.color }}>
+        {n.label}
+      </span>
+      <span style={{ fontSize: 9, fontWeight: 700, color: "#191c1e" }}>
+        {value}
+        {unit}
+      </span>
     </div>
   );
 }
@@ -505,6 +468,10 @@ function ProgressBar({ current, target, over }) {
 
 export default function MealPage() {
   const [selectedMeal, setSelectedMeal] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const dateInputRef = useRef(null);
 
   const totalCal = 1420;
   const targetCal = 2100;
@@ -520,7 +487,6 @@ export default function MealPage() {
         background: "#f2f2f2",
         minHeight: "100vh",
         color: "#2d3335",
-        // ★ 부모(App.jsx)의 flex 제약에서 벗어나 창 너비에 맞춰 반응
         width: "100%",
         maxWidth: "100%",
         minWidth: 0,
@@ -565,20 +531,42 @@ export default function MealPage() {
                   지난 신체 변화를 분석한 결과입니다.
                 </p>
               </div>
-              <button
-                style={{
-                  padding: "10px 24px",
-                  borderRadius: 14,
-                  background: "#fff",
-                  border: "none",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                }}
-              >
-                전체 보기
-              </button>
+
+              {/* 날짜 선택 버튼 */}
+              <div style={{ position: "relative" }}>
+                <input
+                  type="date"
+                  ref={dateInputRef}
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  style={{
+                    position: "absolute",
+                    pointerEvents: "none",
+                    opacity: 0,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => dateInputRef.current?.showPicker()}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                    borderRadius: 14,
+                    background: "#fff",
+                    border: "1px solid #e2e5e8",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "#414753",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  {selectedDate}
+                  <span style={{ fontSize: 10, color: "#b0b8c1" }}>▼</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -877,7 +865,6 @@ export default function MealPage() {
         </main>
       </div>
 
-      {/* ★ 모달 - props 이름(isOpen, mealData, onClose)과 데이터 구조 맞춤 */}
       <MealDetailModal
         isOpen={!!selectedMeal}
         mealData={buildMealData(selectedMeal)}
