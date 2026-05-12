@@ -32,7 +32,7 @@ export default function MedicationPage() {
 
   return (
     <div className="min-h-full w-full bg-gray-100 overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pt-12 pb-10">
+      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pt-12 pb-10 ">
         {/* 제목 영역 */}
         <section className="mb-10">
           <h1 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
