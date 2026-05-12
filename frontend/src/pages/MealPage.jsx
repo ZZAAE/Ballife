@@ -8,7 +8,7 @@ const meals = [
   {
     id: "breakfast",
     label: "아침",
-    time: "08:30 AM",
+    time: "08:30",
     image: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400&h=300&fit=crop",
     items: [
       { name: "그릭 요거트와 블루베리", kcal: 245, carb: 18, protein: 12, fat: 8,  sugar: 4,  chol: 5,  na: 80  },
@@ -18,7 +18,7 @@ const meals = [
   {
     id: "lunch",
     label: "점심",
-    time: "12:45 PM",
+    time: "12:45",
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
     items: [
       { name: "연어 샐러드",      kcal: 480, carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, na: 60  },
@@ -28,7 +28,7 @@ const meals = [
   {
     id: "dinner",
     label: "저녁",
-    time: "07:15 PM",
+    time: "19:15",
     image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
     items: [
       { name: "닭가슴살 구이",        kcal: 310, carb: 0,  protein: 42, fat: 12, sugar: 0, chol: 75, na: 120 },
@@ -38,7 +38,7 @@ const meals = [
   {
     id: "snack",
     label: "간식",
-    time: "04:00 PM",
+    time: "16:00",
     image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
     items: [
       { name: "사과와 땅콩버터", kcal: 190, carb: 22, protein: 4,  fat: 11, sugar: 15, chol: 0,  na: 70 },

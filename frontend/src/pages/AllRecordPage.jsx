@@ -301,7 +301,7 @@ function AllRecordPage() {
     breakfast: {
       time: "08:30",
       label: "아침 식사",
-      image: "",
+      image: "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
       items: [
         {
           name: "닭가슴살 샐러드 🥗",
@@ -331,7 +331,7 @@ function AllRecordPage() {
     dinner: {
       time: "18:40",
       label: "저녁 식사",
-      image: "",
+      image: "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
       items: [
         {
           name: "현미밥 🍚",
