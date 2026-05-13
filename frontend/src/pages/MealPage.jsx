@@ -289,9 +289,26 @@ function NutrientBadge({ type, value, unit = "g" }) {
 function NutrientPill({ type, value, unit = "g" }) {
   const n = nutrientColors[type];
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, padding: "5px 3px", borderRadius: 10, background: n.bg, minWidth: 36, flex: "1 1 auto" }}>
-      <span style={{ fontSize: 8, fontWeight: 700, color: n.color }}>{n.label}</span>
-      <span style={{ fontSize: 9, fontWeight: 700, color: "#191c1e" }}>{value}{unit}</span>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1.5,
+        padding: "5px 3px",
+        borderRadius: 10,
+        background: n.bg,
+        minWidth: 36,
+        flex: "1 1 auto",
+      }}
+    >
+      <span style={{ fontSize: 8, fontWeight: 700, color: n.color }}>
+        {n.label}
+      </span>
+      <span style={{ fontSize: 9, fontWeight: 700, color: "#191c1e" }}>
+        {value}
+        {unit}
+      </span>
     </div>
   );
 }
@@ -514,10 +531,11 @@ export default function MealPage() {
 
   return (
     <div
+      className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3]"
       style={{
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        background: "#f2f2f2",
+        background: "#F3F3F3",
         minHeight: "100vh",
         color: "#2d3335",
         // ★ 부모(App.jsx)의 flex 제약에서 벗어나 창 너비에 맞춰 반응
@@ -526,12 +544,11 @@ export default function MealPage() {
         minWidth: 0,
       }}
     >
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
         {/* Main Content */}
         <main
           style={{
-            flex: 1,
-            padding: "32px 40px",
+            padding: 0,
             width: "100%",
             minWidth: 0,
             overflow: "auto",
@@ -551,16 +568,16 @@ export default function MealPage() {
               <div>
                 <h1
                   style={{
-                    fontSize: 28,
-                    fontWeight: 600,
+                    fontSize: 24,
+                    fontWeight: 700,
                     margin: 0,
-                    color: "#2d3335",
+                    color: "#111827",
                   }}
                 >
                   오늘의 식단 기록 확인
                 </h1>
                 <p
-                  style={{ fontSize: 15, color: "#5a6062", margin: "6px 0 0" }}
+                  style={{ fontSize: 14, color: "#9ca3af", margin: "6px 0 0" }}
                 >
                   지난 신체 변화를 분석한 결과입니다.
                 </p>

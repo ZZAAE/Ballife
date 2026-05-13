@@ -4,7 +4,7 @@ import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
 import Excercise from "../assets/Record/Excercise.svg";
 import Meal from "../assets/Record/Meal.svg";
-import Meal2 from "../assets/Record/Meal2.svg";
+import Meal2 from "../assets/Record/Meal2.svg"
 import Water from "../assets/Record/Water.svg";
 import Weight from "../assets/Record/Weight.svg";
 import Plus from "../assets/Record/Plus.svg";

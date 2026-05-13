@@ -31,8 +31,8 @@ export default function MedicationPage() {
   };
 
   return (
-    <div className="min-h-full w-full bg-gray-100 overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pt-12 pb-10">
+    <div className="min-h-[calc(100vh-70px)] w-full overflow-x-hidden bg-[#F3F3F3]">
+      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
         {/* 제목 영역 */}
         <section className="mb-10">
           <h1 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
@@ -58,16 +58,15 @@ export default function MedicationPage() {
               time={time}
               setTime={setTime}
             />
+
+            <MemoCard />
           </div>
 
           {/* 오른쪽 영역 */}
           <div className="w-full min-w-0 flex flex-col gap-8">
             <TodayScheduleCard />
 
-            <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
-              <MemoCard />
-              <WeeklyCalendarCard />
-            </div>
+            <WeeklyCalendarCard />
           </div>
         </section>
 

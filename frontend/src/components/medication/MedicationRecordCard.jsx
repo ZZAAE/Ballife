@@ -27,7 +27,7 @@ export default function MedicationRecordCard({
 
   return (
     <>
-      <div className="bg-[#1B1F2A] rounded-2xl p-4 sm:p-5 lg:p-6 text-white flex flex-col h-auto xl:min-h-[540px]">
+      <div className="bg-[#1B1F2A] rounded-2xl p-4 sm:p-5 lg:p-6 text-white flex flex-col h-auto xl:min-h-[270px]">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-base sm:text-lg">📝</span>
           <span className="text-[15px] sm:text-[16px] font-bold">
@@ -37,8 +37,6 @@ export default function MedicationRecordCard({
 
         <p className="text-[12px] sm:text-[13px] text-gray-400 leading-relaxed mb-5 sm:mb-6">
           상비약 복용 시 기록해주세요.
-          <br />
-          체계적인 이행 관리에 도움이 됩니다.
         </p>
 
         <label className="text-[11px] sm:text-[12px] text-gray-400 mb-1.5">

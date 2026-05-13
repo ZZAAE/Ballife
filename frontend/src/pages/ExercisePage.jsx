@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React from "react";
+import { CalendarDays } from "lucide-react";
 import ExerciseSection from "./exercise/components/ExerciseSection";
 import ExerciseRecordTable from "./exercise/components/ExerciseRecordTable";
 import Pagination from "./exercise/components/Pagination";
@@ -6,18 +7,19 @@ import ExerciseModal from "../modals/ExerciseModal";
 import { useExercise } from "./exercise/hooks/useExercise";
 
 function ExercisePage({ isModalOpen, onCloseModal }) {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const dateInputRef = useRef(null);
   const {
     activeTab,
     anaerobicCards,
     aerobicCards,
     logs,
+    startDate,
+    endDate,
     currentPage,
     totalPages,
     handleTabChange,
+    handleStartDateChange,
+    handleEndDateChange,
+    handleApplyDateRange,
     handlePageChange,
   } = useExercise();
 
@@ -41,30 +43,16 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   }));
 
   return (
-    <div className="min-h-screen bg-[#efefef]">
-      <div className="min-h-screen w-full bg-[#efefef] pt-[55px]">
-        <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
-          <div className="mb-8 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+    <div className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] text-gray-900">
+      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
+        <main className="min-w-0 flex-1">
+          <div className="mb-8">
+            <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
               운동 기록 확인
-            </h2>
-            <div className="relative sm:w-auto">
-              <input
-                type="date"
-                ref={dateInputRef}
-                value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                className="pointer-events-none absolute opacity-0"
-              />
-              <button
-                type="button"
-                onClick={() => dateInputRef.current?.showPicker()}
-                className="flex w-full items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm sm:w-auto"
-              >
-                {selectedDate}
-                <span className="ml-1 text-[10px] text-slate-300">▼</span>
-              </button>
-            </div>
+            </h1>
+            <p className="text-sm text-gray-400">
+              지난 한 달간의 신체 변화를 분석한 결과입니다.
+            </p>
           </div>
 
           <ExerciseSection
@@ -74,6 +62,39 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
           />
 
           <ExerciseSection icon="🚴" title="유산소 운동" cards={cardioCards} />
+
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+            <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-[#E7E7E7] bg-white px-3 py-2 text-sm text-[#3F4650]">
+              <div className="flex items-center gap-2">
+                <CalendarDays size={14} className="text-[#8D949E]" />
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(event) =>
+                    handleStartDateChange(event.target.value)
+                  }
+                  className="bg-transparent text-sm text-[#3F4650] outline-none"
+                />
+              </div>
+              <span className="text-[#C7CDD6]">~</span>
+              <div className="flex items-center gap-2">
+                <CalendarDays size={14} className="text-[#8D949E]" />
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => handleEndDateChange(event.target.value)}
+                  className="bg-transparent text-sm text-[#3F4650] outline-none"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleApplyDateRange}
+              className="rounded-[10px] bg-[#252A31] px-4 py-2 text-sm font-semibold text-white"
+            >
+              적용
+            </button>
+          </div>
 
           <ExerciseRecordTable
             activeTab={activeTab}

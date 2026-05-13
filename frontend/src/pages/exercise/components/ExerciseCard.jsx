@@ -2,7 +2,7 @@ import CardRow from "./CardRow";
 
 function ExerciseCard({ item }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-[#fcfcfc] p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-[#fcfcfc] p-5">
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#eef2ff] text-sm">
           {item.icon}

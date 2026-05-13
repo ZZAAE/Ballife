@@ -12,7 +12,6 @@ const defaultMemoList = [
     groupName: "당뇨약",
     content: "식후 바로 복용하기.\n공복 복용은 피하고 하루 2회 체크하기.",
   },
-
 ];
 
 export default function MemoCard({ memoList = defaultMemoList }) {
@@ -29,7 +28,7 @@ export default function MemoCard({ memoList = defaultMemoList }) {
   };
 
   return (
-    <div className="w-full xl:w-[300px] bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+    <div className="w-full bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
       {/* 상단 헤더 */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
@@ -40,7 +39,7 @@ export default function MemoCard({ memoList = defaultMemoList }) {
 
       {/* 본문 */}
       <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-[#D8E8FF]">
-        <div className="min-h-[320px] bg-[#EAF3FF] px-5 py-7">
+        <div className="min-h-[200px] bg-[#EAF3FF] px-5 py-7">
           <p className="text-[14px] leading-[1.9] text-gray-700 whitespace-pre-line">
             {currentMemo?.content}
           </p>

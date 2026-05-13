@@ -32,24 +32,22 @@ const measurementData = Array(8).fill({
   status: "정상",
 });
 
-
 export default function WeightRecord() {
   const [currentPage, setCurrentPage] = useState(1);
   const [startDate] = useState("2023.10.01");
   const [endDate] = useState("2023.10.31");
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-
+    <div className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] text-gray-900">
       {/* ───────── Body ───────── */}
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
+      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
         {/* ───────── Main Content ───────── */}
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+        <main className="min-w-0 flex-1">
           {/* Header */}
           <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
             체중 기록 확인
           </h1>
-          <p className="mb-8 text-sm text-gray-500">
+          <p className="mb-8 text-sm text-gray-400">
             지난 한 달간의 신체 변화를 분석한 결과입니다.
           </p>
 
@@ -131,52 +129,57 @@ export default function WeightRecord() {
             startDate={startDate}
             endDate={endDate}
           >
-              <ResponsiveContainer width="100%" height = "100%">
-                <LineChart data={chartData}>
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    height={36}
-                    iconType="circle"
-                    wrapperStyle={{ fontSize:12 , paddingBottom: 10 }}
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  height={36}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 12, paddingBottom: 10 }}
                 />
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#f0f0f0"
-                    horizontal={true}
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    axisLine={{ stroke: "#e5e7eb" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={[0, 90]}
-                    ticks={[0, 30, 60, 90]}
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      fontSize: 12,
-                      borderRadius: 8,
-                      border: "1px solid #e5e7eb",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    name="체중"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#f0f0f0"
+                  horizontal={true}
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={{ stroke: "#e5e7eb" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[0, 90]}
+                  ticks={[0, 30, 60, 90]}
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    fontSize: 12,
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="weight"
+                  name="체중"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={{
+                    r: 4,
+                    fill: "#3b82f6",
+                    stroke: "#fff",
+                    strokeWidth: 2,
+                  }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </ChartSection>
 
           <RecordTable
@@ -187,31 +190,50 @@ export default function WeightRecord() {
             totalPages={5}
             onPageChange={setCurrentPage}
             renderDesktopRow={(row, index) => (
-              <tr key={index} className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/30" : ""}`}>
-                <td className="px-6 py-3.5 text-center text-gray-700">{row.date}</td>
-                <td className="cursor-pointer px-6 py-3.5 text-center font-medium text-blue-600 underline">{row.weight}</td>
-                <td className="px-6 py-3.5 text-center text-gray-700">{row.bmi}</td>
-                <td className="px-6 py-3.5 text-center"><StatusBadge status={row.status} type="normal" /></td>
+              <tr
+                key={index}
+                className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/30" : ""}`}
+              >
+                <td className="px-6 py-3.5 text-center text-gray-700">
+                  {row.date}
+                </td>
+                <td className="cursor-pointer px-6 py-3.5 text-center font-medium text-blue-600 underline">
+                  {row.weight}
+                </td>
+                <td className="px-6 py-3.5 text-center text-gray-700">
+                  {row.bmi}
+                </td>
+                <td className="px-6 py-3.5 text-center">
+                  <StatusBadge status={row.status} type="normal" />
+                </td>
               </tr>
             )}
             renderMobileCard={(row, index) => (
               <div key={index} className="space-y-3 px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-gray-400">측정 일시</span>
+                  <span className="text-xs font-medium text-gray-400">
+                    측정 일시
+                  </span>
                   <span className="text-sm text-gray-700">{row.date}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3 rounded-lg bg-slate-50 p-3 text-center">
                   <div>
                     <p className="text-[11px] text-gray-400">체중</p>
-                    <p className="mt-1 text-sm font-semibold text-blue-600">{row.weight}</p>
+                    <p className="mt-1 text-sm font-semibold text-blue-600">
+                      {row.weight}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-400">BMI</p>
-                    <p className="mt-1 text-sm font-semibold text-gray-700">{row.bmi}</p>
+                    <p className="mt-1 text-sm font-semibold text-gray-700">
+                      {row.bmi}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-400">상태</p>
-                    <div className="mt-1"><StatusBadge status={row.status} type="normal" /></div>
+                    <div className="mt-1">
+                      <StatusBadge status={row.status} type="normal" />
+                    </div>
                   </div>
                 </div>
               </div>

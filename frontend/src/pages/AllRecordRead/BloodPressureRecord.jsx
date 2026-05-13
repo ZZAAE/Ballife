@@ -26,14 +26,70 @@ const bpData = [
 ];
 
 const records = [
-  { time: "오늘 12:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "오늘 08:15", systolic: 134, diastolic: 76, pulse: 78, status: "주의", statusType: "warning" },
-  { time: "어제 21:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "어제 12:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-30 09:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-29 21:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-29 08:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-28 20:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
+  {
+    time: "오늘 12:30",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "오늘 08:15",
+    systolic: 134,
+    diastolic: 76,
+    pulse: 78,
+    status: "주의",
+    statusType: "warning",
+  },
+  {
+    time: "어제 21:00",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "어제 12:30",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "03-30 09:00",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "03-29 21:30",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "03-29 08:00",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
+  {
+    time: "03-28 20:00",
+    systolic: 118,
+    diastolic: 76,
+    pulse: 72,
+    status: "정상",
+    statusType: "normal",
+  },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -49,7 +105,9 @@ const CustomTooltip = ({ active, payload, label }) => {
           boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
         }}
       >
-        <p style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}>{`2026-${label}`}</p>
+        <p
+          style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}
+        >{`2026-${label}`}</p>
         {payload.map((p) => (
           <p key={p.dataKey} style={{ color: p.color, margin: "2px 0" }}>
             {p.name}: <strong>{p.value}</strong> mmHg
@@ -66,17 +124,21 @@ export default function BloodPressureRecord() {
   const totalPages = 5;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-
-
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-          <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">혈압 기록 확인</h1>
-          <p className="mb-8 text-sm text-gray-500">지난 한 달간의 신체 변화를 분석한 결과입니다.</p>
+    <div className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] text-gray-900">
+      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
+        <main className="min-w-0 flex-1">
+          <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+            혈압 기록 확인
+          </h1>
+          <p className="mb-8 text-sm text-gray-400">
+            지난 한 달간의 신체 변화를 분석한 결과입니다.
+          </p>
 
           <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard>
-              <span className="text-xs font-medium text-blue-600">평균 혈압</span>
+              <span className="text-xs font-medium text-blue-600">
+                평균 혈압
+              </span>
               <div className="mt-3 flex items-end gap-2">
                 <span className="text-4xl font-bold text-slate-900">118</span>
                 <span className="pb-1 text-xl text-slate-300">/</span>
@@ -90,58 +152,117 @@ export default function BloodPressureRecord() {
             </MetricCard>
 
             <MetricCard>
-              <span className="text-xs font-medium text-gray-500">최고 수축기</span>
+              <span className="text-xs font-medium text-gray-500">
+                최고 수축기
+              </span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-bold text-gray-900">134</span>
                 <span className="pb-1 text-sm text-gray-500">mmHg</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-blue-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-blue-600">
+                5월 28일 오후 9:15
+              </p>
             </MetricCard>
 
             <MetricCard>
-              <span className="text-xs font-medium text-gray-500">최저 이완기</span>
+              <span className="text-xs font-medium text-gray-500">
+                최저 이완기
+              </span>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-4xl font-bold text-gray-900">70</span>
                 <span className="pb-1 text-sm text-gray-500">mmHg</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-cyan-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-cyan-600">
+                5월 28일 오후 9:15
+              </p>
             </MetricCard>
           </div>
 
           <ChartSection
             title="혈압 변화 추이"
-            startDate="2023.10.01" // 
+            startDate="2023.10.01" //
             endDate="2023.10.31"
-           
           >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={bpData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    height={36}
-                    iconType="circle"
-                    wrapperStyle={{ fontSize:12 , paddingBottom: 10 }}
-                  />
-                  <defs>
-                    <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} tickFormatter={(v) => `2026-${v}`} />
-                  <YAxis domain={[0, 150]} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="systolic" name="수축기" stroke="#2563eb" strokeWidth={3} fill="url(#systolicGrad)" dot={{ fill: "#2563eb", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                  <Area type="monotone" dataKey="diastolic" name="이완기" stroke="#06b6d4" strokeWidth={3} fill="url(#diastolicGrad)" dot={{ fill: "#06b6d4", r: 4, stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                </AreaChart>
-              </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={bpData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  height={36}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 12, paddingBottom: 10 }}
+                />
+                <defs>
+                  <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient
+                    id="diastolicGrad"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#f0f0f0"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={{ stroke: "#e5e7eb" }}
+                  tickLine={false}
+                  tickFormatter={(v) => `2026-${v}`}
+                />
+                <YAxis
+                  domain={[0, 150]}
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="systolic"
+                  name="수축기"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                  fill="url(#systolicGrad)"
+                  dot={{
+                    fill: "#2563eb",
+                    r: 4,
+                    stroke: "#fff",
+                    strokeWidth: 2,
+                  }}
+                  activeDot={{ r: 6 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="diastolic"
+                  name="이완기"
+                  stroke="#06b6d4"
+                  strokeWidth={3}
+                  fill="url(#diastolicGrad)"
+                  dot={{
+                    fill: "#06b6d4",
+                    r: 4,
+                    stroke: "#fff",
+                    strokeWidth: 2,
+                  }}
+                  activeDot={{ r: 6 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </ChartSection>
 
           <RecordTable
@@ -152,36 +273,63 @@ export default function BloodPressureRecord() {
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             renderDesktopRow={(row, index) => (
-              <tr key={index} className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/20" : ""}`}>
-                <td className="px-6 py-3.5 text-center font-medium text-gray-700">{row.time}</td>
-                <td className={`px-6 py-3.5 text-center font-semibold ${row.statusType === "warning" ? "text-amber-700" : "text-blue-600"}`}>{row.systolic}</td>
-                <td className="px-6 py-3.5 text-center font-semibold text-gray-700">{row.diastolic}</td>
-                <td className="px-6 py-3.5 text-center text-gray-600">{row.pulse}</td>
-                <td className="px-6 py-3.5 text-center"><StatusBadge status={row.status} type={row.statusType} /></td>
+              <tr
+                key={index}
+                className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/20" : ""}`}
+              >
+                <td className="px-6 py-3.5 text-center font-medium text-gray-700">
+                  {row.time}
+                </td>
+                <td
+                  className={`px-6 py-3.5 text-center font-semibold ${row.statusType === "warning" ? "text-amber-700" : "text-blue-600"}`}
+                >
+                  {row.systolic}
+                </td>
+                <td className="px-6 py-3.5 text-center font-semibold text-gray-700">
+                  {row.diastolic}
+                </td>
+                <td className="px-6 py-3.5 text-center text-gray-600">
+                  {row.pulse}
+                </td>
+                <td className="px-6 py-3.5 text-center">
+                  <StatusBadge status={row.status} type={row.statusType} />
+                </td>
               </tr>
             )}
             renderMobileCard={(row, index) => (
               <div key={index} className="space-y-3 px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-gray-400">측정 일시</span>
+                  <span className="text-xs font-medium text-gray-400">
+                    측정 일시
+                  </span>
                   <span className="text-sm text-gray-700">{row.time}</span>
                 </div>
                 <div className="grid grid-cols-4 gap-3 rounded-lg bg-slate-50 p-3 text-center">
                   <div>
                     <p className="text-[11px] text-gray-400">수축기</p>
-                    <p className={`mt-1 text-sm font-semibold ${row.statusType === "warning" ? "text-amber-700" : "text-blue-600"}`}>{row.systolic}</p>
+                    <p
+                      className={`mt-1 text-sm font-semibold ${row.statusType === "warning" ? "text-amber-700" : "text-blue-600"}`}
+                    >
+                      {row.systolic}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-400">이완기</p>
-                    <p className="mt-1 text-sm font-semibold text-gray-700">{row.diastolic}</p>
+                    <p className="mt-1 text-sm font-semibold text-gray-700">
+                      {row.diastolic}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-400">맥박</p>
-                    <p className="mt-1 text-sm font-semibold text-gray-700">{row.pulse}</p>
+                    <p className="mt-1 text-sm font-semibold text-gray-700">
+                      {row.pulse}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-400">상태</p>
-                    <div className="mt-1"><StatusBadge status={row.status} type={row.statusType} /></div>
+                    <div className="mt-1">
+                      <StatusBadge status={row.status} type={row.statusType} />
+                    </div>
                   </div>
                 </div>
               </div>

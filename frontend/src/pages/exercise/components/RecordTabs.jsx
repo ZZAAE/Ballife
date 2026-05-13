@@ -5,7 +5,7 @@ function RecordTabs({ activeTab, onTabChange }) {
   ];
 
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b border-[#E7E7E7]">
       <div className="grid grid-cols-2 text-center text-xs">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -17,8 +17,8 @@ function RecordTabs({ activeTab, onTabChange }) {
               onClick={() => onTabChange?.(tab.key)}
               className={
                 isActive
-                  ? "border-b-2 border-[#2563eb] py-4 font-semibold text-[#2563eb]"
-                  : "py-4 text-gray-500"
+                  ? "border-b-2 border-[#252A31] py-4 font-semibold text-[#252A31]"
+                  : "py-4 text-[#8D949E]"
               }
             >
               {tab.label}

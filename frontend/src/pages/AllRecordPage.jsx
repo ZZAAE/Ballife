@@ -110,7 +110,10 @@ function LargeRecordCard({
           }
         >
           {children ?? (
-            <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
+            <EmptyRecordArea
+              recordTitle={recordTitle}
+              onAddClick={onAddClick}
+            />
           )}
         </div>
       </div>
@@ -151,7 +154,10 @@ function SmallRecordCard({
           }
         >
           {children ?? (
-            <EmptyRecordArea recordTitle={recordTitle} onAddClick={onAddClick} />
+            <EmptyRecordArea
+              recordTitle={recordTitle}
+              onAddClick={onAddClick}
+            />
           )}
         </div>
       </div>
@@ -196,99 +202,99 @@ function AllRecordPage() {
   const [modalType, setModalType] = useState(null);
 
   // 더미데이터: 기록 컴포넌트 디자인 확인용
-const [bloodPressureRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침",
-    systolicBp: 160,
-    diastolicBp: 96,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:11:00",
-    mealTiming: "점심",
-    systolicBp: 120,
-    diastolicBp: 80,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "20:42:00",
-    mealTiming: "저녁",
-    systolicBp: 123,
-    diastolicBp: 88,
-  },
-]);
+  const [bloodPressureRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침",
+      systolicBp: 160,
+      diastolicBp: 96,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:11:00",
+      mealTiming: "점심",
+      systolicBp: 120,
+      diastolicBp: 80,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "20:42:00",
+      mealTiming: "저녁",
+      systolicBp: 123,
+      diastolicBp: 88,
+    },
+  ]);
 
-const [bloodSugarRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "08:30:00",
-    mealTiming: "아침 식전",
-    bloodsugar: 100,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "09:30:00",
-    mealTiming: "아침 식후",
-    bloodsugar: 150,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "12:30:00",
-    mealTiming: "점심 식전",
-    bloodsugar: 95,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:30:00",
-    mealTiming: "점심 식후",
-    bloodsugar: 128,
-  },
-  {
-    recordDate: "2026-05-09",
-    recordTime: "18:30:00",
-    mealTiming: "저녁 식전",
-    bloodsugar: 89,
-  },
-]);
+  const [bloodSugarRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "08:30:00",
+      mealTiming: "아침 식전",
+      bloodsugar: 100,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "09:30:00",
+      mealTiming: "아침 식후",
+      bloodsugar: 150,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "12:30:00",
+      mealTiming: "점심 식전",
+      bloodsugar: 95,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:30:00",
+      mealTiming: "점심 식후",
+      bloodsugar: 128,
+    },
+    {
+      recordDate: "2026-05-09",
+      recordTime: "18:30:00",
+      mealTiming: "저녁 식전",
+      bloodsugar: 89,
+    },
+  ]);
 
-const [exerciseRecords] = useState([
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "걷기",
-    kcal: 609,
-  },
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "줄넘기",
-    kcal: 120,
-  },
-  {
-    exerciseDate: "2026-05-09",
-    exerciseTypeId: 3,
-    exerciseName: "사이클",
-    kcal: 430,
-  },
-]);
+  const [exerciseRecords] = useState([
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "걷기",
+      kcal: 609,
+    },
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "줄넘기",
+      kcal: 120,
+    },
+    {
+      exerciseDate: "2026-05-09",
+      exerciseTypeId: 3,
+      exerciseName: "사이클",
+      kcal: 430,
+    },
+  ]);
 
-const [weightRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    weight: 78.2,
-  },
-]);
+  const [weightRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      weight: 78.2,
+    },
+  ]);
 
-const [waterRecords] = useState([
-  {
-    recordDate: "2026-05-09",
-    recordTime: "13:33:00",
-    amount: 1400,
-  },
-]);
+  const [waterRecords] = useState([
+    {
+      recordDate: "2026-05-09",
+      recordTime: "13:33:00",
+      amount: 1400,
+    },
+  ]);
   const closeModal = () => {
     setModalType(null);
   };
@@ -304,7 +310,7 @@ const [waterRecords] = useState([
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[104px] md:px-[60px] xl:px-[150px]">
+        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
           <div className="mb-[50px] flex items-center justify-between">
             <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               전체 기록 관리
@@ -470,20 +476,11 @@ const [waterRecords] = useState([
             </div>
 
             <div className="grid grid-cols-1 gap-[34px] md:grid-cols-2">
-              <MealBox
-                title="아침 식사"
-                onClick={() => setModalType("meal")}
-              />
+              <MealBox title="아침 식사" onClick={() => setModalType("meal")} />
 
-              <MealBox
-                title="점심 식사"
-                onClick={() => setModalType("meal")}
-              />
+              <MealBox title="점심 식사" onClick={() => setModalType("meal")} />
 
-              <MealBox
-                title="저녁 식사"
-                onClick={() => setModalType("meal")}
-              />
+              <MealBox title="저녁 식사" onClick={() => setModalType("meal")} />
 
               <MealBox title="간식" onClick={() => setModalType("meal")} />
             </div>
@@ -496,30 +493,15 @@ const [waterRecords] = useState([
         onClose={closeModal}
       />
 
-      <BloodsugarModal
-        isOpen={modalType === "blood"}
-        onClose={closeModal}
-      />
+      <BloodsugarModal isOpen={modalType === "blood"} onClose={closeModal} />
 
-      <MealRegisterModal
-        isOpen={modalType === "meal"}
-        onClose={closeModal}
-      />
+      <MealRegisterModal isOpen={modalType === "meal"} onClose={closeModal} />
 
-      <WaterRecordModal
-        isOpen={modalType === "water"}
-        onClose={closeModal}
-      />
+      <WaterRecordModal isOpen={modalType === "water"} onClose={closeModal} />
 
-      <WeightRecordModal
-        isOpen={modalType === "weight"}
-        onClose={closeModal}
-      />
+      <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
 
-      <ExerciseModal
-        isOpen={modalType === "exercise"}
-        onClose={closeModal}
-      />
+      <ExerciseModal isOpen={modalType === "exercise"} onClose={closeModal} />
     </>
   );
 }
