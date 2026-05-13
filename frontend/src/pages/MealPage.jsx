@@ -140,23 +140,18 @@ export default function MealPage() {
 
   return (
     <div
-      className="bg-[#f2f2f2] min-h-screen text-[#2d3335] w-full max-w-full min-w-0"
-      style={{
-        fontFamily:
-          "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      }}
-    >
-      <div className="flex min-h-screen">
+      className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
+      <div className="flex pt-[55px]">
         <main className="flex-1 p-8">
 
           {/* ── 페이지 타이틀 ─────────────────────────────────────────── */}
-          <div className="pt-[55px]">
+          <div className="mb-8">
             <div className="flex justify-between items-start gap-4 flex-wrap">
               <div>
-                <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+                <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                   오늘의 식단 기록 확인
                 </h1>
-                <p className="text-sm text-gray-400 mb-8">
+                <p className="text-sm text-gray-400">
                   지난 신체 변화를 분석한 결과입니다.
                 </p>
               </div>
