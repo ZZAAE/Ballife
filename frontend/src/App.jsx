@@ -29,6 +29,7 @@ import HealthIndicatorMenu from './components/HealthMenu';
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
 import AllRecordPage from './pages/AllRecordPage';
 import UserInformation from './pages/user/UserInformation'
+import Calendar from './components/mainpage/calendar';
 
 function App() {
   const location = useLocation();
@@ -74,6 +75,8 @@ function App() {
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<MainPage />} />
+              <Route path="/calender" element={<HealthCalenderPage />} />
+
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
 
@@ -86,9 +89,7 @@ function App() {
               <Route path="/check/all" element={<RecordSummary />} />
               <Route path="/check/meal" element={<MealPage />} />
               <Route path="/check/weight" element={<WeightRecord />} />
-              <Route
-                path="/check/blood-pressure"
-                element={<BloodPressureRecord />}
+              <Route path="/check/blood-pressure" element={<BloodPressureRecord />}
               />
               <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
               <Route
