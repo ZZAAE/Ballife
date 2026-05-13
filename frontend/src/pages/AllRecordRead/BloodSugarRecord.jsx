@@ -161,11 +161,6 @@ export default function BloodSugarRecord() {
           />
         </main>
       </div>
-
-      <button className="fixed bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 shadow-lg transition-colors hover:bg-blue-700 sm:bottom-8 sm:right-8 sm:h-14 sm:w-14">
-        <MessageCircle size={24} className="text-white" />
-      </button>
-      
     </div>
     
   );
