@@ -73,12 +73,12 @@ function BoardListPage(){
 
 
 
-    if (loading) return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500 pt-[87px]">로딩 중...</div>;
 
 
     return(
         <div className="px-12 py-10">
-        <div className="mb-8">
+        <div className="mb-8 pt-[55px]">
             <h1 className="text-3xl font-bold text-gray-900">커뮤니티</h1>
             <p className="mt-2 text-sm text-gray-500">
                 건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.

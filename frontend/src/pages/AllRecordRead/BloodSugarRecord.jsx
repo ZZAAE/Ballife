@@ -117,15 +117,11 @@ export default function BloodSugarRecord() {
   const totalPages = 5;
 
   return (
-    <div className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] text-gray-900">
-      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
-        <main className="min-w-0 flex-1">
-          <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
-            혈당 기록 확인
-          </h1>
-          <p className="mb-8 text-sm text-gray-400">
-            지난 한 달간의 혈당 변화를 분석한 결과입니다.
-          </p>
+    <div className="min-h-screen bg-gray-50 text-gray-900 pt-[55px]">
+      <div className="flex w-full flex-col xl:flex-row mx-auto max-w-[1280px]">
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+          <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">혈당 기록 확인</h1>
+          <p className="mb-8 text-sm text-gray-500">지난 한 달간의 혈당 변화를 분석한 결과입니다.</p>
 
           <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard>
@@ -305,10 +301,6 @@ export default function BloodSugarRecord() {
           />
         </main>
       </div>
-
-      <button className="fixed bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 shadow-lg transition-colors hover:bg-blue-700 sm:bottom-8 sm:right-8 sm:h-14 sm:w-14">
-        <MessageCircle size={24} className="text-white" />
-      </button>
     </div>
   );
 }

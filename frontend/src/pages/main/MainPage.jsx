@@ -1,6 +1,4 @@
-import React from "react";
-import Header from "../../components/Header";
-import HealthMenu from "../../components/HealthMenu";
+import React, { useMemo, useState } from "react";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
 import ChartSection from "../../components/mainpage/chart.jsx";
@@ -11,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -31,8 +28,100 @@ const bloodPressureData = [
   { date: "05-06", systolic: 112, diastolic: 70 },
 ];
 
+const bloodSugarData = [
+  { date: "03-01", glucose: 118 },
+  { date: "03-05", glucose: 114 },
+  { date: "03-10", glucose: 121 },
+  { date: "03-15", glucose: 110 },
+  { date: "03-20", glucose: 108 },
+  { date: "03-25", glucose: 115 },
+  { date: "03-31", glucose: 112 },
+  { date: "04-05", glucose: 109 },
+  { date: "04-12", glucose: 107 },
+  { date: "04-20", glucose: 104 },
+  { date: "04-28", glucose: 106 },
+  { date: "05-01", glucose: 103 },
+  { date: "05-06", glucose: 101 },
+];
+
+const weightData = [
+  { date: "03-01", weight: 78.5 },
+  { date: "03-05", weight: 78.3 },
+  { date: "03-10", weight: 78.4 },
+  { date: "03-15", weight: 78.1 },
+  { date: "03-20", weight: 77.9 },
+  { date: "03-25", weight: 78.0 },
+  { date: "03-31", weight: 77.8 },
+  { date: "04-05", weight: 77.6 },
+  { date: "04-12", weight: 77.5 },
+  { date: "04-20", weight: 77.3 },
+  { date: "04-28", weight: 77.1 },
+  { date: "05-01", weight: 77.0 },
+  { date: "05-06", weight: 76.8 },
+];
+
 const MainPage = () => {
-  // 샘플 데이터
+  const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
+
+  const chartConfig = useMemo(
+    () => ({
+      bloodPressure: {
+        data: bloodPressureData,
+        legends: [
+          { label: "수축기", color: "#2563eb" },
+          { label: "이완기", color: "#06b6d4" },
+        ],
+        unit: "mmHg",
+        yDomain: [60, 150],
+        areas: [
+          {
+            key: "systolic",
+            name: "수축기",
+            stroke: "#2563eb",
+            gradientId: "systolicGrad",
+          },
+          {
+            key: "diastolic",
+            name: "이완기",
+            stroke: "#06b6d4",
+            gradientId: "diastolicGrad",
+          },
+        ],
+      },
+      bloodSugar: {
+        data: bloodSugarData,
+        legends: [{ label: "혈당", color: "#16a34a" }],
+        unit: "mg/dL",
+        yDomain: [80, 140],
+        areas: [
+          {
+            key: "glucose",
+            name: "혈당",
+            stroke: "#16a34a",
+            gradientId: "glucoseGrad",
+          },
+        ],
+      },
+      weight: {
+        data: weightData,
+        legends: [{ label: "체중", color: "#f97316" }],
+        unit: "kg",
+        yDomain: [75, 80],
+        areas: [
+          {
+            key: "weight",
+            name: "체중",
+            stroke: "#f97316",
+            gradientId: "weightGrad",
+          },
+        ],
+      },
+    }),
+    [],
+  );
+
+  const activeChart = chartConfig[selectedChartType];
+
   const userStats = {
     ageGender: "45세 / 남성",
     height: "175cm",
@@ -54,28 +143,30 @@ const MainPage = () => {
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
         >
-          <p
-            style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}
-          >{`2026-${label}`}</p>
-          {payload.map((p) => (
-            <p key={p.dataKey} style={{ color: p.color, margin: "2px 0" }}>
-              {p.name}: <strong>{p.value}</strong> mmHg
+          <p style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}>
+            {`2026-${label}`}
+          </p>
+          {payload.map((point) => (
+            <p
+              key={point.dataKey}
+              style={{ color: point.color, margin: "2px 0" }}
+            >
+              {point.name}: <strong>{point.value}</strong> {activeChart.unit}
             </p>
           ))}
         </div>
       );
     }
+
     return null;
   };
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 ml-[150px] mr-[150px]">
-      {/* <Header /> */}
       <div className="flex">
         <main className="flex-1 pb-12 pt-[87px] px-12">
           <div className="max-w-auto mx-auto space-y-10">
-            {/* Header & User Stats */}
-            <header className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <header className="flex items-center justify-between border-b border-slate-200 pb-4">
               <h1 className="text-3xl font-bold">천지수님 안녕하세요.</h1>
               <div className="flex gap-6 text-sm text-slate-500">
                 <div>
@@ -105,23 +196,21 @@ const MainPage = () => {
               </div>
             </header>
 
-            {/* Status Cards (Top Row) */}
             <Card />
 
-            {/* Action Cards (Second Row) */}
-
-            {/* Calendar & Chart Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Calendar Card */}
+            <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <Calendar />
 
-              {/* Chart Placeholder Card */}
               <ChartSection
                 title="주간 건강 추이"
-                data={bloodPressureData}
-                legends={[
-                  { label: "수축기", color: "#2563eb" },
-                  { label: "이완기", color: "#06b6d4" },
+                data={activeChart.data}
+                legends={activeChart.legends}
+                selectedType={selectedChartType}
+                onTypeChange={setSelectedChartType}
+                chartTypes={[
+                  { value: "bloodSugar", label: "혈당" },
+                  { value: "bloodPressure", label: "혈압" },
+                  { value: "weight", label: "체중" },
                 ]}
               >
                 {(filteredData) => (
@@ -167,6 +256,42 @@ const MainPage = () => {
                             stopOpacity={0}
                           />
                         </linearGradient>
+                        <linearGradient
+                          id="glucoseGrad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#16a34a"
+                            stopOpacity={0.22}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#16a34a"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="weightGrad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#f97316"
+                            stopOpacity={0.22}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#f97316"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
                       </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -178,60 +303,47 @@ const MainPage = () => {
                         tick={{ fontSize: 11, fill: "#9ca3af" }}
                         axisLine={{ stroke: "#e5e7eb" }}
                         tickLine={false}
-                        tickFormatter={(v) => `2026-${v}`}
+                        tickFormatter={(value) => `2026-${value}`}
                       />
                       <YAxis
-                        domain={[60, 150]}
+                        domain={activeChart.yDomain}
                         tick={{ fontSize: 11, fill: "#9ca3af" }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="systolic"
-                        name="수축기"
-                        stroke="#2563eb"
-                        strokeWidth={3}
-                        fill="url(#systolicGrad)"
-                        dot={{
-                          fill: "#2563eb",
-                          r: 4,
-                          stroke: "#fff",
-                          strokeWidth: 2,
-                        }}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="diastolic"
-                        name="이완기"
-                        stroke="#06b6d4"
-                        strokeWidth={3}
-                        fill="url(#diastolicGrad)"
-                        dot={{
-                          fill: "#06b6d4",
-                          r: 4,
-                          stroke: "#fff",
-                          strokeWidth: 2,
-                        }}
-                        activeDot={{ r: 6 }}
-                      />
+                      {activeChart.areas.map((area) => (
+                        <Area
+                          key={area.key}
+                          type="monotone"
+                          dataKey={area.key}
+                          name={area.name}
+                          stroke={area.stroke}
+                          strokeWidth={3}
+                          fill={`url(#${area.gradientId})`}
+                          dot={{
+                            fill: area.stroke,
+                            r: 4,
+                            stroke: "#fff",
+                            strokeWidth: 2,
+                          }}
+                          activeDot={{ r: 6 }}
+                        />
+                      ))}
                     </AreaChart>
                   </ResponsiveContainer>
                 )}
               </ChartSection>
             </section>
 
-            {/* 건강 뉴스 섹션 */}
             <section>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold">건강 뉴스</h2>
-                <p className="text-slate-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-slate-500">
                   전문가가 큐레이션한 건강 정보를 만나보세요.
                 </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {[
                   {
                     category: "MEDICAL",
@@ -255,20 +367,20 @@ const MainPage = () => {
                 ].map((news, idx) => (
                   <div
                     key={idx}
-                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer"
+                    className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
                   >
                     <img
                       src={news.img}
                       alt={news.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="p-6">
                       <span
-                        className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}
+                        className={`inline-block rounded px-2 py-0.5 text-[10px] font-bold ${news.color}`}
                       >
                         {news.category}
                       </span>
-                      <p className="mt-3 text-sm font-semibold text-slate-800 leading-snug">
+                      <p className="mt-3 text-sm font-semibold leading-snug text-slate-800">
                         {news.title}
                       </p>
                     </div>

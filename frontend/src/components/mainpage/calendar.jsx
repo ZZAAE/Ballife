@@ -1,16 +1,31 @@
 import { useMemo, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 const ringColors = [
   "stroke-red-400",
-  "stroke-indigo-400",
+  "stroke-purple-400",
   "stroke-blue-400",
+  "stroke-sky-400",
   "stroke-green-400",
   "stroke-orange-400",
-  "stroke-pink-400",
-  "stroke-slate-400",
+  "stroke-yellow-400",
 ];
 
+const legendItems = [
+    { label: "식단", color: "bg-red-400" },
+    { label: "혈압", color: "bg-purple-400" },
+    { label: "혈당", color: "bg-blue-400" },
+    { label: "수분", color: "bg-sky-400" },
+    { label: "복약", color: "bg-green-400" },
+    { label: "운동", color: "bg-orange-400" },
+    { label: "체중", color: "bg-yellow-400" },
+  ];
+
 function RingChart() {
+  const count = ringColors.length;      // 7
+  const slot = 100 / count;         // 각 조각 전체 폭
+  const gap = 0.8;                  // 조각 사이 간격(원하면 0)
+  const segment = slot - gap;       // 실제 색 구간
   return (
     <svg viewBox="0 0 36 36" className="mx-auto mt-1.5 h-9 w-9">
       {ringColors.map((color, i) => (
@@ -20,10 +35,11 @@ function RingChart() {
           cy="18"
           r="15"
           fill="transparent"
-          strokeWidth="3.2"
+          strokeWidth="4"
           className={color}
-          strokeDasharray="11 89"
-          strokeDashoffset={i * -14}
+          strokeDasharray={`${segment} ${100 - segment}`}
+          strokeDashoffset={-(i * slot)}
+          transform="rotate(-90 18 18)"
         />
       ))}
     </svg>
@@ -31,6 +47,7 @@ function RingChart() {
 }
 
 function Calendar() {
+  const navigate = useNavigate();
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1));
 
@@ -70,7 +87,7 @@ function Calendar() {
         key={`day-${dayNumber}`}
         type="button"
         className="group h-20 rounded-xl border border-slate-100 bg-white p-2 transition hover:border-slate-200 hover:shadow-sm"
-        onClick={() => console.log(`Clicked on day ${dayNumber}`)}
+        onClick={() => navigate("/calender", {state:{year:currentDate.getFullYear(), month:currentDate.getMonth()}})}
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-600">{dayNumber}</span>
@@ -114,6 +131,15 @@ function Calendar() {
       </div>
 
       <div className="mt-2 grid grid-cols-7 gap-2">{Array.from({ length: totalCells }, (_, i) => renderDayCell(i))}</div>
+      {/* 하단 범례 */}
+      <div className="flex flex-wrap gap-4 mt-6 text-xs text-gray-500 border-t pt-4">
+        {legendItems.map((item, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <span className={`w-3 h-3 rounded-full ${item.color}`} />
+            <span className="font-medium text-gray-600">{item.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

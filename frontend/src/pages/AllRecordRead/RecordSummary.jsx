@@ -59,8 +59,7 @@ const meals = [
     time: "08:30 AM",
     label: "아침",
     color: "from-slate-600 to-slate-800",
-    image:
-      "https://i.namu.wiki/i/9KlMwPdJc3xUwfQ01bKzEQVphEly7igr380JpMSBfg5yyWtYNAWvqsQaMsdzJIMPSeUjNVk_lXuZnAbX9esdeA.webp",
+    image: "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
     items: [
       {
         name: "그릭 요거트와 블루베리",
@@ -212,14 +211,15 @@ export default function RecordSummary() {
   const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
 
   return (
-    <div className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-sans">
-      <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
+    <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
+      
+      <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              전체 기록 관리
+            <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+              오늘의 기록 보기
             </h1>
             <p className="text-sm text-gray-400">
               하루의 신체 변화를 분석한 결과입니다.

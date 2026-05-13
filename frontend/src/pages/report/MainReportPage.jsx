@@ -50,14 +50,14 @@ export default function MainReportPage() {
         <div className="mt-16 flex flex-col md:flex-row gap-12 items-center text-left">
           <div className="w-full md:w-1/2 bg-[#f87171] rounded-xl aspect-[4/3] flex items-center justify-center">
             <img
-              src="https://via.placeholder.com/200/ffffff/f87171?text=Safe+for+work"
+              src="assets/icon/ballifeLogo.png" 
               alt="Sample"
               className="opacity-80"
             />
           </div>
           <div className="w-full md:w-1/2 space-y-6">
             <div>
-              <h3 className="font-bold text-lg mb-3">왜 BallLife 인가요?</h3>
+              <h3 className="font-bold text-lg mb-3">왜 BalLife 인가요?</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
                 Balance + Life를 합친 말로 사용자의 라이프 밸런스 회복에
                 집중합니다.

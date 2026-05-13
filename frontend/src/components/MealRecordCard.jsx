@@ -1,17 +1,27 @@
 import { useMemo } from "react";
 
-const MacroBadge = ({ label, value, unit = "g", textColor }) => (
+const MacroBadge = ({ label, value, unit = "g", bgColor, textColor }) => (
   <span
-    className={`inline-flex items-center justify-center gap-1.5 text-[12px] ${textColor} bg-slate-50 rounded w-14 py-0.5`}
+    className={`inline-flex min-w-[54px] items-center justify-center gap-[3px] rounded-full px-2 py-1 text-[11px] font-[600] ${bgColor} ${textColor}`}
   >
-    <span className={`${textColor} font-bold `}>{label}</span> {value}
-    {unit}
+    <span className="font-[600]">{label}</span>
+    <span>
+      {value}
+      {unit}
+    </span>
   </span>
 );
 
-const MealRecordCard = ({ time, label, items, image, onClick, className = "" }) => {
+const MealRecordCard = ({
+  time,
+  label,
+  items = [],
+  image,
+  className = "",
+  onClick,
+}) => {
   const visibleItems = items.slice(0, 2);
-  const hiddenCount = items.length - 2;
+  const hiddenCount = Math.max(items.length - 3, 0);
 
   const totals = useMemo(() => {
     return items.reduce(
@@ -22,106 +32,123 @@ const MealRecordCard = ({ time, label, items, image, onClick, className = "" }) 
         fat: acc.fat + (item.fat || 0),
         sugar: acc.sugar + (item.sugar || 0),
         chol: acc.chol + (item.chol || 0),
-        na: acc.na + (item.na || 0)
+        na: acc.na + (item.na || 0),
       }),
       { kcal: 0, carb: 0, protein: 0, fat: 0, sugar: 0, chol: 0, na: 0 },
     );
   }, [items]);
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${className}`}
+      className={`block overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
     >
-      {/* Meal Image Header */}
-      <div className="h-48 relative">
+      <div className="relative h-[180px]">
         {image ? (
-          <img src={image} alt={label} className="w-full h-full object-cover" />
+          <img src={image} alt={label} className="h-full w-full object-cover" />
         ) : (
           <img
-            src={"https://cdn-icons-png.flaticon.com/512/1405/1405021.png"}
+            src="https://saladpanda.co.kr/web/product/extra/big/202407/a039af315a7e721c8e8cb37b387fe90f.jpg"
             alt={label}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-black/30 p-3 flex flex-col justify-end">
-          <span className="text-[10px] text-white/70 font-medium">{time}</span>
-          <span className="text-lg font-bold text-white">{label}</span>
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
+
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <span className="text-[14px] font-[500] text-white/75">{time}</span>
+          <p className="mt-1 text-[19px] font-[700] leading-none text-white">
+            {label}
+          </p>
         </div>
       </div>
 
-      <div className="p-3.5">
-        {visibleItems.map((item, i) => (
-          <div key={i} className="mb-2.5">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-800">
+      <div className="py-3 px-6">
+        <div>
+          {visibleItems.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between border-gray-100 py-2 last:border-b-0 mb-1"
+            >
+              <span className="min-w-0 truncate text-[16px] font-[600] text-gray-800">
                 {item.name}
               </span>
-              <span className="text-xs font-bold text-blue-600">
+
+              <span className="ml-3 shrink-0 text-[16px] font-[600] text-[#5172dc]">
                 {item.kcal} kcal
               </span>
             </div>
-            <div className="flex flex-wrap gap-1">
-              <MacroBadge
-                label="탄"
-                value={item.carb}
-                textColor={`text-slate-400`}
-              />
-              <MacroBadge
-                label="단"
-                value={item.protein}
-                textColor={`text-cyan-500`}
-              />
-              <MacroBadge
-                label="지"
-                value={item.fat}
-                textColor={`text-orange-400`}
-              />
-              <MacroBadge
-                label="당"
-                value={item.sugar}
-                textColor={`text-pink-400`}
-              />
-              <MacroBadge
-                label="콜"
-                value={item.chol}
-                textColor={`text-indigo-400`}
-                unit="mg"
-              />
-              <MacroBadge
-                label="나"
-                value={item.na}
-                textColor={`text-yellow-500`}
-              />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {hiddenCount > 0 ? (
-          <p className="text-[11px] text-gray-400 mb-2">외 {hiddenCount}개</p>
+          <p className="mb-3 mt-1 text-[12px] font-[500] text-gray-400">
+            외 {hiddenCount}개
+          </p>
         ) : (
-          <p className="text-[11px] text-gray-400 mb-2">&nbsp;</p>
+          <div className="mb-3" />
         )}
 
-        {/* Total */}
-        <div className="border-t border-gray-100 pt-2 mt-2">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-gray-500">합계</span>
-            <span className="text-lg font-bold text-gray-900">
+        <div className="border-t border-gray-100 pt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[13px] font-[800] text-[#363636]">
+              합계
+            </span>
+
+            <span className="text-[17px] font-[700] text-[#323232]">
               {totals.kcal} kcal
             </span>
           </div>
+
           <div className="flex flex-wrap gap-1">
-            <MacroBadge label="탄" value={totals.carb} textColor={`text-slate-400`}/>
-            <MacroBadge label="단" value={totals.protein} textColor={`text-cyan-500`}/>
-            <MacroBadge label="지" value={totals.fat} textColor={`text-orange-400`}/>
-            <MacroBadge label="당" value={totals.sugar} textColor={`text-pink-400`}/>
-            <MacroBadge label="콜" value={totals.chol} textColor={`text-indigo-400`} unit="mg" />
-            <MacroBadge label="나" value={totals.na} textColor={`text-yellow-500`} />
+            <MacroBadge
+              label="탄"
+              value={totals.carb}
+              bgColor="bg-slate-100"
+              textColor="text-slate-400"
+            />
+
+            <MacroBadge
+              label="단"
+              value={totals.protein}
+              bgColor="bg-cyan-50"
+              textColor="text-cyan-500"
+            />
+
+            <MacroBadge
+              label="지"
+              value={totals.fat}
+              bgColor="bg-orange-50"
+              textColor="text-orange-400"
+            />
+
+            <MacroBadge
+              label="당"
+              value={totals.sugar}
+              bgColor="bg-pink-50"
+              textColor="text-pink-400"
+            />
+
+            <MacroBadge
+              label="콜"
+              value={totals.chol}
+              bgColor="bg-indigo-50"
+              textColor="text-indigo-400"
+              unit="mg"
+            />
+
+            <MacroBadge
+              label="나"
+              value={totals.na}
+              bgColor="bg-yellow-50"
+              textColor="text-yellow-500"
+            />
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
