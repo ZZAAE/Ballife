@@ -566,14 +566,7 @@ export default function MealPage() {
               }}
             >
               <div>
-                <h1
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 700,
-                    margin: 0,
-                    color: "#111827",
-                  }}
-                >
+                <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                   오늘의 식단 기록 확인
                 </h1>
                 <p
@@ -803,14 +796,7 @@ export default function MealPage() {
           </div>
 
           {/* Meal Section */}
-          <h2
-            style={{
-              fontSize: 20,
-              fontWeight: 500,
-              color: "#040d1b",
-              margin: "0 0 16px",
-            }}
-          >
+          <h2 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl">
             오늘의 식단 기록 확인
           </h2>
           <div

@@ -35,11 +35,11 @@ export default function MedicationPage() {
       <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
         {/* 제목 영역 */}
         <section className="mb-10">
-          <h1 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+          <h1 className="mb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
             약 복용 관리
           </h1>
 
-          <p className="text-[17px] sm:text-[19px] lg:text-[22px] text-gray-400">
+          <p className="text-sm text-gray-400">
             지난 한 달간의 신체 변화를 분석한 결과입니다.
           </p>
         </section>
