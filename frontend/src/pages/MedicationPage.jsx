@@ -31,7 +31,7 @@ export default function MedicationPage() {
   };
 
   return (
-    <div className="min-h-full w-full bg-gray-100 overflow-x-hidden">
+    <div className="min-h-full w-full bg-gray-50 overflow-x-hidden">
       <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pb-10 pt-[87px]">
         {/* 제목 영역 */}
         <section className="mb-10">

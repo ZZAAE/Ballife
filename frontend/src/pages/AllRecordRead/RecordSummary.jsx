@@ -59,7 +59,7 @@ const meals = [
     time: "08:30 AM",
     label: "아침",
     color: "from-slate-600 to-slate-800",
-    image: "https://i.namu.wiki/i/9KlMwPdJc3xUwfQ01bKzEQVphEly7igr380JpMSBfg5yyWtYNAWvqsQaMsdzJIMPSeUjNVk_lXuZnAbX9esdeA.webp",
+    image: "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
     items: [
       {
         name: "그릭 요거트와 블루베리",

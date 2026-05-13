@@ -41,11 +41,11 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   }));
 
   return (
-    <div className="min-h-screen bg-[#efefef]">
-      <div className="min-h-screen w-full bg-[#efefef] pt-[55px]">
+    <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen w-full bg-gray-50 pt-[55px]">
         <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:px-[150px] lg:py-8">
           <div className="mb-8 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+            <h2 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
               운동 기록 확인
             </h2>
             <div className="relative sm:w-auto">
