@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import FloatingChatButton from "../components/medication/FloatingChatButton";
 import MedicationProgressCard from "../components/medication/MedicationProgressCard";
 import MedicationRecordCard from "../components/medication/MedicationRecordCard";
 import MemoCard from "../components/medication/MemoCard";
@@ -63,7 +62,6 @@ export default function MedicationPage() {
           {/* 오른쪽 영역 */}
           <div className="w-full min-w-0 flex flex-col gap-8">
             <TodayScheduleCard />
-
             <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
               <MemoCard />
               <WeeklyCalendarCard />
@@ -76,8 +74,6 @@ export default function MedicationPage() {
           <PrescriptionListCard onSelectGroup={openPrescriptionModal} />
         </section>
       </div>
-
-      <FloatingChatButton />
 
       <BloodPressureRecordModal
         isOpen={isBloodPressureModalOpen}

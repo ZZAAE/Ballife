@@ -1,7 +1,7 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { useState } from 'react';
-
+import ChatBot from './modals/Chatbot';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
 import BoardListPage from './pages/board/BoardListPage';
@@ -45,12 +45,11 @@ function App() {
     location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
-    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/AllRecordPage'||
     location.pathname === '/' ||
     location.pathname.startsWith('/posts/');
-
-  const hideChatbot =
+    
+    const hideChatbot =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/boards' ||
@@ -61,7 +60,7 @@ function App() {
     location.pathname === '/intro/hypertension' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
-    -
+    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname.startsWith('/posts/');
 
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
@@ -118,7 +117,7 @@ function App() {
             </Routes>
           </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}
-        
+        {!hideChatbot && <ChatBot />}
       </div>
 
       </main>
