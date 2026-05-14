@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // 페이지 이동
-import toast from "react-hot-toast"; //토스트 알림
-import Input from "../../components/Input";
-import Button from "../../components/Button";
+import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import authApi from "../../api/authApi";
 
 function SignUpPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  //폼 입력값 전체
   const [formData, setFormData] = useState({
     loginId: "",
     password: "",
@@ -21,22 +18,13 @@ function SignUpPage() {
     weight: "",
     height: "",
   });
-  const [errors, setErrors] = useState({}); //유효성 검사 에러 메세지
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    // username, soldesk
     const { name, value } = e.target;
-    //formData 업데이트 불변성 유지
-    setFormData((prev) => ({
-      ...prev, //기본값 유지
-      [name]: value, //해당 필드만 업데이트
-    }));
-    // 입력 시 해당 필드 에러 제거
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "", //해당 에러만 지움
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -67,46 +55,33 @@ function SignUpPage() {
       newErrors.email = "올바른 이메일 형식이 아닙니다.";
     }
 
-    if (!formData.password) {
-      newErrors.password = "비밀번호를 입력해주세요.";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "비밀번호는 6자 이상이어야 합니다.";
+    if (!formData.birthDate) {
+      newErrors.birthDate = "생년월일을 입력해주세요.";
     }
 
-    if (!formData.passwordConfirm) {
-      newErrors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
-    } else if (formData.password !== formData.passwordConfirm) {
-      newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+    if (!formData.gender || formData.gender === "") {
+      newErrors.gender = "성별을 선택해주세요.";
     }
 
-    if(!formData.birthDate){
-        newErrors.birthDate = "생년월일을 입력해주세요."
+    if (!formData.weight) {
+      newErrors.weight = "몸무게를 입력해주세요.";
+    } else if (formData.weight <= 0) {
+      newErrors.weight = "0 이상의 숫자를 입력해주세요.";
     }
 
-    if(!formData.gender || formData.gender == ""){
-        newErrors.gender = "성별을 선택해주세요."
+    if (!formData.height) {
+      newErrors.height = "키를 입력해주세요.";
+    } else if (formData.height <= 0) {
+      newErrors.height = "0 이상의 숫자를 입력해주세요.";
     }
 
-    if(!formData.weight){
-        newErrors.weight = "몸무게를 입력해주세요."
-    } else if (formData.weight <= 0){
-        newErrors.weight = "0 이상의 숫자를 입력해주세요";
-    }
-
-    if(!formData.height){
-        newErrors.height = "키를 입력해주세요."
-    } else if (formData.height <= 0){
-        newErrors.height = "0 이상의 숫자를 입력해주세요";
-    }
-
-    setErrors(newErrors); //유효성 검사 후 결과를 state에 업데이트
-    return Object.keys(newErrors).length === 0; //유효성 검사에 통과되어 true 반환
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validate()) return; //유효성 실패시 중단
+    if (!validate()) return;
 
     try {
       setLoading(true);
@@ -116,14 +91,14 @@ function SignUpPage() {
         username: formData.username,
         email: formData.email,
         birthDate: formData.birthDate,
-        nickname: formData.nickname, // 이거문젠가
+        nickname: formData.nickname,
         gender: formData.gender,
         weight: formData.weight,
         height: formData.height,
       });
 
       toast.success("회원가입이 완료되었습니다!");
-      navigate("/login"); // <Link to = "/login">로그인</Link>
+      navigate("/login");
     } catch (error) {
       console.error("회원가입 실패:", error);
     } finally {
@@ -131,119 +106,209 @@ function SignUpPage() {
     }
   };
 
+  // 공통 인풋 스타일
+  const inputClass = (field) => `
+    w-full h-12 px-4
+    bg-gray-100 rounded
+    text-sm text-gray-800 placeholder-gray-400
+    border border-transparent
+    outline-none
+    transition-colors duration-150
+    focus:bg-white focus:border-gray-300
+    ${errors[field] ? "border-red-400 bg-red-50" : ""}
+  `;
+
   return (
-    <div className="max-w-md mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-2xl font-bold text-center mb-8">회원가입</h1>
+    <div
+      className="bg-white flex items-start justify-center px-4 pt-16 pb-16"
+      style={{ minHeight: "95vh" }}
+    >
+      <div className="w-full max-w-lg">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="아이디"
-            name="loginId"
-            value={formData.loginId}
-            onChange={handleChange}
-            placeholder="로그인 아이디 (5자 이상)"
-            error={errors.loginId}
-          />
+        {/* 타이틀 */}
+        <h1 className="text-2xl font-medium text-center text-gray-900 mb-8 tracking-tight">
+          회원가입
+        </h1>
 
-          <Input
-            label="비밀번호"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="비밀번호 (6자 이상)"
-            error={errors.password}
-          />
+        <form onSubmit={handleSubmit} noValidate>
 
-          <Input
-            label="비밀번호 확인"
-            name="passwordConfirm"
-            type="password"
-            value={formData.passwordConfirm}
-            onChange={handleChange}
-            placeholder="비밀번호 확인"
-            error={errors.passwordConfirm}
-          />
-
-          <Input
-            label="이름"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="이름"
-          />
-
-          <Input
-            label="이메일"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@email.com"
-            error={errors.email}
-          />
-
-          <Input
-            label="생년월일"
-            name="birthDate"
-            type="date"
-            onChange={handleChange}
-            error={errors.birthDate}
-          />
-
-          <Input
-            label="닉네임 (선택)"
-            name="nickname"
-            value={formData.nickname}
-            onChange={handleChange}
-            placeholder="닉네임"
-          />
-
-          <div className="w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
-            <select
-              className="relative"
-              name="gender"
-              value={formData.gender}
+          {/* 아이디 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">아이디</label>
+            <input
+              type="text"
+              name="loginId"
+              value={formData.loginId}
               onChange={handleChange}
-              error={errors.gender}
-            >
-              <option value="">-- 선택 --</option>
-              <option value="남성">남성</option>
-              <option value="여성">여성</option>
-              <option value="비공개">비공개</option>
-            </select>
+              placeholder="아이디를 입력해주세요."
+              autoComplete="username"
+              className={inputClass("loginId")}
+            />
+            {errors.loginId && <p className="mt-1 text-xs text-red-500 pl-1">{errors.loginId}</p>}
           </div>
 
-          <Input
-            label="몸무게"
-            name="weight"
-            type="number"
-            value={formData.weight}
-            onChange={handleChange}
-            placeholder="몸무게(kg)"
-            error={errors.weight}
-            step="0.1"
-          />
+          {/* 비밀번호 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">비밀번호</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="6자 이상의 영문, 숫자 조합으로 입력해주세요."
+              autoComplete="new-password"
+              className={inputClass("password")}
+            />
+            {errors.password && <p className="mt-1 text-xs text-red-500 pl-1">{errors.password}</p>}
+          </div>
 
-          <Input
-            label="키"
-            name="height"
-            type="number"
-            value={formData.height}
-            onChange={handleChange}
-            placeholder="키(cm)"
-            error={errors.height}
-            step="0.1"
-          />
+          {/* 비밀번호 확인 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">비밀번호 확인</label>
+            <input
+              type="password"
+              name="passwordConfirm"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+              placeholder="비밀번호를 한 번 더 입력해주세요."
+              autoComplete="new-password"
+              className={inputClass("passwordConfirm")}
+            />
+            {errors.passwordConfirm && <p className="mt-1 text-xs text-red-500 pl-1">{errors.passwordConfirm}</p>}
+          </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          {/* 이름 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">사용자 이름</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="이름을 입력해주세요."
+              className={inputClass("username")}
+            />
+          </div>
+
+          {/* 이메일 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">본인 확인인 이메일</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="example@email.com"
+              autoComplete="email"
+              className={inputClass("email")}
+            />
+            {errors.email && <p className="mt-1 text-xs text-red-500 pl-1">{errors.email}</p>}
+          </div>
+
+          {/* 생년월일 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">생년월일</label>
+            <input
+              type="date"
+              name="birthDate"
+              value={formData.birthDate}
+              onChange={handleChange}
+              className={inputClass("birthDate")}
+            />
+            {errors.birthDate && <p className="mt-1 text-xs text-red-500 pl-1">{errors.birthDate}</p>}
+          </div>
+
+          {/* 닉네임 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">닉네임 <span className="text-gray-400 font-normal">(선택)</span></label>
+            <input
+              type="text"
+              name="nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+              placeholder="표시될 이름을 입력해주세요."
+              className={inputClass("nickname")}
+            />
+          </div>
+
+          {/* 성별 */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-800 mb-1">성별</label>
+            <div className={`flex p-1 bg-gray-100 rounded-lg ${errors.gender ? "ring-1 ring-red-400" : ""}`}>
+              {["남성", "여성"].map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => {
+                    setFormData((prev) => ({ ...prev, gender: g }));
+                    setErrors((prev) => ({ ...prev, gender: "" }));
+                  }}
+                  className={`
+                    flex-1 h-10 text-sm font-medium rounded-md transition-all duration-150
+                    ${formData.gender === g
+                      ? "bg-white text-blue-600 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                    }
+                  `}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+            {errors.gender && <p className="mt-1 text-xs text-red-500 pl-1">{errors.gender}</p>}
+          </div>
+
+          {/* 몸무게 / 키 — 나란히 */}
+          <div className="flex gap-4 mb-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-800 mb-1">몸무게</label>
+              <input
+                type="number"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+                placeholder="kg"
+                step="0.1"
+                min="0"
+                className={inputClass("weight")}
+              />
+              {errors.weight && <p className="mt-1 text-xs text-red-500 pl-1">{errors.weight}</p>}
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-800 mb-1">키</label>
+              <input
+                type="number"
+                name="height"
+                value={formData.height}
+                onChange={handleChange}
+                placeholder="cm"
+                step="0.1"
+                min="0"
+                className={inputClass("height")}
+              />
+              {errors.height && <p className="mt-1 text-xs text-red-500 pl-1">{errors.height}</p>}
+            </div>
+          </div>
+
+          {/* 회원가입 버튼 */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              w-full h-12
+              bg-gray-900 hover:bg-black
+              text-white text-sm font-medium
+              rounded
+              transition-colors duration-150
+              disabled:opacity-60 disabled:cursor-not-allowed
+            "
+          >
             {loading ? "가입 중..." : "회원가입"}
-          </Button>
+          </button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600">
+        {/* 로그인 링크 */}
+        <p className="text-center mt-5 text-sm text-gray-500">
           이미 계정이 있으신가요?{" "}
           <Link to="/login" className="text-blue-600 hover:underline">
             로그인
@@ -255,4 +320,3 @@ function SignUpPage() {
 }
 
 export default SignUpPage;
- 
