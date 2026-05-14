@@ -16,27 +16,31 @@ import RecordTable from "../../components/record/RecordTable";
 import StatusBadge from "../../components/record/StatusBadge";
 
 const chartData = [
-  { date: "2026-03-25", weight: 58 },
-  { date: "2026-03-26", weight: 55 },
-  { date: "2026-03-27", weight: 48 },
-  { date: "2026-03-28", weight: 56 },
-  { date: "2026-03-29", weight: 53 },
-  { date: "2026-03-30", weight: 52 },
-  { date: "2026-03-31", weight: 65 },
+  { date: "2026-05-08", weight: 75.5 },
+  { date: "2026-05-09", weight: 75.2 },
+  { date: "2026-05-10", weight: 75.0 },
+  { date: "2026-05-11", weight: 75.4 },
+  { date: "2026-05-12", weight: 75.7 },
+  { date: "2026-05-13", weight: 75.1 },
+  { date: "2026-05-14", weight: 74.8 },
 ];
 
-const measurementData = Array(8).fill({
-  date: "2026.02.22",
-  weight: 72.4,
-  bmi: 22.8,
-  status: "정상",
-});
 
+const records = [
+  { time: "오늘 12:30", category: "체중", weight: 75.0, bmi: 24.1, status: "정상", type: "normal" },
+  { time: "오늘 08:00", category: "체중", weight: 74.8, bmi: 24.0, status: "정상", type: "normal" },
+  { time: "어제 21:00", category: "체중", weight: 75.1, bmi: 24.2, status: "정상", type: "normal" },
+  { time: "어제 12:30", category: "체중", weight: 74.9, bmi: 24.1, status: "정상", type: "normal" },
+  { time: "05-13 09:00", category: "체중", weight: 75.1, bmi: 24.2, status: "정상", type: "normal" },
+  { time: "05-12 21:30", category: "체중", weight: 76.1, bmi: 24.5,  status: "정상", type: "normal" },
+  { time: "05-12 08:00", category: "체중", weight: 75.7, bmi: 24.1, status: "정상", type: "normal" },
+  { time: "05-11 20:00", category: "체중", weight: 75.4, bmi: 24.0, status: "정상", type: "normal" },
+
+]
 
 export default function WeightRecord() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [startDate] = useState("2023.10.01");
-  const [endDate] = useState("2023.10.31");
+  const totalPages = 5;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 pt-[55px]">
@@ -128,8 +132,8 @@ export default function WeightRecord() {
 
           <ChartSection
             title="체중 변화 추이"
-            startDate={startDate}
-            endDate={endDate}
+            startDate="2026.05.07"
+            endDate="2026.05.15"
           >
               <ResponsiveContainer width="100%" height = "100%">
                 <LineChart data={chartData}>
@@ -153,8 +157,8 @@ export default function WeightRecord() {
                     tickLine={false}
                   />
                   <YAxis
-                    domain={[0, 90]}
-                    ticks={[0, 30, 60, 90]}
+                    domain={[50, 90]}
+                    ticks={[50, 60, 70, 80, 90]}
                     tick={{ fontSize: 11, fill: "#9ca3af" }}
                     axisLine={false}
                     tickLine={false}
@@ -180,43 +184,43 @@ export default function WeightRecord() {
           </ChartSection>
 
           <RecordTable
-            title="최근 측정 기록"
-            columns={["측정 일시", "체중 (KG)", "BMI", "상태"]}
-            rows={measurementData}
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={setCurrentPage}
-            renderDesktopRow={(row, index) => (
-              <tr key={index} className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/30" : ""}`}>
-                <td className="px-6 py-3.5 text-center text-gray-700">{row.date}</td>
-                <td className="cursor-pointer px-6 py-3.5 text-center font-medium text-blue-600 underline">{row.weight}</td>
-                <td className="px-6 py-3.5 text-center text-gray-700">{row.bmi}</td>
-                <td className="px-6 py-3.5 text-center"><StatusBadge status={row.status} type="normal" /></td>
-              </tr>
-            )}
-            renderMobileCard={(row, index) => (
-              <div key={index} className="space-y-3 px-4 py-4">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-gray-400">측정 일시</span>
-                  <span className="text-sm text-gray-700">{row.date}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3 rounded-lg bg-slate-50 p-3 text-center">
-                  <div>
-                    <p className="text-[11px] text-gray-400">체중</p>
-                    <p className="mt-1 text-sm font-semibold text-blue-600">{row.weight}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400">BMI</p>
-                    <p className="mt-1 text-sm font-semibold text-gray-700">{row.bmi}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-gray-400">상태</p>
-                    <div className="mt-1"><StatusBadge status={row.status} type="normal" /></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          />
+                      title="최근 측정 기록"
+                      columns={["측정 일시", "체중 (KG)", "BMI", "상태"]}
+                      rows={records}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      renderDesktopRow={(row, index) => (
+                        <tr key={index} className={`border-t border-gray-50 ${index % 2 === 1 ? "bg-blue-50/20" : ""}`}>
+                          <td className="px-6 py-3.5 text-center font-medium text-gray-700">{row.time}</td>
+                          <td className="px-6 py-3.5 text-center font-semibold text-slate-700">{row.weight}</td>
+                          <td className="px-6 py-3.5 text-center font-semibold text-slate-700">{row.bmi }</td>
+                          <td className="px-6 py-3.5 text-center"><StatusBadge status={row.status} type={row.type} /></td>
+                        </tr>
+                      )}
+                      renderMobileCard={(row, index) => (
+                        <div key={index} className="space-y-3 px-4 py-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium text-gray-400">측정 일시</span>
+                            <span className="text-sm text-gray-700">{row.time}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3 rounded-lg bg-slate-50 p-3 text-center">
+                            <div>
+                              <p className="text-[11px] text-gray-400">분류</p>
+                              <p className="mt-1 text-sm font-semibold text-slate-600">{row.category}</p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] text-gray-400">수치</p>
+                              <p className={`mt-1 text-sm font-semibold ${row.type === "warning" ? "text-rose-600" : "text-slate-700"}`}>{row.value}</p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] text-gray-400">상태</p>
+                              <div className="mt-1"><StatusBadge status={row.status} type={row.type} /></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    />
         </main>
       </div>
     </div>

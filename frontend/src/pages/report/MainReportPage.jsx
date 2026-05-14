@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Search, CheckCircle2 } from "lucide-react";
+import logo from "../../assets/icons/ballifeLogo.svg";
 
 export default function MainReportPage() {
   return (
@@ -48,9 +49,9 @@ export default function MainReportPage() {
         </p>
 
         <div className="mt-16 flex flex-col md:flex-row gap-12 items-center text-left">
-          <div className="w-full md:w-1/2 bg-[#f87171] rounded-xl aspect-[4/3] flex items-center justify-center">
+          <div className="w-full md:w-1/2 bg-black rounded-xl aspect-[4/3] flex items-center justify-center">
             <img
-              src="assets/icon/ballifeLogo.png" 
+              src={logo}
               alt="Sample"
               className="opacity-80"
             />
@@ -62,7 +63,7 @@ export default function MainReportPage() {
                 Balance + Life를 합친 말로 사용자의 라이프 밸런스 회복에
                 집중합니다.
                 <br />
-                우리는 파편적으로 흩어져 있는 건강 데이터를 하나의 인사이트로
+               우리는 파편적으로 흩어져 있는 건강 데이터를 하나의 인사이트로
                 통합합니다.
                 <br />
                 의료 전문가 수준의 분석 도구를 누구나 쉽게 이해할 수 있는

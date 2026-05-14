@@ -5,13 +5,13 @@ const defaultPrescriptions = [
     id: 1,
     groupName: "혈압약",
     dosage: "5정",
-    intakeTime: "2026-04-23 12:30",
+    intakeTime: "2026-05-15 18:30",
   },
   {
     id: 2,
     groupName: "당뇨약",
     dosage: "3정",
-    intakeTime: "2026-04-23 12:30",
+    intakeTime: "2026-05-15 18:30",
   },
 ];
 

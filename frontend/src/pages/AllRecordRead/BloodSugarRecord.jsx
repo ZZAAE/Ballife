@@ -17,13 +17,13 @@ import RecordTable from "../../components/record/RecordTable";
 import StatusBadge from "../../components/record/StatusBadge";
 // 더미데이터 
 const bgData = [
-  { date: "03-26", fasting: 94, postMeal: 148 },
-  { date: "03-27", fasting: 82, postMeal: 135 },
-  { date: "03-28", fasting: 88, postMeal: 141 },
-  { date: "03-29", fasting: 79, postMeal: 163 },
-  { date: "03-30", fasting: 72, postMeal: 178 },
-  { date: "03-31", fasting: 68, postMeal: 196 },
-  { date: "04-01", fasting: 68, postMeal: 196 },
+  { date: "05-08", fasting: 82, postMeal: 135 },
+  { date: "05-09", fasting: 88, postMeal: 141 },
+  { date: "05-10", fasting: 79, postMeal: 163 },
+  { date: "05-11", fasting: 72, postMeal: 178 },
+  { date: "05-12", fasting: 68, postMeal: 196 },
+  { date: "05-13", fasting: 68, postMeal: 196 },
+  { date: "05-14", fasting: 94, postMeal: 148 }
 ];
 
 const records = [
@@ -31,10 +31,10 @@ const records = [
   { time: "오늘 08:00", category: "식후", value: 95,  status: "정상", type: "normal" },
   { time: "어제 21:00", category: "식후", value: 145, status: "정상", type: "normal" },
   { time: "어제 12:30", category: "식후", value: 145, status: "정상", type: "normal" },
-  { time: "03-30 09:00", category: "식후", value: 145, status: "정상", type: "normal" },
-  { time: "03-29 21:30", category: "식후", value: 145, status: "정상", type: "normal" },
-  { time: "03-29 08:00", category: "식후", value: 145, status: "정상", type: "normal" },
-  { time: "03-28 20:00", category: "식후", value: 145, status: "정상", type: "normal" },
+  { time: "05-13 09:00", category: "식후", value: 145, status: "정상", type: "normal" },
+  { time: "05-12 21:30", category: "식후", value: 145, status: "정상", type: "normal" },
+  { time: "05-12 08:00", category: "식후", value: 145, status: "정상", type: "normal" },
+  { time: "05-11 20:00", category: "식후", value: 145, status: "정상", type: "normal" },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -62,7 +62,7 @@ export default function BloodSugarRecord() {
       <div className="flex w-full flex-col xl:flex-row mx-auto max-w-[1280px]">
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">혈당 기록 확인</h1>
-          <p className="mb-8 text-sm text-gray-500">지난 한 달간의 혈당 변화를 분석한 결과입니다.</p>
+          <p className="mb-8 text-sm text-gray-500">지난 혈당 변화를 분석한 결과입니다.</p>
 
           <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard>
@@ -84,7 +84,7 @@ export default function BloodSugarRecord() {
                 <span className="text-4xl font-bold text-gray-900">94</span>
                 <span className="pb-1 text-sm text-gray-500">mg/dL</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-blue-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-blue-600">5월 14일 오후 8:15</p>
             </MetricCard>
 
             <MetricCard>
@@ -93,14 +93,14 @@ export default function BloodSugarRecord() {
                 <span className="text-4xl font-bold text-rose-600">148</span>
                 <span className="pb-1 text-sm text-gray-500">mg/dL</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-rose-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-rose-600">5월 14일 오후 9:15</p>
             </MetricCard>
           </div>
 
           <ChartSection
             title="혈당 변화 추이"
-            startDate="2023.10.01"
-            endDate="2023.10.31"
+            startDate="2026.05.07"
+            endDate="2026.05.15"
           >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={bgData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
