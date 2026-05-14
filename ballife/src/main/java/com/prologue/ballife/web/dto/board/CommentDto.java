@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.board.Comment;
 import com.prologue.ballife.domain.board.Post;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -45,30 +44,31 @@ public class CommentDto {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
-        public static CommentResponse from(Comment comment){
+        public static CommentResponse from(Comment comment) {
             String userNickname = comment.getUserId().getNickname() != null
-                                && !comment.getUserId().getNickname().isBlank()
-                                ? comment.getUserId().getNickname()
-                                : comment.getUserId().getUsername();
+                    && !comment.getUserId().getNickname().isBlank()
+                            ? comment.getUserId().getNickname()
+                            : comment.getUserId().getUsername();
             return CommentResponse.builder()
-                        .id(comment.getCommentId())
-                        .userId(comment.getUserId().getUserId())
-                        .postId(comment.getPostId())
-                        .userNickname(userNickname)
-                        .imageUrl(comment.getImageUrl())
-                        .content(comment.getContent())
-                        .parentComment(comment.getParentComment())
-                        .level(comment.getLevel())
-                        .createdAt(comment.getCreatedAt())
-                        .updatedAt(comment.getUpdatedAt())
-                        .build();
+                    .id(comment.getCommentId())
+                    .userId(comment.getUserId().getUserId())
+                    .postId(comment.getPostId())
+                    .userNickname(userNickname)
+                    .imageUrl(comment.getImageUrl())
+                    .content(comment.getContent())
+                    .parentComment(comment.getParentComment())
+                    .level(comment.getLevel())
+                    .createdAt(comment.getCreatedAt())
+                    .updatedAt(comment.getUpdatedAt())
+                    .build();
         }
     }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UpdateRequest{
+    public static class UpdateRequest {
         @NotBlank(message = "내용은 필수입니다")
         @Size(max = 500, message = "댓글길이는 500자 이하여야 합니다.")
         private String content;
@@ -76,7 +76,7 @@ public class CommentDto {
         private Long parentComment;
 
         private Integer level;
-        
+
         private String imageUrl;
     }
 }

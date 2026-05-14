@@ -104,10 +104,10 @@ public class CommentService {
     // 댓글 추천
     @Transactional
     public CommentDto.CommentResponse upVoteComment(Long commentId) {
-    Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
 
-    comment.upvoteComment();
-    return CommentDto.CommentResponse.from(commentRepository.save(comment));
-}
+        comment.upvoteComment();
+        return CommentDto.CommentResponse.from(commentRepository.save(comment));
+    }
 }

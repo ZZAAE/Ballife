@@ -98,36 +98,133 @@ const COLOR_THEME = {
 
 /* ---------- 2. 더미 데이터 (백엔드 연동 후 교체) ---------- */
 const dummyData = {
-  month: "3월",
-  day: "월요일",
-  date: "2024년 8월 28일",
+  month: "5월",
+  day: "금요일",
+  date: "2026년 5월 15일",
   items: [
-    { id: 1, time: "08:15", status: "active",    color: "yellow", title: "체중 측정",         subtitle: "일상 루틴",            value: "58.0kg", valueSub: "↓ 0.5kg" },
-    { id: 2, time: "08:30", status: "completed", color: "red",    title: "아침 식사",         subtitle: "식단",                value: "450 kcal" },
-    { id: 3, time: "09:00", status: "completed", color: "purple", title: "혈압 측정 & 복약",  subtitle: "혈압 체크",            value: "118/70", valueUnit: "mmHg" },
-    { id: 4, time: "10:30", status: "completed", color: "blue",   title: "혈당 체크",         subtitle: "혈당 체크 (식후 1시간)", value: "112",     valueUnit: "mg/dL", valueSub: "정상" },
-    { id: 5, time: "11:30", status: "active",    color: "sky",    title: "수분 섭취",         subtitle: "수분",                value: "250ml",  icon: "water" },
-    { id: 6, time: "13:00", status: "pending",   color: "green",  title: "종합 비타민",       subtitle: "복약 • 1정",          icon: "pillBottle", reminder: true },
-    { id: 7, time: "14:00", status: "pending",   color: "orange", title: "운동 (걷기)",       subtitle: "운동 • 30분",          value: "120",    valueUnit: "kcal", icon: "dumbbell" },
-    { id: 8, time: "18:30", status: "pending",   color: "green",  title: "오메가-3",          subtitle: "복약 • 1캡슐",         icon: "capsule", reminder: true },
+    {
+      id: 1,
+      time: "08:15",
+      status: "active",
+      color: "yellow",
+      title: "체중 측정",
+      subtitle: "일상 루틴",
+      value: "58.0kg",
+      valueSub: "↓ 0.5kg",
+    },
+    {
+      id: 2,
+      time: "08:30",
+      status: "completed",
+      color: "red",
+      title: "아침 식사",
+      subtitle: "식단",
+      value: "450 kcal",
+    },
+    {
+      id: 3,
+      time: "09:00",
+      status: "completed",
+      color: "purple",
+      title: "혈압 측정 & 복약",
+      subtitle: "혈압 체크",
+      value: "118/70",
+      valueUnit: "mmHg",
+    },
+    {
+      id: 4,
+      time: "10:30",
+      status: "completed",
+      color: "blue",
+      title: "혈당 체크",
+      subtitle: "혈당 체크 (식후 1시간)",
+      value: "112",
+      valueUnit: "mg/dL",
+      valueSub: "정상",
+    },
+    {
+      id: 5,
+      time: "11:30",
+      status: "active",
+      color: "sky",
+      title: "수분 섭취",
+      subtitle: "수분",
+      value: "250ml",
+      icon: "water",
+    },
+    {
+      id: 6,
+      time: "13:00",
+      status: "pending",
+      color: "green",
+      title: "종합 비타민",
+      subtitle: "복약 • 1정",
+      icon: "pillBottle",
+      reminder: true,
+    },
+    {
+      id: 7,
+      time: "14:00",
+      status: "pending",
+      color: "orange",
+      title: "운동 (걷기)",
+      subtitle: "운동 • 30분",
+      value: "120",
+      valueUnit: "kcal",
+      icon: "dumbbell",
+    },
+    {
+      id: 8,
+      time: "18:30",
+      status: "pending",
+      color: "green",
+      title: "오메가-3",
+      subtitle: "복약 • 1캡슐",
+      icon: "capsule",
+      reminder: true,
+    },
   ],
 };
 
 /* ---------- 3. 아이콘 컴포넌트 ---------- */
 const Icons = {
   ArrowLeft: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
     </svg>
   ),
   Check: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <polyline points="20 6 9 17 4 12" />
     </svg>
   ),
   Bell: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
@@ -138,7 +235,15 @@ const Icons = {
     </svg>
   ),
   PillBottle: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <rect x="6" y="3" width="12" height="4" rx="1" />
       <rect x="7" y="7" width="10" height="14" rx="2" />
       <line x1="12" y1="11" x2="12" y2="17" />
@@ -146,7 +251,15 @@ const Icons = {
     </svg>
   ),
   Dumbbell: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="M6.5 6.5l11 11" />
       <path d="M21 21l-1-1" />
       <path d="M3 3l1 1" />
@@ -157,7 +270,15 @@ const Icons = {
     </svg>
   ),
   Capsule: (props) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="M10.5 20.5a4.95 4.95 0 0 1-7-7l10-10a4.95 4.95 0 0 1 7 7z" />
       <line x1="8.5" y1="8.5" x2="15.5" y2="15.5" />
     </svg>
@@ -177,7 +298,9 @@ const StatusDot = ({ status, color }) => {
 
   if (status === "completed") {
     return (
-      <div className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full ${t.dotFilled} shadow-sm ring-4 ring-white`}>
+      <div
+        className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full ${t.dotFilled} shadow-sm ring-4 ring-white`}
+      >
         <Icons.Check className="h-4 w-4 text-white" />
       </div>
     );
@@ -185,14 +308,18 @@ const StatusDot = ({ status, color }) => {
 
   if (status === "active") {
     return (
-      <div className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full ${t.dotFilled} shadow-sm ring-4 ring-white`}>
+      <div
+        className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full ${t.dotFilled} shadow-sm ring-4 ring-white`}
+      >
         <div className="h-2 w-2 rounded-full bg-white" />
       </div>
     );
   }
 
   return (
-    <div className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-white ${t.dotBorder} ring-4 ring-white`}>
+    <div
+      className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-white ${t.dotBorder} ring-4 ring-white`}
+    >
       <div className={`h-2 w-2 rounded-full ${t.dotInner}`} />
     </div>
   );
@@ -207,7 +334,9 @@ const TimelineRow = ({ item, isLast }) => {
     <div className="relative flex items-stretch">
       {/* 시간 */}
       <div className="flex w-20 shrink-0 items-center justify-end pr-6">
-        <span className="text-sm font-semibold tracking-wide text-gray-500">{item.time}</span>
+        <span className="text-sm font-semibold tracking-wide text-gray-500">
+          {item.time}
+        </span>
       </div>
 
       {/* 상태 점 + 세로 라인 */}
@@ -223,16 +352,22 @@ const TimelineRow = ({ item, isLast }) => {
       </div>
 
       {/* 카드 본체 */}
-      <div className={`my-3 flex flex-1 items-center justify-between rounded-2xl ${t.card} px-7 py-5`}>
+      <div
+        className={`my-3 flex flex-1 items-center justify-between rounded-2xl ${t.card} px-7 py-5`}
+      >
         <div className="flex items-center gap-4">
           {IconCmp && (
-            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.iconBg}`}>
+            <div
+              className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.iconBg}`}
+            >
               <IconCmp className={`h-5 w-5 ${t.iconColor}`} />
             </div>
           )}
           <div className="flex flex-col">
             <span className={`text-lg font-bold ${t.title}`}>{item.title}</span>
-            <span className={`mt-0.5 text-sm ${t.subtitle}`}>{item.subtitle}</span>
+            <span className={`mt-0.5 text-sm ${t.subtitle}`}>
+              {item.subtitle}
+            </span>
           </div>
         </div>
 
@@ -241,12 +376,20 @@ const TimelineRow = ({ item, isLast }) => {
             <Icons.Bell className={`h-5 w-5 ${t.iconColor}`} />
           ) : item.value ? (
             <div className="flex flex-col items-end">
-              <div className={`flex items-baseline gap-1 text-xl font-extrabold ${t.value}`}>
+              <div
+                className={`flex items-baseline gap-1 text-xl font-extrabold ${t.value}`}
+              >
                 <span>{item.value}</span>
-                {item.valueUnit && <span className="text-sm font-semibold">{item.valueUnit}</span>}
+                {item.valueUnit && (
+                  <span className="text-sm font-semibold">
+                    {item.valueUnit}
+                  </span>
+                )}
               </div>
               {item.valueSub && (
-                <span className={`mt-0.5 text-xs font-medium ${t.valueSub}`}>{item.valueSub}</span>
+                <span className={`mt-0.5 text-xs font-medium ${t.valueSub}`}>
+                  {item.valueSub}
+                </span>
               )}
             </div>
           ) : null}
@@ -257,7 +400,11 @@ const TimelineRow = ({ item, isLast }) => {
 };
 
 /* ---------- 6. 메인 모달 컴포넌트 ---------- */
-export default function DailyTimelineModal({ isOpen = true, onClose = () => {}, data = dummyData }) {
+export default function DailyTimelineModal({
+  isOpen = true,
+  onClose = () => {},
+  data = dummyData,
+}) {
   if (!isOpen) return null;
 
   return (
@@ -280,20 +427,30 @@ export default function DailyTimelineModal({ isOpen = true, onClose = () => {}, 
             <Icons.ArrowLeft className="h-6 w-6" />
           </button>
 
-          <h1 className="mb-14 text-6xl font-black tracking-tight text-gray-900">{data.month}</h1>
+          <h1 className="mb-14 text-6xl font-black tracking-tight text-gray-900">
+            {data.month}
+          </h1>
 
           <div className="mb-6 flex items-baseline pl-4">
             <div className="w-20 pr-6 text-right">
-              <span className="text-base font-bold text-gray-700">{data.day}</span>
+              <span className="text-base font-bold text-gray-700">
+                {data.day}
+              </span>
             </div>
             <div className="pl-10">
-              <span className="text-base font-medium text-gray-500">{data.date}</span>
+              <span className="text-base font-medium text-gray-500">
+                {data.date}
+              </span>
             </div>
           </div>
 
           <div className="flex flex-col">
             {data.items.map((item, idx) => (
-              <TimelineRow key={item.id} item={item} isLast={idx === data.items.length - 1} />
+              <TimelineRow
+                key={item.id}
+                item={item}
+                isLast={idx === data.items.length - 1}
+              />
             ))}
           </div>
         </div>

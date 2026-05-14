@@ -32,7 +32,7 @@ public class Post {
     private String title;
 
     @Column(name = "CONTENT", unique = false, nullable = false, length = 5000)
-    private String content;    
+    private String content;
 
     @Column(name = "IMAGE_URL", unique = false, nullable = true, length = 300)
     private String imageUrl;
@@ -54,7 +54,6 @@ public class Post {
     @Column(name = "IS_DELETED")
     @Builder.Default
     private Boolean isDeleted = false;
-    
 
     @PrePersist
     protected void onCreate() {
@@ -66,14 +65,14 @@ public class Post {
         updatedAt = LocalDateTime.now();
     }
 
-    //편의 메서드 : 의도 파악을 명확하게 하기 위함
-    //post.setViewCount => viewCount++ 명확하지 않다
-    public void increaseViewCount(){
+    // 편의 메서드 : 의도 파악을 명확하게 하기 위함
+    // post.setViewCount => viewCount++ 명확하지 않다
+    public void increaseViewCount() {
         this.viewCount++;
     }
 
-    //논리 삭제(자기 데이터를 스스로 책임)
-    public void softDelete(){
+    // 논리 삭제(자기 데이터를 스스로 책임)
+    public void softDelete() {
         this.isDeleted = true;
     }
 
@@ -99,6 +98,6 @@ public class Post {
     }
 
     public void increaseUpVote() {
-    this.upVote++;
+        this.upVote++;
     }
 }

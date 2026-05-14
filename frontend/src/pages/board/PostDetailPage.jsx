@@ -9,7 +9,7 @@ export default function PostDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [commentDraft, setCommentDraft] = useState("");
-  const [extraComments, setExtraComments] = useState([]);
+  const [commentState, setCommentState] = useState([]);
   const [upVote, setUpVote] = useState(null);
   const [loading] = useState(false);
 
@@ -37,14 +37,23 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!post) {
       navigate("/boards");
+      return;
     }
+
+    setCommentState(
+      (post.comments ?? []).map((comment) => ({
+        ...comment,
+        upVote: comment.upVote ?? 0,
+        reportCount: comment.reportCount ?? 0,
+      })),
+    );
   }, [navigate, post]);
   // [더미 상세 로직 끝]
 
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
 
-  const comments = [...(post.comments ?? []), ...extraComments];
+  const comments = commentState;
   const displayedUpVote = upVote ?? post.upVote ?? 0;
 
   // 작성일 포맷팅
@@ -65,17 +74,39 @@ export default function PostDetailPage() {
       return;
     }
 
-    setExtraComments((currentComments) => [
+    setCommentState((currentComments) => [
       ...currentComments,
       {
         id: Date.now(),
         author: user?.nickname || user?.username || "콩콩이식사",
         content: commentDraft.trim(),
         createdAt: new Date().toISOString(),
+        upVote: 0,
+        reportCount: 0,
       },
     ]);
     setCommentDraft("");
     toast.success("댓글이 등록되었습니다.");
+  };
+
+  const handleCommentReaction = (commentId, type) => {
+    setCommentState((currentComments) =>
+      currentComments.map((comment) => {
+        if (comment.id !== commentId) {
+          return comment;
+        }
+
+        if (type === "upvote") {
+          return { ...comment, upVote: (comment.upVote ?? 0) + 1 };
+        }
+
+        return { ...comment, reportCount: (comment.reportCount ?? 0) + 1 };
+      }),
+    );
+
+    toast.success(
+      type === "upvote" ? "댓글을 추천했습니다." : "댓글을 신고했습니다.",
+    );
   };
 
   return (
@@ -244,12 +275,34 @@ export default function PostDetailPage() {
                         <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-gray-600">
                           {comment.content}
                         </p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleCommentReaction(comment.id, "upvote")
+                            }
+                            className="rounded-md border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                          >
+                            추천 {comment.upVote ?? 0}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    <span className="shrink-0 text-[11px] text-gray-400">
-                      {formatDate(comment.createdAt)}
-                    </span>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <span className="text-[11px] text-gray-400">
+                        {formatDate(comment.createdAt)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCommentReaction(comment.id, "report")
+                        }
+                        className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
+                      >
+                        신고
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
