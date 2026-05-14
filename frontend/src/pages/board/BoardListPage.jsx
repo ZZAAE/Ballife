@@ -1,22 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 // import boardApi from "../../api/boardApi";
 import { Link, useLocation } from "react-router-dom";
+import { DUMMY_POSTS, PAGE_SIZE } from "./dummyPosts";
 
 // 로그인 auth 구현 필요
 // 내가쓴거 : getBoardByCategory(카테고리별로 검색)
 
 function BoardListPage() {
   const [loading] = useState(false);
-  const [posts] = useState([]);
   const [page, setPage] = useState(0);
-  const [totalPages] = useState(0);
 
   const location = useLocation(); // 게시판 초기화 위해 필요함 링크에서 카테고리값 추출
   const givenCategory = location.state?.category ?? "ALL"; // 디테일에서 넘어온 값이 있나 확인
 
   const [category, setCategory] = useState(givenCategory || "ALL"); // 초기값: 전체조회
   const [sort, setSort] = useState("latest"); // 초기값: 날짜순,   latest|views|recommend
-  const [_searchKeyword, setSearchKeyword] = useState(""); // 검색기능
+  const [searchKeyword, setSearchKeyword] = useState(""); // 검색기능
   const [keyword, setKeyword] = useState(""); // 검색키워드 저장
 
   // 기본적으로 전체 게시글 조회
@@ -58,6 +57,46 @@ function BoardListPage() {
     const options = { year: "numeric", month: "2-digit", day: "2-digit" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
+
+  // [더미 데이터 로직 시작] 검색, 정렬, 카테고리 필터를 프런트에서 처리
+  const filteredPosts = useMemo(() => {
+    let result = [...DUMMY_POSTS];
+
+    if (category !== "ALL") {
+      result = result.filter((post) => post.category === category);
+    }
+
+    if (searchKeyword.trim()) {
+      const normalizedKeyword = searchKeyword.toLowerCase();
+      result = result.filter(
+        (post) =>
+          post.title.toLowerCase().includes(normalizedKeyword) ||
+          post.userNickname.toLowerCase().includes(normalizedKeyword),
+      );
+    }
+
+    result.sort((leftPost, rightPost) => {
+      if (sort === "views") {
+        return rightPost.viewCount - leftPost.viewCount;
+      }
+
+      if (sort === "recommend") {
+        return rightPost.upVote - leftPost.upVote;
+      }
+
+      return new Date(rightPost.createdAt) - new Date(leftPost.createdAt);
+    });
+
+    return result;
+  }, [category, searchKeyword, sort]);
+
+  const totalPages = Math.ceil(filteredPosts.length / PAGE_SIZE);
+
+  const posts = useMemo(() => {
+    const startIndex = page * PAGE_SIZE;
+    return filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredPosts, page]);
+  // [더미 데이터 로직 끝]
 
   // 카테고리, 정렬법 변경, 검색시 1페이지로
   const handleCategoryChange = (nextCategory) => {
@@ -119,6 +158,7 @@ function BoardListPage() {
           <option value="DIABETES">당뇨</option>
           <option value="OBESITY">비만</option>
           <option value="GOUT">통풍</option>
+          <option value="QNA">질문</option>
         </select>
 
         <button
@@ -187,7 +227,7 @@ function BoardListPage() {
             ) : (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="7"
                   className="px-4 py-10 text-center text-gray-500"
                 >
                   게시글이 없습니다.
