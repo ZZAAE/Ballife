@@ -1,5 +1,7 @@
 import Header from "../../components/Header";
 import HealthIndicatorMenu from "../../components/HealthMenu";
+import PrescriptionRegisterModal from "../../modals/PrescriptionRegisterModal";
+import { useState } from "react";
 
 const dummy = {
   name: "천지수",
@@ -93,6 +95,7 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
 }
 
 function UserInformation() {
+  const[isPreResisterModalOpen, SetPreResisterModalOpen] = useState(false);
   return (
     <div className="min-h-screen w-full bg-[#f7f8fa]">
       <Header />
@@ -268,7 +271,8 @@ function UserInformation() {
                       <p className="text-[10px] mt-0.5 text-gray-300">RX</p>
                     </div>
                   </div>
-                  <button className="mt-3 h-10 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors">
+                  <button className="mt-3 h-10 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                          onClick = {() => SetPreResisterModalOpen(true)}>
                     사진 업로드
                   </button>
                 </div>
@@ -303,6 +307,12 @@ function UserInformation() {
             </div>
           </div>
         </main>
+
+        <PrescriptionRegisterModal
+          open = {isPreResisterModalOpen}
+          onClose={() => SetPreResisterModalOpen(false)}
+
+        />
       </div>
     </div>
   );
