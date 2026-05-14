@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ChatBot from './modals/Chatbot';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+import DiseasePage from './pages/user/DiseasePage'
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -36,6 +37,7 @@ function App() {
   const hideHealthMenu =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
+    location.pathname === '/disease' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
     location.pathname === '/intro/web' ||
@@ -53,6 +55,7 @@ function App() {
     const hideChatbot =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
+    location.pathname === '/disease' ||
     location.pathname === '/boards' ||
     location.pathname === '/intro/web' ||
     location.pathname === '/intro/osteoporosis' ||
@@ -78,7 +81,7 @@ function App() {
 
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
-
+              <Route path="/disease" element={<DiseasePage/>} />
          
               <Route path="/boards" element={<BoardListPage />} />
               <Route path="/posts/create" element={<PostCreatePage />} />

@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate, Link } from "react-router-dom"; // 페이지 이동
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 
@@ -46,6 +47,7 @@ const diseaseFields = [
 
 
 function DiseasePage() {
+	const navigate = useNavigate();
 
     // 초기값 세팅 - 질환 필드명 기준으로 'NONE'으로 초기화
 	const [formData, setFormData] = useState(() => (
@@ -67,11 +69,12 @@ function DiseasePage() {
 		event.preventDefault();
 		toast.success('보유 질환 정보가 선택되었습니다.');
 		console.log('disease form data', formData);
+		navigate("/");
 	};
 
 	return (
 		<div className="flex min-h-[calc(100vh-10rem)]  bg-white px-8 py-10">
-			<div className="mx-auto flex min-h-full w-full flex-col rounded-[28px]   bg-white px-8 py-10  sm:px-10">
+			<div className="mx-auto flex min-h-full w-1/3 flex-col rounded-[28px]   bg-white px-8 py-10  sm:px-10">
 				<h1 className="text-3xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
 
 				<form onSubmit={handleSubmit} className="mt-10 flex flex-1 flex-col">
