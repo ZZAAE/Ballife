@@ -34,7 +34,7 @@ export default function MedicationPage() {
       <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pb-10 pt-[87px]">
         {/* 제목 영역 */}
         <section className="mb-10">
-          <h1 class="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+          <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
             약 복용 관리
           </h1>
 
