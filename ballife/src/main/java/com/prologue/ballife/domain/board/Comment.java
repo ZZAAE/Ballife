@@ -28,7 +28,7 @@ public class Comment {
     private Post postId;
 
     @Column(name = "CONTENT", unique = false, nullable = false, length = 500)
-    private String content;  
+    private String content;
 
     @Column(name = "PARENT_COMMENT")
     private Long parentComment;
@@ -63,12 +63,12 @@ public class Comment {
         updatedAt = LocalDateTime.now();
     }
 
-    //논리 삭제(자기 데이터를 스스로 책임)
-    public void softDelete(){
+    // 논리 삭제(자기 데이터를 스스로 책임)
+    public void softDelete() {
         this.isDeleted = true;
     }
 
     public void upvoteComment() {
-    this.upVote++;
+        this.upVote++;
     }
 }

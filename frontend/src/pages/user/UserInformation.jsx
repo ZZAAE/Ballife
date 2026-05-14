@@ -2,12 +2,12 @@ import Header from "../../components/Header";
 import HealthIndicatorMenu from "../../components/HealthMenu";
 
 const dummy = {
-  name: "천지수",
+  name: "김지수",
   username: "ballife-wkjgpho2enj",
-  email: "jisoo.chun@vitalis.core",
+  email: "jisoo.kim@vitalis.core",
   phone: "010-9493-3323",
-  birth: "08.02.2004",
-  gender: "여성",
+  birth: "1982.08.02",
+  gender: "남성",
   disease: "고혈압",
   bloodSugar: {
     fasting: "100 mg/dL",

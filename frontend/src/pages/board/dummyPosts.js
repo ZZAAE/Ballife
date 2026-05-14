@@ -20,6 +20,8 @@ export const DUMMY_POSTS = [
         content:
           "다음 검사까지 스트레스를 줄이고 같은 시간대에 한두 번 더 재보세요. 식후 140 전후는 식단에 따라 일시적으로 올라갈 수도 있어요.",
         createdAt: "2026-05-14T10:24:00",
+        upVote: 3,
+        reportCount: 0,
       },
       {
         id: 2,
@@ -27,12 +29,16 @@ export const DUMMY_POSTS = [
         content:
           "식후 2시간 수치면 140 전후로 나올 때도 있습니다. 며칠 연속으로 비슷하게 높게 나오지만 않으면 너무 불안해하지 않으셔도 됩니다.",
         createdAt: "2026-05-14T11:40:00",
+        upVote: 5,
+        reportCount: 1,
       },
       {
         id: 3,
         author: "아이제로",
         content: "감사합니다. 며칠 같은 시간대에 다시 측정해볼게요.",
         createdAt: "2026-05-14T12:15:00",
+        upVote: 1,
+        reportCount: 0,
       },
     ],
   },
