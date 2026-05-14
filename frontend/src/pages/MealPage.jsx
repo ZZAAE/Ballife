@@ -139,10 +139,10 @@ export default function MealPage() {
   const achievement = Math.round((totalCal / targetCal) * 100);
 
   return (
-    <div
-      className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <div className="max-w-[1920px] mx-auto">
       <div className="flex pt-[55px]">
-        <main className="flex-1 p-8">
+        <main className="flex-1 px-16 py-8 max-w-[1400px] mx-auto w-full">
 
           {/* ── 페이지 타이틀 ─────────────────────────────────────────── */}
           <div className="mb-8">
@@ -284,6 +284,7 @@ export default function MealPage() {
           </div>
 
         </main>
+        </div>
       </div>
 
       <MealDetailModal
