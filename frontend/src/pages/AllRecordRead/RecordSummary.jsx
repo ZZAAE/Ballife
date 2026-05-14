@@ -98,6 +98,7 @@ const meals = [
     time: "12:45 PM",
     label: "점심",
     color: "from-emerald-600 to-emerald-800",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
     items: [
       {
         name: "연어 샐러드",
@@ -125,6 +126,7 @@ const meals = [
     time: "07:15 PM",
     label: "저녁",
     color: "from-orange-500 to-orange-700",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
     items: [
       {
         name: "닭가슴살 구이",
@@ -152,6 +154,7 @@ const meals = [
     time: "04:00 PM",
     label: "간식",
     color: "from-violet-500 to-violet-700",
+    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
     items: [
       {
         name: "사과와 땅콩버터",
@@ -174,26 +177,28 @@ const meals = [
     ],
   },
   {
-    time: "04:00 PM",
+    time: "08:00 PM",
     label: "간식",
     color: "from-violet-500 to-violet-700",
+    image: "https://www.marketresearchintellect.com/images/blogs/best-doughnut-brands.webp",
     items: [
       {
-        name: "사과와 땅콩버터",
-        kcal: 190,
+        name: "도넛",
+        kcal: 400,
         carb: 22,
         protein: 4,
-        fat: 11,
-        sugar: 15,
+        fat: 60,
+        chol: 80,
+        sugar: 80,
       },
       {
-        name: "단백질 쉐이크",
-        kcal: 120,
-        carb: 3,
-        protein: 24,
+        name: "밀크 쉐이크",
+        kcal: 330,
+        carb: 1,
+        protein: 5,
         fat: 1,
-        sugar: 1,
-        chol: 15,
+        sugar: 80,
+        chol: 1,
         na: 5,
       },
     ],
