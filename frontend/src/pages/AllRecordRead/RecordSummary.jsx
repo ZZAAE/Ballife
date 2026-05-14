@@ -59,22 +59,38 @@ const meals = [
     time: "08:30 AM",
     label: "아침",
     color: "from-slate-600 to-slate-800",
-    image: "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
+    image:
+      "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
     items: [
       {
         name: "그릭 요거트와 블루베리",
         kcal: 245,
-        carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5, na: 2
+        carb: 18,
+        protein: 12,
+        fat: 8,
+        sugar: 4,
+        chol: 5,
+        na: 2,
       },
       {
         name: "아몬드 한 줌",
         kcal: 160,
-        carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0, na: 0
+        carb: 6,
+        protein: 6,
+        fat: 14,
+        sugar: 1,
+        chol: 0,
+        na: 0,
       },
       {
         name: "라면 큰거",
         kcal: 400,
-        carb: 28, protein: 6, fat: 19, sugar: 1, chol: 5, na: 11
+        carb: 28,
+        protein: 6,
+        fat: 19,
+        sugar: 1,
+        chol: 5,
+        na: 11,
       },
     ],
   },
@@ -86,12 +102,22 @@ const meals = [
       {
         name: "연어 샐러드",
         kcal: 480,
-        carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, na: 1
+        carb: 12,
+        protein: 34,
+        fat: 28,
+        sugar: 3,
+        chol: 45,
+        na: 1,
       },
       {
         name: "현미밥 반 공기",
         kcal: 150,
-        carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0, na: 0
+        carb: 32,
+        protein: 3,
+        fat: 1,
+        sugar: 0,
+        chol: 0,
+        na: 0,
       },
     ],
   },
@@ -103,12 +129,22 @@ const meals = [
       {
         name: "닭가슴살 구이",
         kcal: 310,
-        carb: 0, protein: 47, fat: 12, sugar: 0, chol: 75, na: 0
+        carb: 0,
+        protein: 47,
+        fat: 12,
+        sugar: 0,
+        chol: 75,
+        na: 0,
       },
       {
         name: "구운 고구마와 야채",
         kcal: 220,
-        carb: 45, protein: 4, fat: 1, sugar: 0, chol: 0, na: 0
+        carb: 45,
+        protein: 4,
+        fat: 1,
+        sugar: 0,
+        chol: 0,
+        na: 0,
       },
     ],
   },
@@ -120,12 +156,20 @@ const meals = [
       {
         name: "사과와 땅콩버터",
         kcal: 190,
-        carb: 22, protein: 4, fat: 11, sugar: 15
+        carb: 22,
+        protein: 4,
+        fat: 11,
+        sugar: 15,
       },
       {
         name: "단백질 쉐이크",
         kcal: 120,
-        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
+        carb: 3,
+        protein: 24,
+        fat: 1,
+        sugar: 1,
+        chol: 15,
+        na: 5,
       },
     ],
   },
@@ -137,12 +181,20 @@ const meals = [
       {
         name: "사과와 땅콩버터",
         kcal: 190,
-        carb: 22, protein: 4, fat: 11, sugar: 15
+        carb: 22,
+        protein: 4,
+        fat: 11,
+        sugar: 15,
       },
       {
         name: "단백질 쉐이크",
         kcal: 120,
-        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
+        carb: 3,
+        protein: 24,
+        fat: 1,
+        sugar: 1,
+        chol: 15,
+        na: 5,
       },
     ],
   },
@@ -157,11 +209,10 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 
 export default function RecordSummary() {
   const [isMealModalOpen, setMealModalOpen] = useState(false);
-  const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false)
+  const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
-      
       <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1 p-8">
@@ -445,9 +496,14 @@ export default function RecordSummary() {
         </main>
 
         {/* <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} /> */}
-        <DailyTimelineModal isOpen={isTimeLineModalOpen} onClose={()=>setTimeLineModelOpen(false)}/>
-        <MealDetailModal isOpen = {isMealModalOpen} onClose={() => setMealModalOpen(false)}/>
-
+        <DailyTimelineModal
+          isOpen={isTimeLineModalOpen}
+          onClose={() => setTimeLineModelOpen(false)}
+        />
+        <MealDetailModal
+          isOpen={isMealModalOpen}
+          onClose={() => setMealModalOpen(false)}
+        />
       </div>
     </div>
   );

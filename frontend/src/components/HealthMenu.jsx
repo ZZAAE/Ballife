@@ -76,26 +76,26 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
               key={item.key}
               to={item.path}
               className={[
-                "relative flex h-[55px] w-full items-center gap-[14px] rounded-[5px] text-left transition-none no-underline",
-                isActive
-                  ? "bg-[#E8E8E8] pl-[20px]"
-                  : "bg-transparent pl-[23px]",
+                "relative flex h-[55px] w-full items-center rounded-[5px] px-[20px] text-left transition-none no-underline",
+                isActive ? "bg-[#E8E8E8]" : "bg-transparent",
               ].join(" ")}
             >
               {isActive && (
                 <span className="absolute left-0 top-[8px] h-[39px] w-[3px] rounded-r-full bg-[#111111]" />
               )}
 
-              <span className="flex h-[35px] w-[35px] shrink-0 items-center justify-center rounded-[9px] bg-[#050505]">
-                <img
-                  src={item.icon}
-                  alt=""
-                  className="h-[22px] w-[22px] object-contain"
-                />
-              </span>
+              <span className="flex min-w-[120px] items-center gap-[14px]">
+                <span className="flex h-[35px] w-[35px] shrink-0 items-center justify-center rounded-[9px] bg-[#050505]">
+                  <img
+                    src={item.icon}
+                    alt=""
+                    className="h-[22px] w-[22px] object-contain"
+                  />
+                </span>
 
-              <span className="text-[14px] font-medium leading-none tracking-[-0.2px] text-[#111111]">
-                {item.label}
+                <span className="text-[14px] font-medium leading-none tracking-[-0.2px] text-[#111111]">
+                  {item.label}
+                </span>
               </span>
             </Link>
           );
@@ -103,14 +103,14 @@ export default function HealthIndicatorMenu({ onRegisterClick }) {
       </nav>
 
       {/* 기록하기 버튼 */}
-      <Link to="/allRecord" >
-      <button
-        type="button"
-        onClick={onRegisterClick}
-        className="mt-[31px] h-[55px] w-full rounded-[6px] bg-[#050505] text-[15px] font-bold tracking-[-0.2px] text-white"
-      >
-        기록하기
-      </button>
+      <Link to="/allRecord">
+        <button
+          type="button"
+          onClick={onRegisterClick}
+          className="mt-[31px] h-[55px] w-full rounded-[6px] bg-[#050505] text-[15px] font-bold tracking-[-0.2px] text-white"
+        >
+          기록하기
+        </button>
       </Link>
       {/* 파란 조언 카드 */}
       <section className="mt-[86px] rounded-[10px] bg-[#0057E5] px-[24px] pt-[24px] pb-[24px] text-white shadow-[0_18px_32px_rgba(0,0,0,0.14)]">
