@@ -45,10 +45,13 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
       <div className="min-h-screen bg-gray-50 pt-[55px] text-gray-900">
         <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
           <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-          <div className="mb-8 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
-              운동 기록 확인
-            </h2>
+          <div className="mb-8 flex w-full flex-col gap-4 sm:gap-0 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+                운동 기록 확인
+              </h2>
+              <p className="text-sm text-gray-500">지난 운동 변화를 분석한 결과입니다.</p>
+            </div>
             <div className="relative sm:w-auto">
               <input
                 type="date"

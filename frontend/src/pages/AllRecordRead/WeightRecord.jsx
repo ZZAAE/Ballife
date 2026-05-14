@@ -54,7 +54,7 @@ export default function WeightRecord() {
             체중 기록 확인
           </h1>
           <p className="mb-8 text-sm text-gray-500">
-            지난 한 달간의 신체 변화를 분석한 결과입니다.
+            지난 신체 변화를 분석한 결과입니다.
           </p>
 
           {/* ── Stat Cards ── */}
