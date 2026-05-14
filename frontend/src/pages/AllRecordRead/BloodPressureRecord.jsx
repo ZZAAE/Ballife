@@ -16,13 +16,13 @@ import RecordTable from "../../components/record/RecordTable";
 import StatusBadge from "../../components/record/StatusBadge";
 
 const bpData = [
-  { date: "03-26", systolic: 122, diastolic: 78 },
-  { date: "03-27", systolic: 118, diastolic: 76 },
-  { date: "03-28", systolic: 120, diastolic: 77 },
-  { date: "03-29", systolic: 116, diastolic: 74 },
-  { date: "03-30", systolic: 121, diastolic: 78 },
-  { date: "03-31", systolic: 115, diastolic: 73 },
-  { date: "04-01", systolic: 117, diastolic: 75 },
+  { date: "05-08", systolic: 118, diastolic: 76 },
+  { date: "05-09", systolic: 120, diastolic: 77 },
+  { date: "05-10", systolic: 116, diastolic: 74 },
+  { date: "05-11", systolic: 121, diastolic: 78 },
+  { date: "05-12", systolic: 115, diastolic: 73 },
+  { date: "05-13", systolic: 117, diastolic: 75 },
+  { date: "05-14", systolic: 122, diastolic: 78 },
 ];
 
 const records = [
@@ -30,10 +30,10 @@ const records = [
   { time: "오늘 08:15", systolic: 134, diastolic: 76, pulse: 78, status: "주의", statusType: "warning" },
   { time: "어제 21:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
   { time: "어제 12:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-30 09:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-29 21:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-29 08:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
-  { time: "03-28 20:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
+  { time: "05-13 09:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
+  { time: "05-12 21:30", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
+  { time: "05-12 08:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
+  { time: "05-11 20:00", systolic: 118, diastolic: 76, pulse: 72, status: "정상", statusType: "normal" },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -72,7 +72,7 @@ export default function BloodPressureRecord() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">혈압 기록 확인</h1>
-          <p className="mb-8 text-sm text-gray-500">지난 한 달간의 신체 변화를 분석한 결과입니다.</p>
+          <p className="mb-8 text-sm text-gray-500">지난 혈압 변화를 분석한 결과입니다.</p>
 
           <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard>
@@ -95,7 +95,7 @@ export default function BloodPressureRecord() {
                 <span className="text-4xl font-bold text-gray-900">134</span>
                 <span className="pb-1 text-sm text-gray-500">mmHg</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-blue-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-blue-600">5월 14일 오후 9:15</p>
             </MetricCard>
 
             <MetricCard>
@@ -104,14 +104,14 @@ export default function BloodPressureRecord() {
                 <span className="text-4xl font-bold text-gray-900">70</span>
                 <span className="pb-1 text-sm text-gray-500">mmHg</span>
               </div>
-              <p className="mt-4 text-xs font-semibold text-cyan-600">5월 28일 오후 9:15</p>
+              <p className="mt-4 text-xs font-semibold text-cyan-600">5월 14일 오후 9:15</p>
             </MetricCard>
           </div>
 
           <ChartSection
             title="혈압 변화 추이"
-            startDate="2023.10.01" // 
-            endDate="2023.10.31"
+            startDate="2026.05.07" // 
+            endDate="2026.05.15"
            
           >
               <ResponsiveContainer width="100%" height="100%">

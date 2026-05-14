@@ -39,7 +39,7 @@ export default function MedicationPage() {
           </h1>
 
           <p className="text-sm text-gray-400">
-            지난 한 달간의 신체 변화를 분석한 결과입니다.
+            지난 복용 결과를 분석한 결과입니다.
           </p>
         </section>
 
