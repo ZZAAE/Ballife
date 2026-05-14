@@ -1,6 +1,4 @@
 import { X } from "lucide-react";
-import salmonImg from "../assets/salmon.jpg";
-import riceImg from "../assets/rice.jpg";
 
 function MealDetailModal({ isOpen, onClose, mealData }) {
   if (!isOpen) return null;

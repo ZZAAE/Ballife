@@ -59,9 +59,4 @@ public class UserMedicineRecordService {
 
     // 일주일 단위 아점저 약 복용 (이행률 계산)
 
-    // 복용 이행률 계산
-    @Transactional
-    public Long DosageSituation() {
-        // 멀 가져와야?
-    }
 }

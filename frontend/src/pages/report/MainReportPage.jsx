@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Search, CheckCircle2 } from "lucide-react";
+import ballifeLogo from '../../assets/icons/ballifeLogo.svg'
 
 export default function MainReportPage() {
   return (
@@ -48,9 +49,9 @@ export default function MainReportPage() {
         </p>
 
         <div className="mt-16 flex flex-col md:flex-row gap-12 items-center text-left">
-          <div className="w-full md:w-1/2 bg-[#f87171] rounded-xl aspect-[4/3] flex items-center justify-center">
+          <div className="w-full md:w-1/2 bg-black rounded-xl aspect-[4/3] flex items-center justify-center">
             <img
-              src="assets/icon/ballifeLogo.png" 
+              src={ballifeLogo} 
               alt="Sample"
               className="opacity-80"
             />
