@@ -49,7 +49,7 @@ function RingChart() {
 function Calendar() {
   const navigate = useNavigate();
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1));
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const monthTitle = `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월`;
 
