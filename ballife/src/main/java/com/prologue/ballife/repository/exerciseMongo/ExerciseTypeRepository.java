@@ -1,4 +1,4 @@
-package com.prologue.ballife.repository.exercise;
+package com.prologue.ballife.repository.exerciseMongo;
 
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import org.springframework.data.mongodb.repository.MongoRepository;
