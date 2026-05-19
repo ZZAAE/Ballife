@@ -77,7 +77,7 @@ function App() {
         <div className="min-w-screen bg-white flex justify-end">
           <div className="flex-1">
             <Routes>
-              {/* <Route path="/" element={<MainPage />} /> */}
+              <Route path="/" element={<MainPage />} />
               <Route path="/calender" element={<HealthCalenderPage />} />
 
               <Route path="/signup" element={<SignUpPage />} />
@@ -118,7 +118,7 @@ function App() {
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
               
-              <Route path="/" element={<PetPage />} />
+              <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}

@@ -2,7 +2,7 @@ import { Unity, useUnityContext } from "react-unity-webgl";
 
 export default function PetPage(){
 
-     const { unityProvider } = useUnityContext({
+    const { unityProvider } = useUnityContext({
         loaderUrl: "/Unity/Build.loader.js",
         dataUrl: "/Unity/Build.data",
         frameworkUrl: "/Unity/Build.framework.js",
