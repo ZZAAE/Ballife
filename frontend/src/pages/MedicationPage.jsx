@@ -39,7 +39,7 @@ export default function MedicationPage() {
             약 복용 관리
           </h1>
 
-          <p className="text-[17px] sm:text-[19px] lg:text-[22px] text-gray-400">
+          <p className="text-[17px] sm:text-[19px] lg:text-[18px] text-gray-400">
             지난 한 달간의 신체 변화를 분석한 결과입니다.
           </p>
         </section>
