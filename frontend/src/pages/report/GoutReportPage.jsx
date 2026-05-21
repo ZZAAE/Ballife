@@ -28,7 +28,7 @@ export default function GoutReportPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20 font-sans text-gray-900">
+    <div className="bg-gray-50 min-h-screen pb-20 font-sans text-gray-900 pt-[55px]">
       <main className="max-w-7xl mx-auto p-10">
         
         {/* 타이틀 섹션 */}

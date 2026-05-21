@@ -19,7 +19,13 @@ const navItems = [
     ],
   },
   { key: "community", label: "커뮤니티", path: "/boards" },
-  { key: "member", label: "회원정보", path: "/member" },
+  { key: "member", 
+    label: "회원정보", 
+    path: "/member",
+    dropdown: [
+      { label: "펫", path: "/member/pet" },
+    ]
+  },
   {
     key: "intro",
     label: "소개",
@@ -62,6 +68,17 @@ export default function Header({ isLoggedIn = false }) {
         {/* 메뉴 */}
         <nav className="flex flex-1 items-center justify-around">
           {navItems.map((item) => (
+            ["check", "intro"].includes(item.key) ?
+            <Link
+              key={item.key}
+              onMouseEnter={() =>
+                setHoveredMenu(item.dropdown ? item.key : null)
+              }
+              className="flex h-[70px] items-center px-[20px] text-[18px] font-semibold tracking-[-0.3px] text-white no-underline"
+            >
+              {item.label}
+            </Link>
+            :
             <Link
               key={item.key}
               to={item.path}

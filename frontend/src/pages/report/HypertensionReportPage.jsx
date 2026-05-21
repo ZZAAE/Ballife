@@ -28,7 +28,7 @@ export default function HypertensionReportPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20 font-sans text-gray-900">
+    <div className="bg-gray-50 min-h-screen pb-20 font-sans text-gray-900 pt-[55px]">
       <main className="max-w-7xl mx-auto p-10">
         
         {/* 타이틀 섹션 - 이미지 텍스트 그대로 적용 */}
@@ -43,7 +43,7 @@ export default function HypertensionReportPage() {
         {/* 개요 섹션 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-14">
           <div className="md:col-span-2">
-            <ContentCard className="h-full border-t-[5px] border-t-rose-500">
+            <ContentCard className="h-full border-t-[5px] border-t-emerald-500">
               <h3 className="text-lg font-extrabold mb-5">고혈압이란?</h3>
               <p className="text-[14px] text-gray-600 leading-loose">
                 고혈압은 혈관 벽에 가해지는 혈액의 압력이 정상 범위보다 높아지는 상태에 의해 유발됩니다.

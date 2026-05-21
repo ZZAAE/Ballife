@@ -80,6 +80,35 @@
   color: #94a3b8;
 }
 
+.post-file-input {
+  padding: 0.625rem 0.75rem;
+  background-color: #ffffff;
+}
+
+.post-image-preview-wrap {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.post-image-preview {
+  width: min(100%, 18rem);
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.post-image-remove {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .post-input:focus,
 .post-select:focus,
 .post-textarea:focus {

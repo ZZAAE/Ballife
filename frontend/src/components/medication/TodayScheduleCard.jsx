@@ -7,7 +7,7 @@ export default function TodayScheduleCard() {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-[18px] font-bold text-gray-900">오늘의 복용 일정</h2>
           <span className="text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium">
-            2025년 5월 22일
+            2025년 5월 15일
           </span>
         </div>
 

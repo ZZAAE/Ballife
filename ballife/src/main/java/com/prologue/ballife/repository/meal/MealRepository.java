@@ -12,7 +12,7 @@ import com.prologue.ballife.domain.meal.Meal;
 
 public interface MealRepository extends JpaRepository<Meal, Long> {
 
-    Optional<Meal> findByIdAndUserId(Long mealId, Long userId);
+    Optional<Meal> findByMealIdAndUser_UserId(Long mealId, Long userId);
 
     // 전체 식사 데이터 조회
     List<Meal> findByUser_UserId(Long userId);

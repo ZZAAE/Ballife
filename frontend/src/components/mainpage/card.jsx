@@ -13,7 +13,7 @@ const Card = () => {
 
     const statusCards = [
     { 
-        link: 'sugar',
+        link: 'blood-sugar',
         type: '혈당', 
         value: '112 mg/dL', 
         label: '안정 범위', // bloodsugar > 140 ? 위험 범위 :  bloodsugar > 120 || bloodsugar < 80 ? 주의 요망 : 안정 범위 
@@ -24,7 +24,7 @@ const Card = () => {
         icon: 'tint' 
     },
     { 
-        link: 'press',
+        link: 'blood-pressure',
         type: '혈압', 
         value: '118 / 70', 
         label: '수축기 / 이완기', // systolic_bp < 80 || diastolic_bp > 120 ? 위험 : 정상
@@ -72,7 +72,7 @@ const Card = () => {
       icon: 'exercise',
     },
     {
-      link: 'water',
+      link: 'all',
       type: '수분 섭취',
       value: '총 400ml',
       label: '목표량까지 3컵',
@@ -86,7 +86,7 @@ const Card = () => {
 
 const medicineCard = [
   { 
-        link: '/medication',
+        link: '/medicine',
         type: '복약 알림', 
         value: '2건 확인 필요', 
         label: '오전 복용 요망', 
@@ -129,7 +129,7 @@ const medicineCard = [
         <div className="space-y-4 md:space-y-8">
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {statusCards.map((card, idx) => (
-              <Link to={`/record/${card.link}`} key={idx}>
+              <Link to={`/check/${card.link}`} key={idx}>
               <div className={`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-4 min-h-[140px]`}>
                 <div>
                   <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
@@ -146,7 +146,7 @@ const medicineCard = [
 
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {actionCards.map((card, idx) => (
-              <Link to={`/record/${card.link}`} key={idx}>
+              <Link to={`/check/${card.link}`} key={idx}>
               <div className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-opacity min-h-[140px]`}>
                 <div>
                   <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
@@ -164,7 +164,7 @@ const medicineCard = [
 
         <section className="lg:h-full">
           {medicineCard.map((card, idx) => (
-            <Link to={card.link.startsWith('/') ? card.link : `/record/${card.link}`} key={idx} className="block h-full">
+            <Link to={`/check/${card.link}`} key={idx} className="block h-full">
             <div className={`${card.color} p-6 rounded-2xl shadow-sm border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10`}>
               <div className="flex items-start justify-between gap-4">
                 <div>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import FloatingChatButton from "../components/medication/FloatingChatButton";
 import MedicationProgressCard from "../components/medication/MedicationProgressCard";
 import MedicationRecordCard from "../components/medication/MedicationRecordCard";
 import MemoCard from "../components/medication/MemoCard";
@@ -31,16 +30,21 @@ export default function MedicationPage() {
   };
 
   return (
-    <div className="min-h-full w-full bg-gray-100 overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pt-12 pb-10">
+    <div className="min-h-full w-full bg-gray-50 overflow-x-hidden">
+      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pb-10 pt-[87px]">
         {/* 제목 영역 */}
         <section className="mb-10">
-          <h1 class="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+          <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
             약 복용 관리
           </h1>
 
+<<<<<<< HEAD
           <p className="text-[17px] sm:text-[19px] lg:text-[18px] text-gray-400">
             지난 한 달간의 신체 변화를 분석한 결과입니다.
+=======
+          <p className="text-sm text-gray-400">
+            지난 복용 결과를 분석한 결과입니다.
+>>>>>>> e6085f23a9ed6b30e10beeaa20035d519a404c87
           </p>
         </section>
 
@@ -63,7 +67,6 @@ export default function MedicationPage() {
           {/* 오른쪽 영역 */}
           <div className="w-full min-w-0 flex flex-col gap-8">
             <TodayScheduleCard />
-
             <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
               <MemoCard />
               <WeeklyCalendarCard />
@@ -76,8 +79,6 @@ export default function MedicationPage() {
           <PrescriptionListCard onSelectGroup={openPrescriptionModal} />
         </section>
       </div>
-
-      <FloatingChatButton />
 
       <BloodPressureRecordModal
         isOpen={isBloodPressureModalOpen}

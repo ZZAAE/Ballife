@@ -28,7 +28,7 @@ const ObesityReportPage = () => {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-900">
+    <div className="bg-gray-50 min-h-screen font-sans text-gray-900 pt-[55px]">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-10 pb-20">
         {/* Title Section */}

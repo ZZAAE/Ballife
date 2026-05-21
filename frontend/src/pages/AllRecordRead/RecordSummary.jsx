@@ -59,22 +59,38 @@ const meals = [
     time: "08:30 AM",
     label: "아침",
     color: "from-slate-600 to-slate-800",
-    image: "https://i.namu.wiki/i/9KlMwPdJc3xUwfQ01bKzEQVphEly7igr380JpMSBfg5yyWtYNAWvqsQaMsdzJIMPSeUjNVk_lXuZnAbX9esdeA.webp",
+    image:
+      "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
     items: [
       {
         name: "그릭 요거트와 블루베리",
         kcal: 245,
-        carb: 18, protein: 12, fat: 8, sugar: 4, chol: 5, na: 2
+        carb: 18,
+        protein: 12,
+        fat: 8,
+        sugar: 4,
+        chol: 5,
+        na: 2,
       },
       {
         name: "아몬드 한 줌",
         kcal: 160,
-        carb: 6, protein: 6, fat: 14, sugar: 1, chol: 0, na: 0
+        carb: 6,
+        protein: 6,
+        fat: 14,
+        sugar: 1,
+        chol: 0,
+        na: 0,
       },
       {
         name: "라면 큰거",
         kcal: 400,
-        carb: 28, protein: 6, fat: 19, sugar: 1, chol: 5, na: 11
+        carb: 28,
+        protein: 6,
+        fat: 19,
+        sugar: 1,
+        chol: 5,
+        na: 11,
       },
     ],
   },
@@ -82,16 +98,27 @@ const meals = [
     time: "12:45 PM",
     label: "점심",
     color: "from-emerald-600 to-emerald-800",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
     items: [
       {
         name: "연어 샐러드",
         kcal: 480,
-        carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, na: 1
+        carb: 12,
+        protein: 34,
+        fat: 28,
+        sugar: 3,
+        chol: 45,
+        na: 1,
       },
       {
         name: "현미밥 반 공기",
         kcal: 150,
-        carb: 32, protein: 3, fat: 1, sugar: 0, chol: 0, na: 0
+        carb: 32,
+        protein: 3,
+        fat: 1,
+        sugar: 0,
+        chol: 0,
+        na: 0,
       },
     ],
   },
@@ -99,16 +126,27 @@ const meals = [
     time: "07:15 PM",
     label: "저녁",
     color: "from-orange-500 to-orange-700",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
     items: [
       {
         name: "닭가슴살 구이",
         kcal: 310,
-        carb: 0, protein: 47, fat: 12, sugar: 0, chol: 75, na: 0
+        carb: 0,
+        protein: 47,
+        fat: 12,
+        sugar: 0,
+        chol: 75,
+        na: 0,
       },
       {
         name: "구운 고구마와 야채",
         kcal: 220,
-        carb: 45, protein: 4, fat: 1, sugar: 0, chol: 0, na: 0
+        carb: 45,
+        protein: 4,
+        fat: 1,
+        sugar: 0,
+        chol: 0,
+        na: 0,
       },
     ],
   },
@@ -116,33 +154,52 @@ const meals = [
     time: "04:00 PM",
     label: "간식",
     color: "from-violet-500 to-violet-700",
+    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
     items: [
       {
         name: "사과와 땅콩버터",
         kcal: 190,
-        carb: 22, protein: 4, fat: 11, sugar: 15
+        carb: 22,
+        protein: 4,
+        fat: 11,
+        sugar: 15,
       },
       {
         name: "단백질 쉐이크",
         kcal: 120,
-        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
+        carb: 3,
+        protein: 24,
+        fat: 1,
+        sugar: 1,
+        chol: 15,
+        na: 5,
       },
     ],
   },
   {
-    time: "04:00 PM",
+    time: "08:00 PM",
     label: "간식",
     color: "from-violet-500 to-violet-700",
+    image: "https://www.marketresearchintellect.com/images/blogs/best-doughnut-brands.webp",
     items: [
       {
-        name: "사과와 땅콩버터",
-        kcal: 190,
-        carb: 22, protein: 4, fat: 11, sugar: 15
+        name: "도넛",
+        kcal: 400,
+        carb: 22,
+        protein: 4,
+        fat: 60,
+        chol: 80,
+        sugar: 80,
       },
       {
-        name: "단백질 쉐이크",
-        kcal: 120,
-        carb: 3, protein: 24, fat: 1, sugar: 1, chol: 15, na: 5
+        name: "밀크 쉐이크",
+        kcal: 330,
+        carb: 1,
+        protein: 5,
+        fat: 1,
+        sugar: 80,
+        chol: 1,
+        na: 5,
       },
     ],
   },
@@ -157,18 +214,17 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 
 export default function RecordSummary() {
   const [isMealModalOpen, setMealModalOpen] = useState(false);
-  const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false)
+  const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
-      
-      <div className="flex">
+      <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1 p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              전체 기록 관리
+            <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+              오늘의 기록 보기
             </h1>
             <p className="text-sm text-gray-400">
               하루의 신체 변화를 분석한 결과입니다.
@@ -445,9 +501,14 @@ export default function RecordSummary() {
         </main>
 
         {/* <MealRegisterModal isOpen={isMealModalOpen} onClose={() => setMealModalOpen(false)} /> */}
-        <DailyTimelineModal isOpen={isTimeLineModalOpen} onClose={()=>setTimeLineModelOpen(false)}/>
-        <MealDetailModal isOpen = {isMealModalOpen} onClose={() => setMealModalOpen(false)}/>
-
+        <DailyTimelineModal
+          isOpen={isTimeLineModalOpen}
+          onClose={() => setTimeLineModelOpen(false)}
+        />
+        <MealDetailModal
+          isOpen={isMealModalOpen}
+          onClose={() => setMealModalOpen(false)}
+        />
       </div>
     </div>
   );

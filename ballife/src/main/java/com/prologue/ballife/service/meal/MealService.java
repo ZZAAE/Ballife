@@ -77,7 +77,7 @@ public class MealService {
 
     // 식사 검색(하나)
     public MealDto.MealResponse getMeal(Long mealId, Long userId){
-        Meal meal = mealRepository.findByIdAndUserId(mealId, userId)
+        Meal meal = mealRepository.findByMealIdAndUser_UserId(mealId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("식사", mealId));
 
         return MealDto.MealResponse.from(meal);

@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import DailyTimelineModal from "../../modals/DailyTimelineModal";
 
 // 1. 링 차트 컴포넌트
 const RingChart = () => {
   const colors = [
     "stroke-red-400",
-    "stroke-yellow-400",
-    "stroke-blue-400",
-    "stroke-green-400",
     "stroke-purple-400",
+    "stroke-blue-400",
+    "stroke-sky-400",
+    "stroke-green-400",
     "stroke-orange-400",
+    "stroke-yellow-400",
   ];
+
+  const count = colors.length;      // 7
+  const slot = 100 / count;         // 각 조각 전체 폭
+  const gap = 1.8;                  // 조각 사이 간격(원하면 0)
+  const segment = slot - gap;       // 실제 색 구간
 
   return (
     <svg viewBox="0 0 36 36" className="w-10 h-10">
@@ -20,10 +28,12 @@ const RingChart = () => {
           cy="18"
           r="15.915"
           fill="transparent"
-          strokeWidth="3"
+          strokeWidth="5"
+          pathLength="100"
           className={c}
-          strokeDasharray={`${10 + i * 5}, 100`}
-          strokeDashoffset={i * -15}
+          strokeDasharray={`${segment} ${100 - segment}`}
+          strokeDashoffset={-(i * slot)}
+          transform="rotate(-90 18 18)"
         />
       ))}
     </svg>
@@ -31,12 +41,25 @@ const RingChart = () => {
 };
 
 // 2. 작동하는 달력 컴포넌트
-const Calendar = () => {
-  // 현재 날짜 기준 (2026년 3월 또는 오늘 날짜 기준)
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // 2026년 3월 1일 기본값 설정
+const Calendar = ({ onDayClick }) => {
+  const location = useLocation();
+  const selectedDate = location.state;
+
+  const initialDate = useMemo(() => {
+    if (selectedDate?.year && selectedDate?.month) {
+      return new Date(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day ?? 1
+      );
+    }
+    return new Date();
+  }, [selectedDate]);
+
+  const [currentDate, setCurrentDate] = useState(initialDate); // 2026년 3월 1일 기본값 설정
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth(); // 0 ~ 11
+  const month = currentDate.getMonth()
 
   // 달력 연산 로직
   const firstDayOfMonth = new Date(year, month, 1).getDay(); // 시작 요일 (0: 일요일 ~ 6: 토요일)
@@ -47,20 +70,45 @@ const Calendar = () => {
     setCurrentDate(new Date(year, month + offset, 1));
   };
 
-  // 달력 격자(Grid)에 채울 배열 생성 (시작 요일 전 빈칸 + 실제 날짜들)
-  const calendarDays = [
-    ...Array(firstDayOfMonth).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ];
+  // 달력 격자(Grid)에 채울 배열 생성 (이전달/현재달/다음달 날짜 포함)
+  const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const calendarDays = Array.from({ length: totalCells }, (_, index) => {
+    const dayNumber = index - firstDayOfMonth + 1;
+
+    if (dayNumber < 1) {
+      return {
+        day: prevMonthDays + dayNumber,
+        monthOffset: -1,
+        isCurrentMonth: false,
+      };
+    }
+
+    if (dayNumber > daysInMonth) {
+      return {
+        day: dayNumber - daysInMonth,
+        monthOffset: 1,
+        isCurrentMonth: false,
+      };
+    }
+
+    return {
+      day: dayNumber,
+      monthOffset: 0,
+      isCurrentMonth: true,
+    };
+  });
 
   // 범례 데이터 (CSS 클래스가 빌드 시 누락되지 않도록 풀 클래스명 작성)
   const legendItems = [
     { label: "식단", color: "bg-red-400" },
-    { label: "혈압", color: "bg-yellow-400" },
+    { label: "혈압", color: "bg-purple-400" },
     { label: "혈당", color: "bg-blue-400" },
-    { label: "수면", color: "bg-green-400" },
-    { label: "체력", color: "bg-purple-400" },
+    { label: "수분", color: "bg-sky-400" },
+    { label: "복약", color: "bg-green-400" },
     { label: "운동", color: "bg-orange-400" },
+    { label: "체중", color: "bg-yellow-400" },
   ];
 
   return (
@@ -104,36 +152,42 @@ const Calendar = () => {
 
       {/* 실제 날짜 그리드 */}
       <div className="grid grid-cols-7 gap-3">
-        {calendarDays.map((day, index) => {
+        {calendarDays.map((cell, index) => {
           const isSunday = index % 7 === 0;
           const isSaturday = index % 7 === 6;
+          const targetDate = new Date(year, month + cell.monthOffset, cell.day);
 
           return (
-            <div
+            <button
               key={index}
               className={`rounded-xl p-2 flex flex-col items-center min-h-[85px] transition-all ${
-                day
+                cell.isCurrentMonth
                   ? "bg-gray-50 hover:bg-gray-100/70 border border-gray-100"
-                  : "bg-transparent border-none"
+                  : "bg-gray-50/40 hover:bg-gray-100/70 border border-gray-100"
               }`}
+              onClick={() => {
+                onDayClick?.({
+                year: targetDate.getFullYear(),
+                month: targetDate.getMonth() + 1,
+                day: targetDate.getDate(),
+                });
+                }}
             >
-              {day && (
-                <>
-                  <span
-                    className={`text-xs font-bold mb-1.5 ${
-                      isSunday
-                        ? "text-red-500"
-                        : isSaturday
-                        ? "text-blue-500"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {day}
-                  </span>
-                  <RingChart />
-                </>
-              )}
-            </div>
+              <span
+                className={`text-xs font-bold mb-1.5 ${
+                  !cell.isCurrentMonth
+                    ? "text-gray-400"
+                    : isSunday
+                    ? "text-red-500"
+                    : isSaturday
+                    ? "text-blue-500"
+                    : "text-gray-500"
+                }`}
+              >
+                {cell.day}
+              </span>
+              <RingChart />
+            </button>
           );
         })}
       </div>
@@ -262,6 +316,14 @@ const Sidebar = () => {
 };
 
 export default function HealthCalendarPage() {
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [selectedDayInfo, setSelectedDayInfo] = useState(null);
+
+  const handleDayClick = (dayInfo) => {
+  setSelectedDayInfo(dayInfo);
+  setIsTimelineOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-['Noto_Sans_KR']">
       <div className="px-4 py-8 sm:px-6 lg:px-10 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto">
@@ -275,7 +337,19 @@ export default function HealthCalendarPage() {
         </header>
 
         <div className="space-y-6">
-          <Calendar />
+          <Calendar onDayClick={handleDayClick} />
+          <DailyTimelineModal
+            isOpen={isTimelineOpen}
+            onClose={() => setIsTimelineOpen(false)}
+            // data={{
+            // month: selectedDayInfo ? selectedDayInfo.month + "월" : "",
+            // day: "",
+            // date: selectedDayInfo
+            // ? selectedDayInfo.year + "년 " + selectedDayInfo.month + "월 " + selectedDayInfo.day + "일"
+            // : "",
+            // items: []
+            // }}
+          />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
             <div className="lg:col-span-7">

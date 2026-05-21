@@ -63,5 +63,6 @@ public class UserMedicineRecordService {
     @Transactional
     public Long DosageSituation() {
         // 멀 가져와야?
+        return Long.MIN_VALUE;
     }
 }

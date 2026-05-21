@@ -1,9 +1,10 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { useState } from 'react';
-
+import ChatBot from './modals/Chatbot';
 import SignUpPage from './pages/user/SignUpPage';
 import LoginPage from './pages/user/LoginPage';
+import DiseasePage from './pages/user/DiseasePage'
 import BoardListPage from './pages/board/BoardListPage';
 import PostCreatePage from './pages/board/PostCreatePage';
 import PostEditPage from './pages/board/PostEditPage';
@@ -29,12 +30,15 @@ import HealthIndicatorMenu from './components/HealthMenu';
 import HealthCalenderPage from './pages/main/HealthCalenderPage';
 import AllRecordPage from './pages/AllRecordPage';
 import UserInformation from './pages/user/UserInformation'
+import Calendar from './components/mainpage/calendar';
+import PetPage from './pages/PetPage';
 
 function App() {
   const location = useLocation();
   const hideHealthMenu =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
+    location.pathname === '/disease' ||
     location.pathname === '/boards' ||
     location.pathname === '/posts/create' ||
     location.pathname === '/intro/web' ||
@@ -42,15 +46,17 @@ function App() {
     location.pathname === '/intro/diabetes' ||
     location.pathname === '/intro/gout' ||
     location.pathname === '/intro/hypertension' ||
+    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
     location.pathname === '/' ||
     location.pathname.startsWith('/posts/');
-
-  const hideChatbot =
+    
+    const hideChatbot =
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
+    location.pathname === '/disease' ||
     location.pathname === '/boards' ||
     location.pathname === '/intro/web' ||
     location.pathname === '/intro/osteoporosis' ||
@@ -59,6 +65,7 @@ function App() {
     location.pathname === '/intro/hypertension' ||
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
+    location.pathname === '/intro/hyperlipidemia' ||
     location.pathname.startsWith('/posts/');
 
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
@@ -71,9 +78,11 @@ function App() {
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<MainPage />} />
+              <Route path="/calender" element={<HealthCalenderPage />} />
+
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
-
+              <Route path="/disease" element={<DiseasePage/>} />
          
               <Route path="/boards" element={<BoardListPage />} />
               <Route path="/posts/create" element={<PostCreatePage />} />
@@ -83,9 +92,7 @@ function App() {
               <Route path="/check/all" element={<RecordSummary />} />
               <Route path="/check/meal" element={<MealPage />} />
               <Route path="/check/weight" element={<WeightRecord />} />
-              <Route
-                path="/check/blood-pressure"
-                element={<BloodPressureRecord />}
+              <Route path="/check/blood-pressure" element={<BloodPressureRecord />}
               />
               <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
               <Route
@@ -110,11 +117,12 @@ function App() {
               <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
-
+              
+              <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
         {!hideHealthMenu && <HealthIndicatorMenu />}
-        
+        {!hideChatbot && <ChatBot />}
       </div>
 
       </main>

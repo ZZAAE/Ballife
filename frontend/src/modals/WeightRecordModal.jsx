@@ -43,9 +43,24 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
             <h2 className="text-2xl font-bold text-slate-900">체중 기록하기</h2>
             <p className="text-sm text-slate-400 mt-1 font-medium">오늘의 체중을 기록하세요.</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-100 transition-colors">
-            <X className="h-7 w-7 text-slate-400" />
-          </button>
+          <button onClick={onClose} style={{
+              background: "none", border: "none", cursor: "pointer", padding: 4,
+              color: "#bbb", fontSize: 20, lineHeight: 1,
+            }}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
         </div>
 
         <div className="flex-1 flex flex-col justify-between">
@@ -108,7 +123,7 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
 
           {/* Footer Button */}
           <div className="pt-4">
-            <button className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl">
+            <button onClick={onClose} className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl">
               기록 저장 및 확인
             </button>
           </div>
