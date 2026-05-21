@@ -47,6 +47,24 @@ const DUMMY_ANAEROBIC_CARDS = [
     intensity: "보통",
     calories: "241 kcal",
   },
+  {
+    id: 6,
+    name: "풀업",
+    iconType: "pullup",
+    sets: "4 Sets",
+    reps: "10 회",
+    intensity: "강함",
+    calories: "180 kcal",
+  },
+  {
+    id: 7,
+    name: "랫풀다운",
+    iconType: "latpulldown",
+    sets: "5 Sets",
+    reps: "12 회",
+    intensity: "보통",
+    calories: "220 kcal",
+  },
 ];
 
 // 유산소 운동 더미 데이터
@@ -90,6 +108,22 @@ const DUMMY_AEROBIC_CARDS = [
     duration: "25분",
     intensity: "보통",
     calories: "127 kcal",
+  },
+  {
+    id: 6,
+    name: "수영",
+    iconType: "swimming",
+    duration: "30분",
+    intensity: "강함",
+    calories: "310 kcal",
+  },
+  {
+    id: 7,
+    name: "줄넘기",
+    iconType: "jumprope",
+    duration: "15분",
+    intensity: "보통",
+    calories: "180 kcal",
   },
 ];
 
@@ -143,6 +177,22 @@ const DUMMY_ANAEROBIC_LOGS = [
     intensity: "보통",
     calories: "450 kcal",
   },
+  {
+    id: 7,
+    date: "어제 20:00",
+    sets: 4,
+    reps: 12,
+    intensity: "강함",
+    calories: "380 kcal",
+  },
+  {
+    id: 8,
+    date: "어제 18:00",
+    sets: 5,
+    reps: 10,
+    intensity: "보통",
+    calories: "275 kcal",
+  },
 ];
 
 const DUMMY_AEROBIC_LOGS = [
@@ -187,6 +237,20 @@ const DUMMY_AEROBIC_LOGS = [
     duration: "20분",
     intensity: "약함",
     calories: "220 kcal",
+  },
+  {
+    id: 7,
+    date: "2일 전 07:00",
+    duration: "40분",
+    intensity: "강함",
+    calories: "320 kcal",
+  },
+  {
+    id: 8,
+    date: "2일 전 19:00",
+    duration: "35분",
+    intensity: "보통",
+    calories: "260 kcal",
   },
 ];
 
