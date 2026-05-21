@@ -1,5 +1,4 @@
-import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useState } from "react";
 import ChatBot from "./modals/Chatbot";
 import SignUpPage from "./pages/user/SignUpPage";
@@ -29,6 +28,7 @@ import Header from "./components/Header";
 import HealthIndicatorMenu from "./components/HealthMenu";
 import HealthCalenderPage from "./pages/main/HealthCalenderPage";
 import AllRecordPage from "./pages/AllRecordPage";
+import PetPage from "./pages/PetPage";
 import UserInformation from "./pages/user/UserInformation";
 import Calendar from "./components/mainpage/calendar";
 
@@ -127,6 +127,8 @@ function App() {
               />
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
+
+              <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
           {!hideHealthMenu && <HealthIndicatorMenu />}

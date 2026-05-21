@@ -403,16 +403,17 @@ const TimelineRow = ({ item, isLast }) => {
 export default function DailyTimelineModal({
   isOpen = true,
   onClose = () => {},
-  data = dummyData,
+  data,
 }) {
   if (!isOpen) return null;
+  const merged = { ...dummyData, ...(data ?? {}) };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-6 backdrop-blur-sm"
       onClick={onClose}
     >
-      {/* 모달 본체 — 1341 × 1278, 모서리 40px 는 inline style */}
+      {/* 모달 본체 — 1000 × 700, 모서리 40px 는 inline style */}
       <div
         className="relative overflow-hidden bg-white shadow-2xl"
         style={{ width: 1000, height: 700, borderRadius: 40 }}
@@ -428,28 +429,28 @@ export default function DailyTimelineModal({
           </button>
 
           <h1 className="mb-14 text-6xl font-black tracking-tight text-gray-900">
-            {data.month}
+            {merged.month}
           </h1>
 
           <div className="mb-6 flex items-baseline pl-4">
             <div className="w-20 pr-6 text-right">
               <span className="text-base font-bold text-gray-700">
-                {data.day}
+                {merged.day}
               </span>
             </div>
             <div className="pl-10">
               <span className="text-base font-medium text-gray-500">
-                {data.date}
+                {merged.date}
               </span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            {data.items.map((item, idx) => (
+            {merged.items.map((item, idx) => (
               <TimelineRow
                 key={item.id}
                 item={item}
-                isLast={idx === data.items.length - 1}
+                isLast={idx === merged.items.length - 1}
               />
             ))}
           </div>
@@ -459,27 +460,3 @@ export default function DailyTimelineModal({
   );
 }
 
-/* ============================================================
- * 사용 예시
- * ------------------------------------------------------------
- *  import HealthTimelineModal from "./HealthTimelineModal";
- *
- *  function App() {
- *    const [open, setOpen] = useState(false);
- *
- *    // 백엔드 연동 시:
- *    // const [data, setData] = useState(null);
- *    // useEffect(() => {
- *    //   fetch("/api/timeline?date=2024-08-28")
- *    //     .then(r => r.json())
- *    //     .then(setData);
- *    // }, []);
- *
- *    return (
- *      <>
- *        <button onClick={() => setOpen(true)}>타임라인 열기</button>
- *        <HealthTimelineModal isOpen={open} onClose={() => setOpen(false)} />
- *      </>
- *    );
- *  }
- * ============================================================ */

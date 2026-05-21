@@ -83,7 +83,7 @@ function LargeRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white ">
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -132,7 +132,7 @@ function SmallRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white">
       <div
         className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
         style={{ backgroundColor: color }}
@@ -197,7 +197,7 @@ function MealBox({ title, onClick }) {
 }
 
 function AllRecordPage() {
-  const [selectedDate, setSelectedDate] = useState("2026-04-30");
+  const [selectedDate, setSelectedDate] = useState("2026-05-15");
   const dateInputRef = useRef(null);
 
   const [modalType, setModalType] = useState(null);
@@ -374,7 +374,7 @@ function AllRecordPage() {
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[150px]">
+        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[60px]">
           <div className="mb-[50px] flex items-center justify-between">
             <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               전체 기록 관리
@@ -518,7 +518,7 @@ function AllRecordPage() {
             </LargeRecordCard>
           </div>
 
-          <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px] shadow-[0_3px_8px_rgba(0,0,0,0.12)]">
+          <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px]">
             <div className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px] bg-[#A142FF]" />
 
             <div className="mb-[34px] flex items-center justify-center gap-[15px]">

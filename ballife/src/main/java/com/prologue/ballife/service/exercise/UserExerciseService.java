@@ -11,8 +11,8 @@ import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
-import com.prologue.ballife.repository.exercise.ExerciseTypeRepository;
 import com.prologue.ballife.repository.exercise.UserExerciseRepository;
+import com.prologue.ballife.repository.exerciseMongo.ExerciseTypeRepository;
 import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.exercise.UserExerciseDto;
 

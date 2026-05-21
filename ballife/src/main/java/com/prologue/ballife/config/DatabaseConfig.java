@@ -11,10 +11,14 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
         "com.prologue.ballife.repository.board",
         "com.prologue.ballife.repository.daily",
         "com.prologue.ballife.repository.user",
-        "com.prologue.ballife.repository.userexercise" // UserExercise = MySQL(JPA)
+        "com.prologue.ballife.repository.exercise",
+        "com.prologue.ballife.repository.meal",
+        "com.prologue.ballife.repository.medicine"
+        //"com.prologue.ballife.repository.userexercise" // UserExercise = MySQL(JPA)
 })
 @EnableMongoRepositories(basePackages = {
-        "com.prologue.ballife.repository.exercise" // ExerciseType, UserExerciseDetail = MongoDB
+        "com.prologue.ballife.repository.exerciseMongo"
+        //"com.prologue.ballife.repository.exercise" // ExerciseType, UserExerciseDetail = MongoDB
 })
 public class DatabaseConfig {
 }

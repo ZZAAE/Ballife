@@ -19,7 +19,13 @@ const navItems = [
     ],
   },
   { key: "community", label: "커뮤니티", path: "/boards" },
-  { key: "member", label: "회원정보", path: "/member" },
+  { key: "member", 
+    label: "회원정보", 
+    path: "/member",
+    dropdown: [
+      { label: "펫", path: "/member/pet" },
+    ]
+  },
   {
     key: "intro",
     label: "소개",

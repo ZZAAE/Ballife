@@ -106,7 +106,7 @@ public class BioValueRecordController {
         }
 
     @Operation(summary = "유저별 생체정보 수치 페이지로 조회")
-    @GetMapping("searchBioValuePage/{userId")
+    @GetMapping("searchBioValuePage/{userId}")
     public ResponseEntity<Page<BioValueRecordDto.BioResponse>> getBioRecordPage(
         @Parameter (description = "유저 ID") @PathVariable Long userId,
         @Parameter (description = "생체 정보 종류") @RequestParam String category,

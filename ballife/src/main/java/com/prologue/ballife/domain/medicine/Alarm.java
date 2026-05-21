@@ -42,7 +42,7 @@ public class Alarm {
     @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
     private Prescription prescription;
 
-    @ManyToOne
+    //@ManyToOne -> supplementId은 MySQL 외래키가 아니기 때문에 이거 쓰면 안됨
     @JoinColumn(name = "SUPPLEMENT_ID")
     private Long supplementId;
 
