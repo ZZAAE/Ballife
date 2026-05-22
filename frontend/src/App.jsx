@@ -50,6 +50,7 @@ function App() {
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
+    location.pathname === '/check/all'||
     location.pathname === '/' ||
     location.pathname.startsWith('/posts/');
     
