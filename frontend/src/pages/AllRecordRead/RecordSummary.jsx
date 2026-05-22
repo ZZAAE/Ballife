@@ -217,21 +217,22 @@ export default function RecordSummary() {
   const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1">
+          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+            <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
               오늘의 기록 보기
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="mt-2 text-sm text-[#64748B]">
               하루의 신체 변화를 분석한 결과입니다.
             </p>
           </div>
           {/* Summary Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
             {/* 식단 Card */}
             <SummaryCard
               Icon={Utensils}
@@ -497,6 +498,7 @@ export default function RecordSummary() {
                 />
               ))}
             </div>
+          </div>
           </div>
         </main>
 
