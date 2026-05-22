@@ -106,7 +106,6 @@ function SignUpPage() {
     } finally {
       setLoading(false);
     }
-    navigate("/disease");
   };
 
   // 공통 인풋 스타일

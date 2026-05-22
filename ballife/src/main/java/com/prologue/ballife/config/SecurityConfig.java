@@ -56,10 +56,12 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
+                .requestMatchers("/error").permitAll()  
                 .requestMatchers("/api/auth/**").permitAll() //회원가입 토큰없이 접근 가능
                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll() //프론트 서버 생존 폴링 (JWT 불필요)
                 // 나머지 인증이 필요한 주소는 이 밑에
-                //.requestMatchers(HttpMethod.GET, )
+                //.anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라 그럼)
+                .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는 이렇게 하는걸 고려)
             );
         
          return http.build();

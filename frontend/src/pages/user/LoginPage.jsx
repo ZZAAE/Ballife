@@ -39,8 +39,8 @@ function LoginPage() {
             setLoading(true);
             const response = await authApi.login(formData);
             login(response.data);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data));
+            // localStorage.setItem('token', response.data.token);
+            // localStorage.setItem('user', JSON.stringify(response.data));
             toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`);
             const from = typeof location.state?.from === 'string' ? location.state.from : '/';
             navigate(from, { replace: true });

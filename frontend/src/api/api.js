@@ -37,7 +37,7 @@ function setJsonIfNeeded(config){
     if (h && typeof h.set === 'function') {
         h.set('Content-Type', 'application/json');
     } else {
-        config.headers['Content-Type'] = 'applicaton/json';
+        config.headers['Content-Type'] = 'application/json';
     }
 }
 
