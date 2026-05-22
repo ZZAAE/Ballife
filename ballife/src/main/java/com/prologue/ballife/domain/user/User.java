@@ -46,6 +46,15 @@ public class User {
     @Column(name = "HEIGHT")
     private Double height;
 
+    @Column(name = "POINT")
+    private Long point;
+
+    @Column(name = "USE_POINT_COUNT")
+    private Long usePointCount;
+
+    @Column(name = "MEDAL")
+    private Long medal;
+
     @Column(name = "DISEASE_INDEX", unique = false, nullable = true, length = 300)
     private String diseaseIndex;
 

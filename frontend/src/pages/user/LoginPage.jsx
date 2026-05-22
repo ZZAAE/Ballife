@@ -46,7 +46,10 @@ function LoginPage() {
             navigate(from, { replace: true });
         } catch (error) {
             console.error('로그인 실패:', error);
-        } finally {
+            const msg = error?.response?.data?.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+            toast.error(msg);   // 직접 띄우기
+        }
+        finally {
             setLoading(false);
         }
     };

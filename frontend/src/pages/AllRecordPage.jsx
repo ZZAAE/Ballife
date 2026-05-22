@@ -1,4 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
@@ -370,6 +373,19 @@ function AllRecordPage() {
       dateInputRef.current?.click();
     }
   };
+
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+  //토큰 인증 테스트용
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated || !user?.id) {
+            toast.error('로그인이 필요합니다.');
+            navigate('/login', { replace: true, state: { from: `/allRecord` } });
+            return;
+        }
+  },  [authLoading, isAuthenticated, user?.id, navigate]);
 
   return (
     <>

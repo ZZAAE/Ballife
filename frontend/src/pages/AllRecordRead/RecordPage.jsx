@@ -1,8 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import WeightRecordModal from '../../modals/WeightRecordModal';
 
 const RecordPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+  //토큰 인증 테스트용
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated || !user?.id) {
+            toast.error('로그인이 필요합니다.');
+            navigate('/login', { replace: true, state: { from: `/allRecord` } });
+            return;
+        }
+  },  [authLoading, isAuthenticated, user?.id, navigate]);
+
+  // 복원 중이거나 비로그인 상태면 본문 자체를 그리지 않음
+  if (authLoading) return null;
+  if (!isAuthenticated || !user?.id) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">

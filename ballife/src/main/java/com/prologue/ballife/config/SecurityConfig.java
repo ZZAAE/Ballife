@@ -56,7 +56,10 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
+                .requestMatchers("/api/auth/**").permitAll() //회원가입 토큰없이 접근 가능
+                .requestMatchers(HttpMethod.GET, "/api/health").permitAll() //프론트 서버 생존 폴링 (JWT 불필요)
                 // 나머지 인증이 필요한 주소는 이 밑에
+                //.requestMatchers(HttpMethod.GET, )
             );
         
          return http.build();

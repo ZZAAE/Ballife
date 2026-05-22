@@ -74,7 +74,7 @@ api.interceptors.response.use(
             localStorage.removeItem(USER_KEY);
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = './login' 
+            //window.location.href = './login' 
         }
 
         return Promise.reject(error);

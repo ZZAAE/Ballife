@@ -1,4 +1,4 @@
-import api from './index';
+import api from './api';
 
 //회원 API 서비스
 const userApi = {
