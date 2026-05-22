@@ -13,7 +13,7 @@ const ICON_BY_TYPE = {
   bumbellpress: "🏋️",
   barbelllow: "🏋️",
   latpulldown: "🏋️",
-  squat: "🦵",
+  squat: "🏋️",
   deadlift: "💪",
   pullup: "🧗",
 };
@@ -165,7 +165,7 @@ function WeekSelector({
         d.setDate(weekStart.getDate() + i);
         return d;
       }),
-    [weekStart]
+    [weekStart],
   );
 
   return (
@@ -199,8 +199,8 @@ function WeekSelector({
             idx === 0
               ? "text-red-400"
               : idx === 6
-              ? "text-blue-400"
-              : "text-gray-400";
+                ? "text-blue-400"
+                : "text-gray-400";
           return (
             <button
               key={idx}
@@ -210,14 +210,16 @@ function WeekSelector({
                 isSelected
                   ? "bg-gray-900 text-white"
                   : isToday
-                  ? "bg-emerald-50 ring-2 ring-emerald-400"
-                  : "hover:bg-gray-50"
+                    ? "bg-emerald-50 ring-2 ring-emerald-400"
+                    : "hover:bg-gray-50"
               }`}
             >
               {/* 요일 위쪽: 활동 점 (없을 땐 자리만 유지) */}
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  hasActivity && !isSelected ? "bg-emerald-500" : "bg-transparent"
+                  hasActivity && !isSelected
+                    ? "bg-emerald-500"
+                    : "bg-transparent"
                 }`}
               />
 
@@ -227,8 +229,8 @@ function WeekSelector({
                   isSelected
                     ? "text-gray-300"
                     : isToday
-                    ? "text-emerald-600"
-                    : dayColor
+                      ? "text-emerald-600"
+                      : dayColor
                 }`}
               >
                 {WEEK_KO[idx]}
@@ -240,12 +242,12 @@ function WeekSelector({
                   isSelected
                     ? "text-white"
                     : isToday
-                    ? "text-emerald-700"
-                    : idx === 0
-                    ? "text-red-500"
-                    : idx === 6
-                    ? "text-blue-500"
-                    : "text-gray-700"
+                      ? "text-emerald-700"
+                      : idx === 0
+                        ? "text-red-500"
+                        : idx === 6
+                          ? "text-blue-500"
+                          : "text-gray-700"
                 }`}
               >
                 {d.getDate()}
@@ -281,8 +283,7 @@ function SummaryCard({ label, totalSec, sessions, kcal }) {
 
 function SessionRow({ session }) {
   const emoji =
-    ICON_BY_TYPE[session.iconType] ??
-    (session.kind === "cardio" ? "🚶" : "🏋️");
+    ICON_BY_TYPE[session.iconType] ?? (session.kind === "cardio" ? "🚶" : "🏋️");
   return (
     <div className="flex items-center gap-4 py-3">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xl">
@@ -352,7 +353,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   // 선택 주(일~토)에 해당하는 세션
   const thisWeekSessions = useMemo(
     () => SESSIONS.filter((s) => sameWeek(s.date, viewDate)),
-    [viewDate]
+    [viewDate],
   );
 
   const thisWeekStats = useMemo(() => {
@@ -466,7 +467,9 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
               ))
             ) : (
               <div className="rounded-2xl bg-white px-5 py-10 text-center text-sm text-gray-400 shadow-sm">
-                {filterDay ? "선택한 날짜의 기록이 없습니다." : "이번 주 기록이 없습니다."}
+                {filterDay
+                  ? "선택한 날짜의 기록이 없습니다."
+                  : "이번 주 기록이 없습니다."}
               </div>
             )}
           </div>

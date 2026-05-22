@@ -13,31 +13,12 @@ const WEEKDAY_KO = [
 
 const WEEKDAY_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-const CATEGORIES = [
-  { key: "meal", label: "식단", bg: "bg-red-400", dot: "bg-red-400" },
-  { key: "bp", label: "혈압", bg: "bg-purple-400", dot: "bg-purple-400" },
-  { key: "bs", label: "혈당", bg: "bg-blue-400", dot: "bg-blue-400" },
-  { key: "water", label: "수분", bg: "bg-sky-400", dot: "bg-sky-400" },
-  { key: "med", label: "복약", bg: "bg-green-400", dot: "bg-green-400" },
-  { key: "exercise", label: "운동", bg: "bg-orange-400", dot: "bg-orange-400" },
-  { key: "weight", label: "체중", bg: "bg-yellow-400", dot: "bg-yellow-400" },
-];
-
 // 해당 주의 일요일 0시로 정규화
 function startOfWeek(date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - d.getDay());
   return d;
-}
-
-// TODO: 실제 기록 데이터와 연동 — 현재는 시드 기반 더미
-function hasRecord(date, categoryKey) {
-  const seed =
-    (date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()) *
-      31 +
-    categoryKey.charCodeAt(0);
-  return Math.abs(Math.sin(seed) * 10000) % 1 > 0.45;
 }
 
 // 주간 캘린더 컴포넌트
@@ -57,7 +38,7 @@ const WeeklyCalendar = ({ onDayClick }) => {
         d.setDate(weekStart.getDate() + i);
         return d;
       }),
-    [weekStart]
+    [weekStart],
   );
 
   const moveWeek = (offset) => {
@@ -103,8 +84,8 @@ const WeeklyCalendar = ({ onDayClick }) => {
             idx === 0
               ? "text-red-400"
               : idx === 6
-              ? "text-blue-400"
-              : "text-gray-400";
+                ? "text-blue-400"
+                : "text-gray-400";
           return (
             <div
               key={idx}
@@ -125,7 +106,7 @@ const WeeklyCalendar = ({ onDayClick }) => {
         })}
       </div>
 
-      {/* 요일 칸: 각 칸 내부에 7개 카테고리(점 + 라벨) 세로 배치 */}
+      {/* 요일 칸 */}
       <div className="grid grid-cols-7 gap-3">
         {days.map((d, idx) => {
           const isToday = d.getTime() === today.getTime();
@@ -140,32 +121,13 @@ const WeeklyCalendar = ({ onDayClick }) => {
                   day: d.getDate(),
                 })
               }
-              className={`rounded-xl border bg-gray-50 hover:bg-gray-100 transition p-4 min-h-[280px] flex flex-col gap-3 text-left ${
+              className={`min-h-[280px] rounded-xl border bg-gray-50 p-4 text-left transition hover:bg-gray-100 ${
                 isToday
                   ? "border-emerald-400 ring-2 ring-emerald-400/40"
                   : "border-gray-100"
               }`}
               title={`${d.getMonth() + 1}월 ${d.getDate()}일`}
-            >
-              {CATEGORIES.map((c) => {
-                const filled = hasRecord(d, c.key);
-                return (
-                  <div
-                    key={c.key}
-                    className={`flex items-center gap-2 transition ${
-                      filled ? "opacity-100" : "opacity-25"
-                    }`}
-                  >
-                    <span
-                      className={`h-4 w-4 rounded-full ${c.dot} shrink-0`}
-                    />
-                    <span className="text-sm font-semibold text-gray-700">
-                      {c.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </button>
+            />
           );
         })}
       </div>
@@ -231,9 +193,7 @@ const Sidebar = () => {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h4 className="font-bold text-gray-800 mb-4 text-sm">
-          월간 종합 성과
-        </h4>
+        <h4 className="font-bold text-gray-800 mb-4 text-sm">월간 종합 성과</h4>
         {[
           ["식단 건강", 82],
           ["혈당 안정도", 50],

@@ -1,36 +1,35 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { useState } from "react";
-import ChatBot from "./modals/Chatbot";
-import SignUpPage from "./pages/user/SignUpPage";
-import LoginPage from "./pages/user/LoginPage";
-import DiseasePage from "./pages/user/DiseasePage";
-import BoardListPage from "./pages/board/BoardListPage";
-import PostCreatePage from "./pages/board/PostCreatePage";
-import PostEditPage from "./pages/board/PostEditPage";
-import PostDetailPage from "./pages/board/PostDetailPage";
-import MainPage from "./pages/main/MainPage";
-import WeightRecord from "./pages/AllRecordRead/WeightRecord";
-import BloodPressureRecord from "./pages/AllRecordRead/BloodPressureRecord";
-import BloodSugarRecord from "./pages/AllRecordRead/BloodSugarRecord";
-import ExercisePage from "./pages/ExercisePage";
-import RecordPage from "./pages/AllRecordRead/RecordPage";
-import RecordSummary from "./pages/AllRecordRead/RecordSummary";
-import MealPage from "./pages/MealPage";
-import MainReportPage from "./pages/report/MainReportPage";
-import MedicationPage from "./pages/MedicationPage";
-import OsteoporosisReportPage from "./pages/report/OsteoporosisReportPage";
-import DiabetesReportPage from "./pages/report/DiabetesReportPage";
-import GoutReportPage from "./pages/report/GoutReportPage";
-import HypertensionReportPage from "./pages/report/HypertensionReportPage";
-import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
-import ObesityReportPage from "./pages/report/ObesityReportPage";
+
 import Header from "./components/Header";
 import HealthIndicatorMenu from "./components/HealthMenu";
-import HealthCalenderPage from "./pages/main/HealthCalenderPage";
+import ChatBot from "./modals/Chatbot";
 import AllRecordPage from "./pages/AllRecordPage";
+import BloodPressureRecord from "./pages/AllRecordRead/BloodPressureRecord";
+import BloodSugarRecord from "./pages/AllRecordRead/BloodSugarRecord";
+import RecordSummary from "./pages/AllRecordRead/RecordSummary";
+import WeightRecord from "./pages/AllRecordRead/WeightRecord";
+import BoardListPage from "./pages/board/BoardListPage";
+import PostCreatePage from "./pages/board/PostCreatePage";
+import PostDetailPage from "./pages/board/PostDetailPage";
+import PostEditPage from "./pages/board/PostEditPage";
+import ExercisePage from "./pages/ExercisePage";
+import MainPage from "./pages/main/MainPage";
+import HealthCalenderPage from "./pages/main/HealthCalenderPage";
+import MealPage from "./pages/MealPage";
+import MedicationPage from "./pages/MedicationPage";
 import PetPage from "./pages/PetPage";
+import MainReportPage from "./pages/report/MainReportPage";
+import DiabetesReportPage from "./pages/report/DiabetesReportPage";
+import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
+import GoutReportPage from "./pages/report/GoutReportPage";
+import HypertensionReportPage from "./pages/report/HypertensionReportPage";
+import ObesityReportPage from "./pages/report/ObesityReportPage";
+import OsteoporosisReportPage from "./pages/report/OsteoporosisReportPage";
+import DiseasePage from "./pages/user/DiseasePage";
+import LoginPage from "./pages/user/LoginPage";
+import SignUpPage from "./pages/user/SignUpPage";
 import UserInformation from "./pages/user/UserInformation";
-import Calendar from "./components/mainpage/calendar";
 
 function App() {
   const location = useLocation();
@@ -49,7 +48,6 @@ function App() {
     location.pathname === "/intro/dyslipidemia" ||
     location.pathname === "/intro/obesity" ||
     location.pathname === "/AllRecordPage" ||
-    location.pathname === "/" ||
     location.pathname.startsWith("/posts/");
 
   const hideChatbot =
@@ -73,7 +71,7 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       <main className="py-12">
         <Header isLoggedIn={false} />
-        <div className="min-w-screen bg-white flex justify-end">
+        <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<MainPage />} />
@@ -108,6 +106,7 @@ function App() {
               <Route path="/check/medicine" element={<MedicationPage />} />
 
               <Route path="/member" element={<UserInformation />} />
+              <Route path="/member/pet" element={<PetPage />} />
 
               <Route path="/allRecord" element={<AllRecordPage />} />
               <Route path="/intro/web" element={<MainReportPage />} />
@@ -127,8 +126,6 @@ function App() {
               />
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
-
-              <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
           {!hideHealthMenu && <HealthIndicatorMenu />}

@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 // 0 ~ 7 점수에 따른 셀 배경 색상 (잔디 스타일)
 const levelStyles = [
-  { bg: "bg-slate-100", text: "text-slate-300" },        // 0
-  { bg: "bg-emerald-100", text: "text-emerald-600" },    // 1
-  { bg: "bg-emerald-200", text: "text-emerald-700" },    // 2
-  { bg: "bg-emerald-300", text: "text-emerald-800" },    // 3
-  { bg: "bg-emerald-400", text: "text-white" },          // 4
-  { bg: "bg-emerald-500", text: "text-white" },          // 5
-  { bg: "bg-emerald-600", text: "text-white" },          // 6
-  { bg: "bg-emerald-700", text: "text-white" },          // 7
+  { bg: "bg-slate-100", text: "text-slate-300" }, // 0
+  { bg: "bg-emerald-100", text: "text-emerald-600" }, // 1
+  { bg: "bg-emerald-200", text: "text-emerald-700" }, // 2
+  { bg: "bg-emerald-300", text: "text-emerald-800" }, // 3
+  { bg: "bg-emerald-400", text: "text-white" }, // 4
+  { bg: "bg-emerald-500", text: "text-white" }, // 5
+  { bg: "bg-emerald-600", text: "text-white" }, // 6
+  { bg: "bg-emerald-700", text: "text-white" }, // 7
 ];
 
 // TODO: 실제 기록 데이터와 연동 (현재는 데모용 시드 기반 점수)
@@ -20,7 +20,14 @@ function getDayLevel(year, month, day) {
   return Math.floor(pseudo % 8); // 0 ~ 7
 }
 
-function Calendar({ onDayClick, initialDate, selectedDay }) {
+function Calendar({
+  onDayClick,
+  initialDate,
+  selectedDay,
+  title = "건강 달력",
+  compact = false,
+  showLegend = true,
+}) {
   const navigate = useNavigate();
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
   const today = useMemo(() => {
@@ -28,11 +35,13 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
     d.setHours(0, 0, 0, 0);
     return d;
   }, []);
-  const [currentDate, setCurrentDate] = useState(() => initialDate ?? new Date());
+  const [currentDate, setCurrentDate] = useState(
+    () => initialDate ?? new Date(),
+  );
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const monthTitle = `${month + 1}월`;
+  const monthTitle = `${year}년 ${month + 1}월`;
 
   const { daysInMonth, firstDayOfWeek, totalCells } = useMemo(() => {
     const firstDate = new Date(year, month, 1);
@@ -50,7 +59,9 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
   }, [year, month]);
 
   const moveMonth = (offset) => {
-    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+    setCurrentDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1),
+    );
   };
 
   const renderDayCell = (index) => {
@@ -77,8 +88,12 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
     const ringClass = isSelected
       ? "ring-2 ring-emerald-700 ring-offset-2 ring-offset-white"
       : isToday
-      ? "ring-2 ring-emerald-600 ring-offset-2 ring-offset-white"
-      : "";
+        ? "ring-2 ring-emerald-600 ring-offset-2 ring-offset-white"
+        : "";
+
+    const sizeClass = compact
+      ? "rounded-xl text-sm md:text-base font-semibold"
+      : "rounded-2xl text-lg md:text-xl font-bold";
 
     const handleClick = () => {
       if (onDayClick) {
@@ -94,8 +109,10 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
         type="button"
         disabled={isFuture}
         onClick={handleClick}
-        className={`aspect-square rounded-2xl ${bg} ${ringClass} flex items-center justify-center font-bold text-lg md:text-xl ${text} transition ${
-          isFuture ? "cursor-not-allowed opacity-70" : "hover:scale-[1.04] hover:shadow-sm"
+        className={`aspect-square ${sizeClass} ${bg} ${ringClass} flex items-center justify-center ${text} transition ${
+          isFuture
+            ? "cursor-not-allowed opacity-70"
+            : "hover:scale-[1.04] hover:shadow-sm"
         }`}
         title={
           isFuture
@@ -109,32 +126,43 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
   };
 
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
-      {/* 헤더: < 월 > */}
-      <div className="mb-6 flex items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={() => moveMonth(-1)}
-          aria-label="이전 달"
-          className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
-        >
-          {"<"}
-        </button>
-        <h2 className="text-xl font-bold text-slate-900 min-w-[64px] text-center">
-          {monthTitle}
-        </h2>
-        <button
-          type="button"
-          onClick={() => moveMonth(1)}
-          aria-label="다음 달"
-          className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
-        >
-          {">"}
-        </button>
+    <div
+      className={`rounded-3xl border border-slate-100 bg-white shadow-sm ${compact ? "p-5 md:p-6" : "p-6 md:p-8"}`}
+    >
+      <div
+        className={`flex items-center justify-between gap-4 ${compact ? "mb-4" : "mb-6"}`}
+      >
+        <div>
+          {title ? (
+            <p className="text-lg font-bold text-slate-900">{title}</p>
+          ) : null}
+        </div>
+        <div className="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => moveMonth(-1)}
+            aria-label="이전 달"
+            className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
+          >
+            {"<"}
+          </button>
+          <h2 className="min-w-[110px] text-center text-base font-bold text-slate-900 md:text-lg">
+            {monthTitle}
+          </h2>
+          <button
+            type="button"
+            onClick={() => moveMonth(1)}
+            aria-label="다음 달"
+            className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
+          >
+            {">"}
+          </button>
+        </div>
       </div>
 
-      {/* 요일 헤더 */}
-      <div className="grid grid-cols-7 gap-2 text-center mb-2">
+      <div
+        className={`mb-2 grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"} text-center`}
+      >
         {weekdays.map((day, idx) => (
           <div
             key={day}
@@ -145,23 +173,23 @@ function Calendar({ onDayClick, initialDate, selectedDay }) {
         ))}
       </div>
 
-      {/* 날짜 셀 */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className={`grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"}`}>
         {Array.from({ length: totalCells }, (_, i) => renderDayCell(i))}
       </div>
 
-      {/* 하단 그라데이션 범례 (0 ~ 7) */}
-      <div className="mt-6 flex items-center gap-3">
-        <span className="text-xs text-slate-400">0</span>
-        <div
-          className="flex-1 h-2 rounded-full"
-          style={{
-            background:
-              "linear-gradient(to right, #f1f5f9, #d1fae5, #6ee7b7, #34d399, #10b981, #059669, #047857, #065f46)",
-          }}
-        />
-        <span className="text-xs text-slate-400">7</span>
-      </div>
+      {showLegend ? (
+        <div className={`flex items-center gap-3 ${compact ? "mt-5" : "mt-6"}`}>
+          <span className="text-xs text-slate-400">0</span>
+          <div
+            className="h-2 flex-1 rounded-full"
+            style={{
+              background:
+                "linear-gradient(to right, #f1f5f9, #d1fae5, #6ee7b7, #34d399, #10b981, #059669, #047857, #065f46)",
+            }}
+          />
+          <span className="text-xs text-slate-400">7</span>
+        </div>
+      ) : null}
     </div>
   );
 }
