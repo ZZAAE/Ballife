@@ -1,96 +1,478 @@
-import React, { useRef, useState } from "react";
-import ExerciseSection from "./exercise/components/ExerciseSection";
-import ExerciseRecordTable from "./exercise/components/ExerciseRecordTable";
-import Pagination from "./exercise/components/Pagination";
+import React, { useMemo, useState } from "react";
 import ExerciseModal from "../modals/ExerciseModal";
-import { useExercise } from "./exercise/hooks/useExercise";
 
-function ExercisePage({ isModalOpen, onCloseModal }) {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
+/* ---------- 운동 종류별 이모지 ---------- */
+const ICON_BY_TYPE = {
+  cycling: "🚴",
+  running: "🏃",
+  stair: "🪜",
+  walking: "🚶",
+  swimming: "🏊",
+  jumprope: "🤸",
+  dumbbellpress: "🏋️",
+  bumbellpress: "🏋️",
+  barbelllow: "🏋️",
+  latpulldown: "🏋️",
+  squat: "🏋️",
+  deadlift: "💪",
+  pullup: "🧗",
+};
+
+/* ---------- 더미 세션 데이터 ----------
+   실제 연동 시 { date, iconType, name, kind, distanceKm?, sets?, reps?, durationSec, calories } 형식으로 교체
+   현재는 "오늘" 기준 상대 날짜로 생성해서 실제 today가 어떤 날이든 이번 주에 데이터가 보이게 함
+*/
+function makeRelativeDate(daysAgo, hour, minute) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
+const SESSIONS = [
+  {
+    id: 1,
+    date: makeRelativeDate(0, 8, 30),
+    iconType: "cycling",
+    name: "사이클링",
+    kind: "cardio",
+    distanceKm: 8.4,
+    durationSec: 25 * 60,
+    calories: 262,
+  },
+  {
+    id: 2,
+    date: makeRelativeDate(1, 19, 54),
+    iconType: "walking",
+    name: "걷기",
+    kind: "cardio",
+    distanceKm: 1.82,
+    durationSec: 21 * 60 + 51,
+    calories: 156,
+  },
+  {
+    id: 3,
+    date: makeRelativeDate(1, 13, 43),
+    iconType: "walking",
+    name: "걷기",
+    kind: "cardio",
+    distanceKm: 3.1,
+    durationSec: 37 * 60 + 24,
+    calories: 156,
+  },
+  {
+    id: 4,
+    date: makeRelativeDate(2, 18, 30),
+    iconType: "squat",
+    name: "스쿼트",
+    kind: "strength",
+    sets: 5,
+    reps: 12,
+    durationSec: 18 * 60,
+    calories: 132,
+  },
+  {
+    id: 5,
+    date: makeRelativeDate(3, 7, 0),
+    iconType: "running",
+    name: "러닝",
+    kind: "cardio",
+    distanceKm: 4.2,
+    durationSec: 25 * 60,
+    calories: 214,
+  },
+  {
+    id: 6,
+    date: makeRelativeDate(4, 19, 10),
+    iconType: "dumbbellpress",
+    name: "벤치 프레스",
+    kind: "strength",
+    sets: 5,
+    reps: 10,
+    durationSec: 22 * 60,
+    calories: 121,
+  },
+];
+
+/* ---------- 유틸 ---------- */
+function startOfWeek(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+}
+
+function sameDay(a, b) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
   );
-  const dateInputRef = useRef(null);
-  const {
-    activeTab,
-    anaerobicCards,
-    aerobicCards,
-    logs,
-    currentPage,
-    totalPages,
-    handleTabChange,
-    handlePageChange,
-  } = useExercise();
+}
 
-  const strengthCards = anaerobicCards.map((card) => ({
-    icon: "🏋️",
-    name: card.name,
-    type: "strength",
-    sets: card.sets,
-    reps: card.reps,
-    intensity: card.intensity,
-    kcal: card.calories,
-  }));
+function sameWeek(a, b) {
+  return startOfWeek(a).getTime() === startOfWeek(b).getTime();
+}
 
-  const cardioCards = aerobicCards.map((card) => ({
-    icon: "🚴",
-    name: card.name,
-    type: "cardio",
-    time: card.duration,
-    intensity: card.intensity,
-    kcal: card.calories,
-  }));
+function formatDuration(totalSec) {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function formatTimeOfDay(date) {
+  const h = date.getHours();
+  const m = date.getMinutes();
+  const isPM = h >= 12;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${isPM ? "오후" : "오전"} ${h12}:${String(m).padStart(2, "0")}`;
+}
+
+function formatDateLabel(date) {
+  const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${dayNames[date.getDay()]})`;
+}
+
+function formatWeekRangeLabel(start) {
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return `${start.getMonth() + 1}월 ${start.getDate()}일 - ${end.getDate()}일`;
+}
+
+/* ---------- 컴포넌트 ---------- */
+function WeekSelector({
+  weekStart,
+  selectedDate,
+  sessionsInWeek,
+  onSelectDate,
+  onMoveWeek,
+}) {
+  const WEEK_KO = ["일", "월", "화", "수", "목", "금", "토"];
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const days = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        return d;
+      }),
+    [weekStart],
+  );
+
+  return (
+    <div className="rounded-2xl bg-white px-4 py-4 shadow-sm sm:px-6">
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          onClick={() => onMoveWeek(-1)}
+          className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
+          aria-label="이전 주"
+        >
+          {"<"}
+        </button>
+        <span className="text-sm font-semibold text-gray-700">
+          {formatWeekRangeLabel(weekStart)}
+        </span>
+        <button
+          onClick={() => onMoveWeek(1)}
+          className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
+          aria-label="다음 주"
+        >
+          {">"}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((d, idx) => {
+          const isSelected = selectedDate ? sameDay(d, selectedDate) : false;
+          const isToday = sameDay(d, today);
+          const hasActivity = sessionsInWeek.some((s) => sameDay(s.date, d));
+          const dayColor =
+            idx === 0
+              ? "text-red-400"
+              : idx === 6
+                ? "text-blue-400"
+                : "text-gray-400";
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => onSelectDate(d)}
+              className={`flex flex-col items-center gap-1 py-2 rounded-2xl transition ${
+                isSelected
+                  ? "bg-gray-900 text-white"
+                  : isToday
+                    ? "bg-emerald-50 ring-2 ring-emerald-400"
+                    : "hover:bg-gray-50"
+              }`}
+            >
+              {/* 요일 위쪽: 활동 점 (없을 땐 자리만 유지) */}
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  hasActivity && !isSelected
+                    ? "bg-emerald-500"
+                    : "bg-transparent"
+                }`}
+              />
+
+              {/* 요일 라벨 (오늘이어도 SUN/MON/... 유지) */}
+              <span
+                className={`text-[11px] font-semibold ${
+                  isSelected
+                    ? "text-gray-300"
+                    : isToday
+                      ? "text-emerald-600"
+                      : dayColor
+                }`}
+              >
+                {WEEK_KO[idx]}
+              </span>
+
+              {/* 날짜 숫자 */}
+              <span
+                className={`text-sm font-bold ${
+                  isSelected
+                    ? "text-white"
+                    : isToday
+                      ? "text-emerald-700"
+                      : idx === 0
+                        ? "text-red-500"
+                        : idx === 6
+                          ? "text-blue-500"
+                          : "text-gray-700"
+                }`}
+              >
+                {d.getDate()}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, totalSec, sessions, kcal }) {
+  return (
+    <div className="rounded-2xl bg-white px-5 py-5 shadow-sm">
+      <div className="text-sm font-semibold text-gray-500">{label}</div>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <span className="text-3xl font-extrabold text-sky-500 sm:text-4xl">
+          {formatDuration(totalSec)}
+        </span>
+        <div className="flex items-baseline gap-3 pb-1 text-sm">
+          <span className="text-gray-500">
+            <span className="font-semibold text-gray-700">{sessions}</span> 세션
+          </span>
+          <span className="text-pink-500">
+            <span className="font-bold">{kcal}</span> kcal
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SessionRow({ session }) {
+  const emoji =
+    ICON_BY_TYPE[session.iconType] ?? (session.kind === "cardio" ? "🚶" : "🏋️");
+  return (
+    <div className="flex items-center gap-4 py-3">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xl">
+        {emoji}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-base font-bold text-gray-800">{session.name}</div>
+        <div className="mt-0.5 text-sm font-semibold text-amber-500">
+          {session.kind === "cardio"
+            ? session.distanceKm != null
+              ? `${session.distanceKm.toFixed(2)} km`
+              : "—"
+            : `${session.sets} Sets · ${session.reps}회`}
+        </div>
+      </div>
+      <div className="text-right">
+        <div className="text-base font-bold text-sky-500">
+          {formatDuration(session.durationSec)}
+        </div>
+        <div className="mt-0.5 text-xs text-gray-400">
+          {formatTimeOfDay(session.date)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DaySection({ date, sessions }) {
+  const totalSec = sessions.reduce((acc, s) => acc + s.durationSec, 0);
+  const kcal = sessions.reduce((acc, s) => acc + s.calories, 0);
+  return (
+    <div className="rounded-2xl bg-white px-5 py-4 shadow-sm">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <span className="text-sm font-semibold text-gray-700">
+          {formatDateLabel(date)}
+        </span>
+        <div className="flex items-baseline gap-3 text-sm">
+          <span className="font-bold text-sky-500">
+            {formatDuration(totalSec)}
+          </span>
+          <span className="font-bold text-pink-500">{kcal} kcal</span>
+        </div>
+      </div>
+      <div className="divide-y divide-gray-100">
+        {sessions.map((s) => (
+          <SessionRow key={s.id} session={s} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- 메인 페이지 ---------- */
+function ExercisePage({ isModalOpen, onCloseModal }) {
+  // 보고 있는 주의 기준 날짜 (주 이동용)
+  const [viewDate, setViewDate] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  // 선택된 단일 날짜 필터 — null 이면 전체 주 보기
+  const [filterDay, setFilterDay] = useState(null);
+  const [sortOrder, setSortOrder] = useState("desc"); // "desc" | "asc"
+
+  const weekStart = useMemo(() => startOfWeek(viewDate), [viewDate]);
+
+  // 선택 주(일~토)에 해당하는 세션
+  const thisWeekSessions = useMemo(
+    () => SESSIONS.filter((s) => sameWeek(s.date, viewDate)),
+    [viewDate],
+  );
+
+  const thisWeekStats = useMemo(() => {
+    const totalSec = thisWeekSessions.reduce((a, s) => a + s.durationSec, 0);
+    const kcal = thisWeekSessions.reduce((a, s) => a + s.calories, 0);
+    return { totalSec, sessions: thisWeekSessions.length, kcal };
+  }, [thisWeekSessions]);
+
+  // 화면에 보일 세션: filterDay 가 있으면 그날만, 없으면 주 전체
+  const visibleSessions = useMemo(() => {
+    if (!filterDay) return thisWeekSessions;
+    return thisWeekSessions.filter((s) => sameDay(s.date, filterDay));
+  }, [thisWeekSessions, filterDay]);
+
+  // 날짜별 그룹핑 + 정렬
+  const dayGroups = useMemo(() => {
+    const map = new Map();
+    for (const s of visibleSessions) {
+      const key = `${s.date.getFullYear()}-${s.date.getMonth()}-${s.date.getDate()}`;
+      if (!map.has(key)) map.set(key, { date: new Date(s.date), sessions: [] });
+      map.get(key).sessions.push(s);
+    }
+    const dir = sortOrder === "desc" ? -1 : 1;
+    return Array.from(map.values())
+      .sort((a, b) => (a.date - b.date) * dir)
+      .map((g) => ({
+        ...g,
+        sessions: g.sessions.sort((a, b) => (a.date - b.date) * dir),
+      }));
+  }, [visibleSessions, sortOrder]);
+
+  const handleSelectDay = (d) => {
+    // 같은 날짜 다시 클릭하면 해제, 다른 날이면 그 날로 필터
+    setFilterDay((prev) => (prev && sameDay(prev, d) ? null : d));
+  };
+
+  const handleMoveWeek = (offset) => {
+    const next = new Date(weekStart);
+    next.setDate(weekStart.getDate() + offset * 7);
+    setViewDate(next);
+    setFilterDay(null); // 주를 옮기면 필터 해제
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="min-h-screen bg-gray-50 pt-[55px] text-gray-900">
-        <div className="mx-auto flex w-full max-w-[1280px] flex-col xl:flex-row">
-          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-          <div className="mb-8 flex w-full flex-col gap-4 sm:gap-0 sm:flex-row sm:items-start sm:justify-between">
+        <div className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+          <header className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
-                운동 기록 확인
+              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                운동 기록
               </h2>
-              <p className="text-sm text-gray-500">지난 운동 변화를 분석한 결과입니다.</p>
+              <p className="text-sm text-gray-500 mt-1">
+                지난 운동 변화를 분석한 결과입니다.
+              </p>
             </div>
-            <div className="relative sm:w-auto">
-              <input
-                type="date"
-                ref={dateInputRef}
-                value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                className="pointer-events-none absolute opacity-0"
-              />
-              <button
-                type="button"
-                onClick={() => dateInputRef.current?.showPicker()}
-                className="flex w-full items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm sm:w-auto"
-              >
-                {selectedDate}
-                <span className="ml-1 text-[10px] text-slate-300">▼</span>
-              </button>
+          </header>
+
+          <div className="flex flex-col gap-4">
+            <WeekSelector
+              weekStart={weekStart}
+              selectedDate={filterDay}
+              sessionsInWeek={thisWeekSessions}
+              onSelectDate={handleSelectDay}
+              onMoveWeek={handleMoveWeek}
+            />
+
+            <SummaryCard
+              label={formatWeekRangeLabel(weekStart)}
+              totalSec={thisWeekStats.totalSec}
+              sessions={thisWeekStats.sessions}
+              kcal={thisWeekStats.kcal}
+            />
+
+            {/* 정렬 토글 */}
+            <div className="flex items-center justify-end gap-2">
+              <span className="text-xs text-gray-400">정렬</span>
+              <div className="inline-flex rounded-full border border-gray-200 bg-white p-0.5 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setSortOrder("desc")}
+                  className={`rounded-full px-3 py-1 transition ${
+                    sortOrder === "desc"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  최신순
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSortOrder("asc")}
+                  className={`rounded-full px-3 py-1 transition ${
+                    sortOrder === "asc"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  오래된순
+                </button>
+              </div>
             </div>
+
+            {dayGroups.length > 0 ? (
+              dayGroups.map((g) => (
+                <DaySection
+                  key={g.date.toISOString()}
+                  date={g.date}
+                  sessions={g.sessions}
+                />
+              ))
+            ) : (
+              <div className="rounded-2xl bg-white px-5 py-10 text-center text-sm text-gray-400 shadow-sm">
+                {filterDay
+                  ? "선택한 날짜의 기록이 없습니다."
+                  : "이번 주 기록이 없습니다."}
+              </div>
+            )}
           </div>
-
-          <ExerciseSection
-            icon="🏋️"
-            title="무산소 운동 목록"
-            cards={strengthCards}
-          />
-
-          <ExerciseSection icon="🚴" title="유산소 운동" cards={cardioCards} />
-
-          <ExerciseRecordTable
-            activeTab={activeTab}
-            logs={logs}
-            onTabChange={handleTabChange}
-          />
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-          </main>
         </div>
       </div>
 

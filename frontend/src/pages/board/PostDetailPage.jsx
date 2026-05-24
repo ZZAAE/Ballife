@@ -1,17 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
+import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import postApi from "../../api/boardApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { DUMMY_POSTS } from "./dummyPosts";
+
+function normalizeContentHtml(content) {
+  if (!content) {
+    return "";
+  }
+
+  const hasHtmlTag = /<\/?[a-z][\s\S]*>/i.test(content);
+  const normalized = hasHtmlTag ? content : content.replace(/\n/g, "<br />");
+
+  return DOMPurify.sanitize(normalized);
+}
 
 export default function PostDetailPage() {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [post, setPost] = useState(null);
   const [commentDraft, setCommentDraft] = useState("");
   const [commentState, setCommentState] = useState([]);
   const [upVote, setUpVote] = useState(null);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
     { value: "", label: "게시판을 선택" },
@@ -26,7 +40,7 @@ export default function PostDetailPage() {
   ];
 
   // [더미 상세 로직 시작] 백엔드 연결 전 목록과 같은 더미 데이터 사용
-  const post = useMemo(
+  const dummyPost = useMemo(
     () =>
       DUMMY_POSTS.find(
         (currentPost) => String(currentPost.id) === String(postId),
@@ -35,26 +49,58 @@ export default function PostDetailPage() {
   );
 
   useEffect(() => {
-    if (!post) {
-      navigate("/boards");
-      return;
-    }
+    let isMounted = true;
 
-    setCommentState(
-      (post.comments ?? []).map((comment) => ({
-        ...comment,
-        upVote: comment.upVote ?? 0,
-        reportCount: comment.reportCount ?? 0,
-      })),
-    );
-  }, [navigate, post]);
-  // [더미 상세 로직 끝]
+    const applyPost = (nextPost) => {
+      setPost(nextPost);
+      setCommentState(
+        (nextPost?.comments ?? []).map((comment) => ({
+          ...comment,
+          upVote: comment.upVote ?? 0,
+          reportCount: comment.reportCount ?? 0,
+        })),
+      );
+    };
+
+    (async () => {
+      try {
+        setLoading(true);
+        const response = await postApi.getPost(postId);
+        if (!isMounted) {
+          return;
+        }
+        applyPost(response.data);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (dummyPost) {
+          applyPost(dummyPost);
+        } else {
+          navigate("/boards");
+          return;
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dummyPost, navigate, postId]);
+  // [상세 로직 끝]
 
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
 
   const comments = commentState;
   const displayedUpVote = upVote ?? post.upVote ?? 0;
+  const contentHtml = normalizeContentHtml(post.content);
+  const hasInlineImage = /<img[\s\S]*?>/i.test(post.content ?? "");
 
   // 작성일 포맷팅
   const formatDate = (dateString) => {
@@ -172,11 +218,12 @@ export default function PostDetailPage() {
               </div>
             </div>
 
-            <div className="mt-6 whitespace-pre-wrap text-[15px] leading-8 text-gray-800">
-              {post.content}
-            </div>
+            <div
+              className="mt-6 break-words text-[15px] leading-8 text-gray-800 [&_img]:my-4 [&_img]:max-h-[360px] [&_img]:max-w-full [&_img]:rounded-xl [&_img]:object-contain [&_p]:mb-4 [&_p:last-child]:mb-0"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
 
-            {post.imageUrl && (
+            {post.imageUrl && !hasInlineImage && (
               <div className="mt-7">
                 <img
                   src={post.imageUrl}

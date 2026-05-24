@@ -50,7 +50,11 @@ function App() {
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
+    location.pathname === '/allRecord' ||
     location.pathname === '/' ||
+    location.pathname === '/member' ||
+    location.pathname.startsWith('/member/') ||
+    location.pathname.startsWith('/check/') ||
     location.pathname.startsWith('/posts/');
     
     const hideChatbot =
@@ -71,10 +75,10 @@ function App() {
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <main className="py-12">
         <Header isLoggedIn={false} />
-        <div className="min-w-screen bg-white flex justify-end">
+        <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<MainPage />} />
@@ -82,8 +86,8 @@ function App() {
 
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/disease" element={<DiseasePage/>} />
-         
+              <Route path="/disease" element={<DiseasePage />} />
+
               <Route path="/boards" element={<BoardListPage />} />
               <Route path="/posts/create" element={<PostCreatePage />} />
               <Route path="/posts/:id/edit" element={<PostEditPage />} />
@@ -92,7 +96,9 @@ function App() {
               <Route path="/check/all" element={<RecordSummary />} />
               <Route path="/check/meal" element={<MealPage />} />
               <Route path="/check/weight" element={<WeightRecord />} />
-              <Route path="/check/blood-pressure" element={<BloodPressureRecord />}
+              <Route
+                path="/check/blood-pressure"
+                element={<BloodPressureRecord />}
               />
               <Route path="/check/blood-sugar" element={<BloodSugarRecord />} />
               <Route
@@ -107,24 +113,33 @@ function App() {
               <Route path="/check/medicine" element={<MedicationPage />} />
 
               <Route path="/member" element={<UserInformation />} />
+              <Route path="/member/pet" element={<PetPage />} />
 
               <Route path="/allRecord" element={<AllRecordPage />} />
               <Route path="/intro/web" element={<MainReportPage />} />
-              <Route path="/intro/osteoporosis" element={<OsteoporosisReportPage />} />
+              <Route
+                path="/intro/osteoporosis"
+                element={<OsteoporosisReportPage />}
+              />
               <Route path="/intro/diabetes" element={<DiabetesReportPage />} />
               <Route path="/intro/gout" element={<GoutReportPage />} />
-              <Route path="/intro/hypertension" element={<HypertensionReportPage />} />
-              <Route path="/intro/hyperlipidemia" element={<DyslipidemiaReportPage />} />
+              <Route
+                path="/intro/hypertension"
+                element={<HypertensionReportPage />}
+              />
+              <Route
+                path="/intro/hyperlipidemia"
+                element={<DyslipidemiaReportPage />}
+              />
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
               
               <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
-        {!hideHealthMenu && <HealthIndicatorMenu />}
-        {!hideChatbot && <ChatBot />}
-      </div>
-
+          {!hideHealthMenu && <HealthIndicatorMenu />}
+          {!hideChatbot && <ChatBot />}
+        </div>
       </main>
     </div>
   );

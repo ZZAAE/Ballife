@@ -1,237 +1,396 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { Search, CheckCircle2 } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  Bot,
+  CheckCircle2,
+  HeartPulse,
+  MessageCircle,
+  PillBottle,
+  Sparkles,
+  Stethoscope,
+  Target,
+} from "lucide-react";
 import logo from "../../assets/icons/ballifeLogo.svg";
 
-export default function MainReportPage() {
+const HERO_BADGES = [
+  "식단·운동 기록",
+  "혈압·혈당 추적",
+  "AI 분석 리포트",
+  "질환별 가이드",
+];
+
+const FEATURES = [
+  {
+    icon: Activity,
+    title: "일일 건강 기록",
+    description:
+      "식단, 운동, 수분 섭취, 체중, 혈압, 혈당, 복약까지 하루의 모든 건강 기록을 한 화면에서 입력하고 관리합니다.",
+    tags: ["식단", "운동", "수분", "혈압/혈당"],
+    accent: "#3B82F6",
+    bg: "#EFF6FF",
+    to: "/record",
+  },
+  {
+    icon: BarChart3,
+    title: "기록 통계 & 리포트",
+    description:
+      "기간별 통계와 시각화된 그래프로 변화의 흐름을 한눈에 확인하고, 주간 종합 리포트를 받아볼 수 있습니다.",
+    tags: ["일/주/월 통계", "추이 그래프", "종합 리포트"],
+    accent: "#10B981",
+    bg: "#ECFDF5",
+    to: "/allrecord",
+  },
+  {
+    icon: Target,
+    title: "맞춤 목표 설정",
+    description:
+      "목표 체중·음수량·섭취/소모 칼로리를 설정하고 하루 생활 루틴(기상·식사·취침)에 맞춰 알림을 받아보세요.",
+    tags: ["목표 지표", "루틴 알림", "달성률"],
+    accent: "#F97316",
+    bg: "#FFF7ED",
+    to: "/user/information",
+  },
+  {
+    icon: PillBottle,
+    title: "복약 관리",
+    description:
+      "처방전 사진 한 장이면 복용 중인 약을 자동으로 등록하고, 시간대별 복약 알림으로 빠짐없이 챙길 수 있습니다.",
+    tags: ["처방전 OCR", "복약 알림", "복약 이력"],
+    accent: "#8B5CF6",
+    bg: "#F5F3FF",
+    to: "/user/information",
+  },
+  {
+    icon: Stethoscope,
+    title: "질환별 가이드",
+    description:
+      "고혈압·당뇨·고지혈증·비만·통풍·골다공증 등 주요 만성질환에 대한 신뢰성 있는 의학 정보와 관리법을 제공합니다.",
+    tags: ["WHO·KDCA 기반", "6대 질환", "관리법"],
+    accent: "#EF4444",
+    bg: "#FEF2F2",
+    to: "/report/diabetes",
+  },
+  {
+    icon: MessageCircle,
+    title: "건강 커뮤니티",
+    description:
+      "같은 고민을 가진 사람들과 경험을 나누고, 카테고리별 게시판에서 질문·노하우·일상을 자유롭게 공유하세요.",
+    tags: ["카테고리 게시판", "질문/응답", "추천/조회"],
+    accent: "#0EA5E9",
+    bg: "#F0F9FF",
+    to: "/posts",
+  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    step: "01",
+    title: "기록한다",
+    description:
+      "오늘 먹은 식단, 운동, 혈압·혈당·체중을 가볍게 입력해 두기만 해도 데이터가 차곡차곡 쌓입니다.",
+  },
+  {
+    step: "02",
+    title: "분석한다",
+    description:
+      "쌓인 데이터를 AI가 분석해 변화 추이, 위험 신호, 개선이 필요한 영역을 알려드립니다.",
+  },
+  {
+    step: "03",
+    title: "관리한다",
+    description:
+      "맞춤 목표·루틴·복약 알림과 커뮤니티의 응원을 통해 건강한 습관을 지속할 수 있도록 돕습니다.",
+  },
+];
+
+function FeatureCard({ icon, title, description, tags, accent, bg, to }) {
+  const Icon = icon;
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans">
-      <section className="relative h-[500px] bg-slate-800 flex items-center justify-center overflow-hidden">
-        <div className="relative z-10 text-center text-white px-4">
-          <span className="inline-block px-3 py-1 border border-white/30 rounded-full text-[10px] mb-6">
-            하나의 공간에서 BalLife
+    <Link
+      to={to}
+      className="group bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6 hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 transition-all"
+    >
+      <div className="flex items-start justify-between mb-5">
+        <div
+          className="w-12 h-12 rounded-[14px] flex items-center justify-center"
+          style={{ backgroundColor: bg, color: accent }}
+        >
+          <Icon className="w-6 h-6" />
+        </div>
+        <ArrowRight className="w-4 h-4 text-[#CBD5E1] group-hover:text-[#0F172A] group-hover:translate-x-0.5 transition" />
+      </div>
+      <h3 className="text-[17px] font-bold text-[#0F172A] mb-2">{title}</h3>
+      <p className="text-[13px] text-[#64748B] leading-relaxed mb-4">
+        {description}
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="px-2.5 py-1 text-[11px] font-medium text-[#475569] bg-[#F1F5F9] rounded-full"
+          >
+            {tag}
           </span>
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
-            당신의 건강한 삶을
-            <br />
-            기록하고 공유하세요
-          </h1>
-          <p className="text-gray-300 text-xs mb-8 leading-relaxed max-w-lg mx-auto">
-            BalLife는 단순한 기록을 넘어,
-            <br />
-            저희 서비스는 활기찬 커뮤니티를 통해 당신의 지속 가능한 건강 관리를
-            돕습니다.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Link to="/login">
-              <button className="px-6 py-2.5 bg-white text-black font-bold text-xs rounded">
-                지금 바로 시작하기
-              </button>
-            </Link>
-            <button className="px-6 py-2.5 bg-black/40 text-white font-bold text-xs rounded border border-white/20">
-              서비스 더 알아보기
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 소개 섹션 1 */}
-      <section className="py-20 text-center max-w-[900px] mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          건강 관리가 더 이상 외롭지 않도록
-        </h2>
-        <p className="text-sm text-gray-500 leading-loose">
-          매일 반복되는 식단 기록과 운동 체크, 혼자서는 작심삼삼이 되기
-          쉽습니다.
-          <br />
-          BallLife는 체계적인 데이터 관리와 커뮤니티의 지지를 결합하여 당신의
-          라이프스타일을 변화시킵니다.
-        </p>
-
-        <div className="mt-16 flex flex-col md:flex-row gap-12 items-center text-left">
-          <div className="w-full md:w-1/2 bg-black rounded-xl aspect-[4/3] flex items-center justify-center">
-            <img
-              src={logo}
-              alt="Sample"
-              className="opacity-80"
-            />
-          </div>
-          <div className="w-full md:w-1/2 space-y-6">
-            <div>
-              <h3 className="font-bold text-lg mb-3">왜 BalLife 인가요?</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Balance + Life를 합친 말로 사용자의 라이프 밸런스 회복에
-                집중합니다.
-                <br />
-               우리는 파편적으로 흩어져 있는 건강 데이터를 하나의 인사이트로
-                통합합니다.
-                <br />
-                의료 전문가 수준의 분석 도구를 누구나 쉽게 이해할 수 있는
-                리포트로 제공합니다.
-              </p>
-            </div>
-            <ul className="space-y-3 text-xs font-medium text-gray-700">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-gray-400" /> AI 기반의
-                체계적인 건강 지표 관리 시스템
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-gray-400" /> 사용자
-                맞춤형 조언 및 알림
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-gray-400" /> 실시간
-                커뮤니티 시스템 구축
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* 3대 핵심 솔루션 */}
-      <section className="py-20 bg-gray-50 overflow-hidden">
-        <div className="max-w-[1000px] mx-auto px-4">
-          <h2 className="text-xl font-bold mb-10">
-            BallLife의 3대 핵심 솔루션
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="bg-white p-6 rounded-xl border border-gray-100 flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-sm mb-2">스마트한 건강 기록</h4>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">
-                    식단, 혈압, 혈당, 운동, 수분섭취 그리고 현재 상태까지.
-                    <br />
-                    앱으로 간편하게 기록하고 시각화된 통계를 통해 변화를 한눈에
-                    확인하세요.
-                  </p>
-                </div>
-                <div className="opacity-20">
-                  <TrendingUpIcon />
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-xl border border-gray-100 flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-sm mb-2">
-                    직관적인 건강 지표 확인
-                  </h4>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">
-                    복잡한 데이터 없이도 즉각 상태를 파악할 수 있도록
-                    제공합니다.
-                  </p>
-                </div>
-                <div className="opacity-20">
-                  <TrendingUpIcon />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden flex flex-col">
-              <div className="p-6">
-                <h4 className="font-bold text-sm mb-2 text-emerald-600">
-                  AI를 활용한 식단 관리
-                </h4>
-                <p className="text-[11px] text-gray-400">
-                  식사 사진 한 장으로 영양 성분 분석부터 건강 맞춤형 피드백까지.
-                </p>
-              </div>
-              <div className="mt-auto">
-                <img
-                  src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
-                  alt="Food"
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI 챗봇 섹션 */}
-      <section className="py-20 px-4">
-        <div className="max-w-[1000px] mx-auto bg-[#0a1120] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-white">
-            <h3 className="text-xl font-bold mb-4">AI 챗봇 맞춤형 조언</h3>
-            <p className="text-xs text-gray-400 leading-loose">
-              궁금한 건강 질문, 현재 식사 사진 등 24시간 즉시 답변해 드립니다.
-              당신의 라이프스타일에 맞게 당뇨 건강 관리를 제안합니다.
-            </p>
-          </div>
-          <div className="flex-1 w-full space-y-3">
-            <div className="bg-[#1e293b] p-4 rounded-xl text-[11px] text-gray-300 ml-12">
-              "오늘 혈당이 조금 높게 나타났는데 거의 1시간 후인것 같네요?"
-            </div>
-            <div className="bg-emerald-900/40 border border-emerald-500/30 p-4 rounded-xl text-[11px] text-emerald-400">
-              "혈당 조절을 위해 식이섬유가 풍부한 잡곡 등은 체크 위주로 드시는게
-              좋습니다.
-              <br />
-              식후 20분 가벼운 산책도 도움이 됩니다."
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 커뮤니티 섹션 */}
-      <section className="pb-20 px-4">
-        <div className="max-w-[1000px] mx-auto bg-gray-100 rounded-2xl overflow-hidden relative min-h-[160px] flex items-center px-10">
-          <img
-            src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1000&q=80"
-            alt="Doctor"
-            className="absolute inset-0 w-full h-full object-cover opacity-20"
-          />
-          <div className="relative z-10">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Together is Better
-            </span>
-            <h3 className="text-lg font-bold mt-1">활기찬 커뮤니티</h3>
-            <p className="text-[11px] text-gray-500 mt-2">
-              혼자하면 지루한 관리, 함께하면 응원이 됩니다. 챌린지를 공유하고
-              서로를 응원하며 매일매일 성장하는 커뮤니티를 경험하세요.
-            </p>
-            <div className="flex items-center gap-1 mt-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 푸터 */}
-      <footer className="bg-[#0a0c10] py-16 text-center text-white">
-        <h2 className="text-xl font-bold mb-4">
-          내일의 더 나은 나를 위한 첫걸음
-        </h2>
-        <p className="text-[11px] text-gray-500 mb-8 font-medium">
-          지금 BallLife에 합류하여 더 나은 사용자와 함께 건강한 라이프스타일을
-          시작해보세요.
-        </p>
-        <Link to="/login">
-          <button className="bg-white text-black px-10 py-3 rounded-lg font-bold text-xs">
-            지금 바로 시작하기
-          </button>
-        </Link>
-      </footer>
-    </div>
+        ))}
+      </div>
+    </Link>
   );
 }
 
-const TrendingUpIcon = () => (
-  <svg
-    width="40"
-    height="40"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-gray-200"
-  >
-    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-    <polyline points="16 7 22 7 22 13"></polyline>
-  </svg>
-);
+export default function MainReportPage() {
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+      {/* ───────── 히어로 ───────── */}
+      <section className="bg-white border-b border-[#E5E7EB]">
+        <div className="max-w-[1280px] mx-auto px-6 pt-20 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0F172A] text-white text-[11px] font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                Balance + Life
+              </span>
+              <h1 className="mt-5 text-[44px] leading-[1.15] font-extrabold text-[#0F172A] tracking-tight">
+                매일의 작은 기록이,
+                <br />
+                <span className="text-[#3B82F6]">평생의 건강</span>이 됩니다.
+              </h1>
+              <p className="mt-5 text-[15px] text-[#64748B] leading-relaxed max-w-[520px]">
+                BalLife는 식단·운동·혈압·혈당·복약까지 흩어져 있던 건강 데이터를
+                한 곳에 모으고, AI가 분석한 인사이트와 커뮤니티의 응원으로
+                지속 가능한 건강 관리를 돕습니다.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {HERO_BADGES.map((label) => (
+                  <span
+                    key={label}
+                    className="px-3 py-1.5 rounded-full bg-[#F1F5F9] text-[#475569] text-[12px] font-medium border border-[#E5E7EB]"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 h-12 px-7 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
+                >
+                  지금 바로 시작하기
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <a
+                  href="#features"
+                  className="inline-flex items-center h-12 px-7 rounded-[12px] bg-white border border-[#E5E7EB] text-[#0F172A] text-[14px] font-semibold hover:bg-gray-50 transition"
+                >
+                  주요 기능 살펴보기
+                </a>
+              </div>
+            </div>
+
+            {/* 히어로 비주얼 */}
+            <div className="relative">
+              <div className="bg-[#0F172A] rounded-[24px] p-8 shadow-[0_20px_60px_rgba(15,23,42,0.15)] relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#3B82F6]/20 blur-3xl" />
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-[#10B981]/20 blur-3xl" />
+
+                <div className="relative flex items-center gap-3 mb-6">
+                  <img src={logo} alt="BalLife" className="w-9 h-9" />
+                  <span className="text-white text-[13px] font-semibold">
+                    오늘의 건강 요약
+                  </span>
+                  <span className="ml-auto text-[11px] text-white/50">
+                    2026.05.22
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10">
+                    <div className="flex items-center gap-1.5 text-[11px] text-white/60 mb-1">
+                      <HeartPulse className="w-3.5 h-3.5" />
+                      혈압
+                    </div>
+                    <p className="text-white text-[22px] font-bold">
+                      118 / 78
+                      <span className="ml-1 text-[11px] font-normal text-white/50">
+                        mmHg
+                      </span>
+                    </p>
+                  </div>
+                  <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10">
+                    <div className="flex items-center gap-1.5 text-[11px] text-white/60 mb-1">
+                      <Activity className="w-3.5 h-3.5" />
+                      혈당
+                    </div>
+                    <p className="text-white text-[22px] font-bold">
+                      96
+                      <span className="ml-1 text-[11px] font-normal text-white/50">
+                        mg/dL
+                      </span>
+                    </p>
+                  </div>
+                  <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10 col-span-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] text-white/60">
+                        오늘의 목표 달성률
+                      </span>
+                      <span className="text-[12px] font-semibold text-[#3B82F6]">
+                        78%
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-[#3B82F6] to-[#10B981] rounded-full"
+                        style={{ width: "78%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 핵심 기능 ───────── */}
+      <section id="features" className="py-20">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="text-center mb-12">
+            <span className="text-[12px] font-semibold text-[#3B82F6] tracking-widest uppercase">
+              Features
+            </span>
+            <h2 className="mt-3 text-[32px] font-extrabold text-[#0F172A]">
+              건강 관리에 필요한 모든 것을, 한 곳에
+            </h2>
+            <p className="mt-3 text-[14px] text-[#64748B]">
+              BalLife가 제공하는 6가지 핵심 기능으로 건강 관리를 더 쉽게,
+              더 똑똑하게.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {FEATURES.map((feature) => (
+              <FeatureCard key={feature.title} {...feature} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 사용 흐름 ───────── */}
+      <section className="py-20 bg-white border-y border-[#E5E7EB]">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="text-center mb-12">
+            <span className="text-[12px] font-semibold text-[#10B981] tracking-widest uppercase">
+              How it works
+            </span>
+            <h2 className="mt-3 text-[32px] font-extrabold text-[#0F172A]">
+              3단계로 시작하는 건강한 습관
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {HOW_IT_WORKS.map((item) => (
+              <div
+                key={item.step}
+                className="bg-[#F9FAFB] rounded-[18px] border border-[#E5E7EB] p-7"
+              >
+                <span className="text-[40px] font-extrabold text-[#0F172A]/10 leading-none">
+                  {item.step}
+                </span>
+                <h3 className="mt-3 text-[18px] font-bold text-[#0F172A]">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-[13px] text-[#64748B] leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── AI 챗봇 ───────── */}
+      <section className="py-20">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="bg-[#0F172A] rounded-[24px] overflow-hidden p-10 lg:p-14 grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-10 items-center">
+            <div className="text-white">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-[11px] font-medium">
+                <Bot className="w-3.5 h-3.5" />
+                AI Assistant
+              </span>
+              <h3 className="mt-4 text-[28px] font-bold leading-tight">
+                24시간 함께하는
+                <br />
+                AI 건강 도우미
+              </h3>
+              <p className="mt-4 text-[14px] text-white/70 leading-relaxed">
+                건강 관련 궁금증, 식단 사진 분석, 복약 시간 알림까지.
+                당신의 라이프스타일에 맞춰 맞춤형 조언을 제공합니다.
+              </p>
+              <ul className="mt-6 space-y-2.5">
+                {[
+                  "복용 중인 약과 상호작용 확인",
+                  "오늘 먹은 음식의 영양 분석",
+                  "혈압·혈당 수치 해석",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-2 text-[13px] text-white/80"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-[#3B82F6]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <div className="bg-white/5 backdrop-blur rounded-[16px] p-4 border border-white/10 max-w-[85%] ml-auto">
+                <p className="text-[13px] text-white/90">
+                  오늘 점심 후 혈당이 180 나왔어요. 괜찮은 건가요?
+                </p>
+              </div>
+              <div className="bg-[#3B82F6]/15 backdrop-blur rounded-[16px] p-4 border border-[#3B82F6]/30 max-w-[85%]">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Bot className="w-3.5 h-3.5 text-[#60A5FA]" />
+                  <span className="text-[11px] font-semibold text-[#60A5FA]">
+                    BalLife AI
+                  </span>
+                </div>
+                <p className="text-[13px] text-white/90 leading-relaxed">
+                  식후 2시간 혈당이 180mg/dL이면 정상 기준(140 미만)보다 다소
+                  높은 수치예요. 식이섬유가 풍부한 잡곡과 채소 위주의 식사,
+                  식후 20분 가벼운 산책이 도움이 됩니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── CTA ───────── */}
+      <section className="pb-24">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="bg-white rounded-[24px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-12 text-center">
+            <h2 className="text-[32px] font-extrabold text-[#0F172A]">
+              내일의 더 나은 나를 위한 첫걸음
+            </h2>
+            <p className="mt-3 text-[14px] text-[#64748B]">
+              지금 BalLife에 합류하여 더 나은 사용자와 함께
+              건강한 라이프스타일을 시작해보세요.
+            </p>
+            <Link
+              to="/login"
+              className="mt-7 inline-flex items-center gap-2 h-12 px-8 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
+            >
+              지금 바로 시작하기
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

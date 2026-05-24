@@ -1,14 +1,21 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Unity, useUnityContext } from 'react-unity-webgl';
-import { Sparkles, ArrowRight } from 'lucide-react';
-import Header from '../../components/Header';
-import HealthMenu from '../../components/HealthMenu';
-import Card from '../../components/mainpage/card.jsx';
-import Calendar from '../../components/mainpage/calendar.jsx';
-import ChartSection from '../../components/mainpage/chart.jsx';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import Header from "../../components/Header";
+import HealthMenu from "../../components/HealthMenu";
+import Card from "../../components/mainpage/card.jsx";
+import Calendar from "../../components/mainpage/calendar.jsx";
+import ChartSection from "../../components/mainpage/chart.jsx";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Unity, useUnityContext } from "react-unity-webgl";
+import { ArrowRight } from "lucide-react";
 
 const bloodPressureData = [
   { date: "03-01", systolic: 128, diastolic: 82 },
@@ -80,8 +87,18 @@ const MainPage = () => {
         unit: "mmHg",
         yDomain: [60, 150],
         areas: [
-          { key: "systolic", name: "수축기", stroke: "#2563eb", gradientId: "systolicGrad" },
-          { key: "diastolic", name: "이완기", stroke: "#06b6d4", gradientId: "diastolicGrad" },
+          {
+            key: "systolic",
+            name: "수축기",
+            stroke: "#2563eb",
+            gradientId: "systolicGrad",
+          },
+          {
+            key: "diastolic",
+            name: "이완기",
+            stroke: "#06b6d4",
+            gradientId: "diastolicGrad",
+          },
         ],
       },
       bloodSugar: {
@@ -90,7 +107,12 @@ const MainPage = () => {
         unit: "mg/dL",
         yDomain: [80, 140],
         areas: [
-          { key: "glucose", name: "혈당", stroke: "#16a34a", gradientId: "glucoseGrad" },
+          {
+            key: "glucose",
+            name: "혈당",
+            stroke: "#16a34a",
+            gradientId: "glucoseGrad",
+          },
         ],
       },
       weight: {
@@ -99,7 +121,12 @@ const MainPage = () => {
         unit: "kg",
         yDomain: [75, 80],
         areas: [
-          { key: "weight", name: "체중", stroke: "#f97316", gradientId: "weightGrad" },
+          {
+            key: "weight",
+            name: "체중",
+            stroke: "#f97316",
+            gradientId: "weightGrad",
+          },
         ],
       },
     };
@@ -107,7 +134,6 @@ const MainPage = () => {
 
   const activeChart = chartConfig[selectedChartType];
 
-  // 샘플 데이터
   const userStats = {
     ageGender: "45세 / 남성",
     height: "175cm",
@@ -129,7 +155,9 @@ const MainPage = () => {
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
         >
-          <p style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}>{`2026-${label}`}</p>
+          <p
+            style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}
+          >{`2026-${label}`}</p>
           {payload.map((p) => (
             <p key={p.dataKey} style={{ color: p.color, margin: "2px 0" }}>
               {p.name}: <strong>{p.value}</strong> {activeChart.unit}
@@ -142,66 +170,42 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 ml-[150px] mr-[150px]">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       {/* <Header /> */}
       <div className="flex pt-[55px]">
-        <main className="flex-1 p-6 px-12 py-10">
-          <div className="max-w-auto mx-auto space-y-10">
-        
-        {/* 펫 히어로 — 진입 시 가장 먼저 보이는 영역 */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 p-6 lg:p-10 ring-1 ring-blue-100/80 shadow-sm">
-          {/* 배경 장식 */}
-          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-blue-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 -left-10 h-56 w-56 rounded-full bg-indigo-200/40 blur-3xl" />
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8 space-y-10">
 
-          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-            {/* 좌측: 인사 + 스탯 + CTA */}
+        {/* Header & User Stats */}
+        <header className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
+          <h1 className="text-3xl font-bold text-[#0F172A]">김지수님 안녕하세요.</h1>
+          <div className="flex gap-6 text-sm">
+            <div><p className="text-xs text-[#94A3B8]">나이 / 성별</p><p className="font-semibold text-[#0F172A]">{userStats.ageGender}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">키</p><p className="font-semibold text-[#0F172A]">{userStats.height}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">몸무게</p><p className="font-semibold text-[#0F172A]">{userStats.weight}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">BMI</p><p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p></div>
+          </div>
+        </header>
+
+        {/* 펫 섹션 */}
+        <section className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-600 ring-1 ring-blue-200 backdrop-blur-sm">
-                <Sparkles className="h-3.5 w-3.5" /> 오늘도 함께해요
-              </span>
-
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 lg:text-4xl">
-                <span className="text-blue-600">김지수</span>님,<br className="hidden sm:block" />
-                {' '}오늘도 건강한 하루를 시작해요
-              </h1>
-
-              <p className="mt-2 text-sm text-slate-500 lg:text-base">
-                내 건강 친구가 옆에서 함께 챙겨드리고 있어요.
+              <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A]">
+                내 펫이 기다리고 있어요
+              </h2>
+              <p className="mt-2 text-sm lg:text-base text-[#64748B]">
+                펫과 함께 건강한 하루를 시작해보세요.
               </p>
-
-              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">나이 / 성별</p>
-                  <p className="font-bold text-slate-800">{userStats.ageGender}</p>
-                </div>
-                <div className="h-8 w-px bg-slate-200/80" />
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">키</p>
-                  <p className="font-bold text-slate-800">{userStats.height}</p>
-                </div>
-                <div className="h-8 w-px bg-slate-200/80" />
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">몸무게</p>
-                  <p className="font-bold text-slate-800">{userStats.weight}</p>
-                </div>
-                <div className="h-8 w-px bg-slate-200/80" />
-                <div>
-                  <p className="text-xs font-semibold text-slate-400">BMI</p>
-                  <p className={`font-bold ${userStats.bmiColor}`}>{userStats.bmi}</p>
-                </div>
-              </div>
-
               <Link
                 to="/member/pet"
-                className="group mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 hover:shadow-blue-300"
+                className="group mt-5 inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#1E293B]"
               >
                 내 펫 자세히 보기
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </Link>
             </div>
 
-            {/* 우측: Unity 펫 뷰어 */}
             <div className="relative mx-auto w-full max-w-[520px]">
               <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-white/80">
                 <Unity
@@ -213,7 +217,6 @@ const MainPage = () => {
                     background: '#F0F7FF',
                   }}
                 />
-                {/* 로딩 오버레이 */}
                 {!isLoaded && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
                     <div className="mb-3 text-3xl">🐾</div>
@@ -231,15 +234,6 @@ const MainPage = () => {
                     </p>
                   </div>
                 )}
-              </div>
-
-              {/* 우측 하단 살짝 떠 있는 배지 */}
-              <div className="absolute -bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-lg ring-1 ring-slate-100">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                내 펫이 활동 중
               </div>
             </div>
           </div>
@@ -291,7 +285,7 @@ const MainPage = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} tickFormatter={(v) => `2026-${v}`} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
                   <YAxis domain={activeChart.yDomain} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   {activeChart.areas.map((area) => (
@@ -316,20 +310,20 @@ const MainPage = () => {
         {/* 건강 뉴스 섹션 */}
         <section>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold">건강 뉴스</h2>
-            <p className="text-slate-500 text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
+            <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
+            <p className="text-[#64748B] text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-blue-50 text-blue-700', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
-              { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-red-50 text-red-700', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
-              { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-green-50 text-green-700', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
+              { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
+              { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
+              { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
             ].map((news, idx) => (
-              <div key={idx} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer">
+              <div key={idx} className="bg-white rounded-[18px] overflow-hidden border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] group cursor-pointer">
                 <img src={news.img} alt={news.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="p-6">
                   <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
-                  <p className="mt-3 text-sm font-semibold text-slate-800 leading-snug">{news.title}</p>
+                  <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
                 </div>
               </div>
             ))}

@@ -18,27 +18,27 @@ import {
   DiagnosisCard,
   StepInfoCard,
   CautionBox,
+  ReferenceFooter,
 } from "../../components/report/DiseaseComponents";
 
 const ObesityReportPage = () => {
   const riskFactors = [
-    "고칼로리·고지방 식단 및 활동량 부족이 주된 원인",
-    "체내 지방 과다 축적으로 인한 대사 기능 및 호르몬 불균형 초래",
-    "식사 조절 및 꾸준한 운동 병행이 필수적",
+    "국내 성인 약 38%가 비만 (BMI ≥ 25, 질병관리청 2022)",
+    "지방세포의 염증성 사이토카인 분비로 대사·호르몬 불균형 유발",
+    "식이·운동·행동요법 병행과 필요 시 약물·수술 치료 고려",
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-900 pt-[55px]">
+    <div className="bg-[#F9FAFB] min-h-screen pb-20 font-sans text-gray-900 pt-[55px]">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-10 pb-20">
+      <main className="max-w-[1280px] mx-auto px-6 py-8">
         {/* Title Section */}
         <div className="mb-12">
-          <h1 className="text-4xl font-extrabold mb-4">비만(Obesity)</h1>
-          <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
-            단순한 체중의 증가를 넘어, 체내에 과도한 지방 조직이 축적되어 건강에
-            악영향을 미치는 상태를 의미합니다.
+          <h1 className="text-[36px] font-extrabold text-[#0F172A] tracking-tight mb-4">비만(Obesity)</h1>
+          <p className="text-[14px] text-[#64748B] leading-relaxed max-w-3xl">
+WHO 서태평양 지역 및 대한비만학회(KSSO) 기준 체질량지수(BMI) 25 kg/m² 이상일 때 비만으로 정의되는, 건강에 악영향을 미치는 만성 질환입니다.
             <br />
-            만성 질환의 주요 원인이 되는 독립적인 질병으로 관리되어야 합니다.
+            제2형 당뇨·고혈압·이상지질혈증·심혈관질환의 주요 원인이 되는 독립적인 질병으로 관리되어야 합니다.
           </p>
         </div>
 
@@ -48,17 +48,13 @@ const ObesityReportPage = () => {
               <h3 className="text-lg font-extrabold mb-5">비만이란?</h3>
               <div className="text-[13px] text-gray-600 leading-relaxed space-y-4">
                 <p>
-                  비만은 섭취하는 에너지가 소비하는 에너지보다 많아 여분의
-                  에너지가 체지방의 형태로 몸에 과도하게 축적된 상태를
-                  의미합니다. 단순히 체중이 많이 나가는 것을 넘어, 축적된
-                  지방세포가 염증 물질을 분비하여 전신의 대사 기능을 저하시키고
-                  신체적 건강을 위협하는 상태를 말합니다.
+                  비만은 에너지 섭취가 소비를 초과해 체지방이 과도하게 축적된 상태입니다(WHO).
+                  한국인은 BMI 25 kg/m² 이상을 비만으로 분류하며, 허리둘레가 남성 90cm·여성 85cm 이상이면
+                  복부비만으로 진단합니다. 질병관리청 2022 조사에 따르면 국내 성인 비만 유병률은 약 38%이며 남성에서 특히 높습니다.
                 </p>
                 <p>
-                  이는 단순한 미용적 문제를 넘어 대사 증후군의 핵심 원인이 되며,
-                  적절한 관리가 이루어지지 않을 경우 당뇨, 고혈압, 심혈관
-                  질환뿐만 아니라 근골격계 질환과 감정적인 영향까지 유발할 수
-                  있습니다.
+                  비만은 미용적 문제를 넘어 대사증후군의 핵심 원인으로, 제2형 당뇨, 고혈압, 이상지질혈증, 심뇌혈관 질환,
+                  지방간, 수면무호흡, 골관절염, 일부 암종(대장암·유방암 등)의 위험을 증가시키며 우울증과도 연관됩니다.
                 </p>
               </div>
             </ContentCard>
@@ -75,28 +71,28 @@ const ObesityReportPage = () => {
             icon={CheckCircle2}
             title="18.5 - 22.9"
             subTitle="정상 체중"
-            desc="건강한 상태를 유지하기 위한 권장 범위"
+            desc="건강 유지를 위한 정상 BMI 권장 범위(KSSO)"
             color="border-l-emerald-400"
           />
           <DiagnosisCard
             icon={TrendingDown}
             title="23.0 - 24.9"
             subTitle="비만 전단계 (과체중)"
-            desc="생활 습관 교정이 강력히 권고되는 단계"
+            desc="비만 전단계, 생활 습관 교정이 강력히 권고됨"
             color="border-l-sky-400"
           />
           <DiagnosisCard
             icon={TrendingUp}
             title="25.0 - 29.9"
             subTitle="1단계 비만"
-            desc="고혈압, 당뇨 등의 위험이 유의하게 증가"
+            desc="1단계 비만, 당뇨·고혈압 등 동반 위험 유의하게 증가"
             color="border-l-orange-400"
           />
           <DiagnosisCard
             icon={AlertTriangle}
             title="30.0+"
             subTitle="2단계 이상 비만"
-            desc="전문적인 의학적 치료와 집중 관리가 필수"
+            desc="2~3단계 비만, 전문 의료 개입과 약물·수술 고려"
             color="border-l-rose-400"
           />
         </div>
@@ -104,9 +100,9 @@ const ObesityReportPage = () => {
         <SectionHeader icon={HeartPulse} title="관리 가이드라인" />
 
         <div className="mb-10">
-          <div className="bg-[#032019] text-white p-4 rounded-t-xl flex items-center gap-3">
+          <div className="bg-[#0F172A] text-white p-5 rounded-t-[18px] flex items-center gap-3">
             <Stethoscope size={18} className="text-emerald-400" />
-            <h3 className="font-bold text-[13px]">약물 치료 (Pharmacology)</h3>
+            <h3 className="font-semibold text-[14px]">약물 치료 (Pharmacology)</h3>
           </div>
           <ContentCard className="rounded-t-none border-t-0 grid grid-cols-2 gap-10 !p-8">
             <div>
@@ -114,8 +110,8 @@ const ObesityReportPage = () => {
                 체중 감량 보조
               </h4>
               <ul className="text-[12px] text-gray-600 list-disc list-outside ml-4 space-y-2 leading-relaxed">
-                <li>식욕 억제제나 지방 흡수 저해제 등 전문 의약품 활용</li>
-                <li>식사 조절과 운동의 효과를 극대화합니다.</li>
+                <li>BMI 25 이상 또는 동반 질환이 있는 BMI 23 이상에서 GLP-1 유사체, 식욕억제제, 지방흡수저해제 등 처방 고려</li>
+                <li>전문의 처방하에 식이·운동요법과 병행하여 효과 극대화</li>
               </ul>
             </div>
             <div>
@@ -123,13 +119,8 @@ const ObesityReportPage = () => {
                 지속적 유지 관리
               </h4>
               <ul className="text-[12px] text-gray-600 list-disc list-outside ml-4 space-y-2 leading-relaxed">
-                <li>
-                  감량 후 다시 체중이 증가하는 '요요 현상'을 방지하기 위해 사용
-                </li>
-                <li>
-                  목표 체중에 도달한 후에도 꾸준한 상담과 생활 습관 모니터링을
-                  병행합니다.
-                </li>
+                <li>감량한 체중을 유지하기 위해 장기적 약물 사용 및 추적 관찰</li>
+                <li>초기 체중의 5~10% 감량 목표 달성 후에도 정기 상담과 생활 습관 모니터링 지속</li>
               </ul>
             </div>
           </ContentCard>
@@ -139,17 +130,15 @@ const ObesityReportPage = () => {
           <div className="flex flex-col gap-6">
             <CautionBox>
               <span className="block font-bold text-gray-800 mb-1">
-                핵심당분의 위험성
+                액상과당의 위험성
               </span>
-              탄산음료, 가당 주스 등에 함유된 단순당(액상과당)은 흡수가 매우
-              빨라 간에 직접적인 부담을 주며 지방간의 주요 원인이 됩니다.
+              WHO는 첨가당을 총 열량의 10% 미만(가능하면 5% 미만)으로 제한하라 권고합니다. 액상과당은 간으로 직행해 지방간·인슐린 저항성을 유발합니다.
             </CautionBox>
             <CautionBox>
               <span className="block font-bold text-gray-800 mb-1">
                 야식과 대사 장애
               </span>
-              밤늦게 먹는 음식은 에너지로 소모되지 못하고 그대로 지방으로
-              축적되어 수면의 질을 저하시킵니다.
+              취침 3시간 이내 식사는 인슐린 분비 리듬을 교란하고 지방으로 저장되기 쉬우며, 수면의 질과 다음 날 식욕 호르몬(렙틴·그렐린) 균형을 무너뜨립니다.
             </CautionBox>
           </div>
           <div className="md:col-span-2">
@@ -162,16 +151,15 @@ const ObesityReportPage = () => {
                   </h3>
                 </div>
                 <p className="text-[13px] text-gray-600 leading-relaxed mb-6">
-                  주 150분 이상의 중강도 무산소 운동(빠르게 걷기, 수영 등)과 주
-                  2~3회의 근력 운동을 병행하십시오.
+                  WHO 권고에 따라 주 150~300분의 중강도 유산소 운동(빠르게 걷기, 수영, 자전거) 또는 75~150분의 고강도 운동에 주 2회 이상의 근력 운동을 병행합니다.
                 </p>
                 <div className="flex gap-4">
                   <div className="bg-gray-100 p-4 rounded-lg flex-1">
                     <h4 className="font-bold text-[13px] mb-1.5 text-gray-900">
-                      무산소 운동
+                      유산소 운동
                     </h4>
                     <p className="text-[11px] text-gray-500">
-                      심폐지내력 향상 및 체지방 감소
+                      심폐지구력 향상 및 체지방 감소
                     </p>
                   </div>
                   <div className="bg-gray-100 p-4 rounded-lg flex-1">
@@ -203,9 +191,9 @@ const ObesityReportPage = () => {
             </div>
             <ul className="space-y-4 flex-1">
               {[
-                "에너지 섭취량 제한 (평소보다 500kcal 감량)",
-                "단백질, 식이섬유 위주의 균형 잡힌 식단",
-                "규칙적인 식사 시간 준수 및 야식 금지",
+                "1일 500~750 kcal 감량(주당 0.5~1kg 감소 목표)",
+                "단백질·식이섬유 위주의 균형 잡힌 식단",
+                "규칙적 식사 시간 준수 및 취침 3시간 전 금식",
               ].map((text, idx) => (
                 <li
                   key={idx}
@@ -220,8 +208,7 @@ const ObesityReportPage = () => {
               ))}
             </ul>
             <p className="text-[11px] text-emerald-200 mt-8 leading-relaxed">
-              * 무조건 굶는 것이 아니라, 질 좋은 소량 영양소를 섭취하는 것이
-              중요합니다.
+              * 굶는 다이어트는 근손실·요요를 유발하므로, 양질의 영양소를 적절량 섭취하는 것이 핵심입니다.
             </p>
           </div>
 
@@ -233,17 +220,17 @@ const ObesityReportPage = () => {
             <StepInfoCard
               number="01"
               title="자기 모니터링"
-              desc="식사 일기 및 운동 기록을 통해 자신의 생활 패턴을 객관적으로 파악합니다."
+              desc="식사·체중·운동을 매일 기록하여 생활 패턴을 객관적으로 파악하고 개선점을 도출합니다."
             />
             <StepInfoCard
               number="02"
               title="스트레스 관리"
-              desc="심리적 허기를 구분하고 스트레스로 인한 폭식을 방지하기 위한 취미 활동이나 명상을 이행합니다."
+              desc="신체적 허기와 정서적 허기를 구분하고, 명상·취미 활동으로 스트레스성 폭식을 예방합니다."
             />
             <StepInfoCard
               number="03"
-              title="목표 설정"
-              desc="실현 가능한 단기 목표를 설정하여 성취감을 통해 지속적인 동기를 부여합니다."
+              title="현실적 목표 설정"
+              desc="6개월에 초기 체중의 5~10% 감량을 목표로 단계별 계획을 세워 성취감과 동기를 유지합니다."
             />
           </div>
 
@@ -257,14 +244,24 @@ const ObesityReportPage = () => {
             </div>
             <StepInfoCard
               number="01"
-              title="생활 습관 개선만으로 조절이 어려운 고도 비만의 경우, 체중 대사 수술 등 의학적 개입을 고려할 수 있습니다."
+              title="BMI 35 이상 또는 동반 질환이 있는 BMI 30 이상의 고도 비만에서는 위소매절제술 등 대사·비만 수술을 고려할 수 있습니다."
             />
             <StepInfoCard
               number="02"
-              title="동반 질환(고혈압, 당뇨 등)이 있는 경우 질환 치료와 비만 관리를 동시에 진행하는 통합 치료 계획을 수립합니다."
+              title="고혈압·당뇨·이상지질혈증 등 동반 질환이 있는 경우 질환 치료와 비만 관리를 동시에 진행하는 통합 치료 계획을 수립합니다."
             />
           </div>
         </div>
+
+        <ReferenceFooter
+          lastUpdated="2026.05"
+          items={[
+            { source: "WHO", detail: "Obesity and Overweight Fact Sheet, 2024" },
+            { source: "대한비만학회(KSSO)", detail: "비만 진료지침 2022" },
+            { source: "질병관리청(KDCA)", detail: "국민건강영양조사 2022, 비만 유병률" },
+            { source: "WHO Western Pacific Region", detail: "BMI Cut-offs for Asian Populations" },
+          ]}
+        />
       </main>
     </div>
   );

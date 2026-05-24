@@ -1,6 +1,8 @@
 import Header from "../../components/Header";
 import HealthIndicatorMenu from "../../components/HealthMenu";
 import PrescriptionRegisterModal from "../../modals/PrescriptionRegisterModal";
+import RoutineModal from "../../modals/RoutineModal";
+import TargetModal from "../../modals/TargetModal";
 import { useState } from "react";
 
 const dummy = {
@@ -70,7 +72,7 @@ function ProgressBar({ progress }) {
   );
 }
 
-function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
+function MetricCard({ label, badge, value, unit, progress, sub, bgColor, onBadgeClick }) {
   return (
     <div
       className="flex min-h-[220px] flex-col justify-between rounded-2xl border border-gray-100 p-7 shadow-sm"
@@ -79,9 +81,13 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
       <div className="mb-3 flex items-center justify-between text-sm text-gray-400">
         <span>{label}</span>
         {badge && (
-          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-500">
+          <button
+            type="button"
+            onClick={onBadgeClick}
+            className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-500 hover:bg-blue-100 transition"
+          >
             {badge}
-          </span>
+          </button>
         )}
       </div>
       <div className="flex items-end gap-1.5">
@@ -96,12 +102,13 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
 
 function UserInformation() {
   const[isPreResisterModalOpen, SetPreResisterModalOpen] = useState(false);
+  const [isRoutineModalOpen, setRoutineModalOpen] = useState(false);
+  const [isTargetModalOpen, setTargetModalOpen] = useState(false);
   return (
-    <div className="min-h-screen w-full bg-[#f7f8fa]">
-      <Header />
-
-      <div className="flex min-h-screen w-full pt-[55px]">
-        <main className="min-w-0 flex-1 p-8">
+    <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
           {/* 프로필 헤더 */}
           <div className="mb-8 flex items-center gap-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-300 text-4xl text-gray-500">
@@ -224,6 +231,7 @@ function UserInformation() {
                   progress={dummy.goalWeight.progress}
                   sub={dummy.goalWeight.prev}
                   bgColor="#DAE4F3"
+                  onBadgeClick={() => setTargetModalOpen(true)}
                 />
                 <MetricCard
                   label="목표 음수량"
@@ -233,6 +241,7 @@ function UserInformation() {
                   progress={dummy.goalWater.progress}
                   sub={dummy.goalWater.prev}
                   bgColor="#E4E9ED"
+                  onBadgeClick={() => setTargetModalOpen(true)}
                 />
                 <MetricCard
                   label="목표 섭취 칼로리"
@@ -241,6 +250,7 @@ function UserInformation() {
                   unit={dummy.goalCalorieIn.unit}
                   sub={dummy.goalCalorieIn.prev}
                   bgColor="#E4E9ED"
+                  onBadgeClick={() => setTargetModalOpen(true)}
                 />
                 <MetricCard
                   label="목표 소모 칼로리"
@@ -249,6 +259,7 @@ function UserInformation() {
                   unit={dummy.goalCalorieOut.unit}
                   sub={dummy.goalCalorieOut.prev}
                   bgColor="#DAE4F3"
+                  onBadgeClick={() => setTargetModalOpen(true)}
                 />
               </div>
 
@@ -283,7 +294,10 @@ function UserInformation() {
                     <h3 className="text-sm font-bold text-gray-800">
                       하루 생활 루틴
                     </h3>
-                    <button className="text-xs text-blue-500 hover:underline">
+                    <button
+                      className="text-xs text-blue-500 hover:underline"
+                      onClick={() => setRoutineModalOpen(true)}
+                    >
                       루틴 수정
                     </button>
                   </div>
@@ -306,12 +320,30 @@ function UserInformation() {
               </div>
             </div>
           </div>
+          </div>
         </main>
 
         <PrescriptionRegisterModal
           open = {isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
 
+        />
+
+        <RoutineModal
+          open={isRoutineModalOpen}
+          onClose={() => setRoutineModalOpen(false)}
+          initialRoutine={dummy.routine}
+        />
+
+        <TargetModal
+          open={isTargetModalOpen}
+          onClose={() => setTargetModalOpen(false)}
+          initialTargets={{
+            weight: dummy.goalWeight.value,
+            water: dummy.goalWater.value,
+            calorieIn: 2000,
+            calorieOut: 1240,
+          }}
         />
       </div>
     </div>
