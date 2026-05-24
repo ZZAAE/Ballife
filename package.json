@@ -1,5 +1,9 @@
 {
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "react-quill": "^2.0.0",
+>>>>>>> origin/sjs0522
     "react-unity-webgl": "^10.2.0",
     "recharts": "^3.8.1"
   }

@@ -1,26 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import postApi from "../../api/boardApi";
 import Button from "../../components/Button";
-import "./post.css";
+import RichTextEditor from "../../components/board/RichTextEditor";
+import { isRichTextEmpty } from "../../components/board/richTextEditorUtils";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const DRAFT_STORAGE_KEY = "board-post-create-draft";
+
+function createEmptyFormData() {
+  return {
+    category: "",
+    title: "",
+    content: "",
+  };
+}
+
+function readDraft() {
+  try {
+    const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+
+    if (!rawDraft) {
+      return createEmptyFormData();
+    }
+
+    const parsedDraft = JSON.parse(rawDraft);
+
+    return {
+      category: parsedDraft.category ?? "",
+      title: parsedDraft.title ?? "",
+      content: parsedDraft.content ?? "",
+    };
+  } catch {
+    return createEmptyFormData();
+  }
+}
+
+function hasDraftContent(formData) {
+  return Boolean(
+    formData.category ||
+    formData.title.trim() ||
+    !isRichTextEmpty(formData.content),
+  );
+}
 
 function PostCreatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    category: "",
-    title: "",
-    content: "",
-    imageUrl: "",
-  });
+  const [formData, setFormData] = useState(() => readDraft());
+  const hasSavedDraft = hasDraftContent(formData);
 
   const categories = [
-    { value: "", label: "게시판을 선택" },
+    { value: "", label: "게시판 선택" },
     { value: "GENERAL", label: "자유게시판" },
     { value: "HYPERLIPIDEMIA", label: "고지혈증" },
     { value: "HYPERTENSION", label: "고혈압" },
@@ -39,35 +72,27 @@ function PostCreatePage() {
     }));
   };
 
-  const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      setFormData((prev) => ({ ...prev, imageUrl: "" }));
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("이미지 파일만 첨부할 수 있습니다.");
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("이미지는 5MB 이하만 첨부할 수 있습니다.");
-      event.target.value = "";
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setFormData((prev) => ({
-        ...prev,
-        imageUrl: typeof reader.result === "string" ? reader.result : "",
-      }));
-    };
-    reader.readAsDataURL(file);
+  const handleContentChange = (content) => {
+    setFormData((prev) => ({ ...prev, content }));
   };
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  };
+
+  const handleDraftSave = () => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+    toast.success("임시저장되었습니다.");
+  };
+
+  useEffect(() => {
+    if (!hasDraftContent(formData)) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      return;
+    }
+
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +107,7 @@ function PostCreatePage() {
       return;
     }
 
-    if (!formData.content.trim()) {
+    if (isRichTextEmpty(formData.content)) {
       toast.error("내용을 입력해주세요.");
       return;
     }
@@ -97,6 +122,7 @@ function PostCreatePage() {
     try {
       setLoading(true);
       const res = await postApi.createPost(user.userId, formData);
+      clearDraft();
       toast.success("등록되었습니다.");
       navigate(`/posts/${res.data.id}`);
     } catch (error) {
@@ -108,19 +134,24 @@ function PostCreatePage() {
   };
 
   return (
-    <section className="post-page">
-      <div className="post-wrap">
-        <div className="post-header">
-          <h1 className="post-title">자유게시판 글쓰기</h1>
-          <p className="post-subtitle">
+    <section className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-5xl px-1 py-2 sm:px-2 lg:px-4">
+        <div className="mb-8 border-b border-[#eef2f7] pb-5">
+          <h1 className="text-[28px] font-bold tracking-[-0.03em] text-gray-900">
+            자유게시판 글쓰기
+          </h1>
+          <p className="mt-2 text-[15px] leading-7 text-gray-500">
             건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="post-form">
-          <div className="post-grid">
+        <form onSubmit={handleSubmit} className="space-y-7">
+          <div className="space-y-6">
             <div>
-              <label htmlFor="category" className="post-field-label">
+              <label
+                htmlFor="category"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 카테고리
               </label>
               <select
@@ -128,7 +159,7 @@ function PostCreatePage() {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="post-select"
+                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
               >
                 {categories.map((category) => (
                   <option key={category.value} value={category.value}>
@@ -139,7 +170,10 @@ function PostCreatePage() {
             </div>
 
             <div>
-              <label htmlFor="title" className="post-field-label">
+              <label
+                htmlFor="title"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 제목
               </label>
               <input
@@ -150,74 +184,61 @@ function PostCreatePage() {
                 onChange={handleChange}
                 placeholder="포스트의 제목을 입력하세요"
                 maxLength={120}
-                className="post-input"
+                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
               />
             </div>
 
             <div>
-              <label htmlFor="content" className="post-field-label">
+              <label
+                htmlFor="content"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 내용
               </label>
-              <textarea
-                id="content"
-                name="content"
+              <RichTextEditor
                 value={formData.content}
-                onChange={handleChange}
+                onChange={handleContentChange}
                 placeholder="내용을 입력하세요..."
-                rows={14}
-                className="post-textarea"
               />
-            </div>
-
-            <div>
-              <label htmlFor="image" className="post-field-label">
-                사진 첨부
-              </label>
-              <input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="post-input post-file-input"
-              />
-              {formData.imageUrl && (
-                <div className="post-image-preview-wrap">
-                  <img
-                    src={formData.imageUrl}
-                    alt="첨부 이미지 미리보기"
-                    className="post-image-preview"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, imageUrl: "" }))
-                    }
-                    className="post-image-remove"
-                  >
-                    첨부 제거
-                  </button>
-                </div>
-              )}
+              <p className="mt-3 text-sm text-gray-400">
+                툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
+              </p>
             </div>
           </div>
 
-          <div className="post-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(-1)}
-              className="post-btn"
-            >
-              나가기
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="post-btn post-btn-submit"
-            >
-              {loading ? "등록 중..." : "등록"}
-            </Button>
+          <div className="flex flex-col gap-4 border-t border-[#eef2f7] pt-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm text-gray-500 lg:whitespace-nowrap">
+                {hasSavedDraft
+                  ? "작성 중인 내용이 브라우저에 자동 임시저장됩니다."
+                  : "임시저장된 글이 없습니다."}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 lg:mr-6">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate(-1)}
+                className="min-w-[112px] rounded-xl bg-[#e05252] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c93f3f]"
+              >
+                나가기
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleDraftSave}
+                className="min-w-[112px] rounded-xl border border-[#d8dee8] bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                임시저장
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="min-w-[112px] rounded-xl bg-[#4f7cff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d68e8]"
+              >
+                {loading ? "등록 중..." : "등록"}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

@@ -301,15 +301,17 @@ const CategorySummary = ({ items }) => {
 export default function HealthTimelineModal({
   isOpen = true,
   onClose = () => {},
-  data = dummyData,
+  data,
 }) {
-  if (!isOpen || !data) return null;
+  if (!isOpen) return null;
+  const merged = { ...dummyData, ...(data ?? {}) };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 backdrop-blur-sm"
       onClick={onClose}
     >
+      {/* 모달 본체 — 1000 × 700, 모서리 40px 는 inline style */}
       <div
         className="relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl"
         style={{ width: 720, maxWidth: "100%", height: 720, maxHeight: "90vh" }}
@@ -330,34 +332,35 @@ export default function HealthTimelineModal({
           </button>
         </div>
 
-        {/* 본문 (스크롤) */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
-          {/* 상단 카테고리 요약 */}
-          <CategorySummary items={data.items || []} />
+          <h1 className="mb-14 text-6xl font-black tracking-tight text-gray-900">
+            {merged.month}
+          </h1>
 
-          {/* 타임라인 */}
-          <div className="mt-6">
-            <p className="mb-3 text-xs font-bold text-slate-500">
-              타임라인 ({(data.items || []).length}건)
-            </p>
-            {(data.items || []).length === 0 ? (
-              <p className="py-12 text-center text-sm text-slate-400">
-                이 날에는 기록이 없습니다.
-              </p>
-            ) : (
-              <div className="flex flex-col">
-                {data.items.map((item, idx) => (
-                  <TimelineRow
-                    key={item.id}
-                    item={item}
-                    isLast={idx === data.items.length - 1}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="mb-6 flex items-baseline pl-4">
+            <div className="w-20 pr-6 text-right">
+              <span className="text-base font-bold text-gray-700">
+                {merged.day}
+              </span>
+            </div>
+            <div className="pl-10">
+              <span className="text-base font-medium text-gray-500">
+                {merged.date}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            {merged.items.map((item, idx) => (
+              <TimelineRow
+                key={item.id}
+                item={item}
+                isLast={idx === merged.items.length - 1}
+              />
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

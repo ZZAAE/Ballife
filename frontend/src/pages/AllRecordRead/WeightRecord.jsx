@@ -51,7 +51,7 @@ export default function WeightRecord() {
           <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
             체중 기록 확인
           </h1>
-          <p className="mt-2 mb-6 text-sm text-[#64748B]">
+          <p className="mb-8 text-sm text-gray-500">
             지난 신체 변화를 분석한 결과입니다.
           </p>
 

@@ -389,10 +389,10 @@ function AllRecordPage() {
 
   return (
     <>
-      <main className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
-        <div className="mx-auto box-border max-w-[1280px] px-6 pt-[87px] pb-8">
-          <div className="mb-8 flex items-center justify-between">
-            <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
+      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
+        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[60px]">
+          <div className="mb-[50px] flex items-center justify-between">
+            <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
               전체 기록 관리
             </h1>
 
