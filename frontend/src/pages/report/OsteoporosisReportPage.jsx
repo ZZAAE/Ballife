@@ -8,30 +8,31 @@ import {
   Activity,
   Check
 } from "lucide-react";
-import { 
-  SectionHeader, 
-  ContentCard, 
-  RiskFactorCard 
+import {
+  SectionHeader,
+  ContentCard,
+  RiskFactorCard,
+  ReferenceFooter
 } from '../../components/report/DiseaseComponents';
 
 export default function OsteoporosisReportPage() {
   const riskFactors = [
-    "고령 및 폐경 후 에스트로겐 감소",
+    "고령 및 폐경 후 에스트로겐 감소 (국내 50세 이상 여성 약 38%가 골다공증)",
     "가족력 및 저체중 (BMI < 18.5)",
     "장기간의 스테로이드(글루코코르티코이드) 복용",
-    "과도한 음주 및 흡연, 활동량 부족"
+    "과도한 음주·흡연 및 신체 활동 부족"
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20 font-sans text-gray-900 pt-[55px]">
-      <main className="max-w-7xl mx-auto p-10">
-        
+    <div className="bg-[#F9FAFB] min-h-screen pb-20 font-sans text-gray-900 pt-[55px]">
+      <main className="max-w-[1280px] mx-auto px-6 py-8">
+
         {/* 타이틀 섹션 */}
         <div className="mb-12">
-          <h1 className="text-4xl font-extrabold mb-4">골다공증(Osteoporosis)</h1>
-          <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
-            골다공증은 골밀도의 감소와 미세구조의 파괴로 인해 뼈가 약해지고 골절 위험이 증가하는 전신 골격계 질환입니다.
-            특히 고령화 사회에서 보건학적으로 매우 중요한 질환으로 간주됩니다.
+          <h1 className="text-[36px] font-extrabold text-[#0F172A] tracking-tight mb-4">골다공증(Osteoporosis)</h1>
+          <p className="text-[14px] text-[#64748B] leading-relaxed max-w-3xl">
+WHO 정의에 따라 DXA 골밀도 T-score가 -2.5 이하일 때 진단되며, 골량 감소와 미세구조 파괴로 골절 위험이 증가하는 전신 골격계 질환입니다.
+            고령화로 국내 50세 이상 인구의 골다공증 유병률이 빠르게 상승하고 있어 보건학적 관리가 매우 중요합니다.
           </p>
         </div>
 
@@ -41,10 +42,9 @@ export default function OsteoporosisReportPage() {
             <ContentCard className="h-full border-t-[5px] border-t-emerald-500">
               <h3 className="text-lg font-extrabold mb-5">골다공증이란?</h3>
               <p className="text-[14px] text-gray-600 leading-loose">
-                골다공증은 말 그대로 '뼈에 구멍이 많이 생긴 상태'를 뜻합니다. 우리 몸의 뼈는 일생 동안 낡은 뼈는 파괴되고 새로운 뼈가 생성되는 과정을 반복합니다.
+                골다공증은 골량 감소와 골조직의 미세구조 변화로 골강도가 약해진 상태입니다(WHO). 뼈는 평생 흡수와 형성을 반복하는데, 폐경·노화·특정 약물 등으로 균형이 무너지면 골밀도가 감소합니다. 질병관리청 자료에 따르면 국내 50세 이상 여성의 약 38%, 남성의 약 7%가 골다공증입니다.
                 <br /><br />
-                하지만 나이가 들거나 특정 원인으로 인해 뼈의 파괴 속도가 생성 속도보다 빨라지면, 뼈 안의 골밀도가 급격히 낮아지게 됩니다. 
-                이는 결국 <span className="text-emerald-600 font-bold underline underline-offset-4 decoration-emerald-200">뼈를 푸석푸석하게 만들어 작은 충격에도 쉽게 부러질 수 있는 취약한 상태</span>로 변화시킵니다.
+                골다공증은 진행 중에는 거의 증상이 없으며, 결국 <span className="text-emerald-600 font-bold underline underline-offset-4 decoration-emerald-200">가벼운 외상이나 일상 동작만으로도 척추·고관절·손목 골절이 발생하는 취약한 상태</span>로 이어집니다. 고관절 골절은 고령자에서 1년 내 사망률을 높이는 중대한 합병증입니다.
               </p>
             </ContentCard>
           </div>
@@ -55,12 +55,12 @@ export default function OsteoporosisReportPage() {
         <SectionHeader 
           icon={ClipboardCheck} 
           title="진단 기준 (WHO T-score)" 
-          subTitle="이중에너지 방사선 흡수계측법(DXA)을 통한 골밀도 측정이 표준 진단 방법입니다." 
+          subTitle="이중에너지 X선 흡수계측법(DXA)으로 요추·대퇴골 골밀도를 측정한 T-score가 표준 진단 기준입니다(WHO)."
         />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-14">
-          <TScoreCard label="정상" score="T-score ≥ -1.0" color="bg-emerald-500" desc="골밀도가 젊은 성인의 평균치와 비교하여 안정적인 상태입니다." />
-          <TScoreCard label="골감소증" score="-1.0 > T > -2.5" color="bg-orange-400" desc="골밀도가 낮아진 상태로, 골다공증으로의 이행 예방이 필요합니다." />
-          <TScoreCard label="골다공증" score="T-score ≤ -2.5" color="bg-rose-500" desc="뼈의 강도가 현저히 약해져 적극적인 약물 치료가 요구되는 단계입니다." />
+          <TScoreCard label="정상" score="T-score ≥ -1.0" color="bg-emerald-500" desc="골밀도가 젊은 성인 평균과 비교해 안정적인 상태로, 예방적 생활습관 유지가 권장됩니다." />
+          <TScoreCard label="골감소증" score="-2.5 < T < -1.0" color="bg-orange-400" desc="골량이 감소된 단계로, 골다공증 진행을 막기 위한 칼슘·비타민 D 섭취와 운동 강화가 필요합니다." />
+          <TScoreCard label="골다공증" score="T-score ≤ -2.5" color="bg-rose-500" desc="WHO 진단 기준에 해당하며, 비스포스포네이트 등 적극적인 약물 치료가 필요한 단계입니다." />
         </div>
 
         {/* 관리 가이드라인 */}
@@ -68,9 +68,9 @@ export default function OsteoporosisReportPage() {
         
         {/* 약물 치료 */}
         <div className="mb-10">
-          <div className="bg-[#032019] text-white p-4 rounded-t-xl flex items-center gap-3">
+          <div className="bg-[#0F172A] text-white p-5 rounded-t-[18px] flex items-center gap-3">
             <Activity size={18} className="text-emerald-400" />
-            <h3 className="font-bold text-[13px]">약물 치료 (Pharmacology)</h3>
+            <h3 className="font-semibold text-[14px]">약물 치료 (Pharmacology)</h3>
           </div>
           <ContentCard className="rounded-t-none border-t-0 grid grid-cols-2 gap-10 !p-8">
             <div>
@@ -99,9 +99,9 @@ export default function OsteoporosisReportPage() {
               <h4 className="font-extrabold text-[14px]">영양 및 생활습관</h4>
             </div>
             <div className="space-y-5">
-              <HabitItem icon="Ca" title="칼슘 섭취" desc="1일 800~1,000mg 권장 (우유, 멸치, 두부 등)" />
-              <HabitItem icon="D3" title="비타민 D" desc="1일 800IU 이상 권장, 적절한 일조량 확보" />
-              <HabitItem icon="Ex" title="체중 부하 운동" desc="걷기, 조깅, 계단 오르기 등 주 3~5회 실시" />
+              <HabitItem icon="Ca" title="칼슘 섭취" desc="50세 이상 1일 800~1,000mg 권장 (우유, 멸치, 두부, 케일)" />
+              <HabitItem icon="D3" title="비타민 D" desc="1일 800~1,000 IU 권장, 주 2~3회 햇볕 노출 병행" />
+              <HabitItem icon="Ex" title="체중 부하 운동" desc="걷기·조깅·계단 오르기 주 3~5회, WHO 권고 주 150분 이상" />
             </div>
           </ContentCard>
 
@@ -111,12 +111,12 @@ export default function OsteoporosisReportPage() {
               <h4 className="font-extrabold text-[14px]">낙상 예방 (Fall Prevention)</h4>
             </div>
             <p className="text-[12px] text-gray-500 mb-5 leading-relaxed">
-              골절을 막기 위해서는 뼈를 강화하는 것만큼 넘어지지 않는 환경 조성이 필수적입니다.
+고령자 골절의 대부분은 낙상이 원인이므로, 뼈 강화만큼 넘어지지 않는 환경 조성이 중요합니다(대한골대사학회 KSBMR).
             </p>
             <div className="bg-[#eff3f8] p-5 rounded-lg space-y-3">
-              <CheckItem text="집안 내 조명 밝게 유지 및 장애물 제거" />
-              <CheckItem text="욕실 바닥 미끄럼 방지 매트 설치" />
-              <CheckItem text="시력 교정 및 균형 감각 유지 운동" />
+              <CheckItem text="실내 조명 충분히 확보 및 바닥 장애물 제거" />
+              <CheckItem text="욕실·계단에 미끄럼 방지 매트·손잡이 설치" />
+              <CheckItem text="시력·청력 정기 점검 및 균형 감각 향상 운동(태극권 등)" />
             </div>
           </ContentCard>
         </div>
@@ -130,15 +130,25 @@ export default function OsteoporosisReportPage() {
             </div>
             <h4 className="font-extrabold text-[15px] mb-3">골절 위험 (Fracture Risk)</h4>
             <p className="text-[13px] text-gray-500 leading-relaxed">
-              손목, 척추, 고관절 부위의 골절이 가장 흔하며, 특히 고관절 골절은 노인에게서 높은 사망률과 연관됩니다.
-              가벼운 외상이나 기침만으로도 골절이 발생할 수 있습니다.
+손목·척추·고관절 부위 골절이 가장 흔하며, 특히 고관절 골절은 1년 내 사망률이 약 15~20%에 이를 정도로 치명적입니다.
+              척추는 가벼운 외상이나 기침만으로도 압박 골절이 발생할 수 있습니다.
             </p>
           </ContentCard>
           <div className="space-y-4">
-            <SmallInfoCard title="체형 변화" desc="척추 압박 골절로 인해 키가 줄어들거나 등이 굽는 현상이 나타납니다." />
-            <SmallInfoCard title="둔한 통증" desc="골다공증 자체는 무증상이지만, 미세 골절 발생 시 요통이나 전신 통증이 동반될 수 있습니다." />
+            <SmallInfoCard title="체형 변화" desc="척추 압박 골절이 누적되면 키가 3cm 이상 줄거나 등이 굽는 척추후만증이 나타날 수 있습니다." />
+            <SmallInfoCard title="둔한 통증" desc="골다공증 자체는 무증상이지만, 미세 골절·압박 골절이 발생하면 만성 요통과 전신 통증이 동반될 수 있습니다." />
           </div>
         </div>
+
+        <ReferenceFooter
+          lastUpdated="2026.05"
+          items={[
+            { source: "WHO", detail: "Assessment of Fracture Risk and Application to Screening for Postmenopausal Osteoporosis" },
+            { source: "대한골대사학회(KSBMR)", detail: "골다공증 진료지침 2022" },
+            { source: "질병관리청(KDCA)", detail: "국민건강영양조사 2022, 골다공증 유병률" },
+            { source: "International Osteoporosis Foundation (IOF)", detail: "Osteoporosis Compendium" },
+          ]}
+        />
       </main>
     </div>
   );
