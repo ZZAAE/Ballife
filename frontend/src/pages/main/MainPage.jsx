@@ -1,17 +1,5 @@
-<<<<<<< HEAD
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Unity, useUnityContext } from 'react-unity-webgl';
-import { ArrowRight } from 'lucide-react';
-import Header from '../../components/Header';
-import HealthMenu from '../../components/HealthMenu';
-import Card from '../../components/mainpage/card.jsx';
-import Calendar from '../../components/mainpage/calendar.jsx';
-import ChartSection from '../../components/mainpage/chart.jsx';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-=======
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../../components/Header";
 import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
@@ -26,7 +14,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
->>>>>>> origin/sjs0522
+import { Unity, useUnityContext } from "react-unity-webgl";
+import { ArrowRight } from "lucide-react";
 
 const bloodPressureData = [
   { date: "03-01", systolic: 128, diastolic: 82 },
@@ -184,7 +173,6 @@ const MainPage = () => {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       {/* <Header /> */}
       <div className="flex pt-[55px]">
-<<<<<<< HEAD
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-6 py-8 space-y-10">
 
@@ -200,8 +188,8 @@ const MainPage = () => {
         </header>
 
         {/* 펫 섹션 */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 p-6 lg:p-8 ring-1 ring-blue-100/80 shadow-sm">
-          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <section className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
             <div>
               <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A]">
                 내 펫이 기다리고 있어요
@@ -336,232 +324,12 @@ const MainPage = () => {
                 <div className="p-6">
                   <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
                   <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
-=======
-        <main className="flex-1 p-6 px-12 py-10">
-          <div className="max-w-auto mx-auto space-y-10">
-            <header className="flex items-center justify-between pb-4 border-b border-slate-200">
-              <h1 className="text-3xl font-bold">김지수님 안녕하세요.</h1>
-              <div className="flex gap-6 text-sm text-slate-500">
-                <div>
-                  <p className="text-xs opacity-60">나이 / 성별</p>
-                  <p className="font-semibold text-slate-800">
-                    {userStats.ageGender}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs opacity-60">키</p>
-                  <p className="font-semibold text-slate-800">
-                    {userStats.height}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs opacity-60">몸무게</p>
-                  <p className="font-semibold text-slate-800">
-                    {userStats.weight}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs opacity-60">BMI</p>
-                  <p className={`font-semibold ${userStats.bmiColor}`}>
-                    {userStats.bmi}
-                  </p>
->>>>>>> origin/sjs0522
                 </div>
               </div>
-            </header>
+            ))}
+          </div>
+        </section>
 
-            <Card />
-
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Calendar />
-
-              <ChartSection
-                title="주간 건강 추이"
-                data={activeChart.data}
-                legends={activeChart.legends}
-                selectedType={selectedChartType}
-                onTypeChange={setSelectedChartType}
-                chartTypes={[
-                  { value: "bloodSugar", label: "혈당" },
-                  { value: "bloodPressure", label: "혈압" },
-                  { value: "weight", label: "체중" },
-                ]}
-              >
-                {(filteredData) => (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={filteredData}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="systolicGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#2563eb"
-                            stopOpacity={0.2}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#2563eb"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="diastolicGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#06b6d4"
-                            stopOpacity={0.18}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#06b6d4"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="glucoseGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#16a34a"
-                            stopOpacity={0.22}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#16a34a"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="weightGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#f97316"
-                            stopOpacity={0.22}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#f97316"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#f0f0f0"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "#9ca3af" }}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                        tickLine={false}
-                        tickFormatter={(v) => `2026-${v}`}
-                      />
-                      <YAxis
-                        domain={activeChart.yDomain}
-                        tick={{ fontSize: 11, fill: "#9ca3af" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      {activeChart.areas.map((area) => (
-                        <Area
-                          key={area.key}
-                          type="monotone"
-                          dataKey={area.key}
-                          name={area.name}
-                          stroke={area.stroke}
-                          strokeWidth={3}
-                          fill={`url(#${area.gradientId})`}
-                          dot={{
-                            fill: area.stroke,
-                            r: 4,
-                            stroke: "#fff",
-                            strokeWidth: 2,
-                          }}
-                          activeDot={{ r: 6 }}
-                        />
-                      ))}
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </ChartSection>
-            </section>
-
-            <section>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold">건강 뉴스</h2>
-                <p className="text-slate-500 text-sm mt-1">
-                  전문가가 큐레이션한 건강 정보를 만나보세요.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[
-                  {
-                    category: "MEDICAL",
-                    title: "Regular blood pressure control reduces stroke risk",
-                    color: "bg-blue-50 text-blue-700",
-                    img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop",
-                  },
-                  {
-                    category: "PREVENTION",
-                    title:
-                      "Guide to regular checkups for complication prevention",
-                    color: "bg-red-50 text-red-700",
-                    img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop",
-                  },
-                  {
-                    category: "NUTRITION",
-                    title: "Diet trends for blood sugar management",
-                    color: "bg-green-50 text-green-700",
-                    img: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop",
-                  },
-                ].map((news, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer"
-                  >
-                    <img
-                      src={news.img}
-                      alt={news.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="p-6">
-                      <span
-                        className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}
-                      >
-                        {news.category}
-                      </span>
-                      <p className="mt-3 text-sm font-semibold text-slate-800 leading-snug">
-                        {news.title}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         </main>
       </div>

@@ -1,43 +1,32 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import DailyTimelineModal from "../../modals/DailyTimelineModal";
 
-// 0 ~ 7 점수에 따른 셀 배경 색상 (잔디 스타일)
-const levelStyles = [
-  { bg: "bg-slate-100", text: "text-slate-300" }, // 0
-  { bg: "bg-emerald-100", text: "text-emerald-600" }, // 1
-  { bg: "bg-emerald-200", text: "text-emerald-700" }, // 2
-  { bg: "bg-emerald-300", text: "text-emerald-800" }, // 3
-  { bg: "bg-emerald-400", text: "text-white" }, // 4
-  { bg: "bg-emerald-500", text: "text-white" }, // 5
-  { bg: "bg-emerald-600", text: "text-white" }, // 6
-  { bg: "bg-emerald-700", text: "text-white" }, // 7
+// 더미 타임라인 데이터 — API 연동 시 교체
+const dummyTimeline = [
+  { id: 1, time: "08:15", category: "체중", color: "yellow", title: "체중 측정", value: "58.0kg", valueSub: "↓ 0.5kg" },
+  { id: 2, time: "08:30", category: "식단", color: "red", title: "아침 식사", value: "450 kcal" },
+  { id: 3, time: "09:00", category: "혈압", color: "purple", title: "혈압 측정", value: "118/70", valueUnit: "mmHg" },
+  { id: 4, time: "10:30", category: "혈당", color: "blue", title: "혈당 체크", value: "112", valueUnit: "mg/dL" },
+  { id: 5, time: "11:30", category: "수분", color: "sky", title: "수분 섭취", value: "250ml" },
+  { id: 6, time: "13:00", category: "복약", color: "green", title: "종합 비타민", value: "1정" },
+  { id: 7, time: "14:00", category: "운동", color: "orange", title: "운동 (걷기)", subtitle: "30분", value: "120", valueUnit: "kcal" },
 ];
 
-// TODO: 실제 기록 데이터와 연동 (현재는 데모용 시드 기반 점수)
-function getDayLevel(year, month, day) {
-  const seed = (year * 100 + (month + 1)) * 100 + day;
-  const pseudo = Math.abs(Math.sin(seed) * 10000);
-  return Math.floor(pseudo % 8); // 0 ~ 7
-}
+const categoryDot = {
+  식단: "bg-rose-400",
+  혈압: "bg-purple-400",
+  혈당: "bg-blue-400",
+  수분: "bg-sky-400",
+  복약: "bg-emerald-400",
+  운동: "bg-orange-400",
+  체중: "bg-amber-400",
+};
 
-function Calendar({
-  onDayClick,
-  initialDate,
-  selectedDay,
-  title = "건강 달력",
-  compact = false,
-  showLegend = true,
-}) {
-  const navigate = useNavigate();
+function Calendar() {
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-  const [currentDate, setCurrentDate] = useState(
-    () => initialDate ?? new Date(),
-  );
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [hoveredCell, setHoveredCell] = useState(null); // { day, rect } | null
+  const [modalDate, setModalDate] = useState(null); // { year, month, day } | null
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -59,9 +48,45 @@ function Calendar({
   }, [year, month]);
 
   const moveMonth = (offset) => {
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1),
-    );
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+    setHoveredCell(null);
+  };
+
+  const today = new Date();
+  const isToday = (day) =>
+    today.getFullYear() === currentDate.getFullYear() &&
+    today.getMonth() === currentDate.getMonth() &&
+    today.getDate() === day;
+
+  const handleMouseEnter = (e, day) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredCell({ day, rect });
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredCell(null);
+  };
+
+  const handleCellClick = (day) => {
+    setModalDate({
+      year: currentDate.getFullYear(),
+      month: currentDate.getMonth(),
+      day,
+    });
+  };
+
+  // 모달에 전달할 데이터 (날짜만 동적, items는 더미)
+  const buildModalData = () => {
+    if (!modalDate) return null;
+    const dateObj = new Date(modalDate.year, modalDate.month, modalDate.day);
+    const weekdayKor = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    return {
+      month: `${modalDate.month + 1}월`,
+      day: weekdayKor[dateObj.getDay()],
+      date: `${modalDate.year}년 ${modalDate.month + 1}월 ${modalDate.day}일`,
+      // items는 일단 더미 — API 연동 시 이 부분만 교체
+      items: dummyTimeline,
+    };
   };
 
   const renderDayCell = (index) => {
@@ -70,59 +95,36 @@ function Calendar({
     const dayOfWeek = index % 7;
 
     if (!isCurrentMonth) {
-      return <div key={`empty-${index}`} className="aspect-square" />;
+      return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-slate-50/60" />;
     }
 
-    const cellDate = new Date(year, month, dayNumber);
-    const isFuture = cellDate > today;
-    const isToday = cellDate.getTime() === today.getTime();
-    const isSelected =
-      selectedDay &&
-      selectedDay.year === year &&
-      selectedDay.month === month &&
-      selectedDay.day === dayNumber;
-
-    // 미래 날짜는 기록이 없으므로 항상 0 (빈 셀)
-    const level = isFuture ? 0 : getDayLevel(year, month, dayNumber);
-    const { bg, text } = levelStyles[level];
-
-    const ringClass = isSelected
-      ? "ring-2 ring-emerald-700 ring-offset-2 ring-offset-white"
-      : isToday
-        ? "ring-2 ring-emerald-600 ring-offset-2 ring-offset-white"
-        : "";
-
-    const sizeClass = compact
-      ? "rounded-xl text-sm md:text-base font-semibold"
-      : "rounded-2xl text-lg md:text-xl font-bold";
-
-    const handleClick = () => {
-      if (onDayClick) {
-        onDayClick({ year, month, day: dayNumber });
-      } else {
-        navigate("/calender", { state: { year, month, day: dayNumber } });
-      }
-    };
+    const dayColor =
+      dayOfWeek === 0 ? "text-red-500" : dayOfWeek === 6 ? "text-blue-500" : "text-slate-700";
 
     return (
       <div
         key={`day-${dayNumber}`}
-        type="button"
-        disabled={isFuture}
-        onClick={handleClick}
-        className={`aspect-square ${sizeClass} ${bg} ${ringClass} flex items-center justify-center ${text} transition ${
-          isFuture
-            ? "cursor-not-allowed opacity-70"
-            : "hover:scale-[1.04] hover:shadow-sm"
-        }`}
-        title={
-          isFuture
-            ? `${month + 1}월 ${dayNumber}일`
-            : `${month + 1}월 ${dayNumber}일 · 활동 ${level}/7`
-        }
+        className={`relative aspect-square rounded-xl border bg-white px-3 py-2.5 transition cursor-pointer
+          ${isToday(dayNumber)
+            ? "border-blue-400 ring-1 ring-blue-200"
+            : "border-slate-100 hover:border-slate-300 hover:shadow-sm"}
+        `}
+        onMouseEnter={(e) => handleMouseEnter(e, dayNumber)}
+        onMouseLeave={handleMouseLeave}
+        onClick={() => handleCellClick(dayNumber)}
       >
-        {dayNumber}
-      </button>
+        <div className="flex items-start justify-between">
+          <span
+            className={`text-sm font-semibold ${
+              isToday(dayNumber)
+                ? "flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-white"
+                : dayColor
+            }`}
+          >
+            {dayNumber}
+          </span>
+        </div>
+      </div>
     );
   };
 
@@ -154,46 +156,58 @@ function Calendar({
   const totalCount = hoveredCell ? dummyTimeline.length : 0;
 
   return (
-    <div
-      className={`rounded-3xl border border-slate-100 bg-white shadow-sm ${compact ? "p-5 md:p-6" : "p-6 md:p-8"}`}
-    >
-      <div
-        className={`flex items-center justify-between gap-4 ${compact ? "mb-4" : "mb-6"}`}
-      >
-        <div>
-          {title ? (
-            <p className="text-lg font-bold text-slate-900">{title}</p>
-          ) : null}
-        </div>
-        <div className="flex items-center justify-center gap-4">
+    <>
+      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => moveMonth(-1)}
             aria-label="이전 달"
-            className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-md active:translate-y-0"
           >
-            {"<"}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:-translate-x-0.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
           </button>
-          <h2 className="min-w-[110px] text-center text-base font-bold text-slate-900 md:text-lg">
+
+          <h2 className="flex-1 text-center text-xl font-bold tracking-tight text-slate-900">
             {monthTitle}
           </h2>
+
           <button
             type="button"
             onClick={() => moveMonth(1)}
             aria-label="다음 달"
-            className="text-slate-400 hover:text-slate-700 transition text-lg font-semibold"
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-md active:translate-y-0"
           >
-            {">"}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:translate-x-0.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
 
-      <div
-        className={`mb-2 grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"} text-center`}
-      >
-        {weekdays.map((day, idx) => (
+        <div className="grid grid-cols-7 gap-2 text-center">
+          {weekdays.map((day, idx) => (
+            <div
+              key={day}
+              className={`pb-2 text-xs font-bold ${
+                idx === 0 ? "text-red-500" : idx === 6 ? "text-blue-500" : "text-slate-400"
+              }`}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-1 grid grid-cols-7 gap-2">
+          {Array.from({ length: totalCells }, (_, i) => renderDayCell(i))}
+        </div>
+
+        {/* 호버 팝오버 — 작은 미리보기 */}
+        {hoveredCell && (
           <div
-            key={day}
-            className={`pb-1 text-xs font-bold ${idx === 0 ? "text-red-400" : "text-slate-400"}`}
+            style={getPopoverStyle()}
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
           >
             <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-2">
               <p className="text-sm font-bold text-slate-900">
@@ -230,24 +244,13 @@ function Calendar({
         )}
       </div>
 
-      <div className={`grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"}`}>
-        {Array.from({ length: totalCells }, (_, i) => renderDayCell(i))}
-      </div>
-
-      {showLegend ? (
-        <div className={`flex items-center gap-3 ${compact ? "mt-5" : "mt-6"}`}>
-          <span className="text-xs text-slate-400">0</span>
-          <div
-            className="h-2 flex-1 rounded-full"
-            style={{
-              background:
-                "linear-gradient(to right, #f1f5f9, #d1fae5, #6ee7b7, #34d399, #10b981, #059669, #047857, #065f46)",
-            }}
-          />
-          <span className="text-xs text-slate-400">7</span>
-        </div>
-      ) : null}
-    </div>
+      {/* 정식 모달 */}
+      <DailyTimelineModal
+        isOpen={!!modalDate}
+        onClose={() => setModalDate(null)}
+        data={buildModalData()}
+      />
+    </>
   );
 }
 
