@@ -39,6 +39,16 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    //유저 질병 정보만 수정
+    @Operation(summary = "질병 정보 수정", description = "유저 질병 정보를 수정합니다.")
+    @PutMapping("disease/{userId}")
+    public ResponseEntity<UserDto.UserResponse> updateUserDisease(
+        @Parameter(description = "유저 ID") @PathVariable Long userId,
+        @Valid @RequestBody UserDto.UpdateRequest request) {
+        UserDto.UserResponse response = userService.updateUser(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
     // 유저 삭제 
     @Operation(summary = "유저 삭제", description = "회원을 삭제합니다.")
     @DeleteMapping("/{userId}") 

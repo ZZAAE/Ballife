@@ -13,6 +13,11 @@ const userApi = {
         return api.put(`/users/${userId}`, memberData);
     },
 
+    //회원 질병 정보 수정
+    updateDisease: (userId, memberData) => {
+        return api.put(`/users/disease/${userId}`, memberData);
+    },
+
     //회원 삭제
     deleteMember: (userId) => {
         return api.delete(`/users/${userId}`);

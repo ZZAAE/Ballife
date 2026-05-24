@@ -378,14 +378,14 @@ function AllRecordPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   //토큰 인증 테스트용
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated || !user?.id) {
-            toast.error('로그인이 필요합니다.');
-            navigate('/login', { replace: true, state: { from: `/allRecord` } });
-            return;
-        }
-  },  [authLoading, isAuthenticated, user?.id, navigate]);
+  // useEffect(() => {
+  //   if (authLoading) return;
+  //   if (!isAuthenticated || !user?.id) {
+  //           toast.error('로그인이 필요합니다.');
+  //           navigate('/login', { replace: true, state: { from: `/allRecord` } });
+  //           return;
+  //       }
+  // },  [authLoading, isAuthenticated, user?.id, navigate]);
 
   return (
     <>

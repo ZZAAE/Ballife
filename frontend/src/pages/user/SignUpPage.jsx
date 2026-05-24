@@ -17,6 +17,7 @@ function SignUpPage() {
     gender: "",
     weight: "",
     height: "",
+    diseaseIndex: ""
   });
   const [errors, setErrors] = useState({});
 
@@ -85,27 +86,31 @@ function SignUpPage() {
     /* 시현용으로 막아둠 (개발시 풀어둘것) */
     if (!validate()) return; //유효성 실패시 중단
 
-    try {
-      setLoading(true);
-      await authApi.signUp({
-        loginId: formData.loginId,
-        password: formData.password,
-        username: formData.username,
-        email: formData.email,
-        birthDate: formData.birthDate,
-        nickname: formData.nickname, // 이거문젠가
-        gender: formData.gender,
-        weight: formData.weight,
-        height: formData.height,
-      });
+    
 
-      toast.success("회원가입이 완료되었습니다!");
-      navigate("/login"); // <Link to = "/login">로그인</Link>
-    } catch (error) {
-      console.error("회원가입 실패:", error);
-    } finally {
-      setLoading(false);
-    }
+    // try {
+    //   setLoading(true);
+    //   await authApi.signUp({
+    //     loginId: formData.loginId,
+    //     password: formData.password,
+    //     username: formData.username,
+    //     email: formData.email,
+    //     birthDate: formData.birthDate,
+    //     nickname: formData.nickname, // 이거문젠가
+    //     gender: formData.gender,
+    //     weight: formData.weight,
+    //     height: formData.height,
+    //   });
+
+    //   toast.success("회원가입이 완료되었습니다!");
+    //   navigate("/disease"); // <Link to = "/login">로그인</Link>
+    // } catch (error) {
+    //   console.error("회원가입 실패:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
+
+    navigate("/disease", { state: formData});
   };
 
   // 공통 인풋 스타일

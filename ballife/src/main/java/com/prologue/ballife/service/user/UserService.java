@@ -58,6 +58,7 @@ public class UserService {
                 .gender(request.getGender())
                 .weight(request.getWeight())
                 .height(request.getHeight())
+                .diseaseIndex(request.getDiseaseIndex())
                 .build();
 
         // 3.저장

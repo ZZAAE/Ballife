@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
+import { useAuth } from '../contexts/AuthContext';
 
 const navItems = [
   { key: "record", label: "기록", path: "/allRecord" },
@@ -42,7 +43,8 @@ const navItems = [
   },
 ];
 
-export default function Header({ isLoggedIn = false }) {
+export default function Header() {
+  const { user } = useAuth();
   const [hoveredMenu, setHoveredMenu] = useState(null);
 
   const activeDropdown = navItems.find((item) => item.key === hoveredMenu);
@@ -95,10 +97,12 @@ export default function Header({ isLoggedIn = false }) {
         {/* 로그인 / 로그아웃 */}
         <div className="flex w-[180px] justify-end">
           <Link
-            to={isLoggedIn ? "/logout" : "/login"}
+            // to={isLoggedIn ? "/logout" : "/login"}
+            to={user ? "/logout" : "/login"}
             className="flex h-[34px] items-center rounded-[8px] bg-white px-[17px] text-[14px] font-semibold tracking-[-0.2px] text-[#222222] no-underline hover:bg-[#F2F2F2]"
           >
-            {isLoggedIn ? "로그아웃" : "로그인"}
+            {/* {isLoggedIn ? "로그아웃" : "로그인"} */}
+            {user ? "로그아웃" : "로그인"}
           </Link>
         </div>
       </div>

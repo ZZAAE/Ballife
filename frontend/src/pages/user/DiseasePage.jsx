@@ -1,8 +1,10 @@
 
 import { useState } from 'react';
-import { useNavigate, Link } from "react-router-dom"; // 페이지 이동
+import { useNavigate, useLocation, Link } from "react-router-dom"; // 페이지 이동
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
+import authApi from "../../api/authApi";
+
 
 const diseaseFields = [
 	{ name: 'hyperlipidemia', label: '고지혈증 보유 여부',
@@ -48,6 +50,9 @@ const diseaseFields = [
 
 function DiseasePage() {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const [loading, setLoading] = useState(false);
+	const singUpFormData = location.state;
 
     // 초기값 세팅 - 질환 필드명 기준으로 'NONE'으로 초기화
 	const [formData, setFormData] = useState(() => (
@@ -65,11 +70,37 @@ function DiseasePage() {
 		}));
 	};
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
-		toast.success('보유 질환 정보가 선택되었습니다.');
-		console.log('disease form data', formData);
-		navigate("/");
+		try {
+			setLoading(true);
+			//질병 정보 Key: Value 형태로 변환
+			const diseaseIndex = Object.entries(formData)
+            .filter(([, value]) => value !== 'NONE')
+            .map(([key, value]) => `${key}:${value}`)
+            .join(',');
+
+			const response = await authApi.signUp({
+				loginId: singUpFormData.loginId,
+				password: singUpFormData.password,
+				username: singUpFormData.username,
+				email: singUpFormData.email,
+				birthDate: singUpFormData.birthDate,
+				nickname: singUpFormData.nickname, // 이거문젠가
+				gender: singUpFormData.gender,
+				weight: singUpFormData.weight,
+				height: singUpFormData.height,
+				diseaseIndex: diseaseIndex
+			});
+
+			toast.success('회원가입이 완료 되었습니다!');
+			console.log('disease form data', formData);
+			navigate("/login"); // <Link to = "/login">로그인</Link>
+		} catch (error) {
+			console.error("회원가입 실패:", error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
