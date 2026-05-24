@@ -1,4 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Unity, useUnityContext } from 'react-unity-webgl';
+import { ArrowRight } from 'lucide-react';
 import Header from '../../components/Header';
 import HealthMenu from '../../components/HealthMenu';
 import Card from '../../components/mainpage/card.jsx';
@@ -57,6 +60,14 @@ const weightData = [
 
 const MainPage = () => {
   const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
+
+  const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
+    loaderUrl: "/Unity/Build.loader.js",
+    dataUrl: "/Unity/Build.data",
+    frameworkUrl: "/Unity/Build.framework.js",
+    codeUrl: "/Unity/Build.wasm",
+  });
+  const loadingPercent = Math.round(loadingProgression * 100);
 
   const chartConfig = useMemo(() => {
     return {
@@ -131,22 +142,74 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 ml-[150px] mr-[150px]">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       {/* <Header /> */}
       <div className="flex pt-[55px]">
-        <main className="flex-1 p-6 px-12 py-10">
-          <div className="max-w-auto mx-auto space-y-10">
-        
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8 space-y-10">
+
         {/* Header & User Stats */}
-        <header className="flex items-center justify-between pb-4 border-b border-slate-200">
-          <h1 className="text-3xl font-bold">김지수님 안녕하세요.</h1>
-          <div className="flex gap-6 text-sm text-slate-500">
-            <div><p className="text-xs opacity-60">나이 / 성별</p><p className="font-semibold text-slate-800">{userStats.ageGender}</p></div>
-            <div><p className="text-xs opacity-60">키</p><p className="font-semibold text-slate-800">{userStats.height}</p></div>
-            <div><p className="text-xs opacity-60">몸무게</p><p className="font-semibold text-slate-800">{userStats.weight}</p></div>
-            <div><p className="text-xs opacity-60">BMI</p><p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p></div>
+        <header className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
+          <h1 className="text-3xl font-bold text-[#0F172A]">김지수님 안녕하세요.</h1>
+          <div className="flex gap-6 text-sm">
+            <div><p className="text-xs text-[#94A3B8]">나이 / 성별</p><p className="font-semibold text-[#0F172A]">{userStats.ageGender}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">키</p><p className="font-semibold text-[#0F172A]">{userStats.height}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">몸무게</p><p className="font-semibold text-[#0F172A]">{userStats.weight}</p></div>
+            <div><p className="text-xs text-[#94A3B8]">BMI</p><p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p></div>
           </div>
         </header>
+
+        {/* 펫 섹션 */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 p-6 lg:p-8 ring-1 ring-blue-100/80 shadow-sm">
+          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div>
+              <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A]">
+                내 펫이 기다리고 있어요
+              </h2>
+              <p className="mt-2 text-sm lg:text-base text-[#64748B]">
+                펫과 함께 건강한 하루를 시작해보세요.
+              </p>
+              <Link
+                to="/member/pet"
+                className="group mt-5 inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#1E293B]"
+              >
+                내 펫 자세히 보기
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[520px]">
+              <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-white/80">
+                <Unity
+                  unityProvider={unityProvider}
+                  style={{
+                    width: '100%',
+                    height: 360,
+                    display: 'block',
+                    background: '#F0F7FF',
+                  }}
+                />
+                {!isLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                    <div className="mb-3 text-3xl">🐾</div>
+                    <p className="text-sm font-semibold text-blue-700">
+                      펫을 데려오는 중이에요…
+                    </p>
+                    <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-white/70">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-300"
+                        style={{ width: `${loadingPercent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-blue-500">
+                      {loadingPercent}%
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Status Cards (Top Row) */}
         <Card />
@@ -194,7 +257,7 @@ const MainPage = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} tickFormatter={(v) => `2026-${v}`} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
                   <YAxis domain={activeChart.yDomain} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   {activeChart.areas.map((area) => (
@@ -219,20 +282,20 @@ const MainPage = () => {
         {/* 건강 뉴스 섹션 */}
         <section>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold">건강 뉴스</h2>
-            <p className="text-slate-500 text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
+            <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
+            <p className="text-[#64748B] text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-blue-50 text-blue-700', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
-              { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-red-50 text-red-700', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
-              { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-green-50 text-green-700', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
+              { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
+              { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
+              { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
             ].map((news, idx) => (
-              <div key={idx} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer">
+              <div key={idx} className="bg-white rounded-[18px] overflow-hidden border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] group cursor-pointer">
                 <img src={news.img} alt={news.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="p-6">
                   <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
-                  <p className="mt-3 text-sm font-semibold text-slate-800 leading-snug">{news.title}</p>
+                  <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
                 </div>
               </div>
             ))}

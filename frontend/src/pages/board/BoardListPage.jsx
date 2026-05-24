@@ -115,10 +115,13 @@ function BoardListPage() {
     );
 
   return (
-    <div className="px-12 py-10">
-      <div className="mb-8 pt-[55px]">
-        <h1 className="text-3xl font-bold text-gray-900">커뮤니티</h1>
-        <p className="mt-2 text-sm text-gray-500">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">커뮤니티</h1>
+        <p className="mt-2 text-sm text-[#64748B]">
           건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
         </p>
       </div>
@@ -130,14 +133,14 @@ function BoardListPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="검색어를 입력하세요."
-          className="w-72 rounded-md border border-gray-300 px-4 py-2 text-sm outline-none focus:border-blue-500"
+          className="w-72 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm outline-none placeholder:text-[#94A3B8] focus:border-[#94A3B8] focus:ring-2 focus:ring-slate-100"
         />
         <button
           onClick={() => {
             setSearchKeyword(keyword);
             setPage(0);
           }}
-          className="rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
           검색
         </button>
@@ -148,7 +151,7 @@ function BoardListPage() {
         <select
           value={category}
           onChange={(e) => handleCategoryChange(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2"
+          className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-[#94A3B8]"
         >
           <option value="ALL">전체</option>
           <option value="GENERAL">자유</option>
@@ -163,36 +166,36 @@ function BoardListPage() {
 
         <button
           onClick={() => handleSortChange("recommend")}
-          className={`${sort === "recommend" ? "text-blue-600 font-semibold" : "text-gray-600"}`}
+          className={`${sort === "recommend" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
           추천순
         </button>
         <button
           onClick={() => handleSortChange("views")}
-          className={`${sort === "views" ? "text-blue-600 font-semibold" : "text-gray-600"}`}
+          className={`${sort === "views" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
           조회순
         </button>
         <button
           onClick={() => handleSortChange("latest")}
-          className={`${sort === "latest" ? "text-blue-600 font-semibold" : "text-gray-600"}`}
+          className={`${sort === "latest" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
           날짜순
         </button>
       </div>
 
       {/* 게시글 테이블 */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
         <table className="w-full text-sm">
-          <thead className="border-b bg-gray-50 text-gray-700">
+          <thead className="border-b border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]">
             <tr>
-              <th className="px-4 py-3 text-center">번호</th>
-              <th className="px-4 py-3 text-center">카테고리</th>
-              <th className="px-4 py-3 text-left">게시글 제목</th>
-              <th className="px-4 py-3 text-center">닉네임</th>
-              <th className="px-4 py-3 text-center">조회수</th>
-              <th className="px-4 py-3 text-center">추천수</th>
-              <th className="px-4 py-3 text-center">작성일</th>
+              <th className="px-4 py-3 text-center font-medium">번호</th>
+              <th className="px-4 py-3 text-center font-medium">카테고리</th>
+              <th className="px-4 py-3 text-left font-medium">게시글 제목</th>
+              <th className="px-4 py-3 text-center font-medium">닉네임</th>
+              <th className="px-4 py-3 text-center font-medium">조회수</th>
+              <th className="px-4 py-3 text-center font-medium">추천수</th>
+              <th className="px-4 py-3 text-center font-medium">작성일</th>
             </tr>
           </thead>
           <tbody>
@@ -200,26 +203,26 @@ function BoardListPage() {
               posts.map((post) => (
                 <tr
                   key={post.id}
-                  className="border-b last:border-b-0 hover:bg-gray-50"
+                  className="border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#F9FAFB]"
                 >
-                  <td className="px-4 py-3 text-center text-gray-500">
+                  <td className="px-4 py-3 text-center text-[#94A3B8]">
                     {post.id} {/* {page * 10 + index + 1} */}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center text-[#64748B]">
                     {categories.find((c) => c.value === post.category)?.label}
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      className="text-gray-900 hover:text-blue-600"
+                      className="text-[#0F172A] hover:text-[#1E293B]"
                       to={`/posts/${post.id}`}
                     >
                       {post.title}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-center">{post.userNickname}</td>
-                  <td className="px-4 py-3 text-center">{post.viewCount}</td>
-                  <td className="px-4 py-3 text-center">{post.upVote ?? 0}</td>
-                  <td className="px-4 py-3 text-center text-gray-500">
+                  <td className="px-4 py-3 text-center text-[#64748B]">{post.userNickname}</td>
+                  <td className="px-4 py-3 text-center text-[#64748B]">{post.viewCount}</td>
+                  <td className="px-4 py-3 text-center text-[#64748B]">{post.upVote ?? 0}</td>
+                  <td className="px-4 py-3 text-center text-[#94A3B8]">
                     {formatDate(post.createdAt)}
                   </td>
                 </tr>
@@ -228,7 +231,7 @@ function BoardListPage() {
               <tr>
                 <td
                   colSpan="7"
-                  className="px-4 py-10 text-center text-gray-500"
+                  className="px-4 py-10 text-center text-[#94A3B8]"
                 >
                   게시글이 없습니다.
                 </td>
@@ -244,10 +247,10 @@ function BoardListPage() {
           <button
             key={i}
             onClick={() => setPage(i)}
-            className={`h-9 w-9 rounded-full text-sm ${
+            className={`h-9 w-9 rounded-full text-sm transition ${
               page === i
-                ? "bg-slate-900 text-white"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-[#0F172A] text-white"
+                : "text-[#64748B] hover:bg-[#F1F5F9]"
             }`}
           >
             {i + 1}
@@ -259,10 +262,13 @@ function BoardListPage() {
       <div className="mt-6 flex justify-end">
         <Link
           to="/posts/create"
-          className="rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
           글쓰기
         </Link>
+      </div>
+          </div>
+        </main>
       </div>
     </div>
   );

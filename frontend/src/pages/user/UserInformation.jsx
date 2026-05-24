@@ -97,11 +97,10 @@ function MetricCard({ label, badge, value, unit, progress, sub, bgColor }) {
 function UserInformation() {
   const[isPreResisterModalOpen, SetPreResisterModalOpen] = useState(false);
   return (
-    <div className="min-h-screen w-full bg-[#f7f8fa]">
-      <Header />
-
-      <div className="flex min-h-screen w-full pt-[55px]">
-        <main className="min-w-0 flex-1 p-8">
+    <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
           {/* 프로필 헤더 */}
           <div className="mb-8 flex items-center gap-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-300 text-4xl text-gray-500">
@@ -305,6 +304,7 @@ function UserInformation() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </main>
 

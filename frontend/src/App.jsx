@@ -50,7 +50,11 @@ function App() {
     location.pathname === '/intro/dyslipidemia' ||
     location.pathname === '/intro/obesity' ||
     location.pathname === '/AllRecordPage'||
+    location.pathname === '/allRecord' ||
     location.pathname === '/' ||
+    location.pathname === '/member' ||
+    location.pathname.startsWith('/member/') ||
+    location.pathname.startsWith('/check/') ||
     location.pathname.startsWith('/posts/');
     
     const hideChatbot =
@@ -71,7 +75,7 @@ function App() {
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <main className="py-12">
         <Header isLoggedIn={false} />
         <div className="min-w-screen bg-white flex justify-end">

@@ -139,19 +139,19 @@ export default function MealPage() {
   const achievement = Math.round((totalCal / targetCal) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <div className="max-w-[1920px] mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
-        <main className="flex-1 px-16 py-8 max-w-[1400px] mx-auto w-full">
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
 
           {/* ── 페이지 타이틀 ─────────────────────────────────────────── */}
           <div className="mb-8">
-            <div className="flex justify-between items-start gap-4 flex-wrap">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+                <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
                   오늘의 식단 기록 확인
                 </h1>
-                <p className="text-sm text-gray-400">
+                <p className="mt-2 text-sm text-[#64748B]">
                   지난 신체 변화를 분석한 결과입니다.
                 </p>
               </div>
@@ -168,10 +168,10 @@ export default function MealPage() {
                 <button
                   type="button"
                   onClick={() => dateInputRef.current?.showPicker()}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-[14px] bg-white border border-[#e2e5e8] text-sm font-semibold text-[#414753] cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                  className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold text-[#64748B] shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition hover:bg-[#F9FAFB]"
                 >
                   {selectedDate}
-                  <span className="text-[10px] text-[#b0b8c1]">▼</span>
+                  <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>
                 </button>
               </div>
             </div>
@@ -283,8 +283,8 @@ export default function MealPage() {
             </div>
           </div>
 
+          </div>
         </main>
-        </div>
       </div>
 
       <MealDetailModal

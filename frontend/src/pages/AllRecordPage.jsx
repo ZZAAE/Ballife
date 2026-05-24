@@ -389,10 +389,10 @@ function AllRecordPage() {
 
   return (
     <>
-      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[60px]">
-          <div className="mb-[50px] flex items-center justify-between">
-            <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
+      <main className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+        <div className="mx-auto box-border max-w-[1280px] px-6 pt-[87px] pb-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
               전체 기록 관리
             </h1>
 
@@ -408,10 +408,10 @@ function AllRecordPage() {
               <button
                 type="button"
                 onClick={openDatePicker}
-                className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm"
+                className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold text-[#64748B] shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition hover:bg-[#F9FAFB]"
               >
                 {selectedDate}
-                <span className="ml-1 text-[10px] text-slate-300">▼</span>
+                <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>
               </button>
             </div>
           </div>
