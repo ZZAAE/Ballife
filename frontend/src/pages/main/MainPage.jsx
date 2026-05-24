@@ -1,4 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Unity, useUnityContext } from 'react-unity-webgl';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import Header from '../../components/Header';
 import HealthMenu from '../../components/HealthMenu';
 import Card from '../../components/mainpage/card.jsx';
@@ -57,6 +60,14 @@ const weightData = [
 
 const MainPage = () => {
   const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
+
+  const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
+    loaderUrl: "/Unity/Build.loader.js",
+    dataUrl: "/Unity/Build.data",
+    frameworkUrl: "/Unity/Build.framework.js",
+    codeUrl: "/Unity/Build.wasm",
+  });
+  const loadingPercent = Math.round(loadingProgression * 100);
 
   const chartConfig = useMemo(() => {
     return {
@@ -137,16 +148,102 @@ const MainPage = () => {
         <main className="flex-1 p-6 px-12 py-10">
           <div className="max-w-auto mx-auto space-y-10">
         
-        {/* Header & User Stats */}
-        <header className="flex items-center justify-between pb-4 border-b border-slate-200">
-          <h1 className="text-3xl font-bold">김지수님 안녕하세요.</h1>
-          <div className="flex gap-6 text-sm text-slate-500">
-            <div><p className="text-xs opacity-60">나이 / 성별</p><p className="font-semibold text-slate-800">{userStats.ageGender}</p></div>
-            <div><p className="text-xs opacity-60">키</p><p className="font-semibold text-slate-800">{userStats.height}</p></div>
-            <div><p className="text-xs opacity-60">몸무게</p><p className="font-semibold text-slate-800">{userStats.weight}</p></div>
-            <div><p className="text-xs opacity-60">BMI</p><p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p></div>
+        {/* 펫 히어로 — 진입 시 가장 먼저 보이는 영역 */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 p-6 lg:p-10 ring-1 ring-blue-100/80 shadow-sm">
+          {/* 배경 장식 */}
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-blue-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 -left-10 h-56 w-56 rounded-full bg-indigo-200/40 blur-3xl" />
+
+          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
+            {/* 좌측: 인사 + 스탯 + CTA */}
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-600 ring-1 ring-blue-200 backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5" /> 오늘도 함께해요
+              </span>
+
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 lg:text-4xl">
+                <span className="text-blue-600">김지수</span>님,<br className="hidden sm:block" />
+                {' '}오늘도 건강한 하루를 시작해요
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-500 lg:text-base">
+                내 건강 친구가 옆에서 함께 챙겨드리고 있어요.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">나이 / 성별</p>
+                  <p className="font-bold text-slate-800">{userStats.ageGender}</p>
+                </div>
+                <div className="h-8 w-px bg-slate-200/80" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">키</p>
+                  <p className="font-bold text-slate-800">{userStats.height}</p>
+                </div>
+                <div className="h-8 w-px bg-slate-200/80" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">몸무게</p>
+                  <p className="font-bold text-slate-800">{userStats.weight}</p>
+                </div>
+                <div className="h-8 w-px bg-slate-200/80" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">BMI</p>
+                  <p className={`font-bold ${userStats.bmiColor}`}>{userStats.bmi}</p>
+                </div>
+              </div>
+
+              <Link
+                to="/member/pet"
+                className="group mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 hover:shadow-blue-300"
+              >
+                내 펫 자세히 보기
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+
+            {/* 우측: Unity 펫 뷰어 */}
+            <div className="relative mx-auto w-full max-w-[520px]">
+              <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-white/80">
+                <Unity
+                  unityProvider={unityProvider}
+                  style={{
+                    width: '100%',
+                    height: 360,
+                    display: 'block',
+                    background: '#F0F7FF',
+                  }}
+                />
+                {/* 로딩 오버레이 */}
+                {!isLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                    <div className="mb-3 text-3xl">🐾</div>
+                    <p className="text-sm font-semibold text-blue-700">
+                      펫을 데려오는 중이에요…
+                    </p>
+                    <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-white/70">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-300"
+                        style={{ width: `${loadingPercent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-blue-500">
+                      {loadingPercent}%
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* 우측 하단 살짝 떠 있는 배지 */}
+              <div className="absolute -bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-lg ring-1 ring-slate-100">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                내 펫이 활동 중
+              </div>
+            </div>
           </div>
-        </header>
+        </section>
 
         {/* Status Cards (Top Row) */}
         <Card />

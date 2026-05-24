@@ -9,12 +9,12 @@ export default function WeeklyCalendarCard() {
   ];
 
   return (
-    <div className="flex-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
-      <div className="min-w-[600px]">
+    <div className="flex-1 min-w-0 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
+      <div className="w-full min-w-0">
         {/* 상단 날짜 헤더 */}
-        <div className="mb-6 grid grid-cols-[repeat(7,85px)] items-start justify-center">
+        <div className="mb-6 grid grid-cols-7 items-start gap-1">
           {weekData.map((item) => (
-            <div key={item.day} className="flex flex-col items-center">
+            <div key={item.day} className="flex min-w-0 flex-col items-center">
               <span
                 className={`mb-1 text-[13px] font-semibold ${
                   item.weekend ? "text-[#E64563]" : "text-gray-500"
@@ -44,23 +44,18 @@ export default function WeeklyCalendarCard() {
             return (
               <div key={row.key}>
                 {/* 아침 / 점심 / 저녁 라벨 */}
-                <div className="mb-1 grid grid-cols-[repeat(7,85px)] items-center justify-center">
-                  <div className="flex items-center justify-between gap-2 text-[14px] font-semibold text-gray-600">
-                    <div className="flex items-center gap-2 whitespace-nowrap">
-                      <RowIcon className="h-4 w-4 text-gray-400" strokeWidth={1.8} />
-                      <span>{labelText}</span>
-                    </div>
-
-                    <span className="w-[50px] whitespace-nowrap text-right text-[12px] text-gray-400">
-                      {timeText}
-                    </span>
-                  </div>
+                <div className="mb-2 flex items-center gap-2 text-[14px] font-semibold text-gray-600">
+                  <RowIcon className="h-4 w-4 shrink-0 text-gray-400" strokeWidth={1.8} />
+                  <span className="whitespace-nowrap">{labelText}</span>
+                  <span className="whitespace-nowrap text-[12px] font-normal text-gray-400">
+                    {timeText}
+                  </span>
                 </div>
 
                 {/* 체크 도형들 */}
-                <div className="mb-6 grid grid-cols-[repeat(7,85px)] items-start justify-center">
+                <div className="mb-4 grid grid-cols-7 items-start gap-1">
                   {weekData.map((item, index) => (
-                    <div key={`${row.key}-${index}`} className="flex justify-center">
+                    <div key={`${row.key}-${index}`} className="flex min-w-0 justify-center">
                       <MedicationStatusIcon status={item[row.key]} />
                     </div>
                   ))}
@@ -71,18 +66,18 @@ export default function WeeklyCalendarCard() {
         </div>
 
         {/* 범례 */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-20 border-t border-gray-200 pt-8 text-[13px] text-gray-600">
-          <div className="flex items-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-gray-200 pt-6 text-[13px] text-gray-600 sm:gap-x-12">
+          <div className="flex items-center gap-2">
             <MedicationStatusIcon status="done" size="sm" />
             <span>복용 완료</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <MedicationStatusIcon status="partial" size="sm" />
             <span>부분 복용</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <MedicationStatusIcon status="miss" size="sm" />
             <span>미복용</span>
           </div>
