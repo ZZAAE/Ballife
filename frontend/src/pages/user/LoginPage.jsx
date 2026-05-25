@@ -39,14 +39,17 @@ function LoginPage() {
             setLoading(true);
             const response = await authApi.login(formData);
             login(response.data);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data));
+            // localStorage.setItem('token', response.data.token);
+            // localStorage.setItem('user', JSON.stringify(response.data));
             toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`);
             const from = typeof location.state?.from === 'string' ? location.state.from : '/';
             navigate(from, { replace: true });
         } catch (error) {
             console.error('로그인 실패:', error);
-        } finally {
+            const msg = error?.response?.data?.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+            toast.error(msg);   // 직접 띄우기
+        }
+        finally {
             setLoading(false);
         }
     };

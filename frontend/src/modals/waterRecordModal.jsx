@@ -1,5 +1,5 @@
-import { useId, useRef, useState } from 'react';
-import { Calendar, X } from 'lucide-react';
+import { useId, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 
 // 데이터베이스에서 기존에 사용자가 저장한 최신 물먹은양, 목표 수분섭취량 가져와서 
@@ -29,12 +29,14 @@ const WaterRecordModal = ({
   targetAmount = 1900, // 목표치
 }) => {
   const clipPathId = useId();
-  const [inputAmount, setInputAmount] = useState(() => String(currentAmount));
+  const { user } = useAuth();
+  const [inputAmount, setInputAmount] = useState(() => String(Math.round(currentAmount / 200)));
 
 
-  const parsedCurrentAmount = Number(inputAmount) || 0;
+  const parsedCurrentCups = Number(inputAmount) || 0;
+  const parsedCurrentMl = parsedCurrentCups * 200;
   const safeTargetAmount = targetAmount > 0 ? targetAmount : 1;
-  const progress = Math.max(0, Math.min(Math.round((parsedCurrentAmount / safeTargetAmount) * 100)));
+  const progress = Math.max(0, Math.min(Math.round((parsedCurrentMl / safeTargetAmount) * 100)));
   const fillHeight = Math.max(0, Math.min(132, (progress / 100) * 132));
   const fillY = 132 - fillHeight;
   const feedbackMessage = getProgressMessage(progress);
@@ -44,9 +46,37 @@ const WaterRecordModal = ({
     setInputAmount(nextValue);
   };
 
-  const handleSave = () => { // api 호출해서 create하기
-    if (onSave) {
-      onSave(parsedCurrentAmount);
+  const handleSave = async () => {
+    if (!user?.id) return;
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const body = JSON.stringify({
+      recordDate,
+      recordTime,
+      category: 'water',
+      waterIntakeCup: parsedCurrentCups,
+    });
+    const accessToken = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch(`http://localhost:8080/api/bioValueRecords/${user.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        body,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('서버 에러:', err);
+        return;
+      }
+      if (onSave) onSave(parsedCurrentCups);
+      onClose?.();
+    } catch (error) {
+      console.error('수분 섭취 기록 실패:', error);
     }
   };
 
@@ -99,11 +129,12 @@ const WaterRecordModal = ({
                 placeholder="0"
                 className="w-[280px] border-0 bg-transparent p-0 text-right text-[80px] font-bold tracking-tighter text-slate-900 outline-none placeholder:text-slate-200"
               />
-              <span className="pb-3 text-4xl font-bold text-slate-300">ml</span>
+              <span className="pb-3 text-4xl font-bold text-slate-300">컵</span>
             </div>
               <div className="mt-2 space-y-1">
                 <p className="text-[12px] font-semibold text-slate-500">현재 수분 섭취량</p>
                 <p className="text-[26px] font-extrabold text-[#3454ff]">{progress}%</p>
+                <p className="text-[13px] font-semibold text-slate-400">= {parsedCurrentMl}ml</p>
               </div>
             </div>
 
@@ -134,7 +165,7 @@ const WaterRecordModal = ({
 
             <div className="absolute bottom-3 left-0">
               <p className="text-[12px] font-semibold text-slate-400">목표 수분 섭취량</p>
-              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{targetAmount}ml</p>
+              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{Math.round(targetAmount / 200)}컵</p>
             </div>
           </div>
 
@@ -155,7 +186,7 @@ const WaterRecordModal = ({
 
             {/* Footer Button */}
           <div  className="pt-4">
-            <button onClick={onClose} className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl">
+            <button onClick={handleSave} className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl">
               기록 저장 및 확인
             </button>
           </div> 

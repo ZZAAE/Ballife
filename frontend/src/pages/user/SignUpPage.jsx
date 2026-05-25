@@ -17,6 +17,7 @@ function SignUpPage() {
     gender: "",
     weight: "",
     height: "",
+    diseaseIndex: ""
   });
   const [errors, setErrors] = useState({});
 
@@ -83,7 +84,9 @@ function SignUpPage() {
     e.preventDefault();
 
     /* 시현용으로 막아둠 (개발시 풀어둘것) */
-    // if (!validate()) return; //유효성 실패시 중단
+    if (!validate()) return; //유효성 실패시 중단
+
+    
 
     // try {
     //   setLoading(true);
@@ -100,13 +103,14 @@ function SignUpPage() {
     //   });
 
     //   toast.success("회원가입이 완료되었습니다!");
-    //   navigate("/login"); // <Link to = "/login">로그인</Link>
+    //   navigate("/disease"); // <Link to = "/login">로그인</Link>
     // } catch (error) {
     //   console.error("회원가입 실패:", error);
     // } finally {
     //   setLoading(false);
     // }
-    navigate("/disease");
+
+    navigate("/disease", { state: formData});
   };
 
   // 공통 인풋 스타일

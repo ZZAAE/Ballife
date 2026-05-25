@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.prologue.ballife.domain.user.User;
+import com.prologue.ballife.security.JwtTokenProvider;
 import com.prologue.ballife.service.user.UserService;
 import com.prologue.ballife.web.dto.user.UserDto;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @Operation(summary = "회원가입", description = "새로운 유저을 등록합니다.")
@@ -38,9 +40,9 @@ public class AuthController {
             @Valid @RequestBody UserDto.LoginRequest request) {
         User user = userService.login(request);
 
-        // 임시 토큰
+        // JWT 토큰 발급 적용
         UserDto.LoginResponse response = UserDto.LoginResponse.builder()
-                .token("temp-token-" + user.getUserId())
+                .token(jwtTokenProvider.createToken(user))
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())

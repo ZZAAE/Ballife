@@ -1,56 +1,84 @@
 package com.prologue.ballife.config;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration //이 클래스가 설정 클래스임을 선언
-@EnableWebSecurity // Spring Security 기능 활성화
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.prologue.ballife.security.JwtAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     
-    //다른 클래스에서 주입 받아서 사용 (bean등록 -> 객체를 메서드화 시키는것)
-    // PasswordEncoder pe = new PasswordEncoder();
-    @Bean 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
+
+    @Bean
     public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder(); //BCrypt: 암호학 알고리즘
+        return new BCryptPasswordEncoder();
     }
 
-    // UI별로 권한설정
-   @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            // CSRF 비활성화 (REST API는 세션 미사용)
-            .csrf(csrf -> csrf.disable())
-            
-            // CORS 설정 적용
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+        http.csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // 세션 미사용 (Stateless)
-            .sessionManagement(session -> 
+            .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            ) //관련 기능은 프론트엔드의 AuthContext.jsx를 이용
-            
-            // URL별 접근 권한 설정
+            )
+            .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> 
+                writeJsonMessage(response, HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.")
+            )) 
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                // 모든 요청 허용 (개발 단계)
-                .anyRequest().permitAll() //이렇게 해도 스웨거 UI 잘나옴
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
+                .requestMatchers("/error").permitAll()  
+                .requestMatchers("/api/auth/**").permitAll() //회원가입 토큰없이 접근 가능
+                .requestMatchers(HttpMethod.PUT,"/api/users/disease/**").permitAll() //회원가입시 질병 정보 업데이트 토큰 없이 접근 가능
+                .requestMatchers(HttpMethod.GET, "/api/health").permitAll() //프론트 서버 생존 폴링 (JWT 불필요)
+                // 나머지 인증이 필요한 주소는 이 밑에
+                
+                //.anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라 그럼)
+                .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는 이렇게 하는걸 고려)
             );
-
-        return http.build();
+        
+         return http.build();
     }
 
-     @Bean
+    private void writeJsonMessage(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+            objectMapper.writeValueAsString(java.util.Map.of("message", message))
+        );
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         

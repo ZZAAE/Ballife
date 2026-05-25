@@ -1,4 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
@@ -371,6 +374,19 @@ function AllRecordPage() {
     }
   };
 
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+  //토큰 인증 테스트용
+  // useEffect(() => {
+  //   if (authLoading) return;
+  //   if (!isAuthenticated || !user?.id) {
+  //           toast.error('로그인이 필요합니다.');
+  //           navigate('/login', { replace: true, state: { from: `/allRecord` } });
+  //           return;
+  //       }
+  // },  [authLoading, isAuthenticated, user?.id, navigate]);
+
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
@@ -392,10 +408,10 @@ function AllRecordPage() {
               <button
                 type="button"
                 onClick={openDatePicker}
-                className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-5 py-2.5 text-[14px] font-semibold text-slate-600 shadow-sm"
+                className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold text-[#64748B] shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition hover:bg-[#F9FAFB]"
               >
                 {selectedDate}
-                <span className="ml-1 text-[10px] text-slate-300">▼</span>
+                <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>
               </button>
             </div>
           </div>

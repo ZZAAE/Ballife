@@ -1,211 +1,141 @@
 import React, { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
 
-// 1. 링 차트 컴포넌트
-const RingChart = () => {
-  const colors = [
-    "stroke-red-400",
-    "stroke-purple-400",
-    "stroke-blue-400",
-    "stroke-sky-400",
-    "stroke-green-400",
-    "stroke-orange-400",
-    "stroke-yellow-400",
-  ];
+const WEEKDAY_KO = [
+  "일요일",
+  "월요일",
+  "화요일",
+  "수요일",
+  "목요일",
+  "금요일",
+  "토요일",
+];
 
-  const count = colors.length;      // 7
-  const slot = 100 / count;         // 각 조각 전체 폭
-  const gap = 1.8;                  // 조각 사이 간격(원하면 0)
-  const segment = slot - gap;       // 실제 색 구간
+const WEEKDAY_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-  return (
-    <svg viewBox="0 0 36 36" className="w-10 h-10">
-      {colors.map((c, i) => (
-        <circle
-          key={i}
-          cx="18"
-          cy="18"
-          r="15.915"
-          fill="transparent"
-          strokeWidth="5"
-          pathLength="100"
-          className={c}
-          strokeDasharray={`${segment} ${100 - segment}`}
-          strokeDashoffset={-(i * slot)}
-          transform="rotate(-90 18 18)"
-        />
-      ))}
-    </svg>
+// 해당 주의 일요일 0시로 정규화
+function startOfWeek(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+}
+
+// 주간 캘린더 컴포넌트
+const WeeklyCalendar = ({ onDayClick }) => {
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  // 이 주의 7일
+  const days = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        return d;
+      }),
+    [weekStart],
   );
-};
 
-// 2. 작동하는 달력 컴포넌트
-const Calendar = ({ onDayClick }) => {
-  const location = useLocation();
-  const selectedDate = location.state;
-
-  const initialDate = useMemo(() => {
-    if (selectedDate?.year && selectedDate?.month) {
-      return new Date(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day ?? 1
-      );
-    }
-    return new Date();
-  }, [selectedDate]);
-
-  const [currentDate, setCurrentDate] = useState(initialDate); // 2026년 3월 1일 기본값 설정
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth()
-
-  // 달력 연산 로직
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 시작 요일 (0: 일요일 ~ 6: 토요일)
-  const daysInMonth = new Date(year, month + 1, 0).getDate(); // 해당 월의 총 일수
-
-  // 이전/다음 달 이동 함수
-  const changeMonth = (offset) => {
-    setCurrentDate(new Date(year, month + offset, 1));
+  const moveWeek = (offset) => {
+    const next = new Date(weekStart);
+    next.setDate(weekStart.getDate() + offset * 7);
+    setWeekStart(next);
   };
 
-  // 달력 격자(Grid)에 채울 배열 생성 (이전달/현재달/다음달 날짜 포함)
-  const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
-  const prevMonthDays = new Date(year, month, 0).getDate();
-
-  const calendarDays = Array.from({ length: totalCells }, (_, index) => {
-    const dayNumber = index - firstDayOfMonth + 1;
-
-    if (dayNumber < 1) {
-      return {
-        day: prevMonthDays + dayNumber,
-        monthOffset: -1,
-        isCurrentMonth: false,
-      };
-    }
-
-    if (dayNumber > daysInMonth) {
-      return {
-        day: dayNumber - daysInMonth,
-        monthOffset: 1,
-        isCurrentMonth: false,
-      };
-    }
-
-    return {
-      day: dayNumber,
-      monthOffset: 0,
-      isCurrentMonth: true,
-    };
-  });
-
-  // 범례 데이터 (CSS 클래스가 빌드 시 누락되지 않도록 풀 클래스명 작성)
-  const legendItems = [
-    { label: "식단", color: "bg-red-400" },
-    { label: "혈압", color: "bg-purple-400" },
-    { label: "혈당", color: "bg-blue-400" },
-    { label: "수분", color: "bg-sky-400" },
-    { label: "복약", color: "bg-green-400" },
-    { label: "운동", color: "bg-orange-400" },
-    { label: "체중", color: "bg-yellow-400" },
-  ];
+  const monthTitle = `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월`;
+  const rangeLabel = `${weekStart.getMonth() + 1}/${weekStart.getDate()} ~ ${
+    days[6].getMonth() + 1
+  }/${days[6].getDate()}`;
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">
-      {/* 달력 헤더: 월 이동 버튼 탑재 */}
+      {/* 헤더: < 2026년 5월 (주 범위) > */}
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => changeMonth(-1)}
+          onClick={() => moveWeek(-1)}
           className="p-2 w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-600 transition-colors font-bold"
+          aria-label="이전 주"
         >
           {"<"}
         </button>
-        <h2 className="font-bold text-lg text-gray-800">
-          {year}년 {month + 1}월
-        </h2>
+        <div className="flex flex-col items-center">
+          <h2 className="font-bold text-lg text-gray-800">{monthTitle}</h2>
+          <span className="text-xs text-gray-400 mt-0.5">{rangeLabel}</span>
+        </div>
         <button
-          onClick={() => changeMonth(1)}
+          onClick={() => moveWeek(1)}
           className="p-2 w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-600 transition-colors font-bold"
+          aria-label="다음 주"
         >
           {">"}
         </button>
       </div>
 
-      {/* 요일 정보 헤더 */}
-      <div className="grid grid-cols-7 text-xs font-semibold text-gray-400 mb-4 text-center">
-        {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d, index) => (
-          <div
-            key={d}
-            className={
-              index === 0
-                ? "text-red-400"
-                : index === 6
+      {/* 요일 + 날짜 헤더 */}
+      <div className="grid grid-cols-7 gap-3 mb-3">
+        {days.map((d, idx) => {
+          const isToday = d.getTime() === today.getTime();
+          const dayColor =
+            idx === 0
+              ? "text-red-400"
+              : idx === 6
                 ? "text-blue-400"
-                : "text-gray-400"
-            }
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* 실제 날짜 그리드 */}
-      <div className="grid grid-cols-7 gap-3">
-        {calendarDays.map((cell, index) => {
-          const isSunday = index % 7 === 0;
-          const isSaturday = index % 7 === 6;
-          const targetDate = new Date(year, month + cell.monthOffset, cell.day);
-
+                : "text-gray-400";
           return (
-            <button
-              key={index}
-              className={`rounded-xl p-2 flex flex-col items-center min-h-[85px] transition-all ${
-                cell.isCurrentMonth
-                  ? "bg-gray-50 hover:bg-gray-100/70 border border-gray-100"
-                  : "bg-gray-50/40 hover:bg-gray-100/70 border border-gray-100"
-              }`}
-              onClick={() => {
-                onDayClick?.({
-                year: targetDate.getFullYear(),
-                month: targetDate.getMonth() + 1,
-                day: targetDate.getDate(),
-                });
-                }}
+            <div
+              key={idx}
+              className="flex flex-col items-center justify-center py-1.5"
             >
+              <span className={`text-[11px] font-semibold ${dayColor}`}>
+                {WEEKDAY_EN[idx]}
+              </span>
               <span
-                className={`text-xs font-bold mb-1.5 ${
-                  !cell.isCurrentMonth
-                    ? "text-gray-400"
-                    : isSunday
-                    ? "text-red-500"
-                    : isSaturday
-                    ? "text-blue-500"
-                    : "text-gray-500"
+                className={`text-sm font-bold mt-0.5 ${
+                  isToday ? "text-emerald-600" : "text-gray-700"
                 }`}
               >
-                {cell.day}
+                {d.getDate()}
               </span>
-              <RingChart />
-            </button>
+            </div>
           );
         })}
       </div>
 
-      {/* 하단 범례 */}
-      <div className="flex flex-wrap gap-4 mt-6 text-xs text-gray-500 border-t pt-4">
-        {legendItems.map((item, i) => (
-          <div key={i} className="flex items-center gap-1.5">
-            <span className={`w-3 h-3 rounded-full ${item.color}`} />
-            <span className="font-medium text-gray-600">{item.label}</span>
-          </div>
-        ))}
+      {/* 요일 칸 */}
+      <div className="grid grid-cols-7 gap-3">
+        {days.map((d, idx) => {
+          const isToday = d.getTime() === today.getTime();
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() =>
+                onDayClick?.({
+                  year: d.getFullYear(),
+                  month: d.getMonth(),
+                  day: d.getDate(),
+                })
+              }
+              className={`min-h-[280px] rounded-xl border bg-gray-50 p-4 text-left transition hover:bg-gray-100 ${
+                isToday
+                  ? "border-emerald-400 ring-2 ring-emerald-400/40"
+                  : "border-gray-100"
+              }`}
+              title={`${d.getMonth() + 1}월 ${d.getDate()}일`}
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
 
-// 3. 건강 지표 테이블 컴포넌트
+// 건강 지표 테이블 컴포넌트
 const Table = () => {
   const rows = [
     ["혈당", "118 mg/dL", "112 mg/dL", "+6 개선"],
@@ -258,15 +188,12 @@ const Table = () => {
   );
 };
 
-// 4. 우측 사이드바 컴포넌트
+// 우측 사이드바 컴포넌트
 const Sidebar = () => {
   return (
     <div className="space-y-4">
-      {/* 성과 바 그래프 */}
       <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h4 className="font-bold text-gray-800 mb-4 text-sm">
-          월간 종합 성과
-        </h4>
+        <h4 className="font-bold text-gray-800 mb-4 text-sm">월간 종합 성과</h4>
         {[
           ["식단 건강", 82],
           ["혈당 안정도", 50],
@@ -289,7 +216,6 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* 주간 분석 그래프 */}
       <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-md">
         <h4 className="font-bold mb-1.5 text-sm">주간 분석</h4>
         <p className="text-xs text-gray-400 mb-4 font-medium">
@@ -320,9 +246,20 @@ export default function HealthCalendarPage() {
   const [selectedDayInfo, setSelectedDayInfo] = useState(null);
 
   const handleDayClick = (dayInfo) => {
-  setSelectedDayInfo(dayInfo);
-  setIsTimelineOpen(true);
+    setSelectedDayInfo(dayInfo);
+    setIsTimelineOpen(true);
   };
+
+  const timelineData = useMemo(() => {
+    if (!selectedDayInfo) return null;
+    const { year, month, day } = selectedDayInfo;
+    const dateObj = new Date(year, month, day);
+    return {
+      month: `${month + 1}월`,
+      day: WEEKDAY_KO[dateObj.getDay()],
+      date: `${year}년 ${month + 1}월 ${day}일`,
+    };
+  }, [selectedDayInfo]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-['Noto_Sans_KR']">
@@ -337,19 +274,7 @@ export default function HealthCalendarPage() {
         </header>
 
         <div className="space-y-6">
-          <Calendar onDayClick={handleDayClick} />
-          <DailyTimelineModal
-            isOpen={isTimelineOpen}
-            onClose={() => setIsTimelineOpen(false)}
-            // data={{
-            // month: selectedDayInfo ? selectedDayInfo.month + "월" : "",
-            // day: "",
-            // date: selectedDayInfo
-            // ? selectedDayInfo.year + "년 " + selectedDayInfo.month + "월 " + selectedDayInfo.day + "일"
-            // : "",
-            // items: []
-            // }}
-          />
+          <WeeklyCalendar onDayClick={handleDayClick} />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
             <div className="lg:col-span-7">
@@ -361,6 +286,12 @@ export default function HealthCalendarPage() {
           </div>
         </div>
       </div>
+
+      <DailyTimelineModal
+        isOpen={isTimelineOpen}
+        onClose={() => setIsTimelineOpen(false)}
+        data={timelineData}
+      />
     </div>
   );
 }

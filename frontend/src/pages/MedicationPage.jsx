@@ -30,15 +30,15 @@ export default function MedicationPage() {
   };
 
   return (
-    <div className="min-h-full w-full bg-gray-50 overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[1480px] px-5 sm:px-6 lg:px-10 xl:px-12 pb-10 pt-[87px]">
+    <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A] overflow-x-hidden">
+      <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
         {/* 제목 영역 */}
-        <section className="mb-10">
-          <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
+        <section className="mb-8">
+          <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
             약 복용 관리
           </h1>
 
-          <p className="text-sm text-gray-400">
+          <p className="mt-2 text-sm text-[#64748B]">
             지난 복용 결과를 분석한 결과입니다.
           </p>
         </section>

@@ -54,7 +54,9 @@ public class UserDto {
 
         @NotNull(message = "키를 입력해주세요")
         @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
-        private Double height; 
+        private Double height;
+
+        private String diseaseIndex;
     }
 
     @Data

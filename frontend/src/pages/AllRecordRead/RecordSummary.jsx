@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -215,23 +215,61 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 export default function RecordSummary() {
   const [isMealModalOpen, setMealModalOpen] = useState(false);
   const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const t = new Date();
+    const yyyy = t.getFullYear();
+    const mm = String(t.getMonth() + 1).padStart(2, "0");
+    const dd = String(t.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  });
+  const dateInputRef = useRef(null);
+
+  const openDatePicker = () => {
+    if (dateInputRef.current?.showPicker) {
+      dateInputRef.current.showPicker();
+    } else {
+      dateInputRef.current?.click();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans max-w-[1920px] mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] font-noto-sans max-w-[1920px] mx-auto">
       <div className="flex pt-[55px]">
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="tmb-1 text-2xl font-bold text-gray-900 sm:text-3xl">
-              오늘의 기록 보기
-            </h1>
-            <p className="text-sm text-gray-400">
-              하루의 신체 변화를 분석한 결과입니다.
-            </p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="mb-1 text-2xl font-bold text-[#0F172A] sm:text-3xl">
+                하루 기록
+              </h1>
+              <p className="text-sm text-[#94A3B8]">
+                하루의 신체 변화를 분석한 결과입니다.
+              </p>
+            </div>
+
+            {/* 날짜 선택 */}
+            <div className="relative">
+              <input
+                type="date"
+                ref={dateInputRef}
+                value={selectedDate}
+                className="absolute opacity-0 pointer-events-none"
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={openDatePicker}
+                className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 py-2.5 text-[14px] font-semibold text-[#64748B] shadow-sm hover:border-slate-300"
+              >
+                {selectedDate}
+                <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>
+              </button>
+            </div>
           </div>
           {/* Summary Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
             {/* 식단 Card */}
             <SummaryCard
               Icon={Utensils}
@@ -486,17 +524,26 @@ export default function RecordSummary() {
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex gap-4">
-              {meals.map((meal, idx) => (
-                <MealRecordCard
-                  key={idx}
-                  {...meal}
-                  onClick={() => setMealModalOpen(true)}
-                  className="min-w-[calc(26%-10px)] flex-shrink-0"
-                />
-              ))}
+          {meals.length === 0 ? (
+            <div className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6">
+              <p className="text-center text-sm text-[#94A3B8] py-12">
+                식단 기록이 없습니다.
+              </p>
             </div>
+          ) : (
+            <div className="overflow-x-auto pb-2">
+              <div className="flex gap-4">
+                {meals.map((meal, idx) => (
+                  <MealRecordCard
+                    key={idx}
+                    {...meal}
+                    onClick={() => setMealModalOpen(true)}
+                    className="min-w-[calc(26%-10px)] flex-shrink-0"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
           </div>
         </main>
 
