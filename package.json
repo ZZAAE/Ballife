@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "i": "^0.3.7",
     "react-unity-webgl": "^10.2.0",
     "recharts": "^3.8.1"
   }
