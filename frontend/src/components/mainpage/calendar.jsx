@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
 
 // 더미 타임라인 데이터 — API 연동 시 교체
@@ -27,6 +27,9 @@ function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [hoveredCell, setHoveredCell] = useState(null); // { day, rect } | null
   const [modalDate, setModalDate] = useState(null); // { year, month, day } | null
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
+  const pickerRef = useRef(null);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -51,6 +54,32 @@ function Calendar() {
     setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
     setHoveredCell(null);
   };
+
+  const toggleMonthPicker = () => {
+    setShowMonthPicker((prev) => {
+      const next = !prev;
+      if (next) setPickerYear(year);
+      return next;
+    });
+    setHoveredCell(null);
+  };
+
+  const selectPickerMonth = (m) => {
+    setCurrentDate(new Date(pickerYear, m, 1));
+    setShowMonthPicker(false);
+    setHoveredCell(null);
+  };
+
+  useEffect(() => {
+    if (!showMonthPicker) return undefined;
+    const handleOutside = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowMonthPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showMonthPicker]);
 
   const today = new Date();
   const isToday = (day) =>
@@ -170,9 +199,83 @@ function Calendar() {
             </svg>
           </button>
 
-          <h2 className="flex-1 text-center text-xl font-bold tracking-tight text-slate-900">
-            {monthTitle}
-          </h2>
+          <div className="relative flex-1" ref={pickerRef}>
+            <button
+              type="button"
+              onClick={toggleMonthPicker}
+              aria-haspopup="dialog"
+              aria-expanded={showMonthPicker}
+              className="mx-auto flex items-center gap-1.5 rounded-lg px-3 py-1 text-xl font-bold tracking-tight text-slate-900 transition hover:bg-slate-100"
+            >
+              <span>{monthTitle}</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`h-4 w-4 text-slate-400 transition-transform ${showMonthPicker ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {showMonthPicker && (
+              <div
+                role="dialog"
+                aria-label="년/월 선택"
+                className="absolute left-1/2 top-full z-30 mt-2 w-[280px] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setPickerYear((y) => y - 1)}
+                    aria-label="이전 해"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+
+                  <span className="text-sm font-bold text-slate-900">{pickerYear}년</span>
+
+                  <button
+                    type="button"
+                    onClick={() => setPickerYear((y) => y + 1)}
+                    aria-label="다음 해"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {Array.from({ length: 12 }, (_, m) => {
+                    const isSelected = pickerYear === year && m === month;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => selectPickerMonth(m)}
+                        className={`rounded-lg py-2 text-sm font-medium transition ${
+                          isSelected
+                            ? "bg-blue-500 text-white shadow-sm"
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {m + 1}월
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
