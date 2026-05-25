@@ -241,7 +241,7 @@ export default function RecordSummary() {
           {/* Header */}
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <h1 className="mb-1 text-2xl font-bold text-[#0F172A] sm:text-3xl">
+              <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
                 하루 기록
               </h1>
               <p className="text-sm text-[#94A3B8]">

@@ -33,7 +33,7 @@ function PlusButton({ size = 52, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
     >
@@ -47,7 +47,7 @@ function AddRecordBar({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[36px] w-full items-center justify-center rounded-[6px] bg-[#F3F4F6]"
+      className="flex h-[36px] w-full items-center justify-center rounded-[10px] bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
       aria-label="기록 추가"
     >
       <img
@@ -64,11 +64,11 @@ function EmptyRecordArea({ recordTitle, onAddClick }) {
     <>
       <PlusButton size={50} onClick={onAddClick} />
 
-      <p className="mt-[15px] text-[14px] font-[600] leading-none text-[#303740]">
+      <p className="mt-[15px] text-[14px] font-semibold leading-none text-[#0F172A]">
         {recordTitle}
       </p>
 
-      <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
+      <p className="mt-[9px] text-[12px] font-medium leading-none text-[#64748B]">
         아직 기록되지 않았습니다.
       </p>
     </>
@@ -86,9 +86,9 @@ function LargeRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white ">
+    <section className="relative flex h-[250px] min-w-0 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
       <div
-        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        className="absolute left-0 top-0 h-full w-[4px]"
         style={{ backgroundColor: color }}
       />
 
@@ -96,10 +96,10 @@ function LargeRecordCard({
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
         <div>
-          <p className="text-[14px] font-[600] leading-none text-[#252A31]">
+          <p className="text-[14px] font-semibold leading-none text-[#0F172A]">
             {title}
           </p>
-          <p className="mt-[7px] whitespace-nowrap text-[10px] font-medium leading-none text-[#8D949E]">
+          <p className="mt-[7px] whitespace-nowrap text-[11px] font-medium leading-none text-[#94A3B8]">
             {subText}
           </p>
         </div>
@@ -110,7 +110,7 @@ function LargeRecordCard({
           className={
             hasRecords
               ? "flex h-[215px] w-full min-w-0 flex-col justify-start overflow-y-auto"
-              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9] p-[14px]"
+              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[12px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] p-[14px]"
           }
         >
           {children ?? (
@@ -135,16 +135,16 @@ function SmallRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white">
+    <section className="relative flex h-[250px] min-w-0 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
       <div
-        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        className="absolute left-0 top-0 h-full w-[4px]"
         style={{ backgroundColor: color }}
       />
 
       <div className="flex w-[98px] shrink-0 flex-col items-center justify-center">
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
-        <p className="mt-[17px] text-[14px] font-[600] leading-none text-[#252A31]">
+        <p className="mt-[17px] text-[14px] font-semibold leading-none text-[#0F172A]">
           {title}
         </p>
       </div>
@@ -154,7 +154,7 @@ function SmallRecordCard({
           className={
             hasRecords
               ? "flex h-[215px] w-full flex-col justify-start overflow-hidden"
-              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[12px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC]"
           }
         >
           {children ?? (
@@ -182,16 +182,16 @@ function MealBox({ title, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[380px] w-full items-center justify-center rounded-[12px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+      className="flex h-[380px] w-full items-center justify-center rounded-[18px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] transition hover:bg-[#F1F5F9]"
     >
       <div className="flex flex-col items-center justify-center">
         <MealPlaceholderIcon />
 
-        <p className="mt-[22px] text-[16px] font-[600] leading-none text-[#303740]">
+        <p className="mt-[22px] text-[16px] font-semibold leading-none text-[#0F172A]">
           {title}
         </p>
 
-        <p className="mt-[10px] text-[11px] font-medium leading-none text-[#3F4650]">
+        <p className="mt-[10px] text-[12px] font-medium leading-none text-[#64748B]">
           아직 기록되지 않았습니다.
         </p>
       </div>
@@ -389,12 +389,17 @@ function AllRecordPage() {
 
   return (
     <>
-      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[60px]">
-          <div className="mb-[50px] flex items-center justify-between">
-            <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
-              전체 기록 관리
-            </h1>
+      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+        <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
+                전체 기록 관리
+              </h1>
+              <p className="mt-2 text-sm text-[#64748B]">
+                오늘 하루의 건강 기록을 한눈에 확인하세요.
+              </p>
+            </div>
 
             <div className="relative">
               <input
@@ -534,8 +539,8 @@ function AllRecordPage() {
             </LargeRecordCard>
           </div>
 
-          <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px]">
-            <div className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px] bg-[#A142FF]" />
+          <section className="relative mt-[22px] overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white px-6 pt-[43px] pb-[32px] shadow-[0_4px_16px_rgba(15,23,42,0.04)] md:px-[74px]">
+            <div className="absolute left-0 top-0 h-full w-[4px] bg-[#A142FF]" />
 
             <div className="mb-[34px] flex items-center justify-center gap-[15px]">
               <img
@@ -545,11 +550,11 @@ function AllRecordPage() {
               />
 
               <div>
-                <p className="text-[14px] font-extrabold leading-none text-[#252A31]">
+                <p className="text-[14px] font-extrabold leading-none text-[#0F172A]">
                   오늘의 식단
                 </p>
 
-                <p className="mt-[8px] text-[10px] font-medium leading-none text-[#8D949E]">
+                <p className="mt-[8px] text-[11px] font-medium leading-none text-[#94A3B8]">
                   식단 기록 대기 중
                 </p>
               </div>

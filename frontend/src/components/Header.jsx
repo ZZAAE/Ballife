@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
 import { useAuth } from '../contexts/AuthContext';
 
@@ -56,8 +57,16 @@ const navItems = [
   },
 ];
 
-export default function Header({ isLoggedIn = false }) {
+export default function Header() {
   const [hoveredKey, setHoveredKey] = useState(null);
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("로그아웃되었습니다.");
+    navigate("/", { replace: true });
+  };
 
   return (
     <header
@@ -143,16 +152,13 @@ export default function Header({ isLoggedIn = false }) {
 
         {/* h_etc */}
         <div className="h_etc flex w-[180px] shrink-0 justify-end">
-          <Link
-            to={isLoggedIn ? "/logout" : "/login"}
-            className={
-              isLoggedIn
-                ? "group flex h-[34px] items-center gap-[6px] rounded-full border border-white/25 bg-transparent px-[16px] text-[13px] font-semibold text-white no-underline transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
-                : "group flex h-[34px] items-center gap-[6px] rounded-full border border-white bg-white px-[16px] text-[13px] font-semibold text-[#121212] no-underline transition-all duration-200 hover:bg-[#f3f6f8]"
-            }
-          >
-            <span>{isLoggedIn ? "로그아웃" : "로그인"}</span>
-            {isLoggedIn && (
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white/25 bg-transparent px-[16px] text-[13px] font-semibold text-white no-underline transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
+            >
+              <span>로그아웃</span>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -165,8 +171,15 @@ export default function Header({ isLoggedIn = false }) {
               >
                 <polyline points="9 18 15 12 9 6" />
               </svg>
-            )}
-          </Link>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white bg-white px-[16px] text-[13px] font-semibold text-[#121212] no-underline transition-all duration-200 hover:bg-[#f3f6f8]"
+            >
+              <span>로그인</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>
