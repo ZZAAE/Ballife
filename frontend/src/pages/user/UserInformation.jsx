@@ -5,67 +5,34 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import userApi from "../../api/userApi";
+import userConfigApi from "../../api/userConfigApi";
+import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   formatDiseaseSummary,
   loadCachedMemberProfile,
 } from "../../utils/userProfile";
 
-const dummy = {
-  name: "김지수",
-  username: "ballife-wkjgpho2enj",
-  email: "jisoo.kim@vitalis.core",
-  phone: "010-9493-3323",
-  birth: "1982.08.02",
-  gender: "남성",
-  disease: "고혈압",
-  bloodSugar: {
-    fasting: "100 mg/dL",
-    after1h: "100 mg/dL",
-    after2h: "100 mg/dL",
-  },
-  bloodPressure: {
-    systolic: "<120 mmHg",
-    diastolic: "<80 mmHg",
-  },
-  goalWeight: {
-    value: 78.2,
-    unit: "kg",
-    progress: 80,
-    prev: "현재 체중 50.0kg (지난 28일간)",
-  },
-  goalWater: {
-    value: 9,
-    unit: "잔",
-    progress: 75,
-    prev: "1,400 ml / 1,900 ml",
-  },
-  goalCalorieIn: {
-    value: "2,000",
-    unit: "kcal",
-    prev: "현재 섭취 칼로리 1,071kcal / 1,725kcal 달성",
-  },
-  goalCalorieOut: {
-    value: "1,240",
-    unit: "kcal",
-    prev: "현재 소모 칼로리 520kcal / 640kcal 달성",
-  },
-  routine: [
-    { label: "기상", time: "—" },
-    { label: "아침", time: "07:30" },
-    { label: "점심", time: "12:30" },
-    { label: "저녁", time: "18:30" },
-    { label: "취침", time: "23:30" },
-  ],
-  reports: [
-    {
-      icon: "📊",
-      title: "주간 건강 종합 리포트",
-      date: "2026.05.06 ~ 2026.05.12",
-    },
-    { icon: "🩸", title: "심혈관 정밀 분석 결과", date: "2026.05.06" },
-  ],
+const ROUTINE_FIELDS = [
+  { label: "기상", key: "wakeupTime" },
+  { label: "아침", key: "breakfastTime" },
+  { label: "점심", key: "lunchTime" },
+  { label: "저녁", key: "dinnerTime" },
+  { label: "취침", key: "bedTime" },
+];
+
+const ROUTINE_LABEL_TO_KEY = ROUTINE_FIELDS.reduce((acc, f) => {
+  acc[f.label] = f.key;
+  return acc;
+}, {});
+
+// 백엔드 LocalTime 직렬화 "HH:mm:ss" → "HH:mm"
+const formatTime = (timeStr) => {
+  if (!timeStr) return "—";
+  return timeStr.length >= 5 ? timeStr.substring(0, 5) : timeStr;
 };
+
+const formatNumber = (n) => (n == null ? "—" : Number(n).toLocaleString());
 
 function ProgressBar({ progress }) {
   return (
@@ -125,6 +92,8 @@ function UserInformation() {
   const [memberProfile, setMemberProfile] = useState(() =>
     loadCachedMemberProfile(),
   );
+  const [userConfig, setUserConfig] = useState(null);
+  const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
 
   useEffect(() => {
     if (!userId) {
@@ -146,7 +115,28 @@ function UserInformation() {
       }
     };
 
+    const fetchUserConfig = async () => {
+      try {
+        const { data } = await userConfigApi.getUserConfig(userId);
+        setUserConfig(data);
+      } catch (error) {
+        toast.error("목표/루틴 정보를 불러오지 못했습니다.");
+      }
+    };
+
+    const fetchTodayBurnedCalorie = async () => {
+      try {
+        const value = await getBurnedCalorieByDate(userId);
+        setTodayBurnedCalorie(value ?? 0);
+      } catch (error) {
+        // 운동 기록 없을 수 있으니 토스트 띄우지 않고 0으로 처리
+        setTodayBurnedCalorie(0);
+      }
+    };
+
     fetchMember();
+    fetchUserConfig();
+    fetchTodayBurnedCalorie();
     const syncDraftProfile = (event) => {
       setMemberProfile((prev) => ({ ...prev, ...(event.detail || {}) }));
     };
@@ -156,14 +146,83 @@ function UserInformation() {
   }, [userId]);
 
   const profile = {
-    name: memberProfile?.username ?? dummy.name,
-    username: memberProfile?.nickname ?? user?.nickname ?? dummy.username,
-    email: memberProfile?.email ?? dummy.email,
-    phone: dummy.phone,
-    birth: memberProfile?.birthDate ?? dummy.birth,
-    gender: memberProfile?.gender ?? dummy.gender,
-    disease: formatDiseaseSummary(memberProfile?.diseaseIndex) ?? dummy.disease,
+    name: memberProfile?.username ?? "—",
+    username: memberProfile?.nickname ?? user?.nickname ?? "",
+    email: memberProfile?.email ?? "—",
+    birth: memberProfile?.birthDate ?? "—",
+    gender: memberProfile?.gender ?? "—",
+    disease: formatDiseaseSummary(memberProfile?.diseaseIndex) ?? "—",
     profileImage: memberProfile?.profileImage ?? null,
+  };
+
+  // 백엔드 데이터를 UI 표시용으로 변환
+  const goals = {
+    weight: userConfig?.targetWeight ?? null,
+    water: userConfig?.targetDailyWaterIntake ?? null,
+    calorieIn: userConfig?.targetDailyCaloriesIntake ?? null,
+    calorieOut: userConfig?.targetDailyCaloriesBurned ?? null,
+  };
+
+  const currentWeight = memberProfile?.weight ?? null;
+  const weightProgress =
+    goals.weight && currentWeight
+      ? Math.min(100, Math.round((currentWeight / goals.weight) * 100))
+      : undefined;
+  const weightSub = currentWeight ? `현재 체중 ${currentWeight}kg` : undefined;
+
+  const calorieOutProgress =
+    goals.calorieOut && todayBurnedCalorie != null
+      ? Math.min(100, Math.round((todayBurnedCalorie / goals.calorieOut) * 100))
+      : undefined;
+  const calorieOutSub =
+    todayBurnedCalorie != null && goals.calorieOut
+      ? `현재 소모 칼로리 ${formatNumber(todayBurnedCalorie)}kcal / ${formatNumber(goals.calorieOut)}kcal 달성`
+      : todayBurnedCalorie != null
+        ? `현재 소모 칼로리 ${formatNumber(todayBurnedCalorie)}kcal`
+        : undefined;
+  const calorieInSub = `현재 섭취 칼로리 ?kcal / ${
+    goals.calorieIn ? `${formatNumber(goals.calorieIn)}kcal` : "?kcal"
+  } 달성`;
+
+  const routine = ROUTINE_FIELDS.map((f) => ({
+    label: f.label,
+    time: formatTime(userConfig?.[f.key]),
+  }));
+
+  const handleSaveTargets = async (payload) => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      throw new Error("missing userId");
+    }
+    const body = {
+      targetWeight: payload.weight,
+      targetDailyWaterIntake:
+        payload.water == null ? null : Math.round(payload.water),
+      targetDailyCaloriesIntake:
+        payload.calorieIn == null ? null : Math.round(payload.calorieIn),
+      targetDailyCaloriesBurned:
+        payload.calorieOut == null ? null : Math.round(payload.calorieOut),
+    };
+    const { data } = await userConfigApi.updateUserConfig(userId, body);
+    setUserConfig(data);
+    toast.success("목표가 저장되었습니다.");
+    return data;
+  };
+
+  const handleSaveRoutine = async (payload) => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      throw new Error("missing userId");
+    }
+    const body = {};
+    payload.routine.forEach((item) => {
+      const key = ROUTINE_LABEL_TO_KEY[item.label];
+      if (key) body[key] = item.time;
+    });
+    const { data } = await userConfigApi.updateUserConfig(userId, body);
+    setUserConfig(data);
+    toast.success("루틴이 저장되었습니다.");
+    return data;
   };
 
   return (
@@ -232,14 +291,6 @@ function UserInformation() {
                         {profile.email}
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                        휴대폰 번호
-                      </dt>
-                      <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
-                        {dummy.phone}
-                      </dd>
-                    </div>
                     <div className="flex gap-8">
                       <div>
                         <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
@@ -266,71 +317,7 @@ function UserInformation() {
                         {profile.disease}
                       </dd>
                     </div>
-                    <div className="border-t border-gray-100 pt-4">
-                      <dt className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                        정상 혈당
-                      </dt>
-                      <dd className="space-y-1 text-[13px] text-[#475569] tabular-nums">
-                        <div className="flex justify-between">
-                          <span className="text-[#64748B]">공복</span>
-                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.fasting}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#64748B]">식사 1시간</span>
-                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.after1h}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#64748B]">식사 2시간</span>
-                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.after2h}</span>
-                        </div>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                        정상 혈압
-                      </dt>
-                      <dd className="space-y-1 text-[13px] text-[#475569] tabular-nums">
-                        <div className="flex justify-between">
-                          <span className="text-[#64748B]">수축기</span>
-                          <span className="font-medium text-[#0F172A]">{dummy.bloodPressure.systolic}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#64748B]">이완기</span>
-                          <span className="font-medium text-[#0F172A]">{dummy.bloodPressure.diastolic}</span>
-                        </div>
-                      </dd>
-                    </div>
                   </dl>
-                </div>
-
-                {/* 최근 데이터 리포트 */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                  <h3 className="mb-3 text-sm font-bold text-gray-800">
-                    최근 데이터 리포트
-                  </h3>
-                  <div className="space-y-2">
-                    {dummy.reports.map((r) => (
-                      <button
-                        key={r.title}
-                        className="flex w-full items-center justify-between rounded-xl px-3 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-base">
-                            {r.icon}
-                          </div>
-                          <div className="text-left">
-                            <p className="text-xs font-semibold text-gray-800">
-                              {r.title}
-                            </p>
-                            <p className="text-[11px] text-gray-400">
-                              {r.date}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-gray-300">›</span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -341,38 +328,37 @@ function UserInformation() {
                   <MetricCard
                     label="목표 체중"
                     badge="수정"
-                    value={dummy.goalWeight.value}
-                    unit={dummy.goalWeight.unit}
-                    progress={dummy.goalWeight.progress}
-                    sub={dummy.goalWeight.prev}
+                    value={goals.weight ?? "—"}
+                    unit="kg"
+                    progress={weightProgress}
+                    sub={weightSub}
                     bgColor="#DAE4F3"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
                     label="목표 음수량"
                     badge="수정"
-                    value={dummy.goalWater.value}
-                    unit={dummy.goalWater.unit}
-                    progress={dummy.goalWater.progress}
-                    sub={dummy.goalWater.prev}
+                    value={goals.water ?? "—"}
+                    unit="잔"
                     bgColor="#E4E9ED"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
                     label="목표 섭취 칼로리"
                     badge="수정"
-                    value={dummy.goalCalorieIn.value}
-                    unit={dummy.goalCalorieIn.unit}
-                    sub={dummy.goalCalorieIn.prev}
+                    value={formatNumber(goals.calorieIn)}
+                    unit="kcal"
+                    sub={calorieInSub}
                     bgColor="#E4E9ED"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
                     label="목표 소모 칼로리"
                     badge="수정"
-                    value={dummy.goalCalorieOut.value}
-                    unit={dummy.goalCalorieOut.unit}
-                    sub={dummy.goalCalorieOut.prev}
+                    value={formatNumber(goals.calorieOut)}
+                    unit="kcal"
+                    progress={calorieOutProgress}
+                    sub={calorieOutSub}
                     bgColor="#DAE4F3"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
@@ -419,7 +405,7 @@ function UserInformation() {
                       </button>
                     </div>
                     <div className="flex flex-1 flex-col justify-between">
-                      {dummy.routine.map((item) => (
+                      {routine.map((item) => (
                         <div
                           key={item.label}
                           className="flex items-center justify-between border-b border-gray-100 py-3 last:border-0"
@@ -448,17 +434,19 @@ function UserInformation() {
         <RoutineModal
           open={isRoutineModalOpen}
           onClose={() => setRoutineModalOpen(false)}
-          initialRoutine={dummy.routine}
+          onSubmit={handleSaveRoutine}
+          initialRoutine={routine}
         />
 
         <TargetModal
           open={isTargetModalOpen}
           onClose={() => setTargetModalOpen(false)}
+          onSubmit={handleSaveTargets}
           initialTargets={{
-            weight: dummy.goalWeight.value,
-            water: dummy.goalWater.value,
-            calorieIn: 2000,
-            calorieOut: 1240,
+            weight: goals.weight ?? "",
+            water: goals.water ?? "",
+            calorieIn: goals.calorieIn ?? "",
+            calorieOut: goals.calorieOut ?? "",
           }}
         />
       </div>

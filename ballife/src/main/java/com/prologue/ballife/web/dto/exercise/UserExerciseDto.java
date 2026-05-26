@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
+
 public class UserExerciseDto {
     // 사용자 운동 기록 등록 요청 DTO
     @Data
@@ -33,6 +34,12 @@ public class UserExerciseDto {
         // 무산소용 (세트 × 반복 계산)
         private Integer exerciseSet;
         private Integer exerciseReps;
+
+        // 무산소: 무게 (kg)
+        private Integer exerciseWeight;
+
+        // 운동 강도 (선택)
+        private String exerciseHard;
     }
 
     // 사용자 운동 기록 수정 요청 DTO
@@ -48,6 +55,16 @@ public class UserExerciseDto {
         @NotNull(message = "운동 수행 날짜는 필수입니다.")
         private LocalDate exerciseDate;
 
+        private LocalTime exerciseTime;
+
+        // detail 갱신용 필드 (서버에서 칼로리 재계산에 사용)
+        private Integer exerciseMin;
+        private Integer exerciseSet;
+        private Integer exerciseReps;
+        private Integer exerciseWeight;
+        private String exerciseHard;
+
+        // 클라이언트가 직접 칼로리를 지정하고 싶을 때만 사용 (보통은 서버 계산)
         private Integer burnedCalorie;
     }
 
@@ -63,15 +80,26 @@ public class UserExerciseDto {
 
         // 운동 종류 식별자 (MongoDB ObjectId -> String)
         private String exerciseTypeId;
+        // 운동명 (MongoDB exercise_type 조인)
+        private String exerciseName;
+        // 운동 카테고리 - 유산소/무산소 (MongoDB exercise_type 조인)
+        private String exerciseCategory;
         private LocalDate exerciseDate;
         private LocalTime exerciseTime;
         private Integer burnedCalorie;
 
-        // 엔티티 -> dto 변환 메서드
+        // 엔티티 -> dto 변환 메서드 (운동 종류 미상)
         public static Response from(UserExercise userExercise) {
+            return from(userExercise, null);
+        }
+
+        // 엔티티 + ExerciseType -> dto 변환 메서드
+        public static Response from(UserExercise userExercise, ExerciseType exerciseType) {
             return Response.builder()
                     .userExerciseId(userExercise.getUserExerciseId())
                     .exerciseTypeId(userExercise.getExerciseTypeId())
+                    .exerciseName(exerciseType != null ? exerciseType.getExerciseName() : null)
+                    .exerciseCategory(exerciseType != null ? exerciseType.getExerciseCategory() : null)
                     .exerciseDate(userExercise.getExerciseDate())
                     .exerciseTime(userExercise.getExerciseTime())
                     .burnedCalorie(userExercise.getBurnedCalorie())

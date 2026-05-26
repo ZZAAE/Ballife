@@ -6,7 +6,7 @@ import ExerciseDetailSection from "./ExerciseDetailSection";
 import ExpectedCalorieCard from "./ExpectedCalorieCard";
 import ExerciseSubmitButton from "./ExerciseSubmitButton";
 import { useAuth } from "../contexts/AuthContext";
-import { createMockExercise } from "../api/exerciseApi";
+import { createExercise } from "../api/exerciseApi";
 import {
   appendExerciseRecords,
   buildCreatePayload,
@@ -84,6 +84,13 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
       return "무산소 운동은 세트와 횟수를 모두 입력해 주세요.";
     }
 
+    const hasInvalidStrengthDuration = currentRows.some(
+      (row) => parseDurationToSeconds(row.durationText) <= 0,
+    );
+    if (hasInvalidStrengthDuration) {
+      return "무산소 운동 시간은 13분30초 또는 13:30 형식으로 입력해 주세요.";
+    }
+
     return null;
   };
 
@@ -103,7 +110,7 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
           const recordedAt = new Date();
           recordedAt.setSeconds(recordedAt.getSeconds() + index);
 
-          const response = await createMockExercise(
+          const response = await createExercise(
             userId,
             buildCreatePayload(activeTab, row, recordedAt),
           );

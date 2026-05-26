@@ -26,6 +26,9 @@ public class ExerciseType {
     // 칼로리 계산 기준 (예: 분당, 회당)
     private String calorieUnit;
 
-    // 단위당 소모 칼로리
+    // 단위당 소모 칼로리 (무산소 회당 칼로리)
     private Integer caloriePerUnit;
+
+    // MET 계수 (유산소 운동 칼로리 계산용: kcal = MET × 체중(kg) × 시간(h))
+    private Double met;
 }

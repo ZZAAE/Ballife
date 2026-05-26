@@ -1,3 +1,5 @@
+import { ACCESS_TOKEN_KEY } from "./api";
+
 const EXERCISE_API_BASE =
   (typeof import.meta !== "undefined" &&
     (import.meta.env?.VITE_EXERCISE_API_BASE_URL ||
@@ -5,9 +7,11 @@ const EXERCISE_API_BASE =
   "http://localhost:8080/api";
 
 async function request(path, options = {}) {
+  const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
   const response = await fetch(`${EXERCISE_API_BASE}${path}`, {
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(options.headers || {}),
     },
     ...options,
@@ -31,13 +35,19 @@ async function request(path, options = {}) {
   return response.json();
 }
 
-export function createMockExercise(userId, payload) {
-  return request(`/mock/users/${userId}/exercises`, {
+export function createExercise(userId, payload) {
+  return request(`/users/${userId}/exercises`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export function getMockExercisesByDate(userId, date) {
-  return request(`/mock/users/${userId}/exercises?date=${date}`);
+  return request(`/users/${userId}/exercises?date=${date}`);
+}
+
+// 특정 날짜(미지정 시 오늘)의 소모 칼로리 합계
+export function getBurnedCalorieByDate(userId, date) {
+  const query = date ? `?date=${date}` : "";
+  return request(`/users/${userId}/exercises/burned-calorie${query}`);
 }
