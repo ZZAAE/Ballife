@@ -1,99 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ExerciseModal from "../modals/ExerciseModal";
-
-/* ---------- 운동 종류별 이모지 ---------- */
-const ICON_BY_TYPE = {
-  cycling: "🚴",
-  running: "🏃",
-  stair: "🪜",
-  walking: "🚶",
-  swimming: "🏊",
-  jumprope: "🤸",
-  dumbbellpress: "🏋️",
-  bumbellpress: "🏋️",
-  barbelllow: "🏋️",
-  latpulldown: "🏋️",
-  squat: "🏋️",
-  deadlift: "💪",
-  pullup: "🧗",
-};
-
-/* ---------- 더미 세션 데이터 ----------
-   실제 연동 시 { date, iconType, name, kind, distanceKm?, sets?, reps?, durationSec, calories } 형식으로 교체
-   현재는 "오늘" 기준 상대 날짜로 생성해서 실제 today가 어떤 날이든 이번 주에 데이터가 보이게 함
-*/
-function makeRelativeDate(daysAgo, hour, minute) {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - daysAgo);
-  d.setHours(hour, minute, 0, 0);
-  return d;
-}
-
-const SESSIONS = [
-  {
-    id: 1,
-    date: makeRelativeDate(0, 8, 30),
-    iconType: "cycling",
-    name: "사이클링",
-    kind: "cardio",
-    distanceKm: 8.4,
-    durationSec: 25 * 60,
-    calories: 262,
-  },
-  {
-    id: 2,
-    date: makeRelativeDate(1, 19, 54),
-    iconType: "walking",
-    name: "걷기",
-    kind: "cardio",
-    distanceKm: 1.82,
-    durationSec: 21 * 60 + 51,
-    calories: 156,
-  },
-  {
-    id: 3,
-    date: makeRelativeDate(1, 13, 43),
-    iconType: "walking",
-    name: "걷기",
-    kind: "cardio",
-    distanceKm: 3.1,
-    durationSec: 37 * 60 + 24,
-    calories: 156,
-  },
-  {
-    id: 4,
-    date: makeRelativeDate(2, 18, 30),
-    iconType: "squat",
-    name: "스쿼트",
-    kind: "strength",
-    sets: 5,
-    reps: 12,
-    durationSec: 18 * 60,
-    calories: 132,
-  },
-  {
-    id: 5,
-    date: makeRelativeDate(3, 7, 0),
-    iconType: "running",
-    name: "러닝",
-    kind: "cardio",
-    distanceKm: 4.2,
-    durationSec: 25 * 60,
-    calories: 214,
-  },
-  {
-    id: 6,
-    date: makeRelativeDate(4, 19, 10),
-    iconType: "dumbbellpress",
-    name: "벤치 프레스",
-    kind: "strength",
-    sets: 5,
-    reps: 10,
-    durationSec: 22 * 60,
-    calories: 121,
-  },
-];
+import { useAuth } from "../contexts/AuthContext";
+import {
+  hydrateExerciseSessions,
+  ICON_BY_TYPE,
+  loadExerciseRecords,
+} from "../utils/exerciseRecords";
 
 /* ---------- 유틸 ---------- */
 function startOfWeek(date) {
@@ -338,6 +250,7 @@ function DaySection({ date, sessions }) {
 
 /* ---------- 메인 페이지 ---------- */
 function ExercisePage({ isModalOpen, onCloseModal }) {
+  const { user } = useAuth();
   // 보고 있는 주의 기준 날짜 (주 이동용)
   const [viewDate, setViewDate] = useState(() => {
     const d = new Date();
@@ -347,13 +260,26 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   // 선택된 단일 날짜 필터 — null 이면 전체 주 보기
   const [filterDay, setFilterDay] = useState(null);
   const [sortOrder, setSortOrder] = useState("desc"); // "desc" | "asc"
+  const [storedSessions, setStoredSessions] = useState([]);
+  const userId = user?.userId ?? user?.id ?? 1;
+
+  useEffect(() => {
+    const syncRecords = () => {
+      setStoredSessions(hydrateExerciseSessions(loadExerciseRecords(userId)));
+    };
+
+    syncRecords();
+    window.addEventListener("exercise-records-updated", syncRecords);
+    return () =>
+      window.removeEventListener("exercise-records-updated", syncRecords);
+  }, [userId]);
 
   const weekStart = useMemo(() => startOfWeek(viewDate), [viewDate]);
 
   // 선택 주(일~토)에 해당하는 세션
   const thisWeekSessions = useMemo(
-    () => SESSIONS.filter((s) => sameWeek(s.date, viewDate)),
-    [viewDate],
+    () => storedSessions.filter((session) => sameWeek(session.date, viewDate)),
+    [storedSessions, viewDate],
   );
 
   const thisWeekStats = useMemo(() => {
@@ -476,7 +402,13 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
         </div>
       </div>
 
-      <ExerciseModal isOpen={isModalOpen} onClose={onCloseModal} />
+      <ExerciseModal
+        isOpen={isModalOpen}
+        onClose={onCloseModal}
+        onSaved={(records) =>
+          setStoredSessions(hydrateExerciseSessions(records))
+        }
+      />
     </div>
   );
 }
