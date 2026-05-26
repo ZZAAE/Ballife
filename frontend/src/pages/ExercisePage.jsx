@@ -329,10 +329,10 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
         <div className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           <header className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+              <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                 운동 기록
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              </h1>
+              <p className="mb-8 text-sm text-gray-500">
                 지난 운동 변화를 분석한 결과입니다.
               </p>
             </div>

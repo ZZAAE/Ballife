@@ -13,10 +13,10 @@ const authApi = {
         return api.post('/auth/login', credentials);
     },
 
-    //사용자명 중복 체크
-    checkUsername: (username) => {
-        return api.get('auth/check-loginid', 
-            {params: {username}});
+    //로그인 아이디 중복 체크
+    checkUsername: (userId) => {
+        return api.get('auth/check-loginid',
+            {params: {userId}});
     },
 
     //닉네임 중복 체크

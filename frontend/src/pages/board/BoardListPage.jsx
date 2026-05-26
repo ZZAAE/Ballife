@@ -186,7 +186,16 @@ function BoardListPage() {
 
       {/* 게시글 테이블 */}
       <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        <table className="w-full text-sm">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            <col className="w-[70px]" />
+            <col className="w-[110px]" />
+            <col />
+            <col className="w-[130px]" />
+            <col className="w-[90px]" />
+            <col className="w-[90px]" />
+            <col className="w-[120px]" />
+          </colgroup>
           <thead className="border-b border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]">
             <tr>
               <th className="px-4 py-3 text-center font-medium">번호</th>
@@ -213,13 +222,13 @@ function BoardListPage() {
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      className="text-[#0F172A] hover:text-[#1E293B]"
+                      className="block truncate text-[#0F172A] hover:text-[#1E293B]"
                       to={`/posts/${post.id}`}
                     >
                       {post.title}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-center text-[#64748B]">{post.userNickname}</td>
+                  <td className="truncate px-4 py-3 text-center text-[#64748B]">{post.userNickname}</td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.viewCount}</td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.upVote ?? 0}</td>
                   <td className="px-4 py-3 text-center text-[#94A3B8]">

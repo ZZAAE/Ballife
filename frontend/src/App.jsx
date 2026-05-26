@@ -1,82 +1,84 @@
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import { useState } from 'react';
-import ChatBot from './modals/Chatbot';
-import SignUpPage from './pages/user/SignUpPage';
-import LoginPage from './pages/user/LoginPage';
-import DiseasePage from './pages/user/DiseasePage'
-import BoardListPage from './pages/board/BoardListPage';
-import PostCreatePage from './pages/board/PostCreatePage';
-import PostEditPage from './pages/board/PostEditPage';
-import PostDetailPage from './pages/board/PostDetailPage';
-import MainPage from './pages/main/MainPage';
-import WeightRecord from './pages/AllRecordRead/WeightRecord';
-import BloodPressureRecord from './pages/AllRecordRead/BloodPressureRecord';
-import BloodSugarRecord from './pages/AllRecordRead/BloodSugarRecord';
-import ExercisePage from './pages/ExercisePage';
-import RecordPage from './pages/AllRecordRead/RecordPage';
-import RecordSummary from './pages/AllRecordRead/RecordSummary';
-import MealPage from './pages/MealPage';
-import MainReportPage from './pages/report/MainReportPage';
-import MedicationPage from './pages/MedicationPage'
-import OsteoporosisReportPage from './pages/report/OsteoporosisReportPage';
-import DiabetesReportPage from './pages/report/DiabetesReportPage';
-import GoutReportPage from './pages/report/GoutReportPage';
-import HypertensionReportPage from './pages/report/HypertensionReportPage';
-import DyslipidemiaReportPage from './pages/report/DyslipidemiaReportPage';
-import ObesityReportPage from './pages/report/ObesityReportPage';
-import Header from './components/Header';
-import HealthIndicatorMenu from './components/HealthMenu';
-import HealthCalenderPage from './pages/main/HealthCalenderPage';
-import AllRecordPage from './pages/AllRecordPage';
-import UserInformation from './pages/user/UserInformation'
-import Calendar from './components/mainpage/calendar';
-import PetPage from './pages/PetPage';
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import { useState } from "react";
+import ChatBot from "./modals/Chatbot";
+import SignUpPage from "./pages/user/SignUpPage";
+import LoginPage from "./pages/user/LoginPage";
+import DiseasePage from "./pages/user/DiseasePage";
+import ProfileEditPage from "./pages/user/ProfileEditPage";
+import DiseaseEditPage from "./pages/user/DiseaseEditPage";
+import BoardListPage from "./pages/board/BoardListPage";
+import PostCreatePage from "./pages/board/PostCreatePage";
+import PostEditPage from "./pages/board/PostEditPage";
+import PostDetailPage from "./pages/board/PostDetailPage";
+import MainPage from "./pages/main/MainPage";
+import WeightRecord from "./pages/AllRecordRead/WeightRecord";
+import BloodPressureRecord from "./pages/AllRecordRead/BloodPressureRecord";
+import BloodSugarRecord from "./pages/AllRecordRead/BloodSugarRecord";
+import ExercisePage from "./pages/ExercisePage";
+import RecordPage from "./pages/AllRecordRead/RecordPage";
+import RecordSummary from "./pages/AllRecordRead/RecordSummary";
+import MealPage from "./pages/MealPage";
+import MainReportPage from "./pages/report/MainReportPage";
+import MedicationPage from "./pages/MedicationPage";
+import OsteoporosisReportPage from "./pages/report/OsteoporosisReportPage";
+import DiabetesReportPage from "./pages/report/DiabetesReportPage";
+import GoutReportPage from "./pages/report/GoutReportPage";
+import HypertensionReportPage from "./pages/report/HypertensionReportPage";
+import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
+import ObesityReportPage from "./pages/report/ObesityReportPage";
+import Header from "./components/Header";
+import HealthIndicatorMenu from "./components/HealthMenu";
+import HealthCalenderPage from "./pages/main/HealthCalenderPage";
+import AllRecordPage from "./pages/AllRecordPage";
+import UserInformation from "./pages/user/UserInformation";
+import Calendar from "./components/mainpage/calendar";
+import PetPage from "./pages/PetPage";
 
 function App() {
   const location = useLocation();
   const hideHealthMenu =
-    location.pathname === '/login' ||
-    location.pathname === '/signup' ||
-    location.pathname === '/disease' ||
-    location.pathname === '/boards' ||
-    location.pathname === '/posts/create' ||
-    location.pathname === '/intro/web' ||
-    location.pathname === '/intro/osteoporosis' ||
-    location.pathname === '/intro/diabetes' ||
-    location.pathname === '/intro/gout' ||
-    location.pathname === '/intro/hypertension' ||
-    location.pathname === '/intro/hyperlipidemia' ||
-    location.pathname === '/intro/dyslipidemia' ||
-    location.pathname === '/intro/obesity' ||
-    location.pathname === '/AllRecordPage'||
-    location.pathname === '/allRecord' ||
-    location.pathname === '/' ||
-    location.pathname === '/member' ||
-    location.pathname.startsWith('/member/') ||
-    location.pathname.startsWith('/check/') ||
-    location.pathname.startsWith('/posts/');
-    
-    const hideChatbot =
-    location.pathname === '/login' ||
-    location.pathname === '/signup' ||
-    location.pathname === '/disease' ||
-    location.pathname === '/boards' ||
-    location.pathname === '/intro/web' ||
-    location.pathname === '/intro/osteoporosis' ||
-    location.pathname === '/intro/diabetes' ||
-    location.pathname === '/intro/gout' ||
-    location.pathname === '/intro/hypertension' ||
-    location.pathname === '/intro/dyslipidemia' ||
-    location.pathname === '/intro/obesity' ||
-    location.pathname === '/intro/hyperlipidemia' ||
-    location.pathname.startsWith('/posts/');
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/disease" ||
+    location.pathname === "/boards" ||
+    location.pathname === "/posts/create" ||
+    location.pathname === "/intro/web" ||
+    location.pathname === "/intro/osteoporosis" ||
+    location.pathname === "/intro/diabetes" ||
+    location.pathname === "/intro/gout" ||
+    location.pathname === "/intro/hypertension" ||
+    location.pathname === "/intro/hyperlipidemia" ||
+    location.pathname === "/intro/dyslipidemia" ||
+    location.pathname === "/intro/obesity" ||
+    location.pathname === "/AllRecordPage" ||
+    location.pathname === "/allRecord" ||
+    location.pathname === "/" ||
+    location.pathname === "/member" ||
+    location.pathname.startsWith("/member/") ||
+    location.pathname.startsWith("/check/") ||
+    location.pathname.startsWith("/posts/");
+
+  const hideChatbot =
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/disease" ||
+    location.pathname === "/boards" ||
+    location.pathname === "/intro/web" ||
+    location.pathname === "/intro/osteoporosis" ||
+    location.pathname === "/intro/diabetes" ||
+    location.pathname === "/intro/gout" ||
+    location.pathname === "/intro/hypertension" ||
+    location.pathname === "/intro/dyslipidemia" ||
+    location.pathname === "/intro/obesity" ||
+    location.pathname === "/intro/hyperlipidemia" ||
+    location.pathname.startsWith("/posts/");
 
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      <main className="py-12">
+      <main className="pt-12">
         <Header />
         <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
@@ -113,7 +115,16 @@ function App() {
               <Route path="/check/medicine" element={<MedicationPage />} />
 
               <Route path="/member" element={<UserInformation />} />
+              <Route
+                path="/member/edit/profile"
+                element={<ProfileEditPage />}
+              />
+              <Route
+                path="/member/edit/disease"
+                element={<DiseaseEditPage />}
+              />
               <Route path="/member/pet" element={<PetPage />} />
+              <Route path="/user/information" element={<UserInformation />} />
 
               <Route path="/allRecord" element={<AllRecordPage />} />
               <Route path="/intro/web" element={<MainReportPage />} />
@@ -133,7 +144,7 @@ function App() {
               />
               <Route path="/intro/obesity" element={<ObesityReportPage />} />
               <Route path="/healthcalendar" element={<HealthCalenderPage />} />
-              
+
               <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>

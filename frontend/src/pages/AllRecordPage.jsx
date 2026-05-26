@@ -461,11 +461,11 @@ function AllRecordPage() {
             >
               {bloodPressureRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("bp")} />
+
                   {bloodPressureRecords.map((record, index) => (
                     <BloodPressureRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("bp")} />
                 </div>
               ) : null}
             </LargeRecordCard>
@@ -485,11 +485,11 @@ function AllRecordPage() {
             >
               {bloodSugarRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("blood")} />
+
                   {bloodSugarRecords.map((record, index) => (
                     <BloodSugarRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("blood")} />
                 </div>
               ) : null}
             </LargeRecordCard>
@@ -553,11 +553,11 @@ function AllRecordPage() {
             >
               {exerciseRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("exercise")} />
+
                   {exerciseRecords.map((record, index) => (
                     <ExerciseRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("exercise")} />
                 </div>
               ) : null}
             </LargeRecordCard>

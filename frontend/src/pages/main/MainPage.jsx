@@ -230,18 +230,18 @@ const MainPage = () => {
             </header>
 
             {/* ====================== 펫 섹션 ====================== */}
-            <section className={`${CARD_STYLE} p-6 sm:p-8`}>
+            <section className="rounded-3xl border border-slate-700 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-950 p-6 shadow-[0_10px_26px_rgba(15,23,42,0.22)] sm:p-8">
               <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8">
                 <div>
-                  <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A]">
+                  <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-white">
                     내 펫이 기다리고 있어요
                   </h2>
-                  <p className="mt-2 text-sm lg:text-base text-[#64748B]">
+                  <p className="mt-2 text-sm lg:text-base text-slate-300">
                     펫과 함께 건강한 하루를 시작해보세요.
                   </p>
                   <Link
                     to="/member/pet"
-                    className="group mt-5 inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#1E293B]"
+                    className="group mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
                   >
                     내 펫 자세히 보기
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -249,7 +249,7 @@ const MainPage = () => {
                 </div>
 
                 <div className="relative mx-auto w-full max-w-[520px]">
-                  <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-100">
+                  <div className="relative overflow-hidden rounded-3xl">
                     <Unity
                       unityProvider={unityProvider}
                       style={{

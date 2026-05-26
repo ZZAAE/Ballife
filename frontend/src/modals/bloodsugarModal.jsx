@@ -1,5 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Calendar, Clock } from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
+import bioValueRecordApi from "../api/bioValueRecordApi";
 
 const MEALS = [
   { id: "공복", label: "공복", hasTiming: false },
@@ -44,6 +47,8 @@ const makeDefaultRecord = () => ({
 });
 
 export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -169,9 +174,39 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
     }
   };
 
-  const handleSave = () => {
-    if (currentVal > 0) {
+  const handleSave = async (e) => {
+    e?.stopPropagation();
+
+    if (isSaving) return;
+
+    if (currentVal <= 0) {
+      toast.error("혈당 수치를 입력해주세요");
+      return;
+    }
+
+    const userId = user?.userId ?? user?.id;
+    if (!userId) {
+      toast.error("로그인이 필요합니다");
+      return;
+    }
+
+    const payload = {
+      recordDate: selectedDate,
+      recordTime: `${timeValue}:00`,
+      category: "BloodSugar",
+      bloodSugar: Math.round(currentVal),
+    };
+
+    try {
+      setIsSaving(true);
+      await bioValueRecordApi.createBioValueRecord(userId, payload);
       updateCurrentRecord({ saved: true });
+      toast.success("혈당이 저장되었습니다");
+      onClose();
+    } catch {
+      // 에러 토스트는 api 인터셉터에서 처리됨
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -454,16 +489,17 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
         </div>
 
         {/* 저장 버튼 */}
-        <div onClick={onClose} className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
+        <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
           <button
             onClick={handleSave}
-            className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl ${
+            disabled={isSaving}
+            className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
               isSaved
                 ? "bg-[#0f172a] text-white hover:bg-[#1a1a2e] active:scale-[0.98]"
                 : "bg-[#1a1a2e] text-white hover:bg-[#25253d] active:scale-[0.98]"
             }`}
           >
-            {isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
+            {isSaving ? "저장 중..." : isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
           </button>
         </div>
     </div>
