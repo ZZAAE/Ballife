@@ -91,40 +91,42 @@ export const AuthProvider = ({ children }) => {
     const logoutRef = useRef(logout);
     logoutRef.current = logout;
 
-    useEffect(() => {
-        // 로그인 안되어 있으면 아무것도 안함
-        if (!user) {
-            return undefined;
-        }
-        //실패 회수
-        let fails = 0;
-
-        //헬스 체크 함수
-        const check = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/health`, {
-                    method: 'GET',
-                    cache: 'no-store', //실제 서버에 물어봄
-                    credentials: 'omit', //살았니? 죽었니?
-                });
-                if (res.ok) {
-                    fails = 0; //살았으면 카운트 리셋
-                    return;
-                }
-                fails += 1; //죽었으면 카운트 증가
-            } catch {
-                fails += 1; //네트워크 에러
-            }
-            //강제 로그아웃
-            if (fails >= HEALTH_FAIL_LOGOUT) {
-                logoutRef.current();
-                toast.error('서버에 연결할 수 없어 로그아웃되었습니다.');
-            }
-        };
-        const id = setInterval(check, SERVER_HEALTH_MS); //주기적 실행
-        check(); //최초 즉시 1회 실행
-        return () => clearInterval(id); //로그아웃시 인터벌 정리
-    }, [user]);
+    // 백엔드 /api/health 엔드포인트 미구현으로 인한 강제 로그아웃 버그 회피용 임시 비활성화
+    // 백엔드에 HealthController 추가 후 다시 활성화할 것
+    // useEffect(() => {
+    //     // 로그인 안되어 있으면 아무것도 안함
+    //     if (!user) {
+    //         return undefined;
+    //     }
+    //     //실패 회수
+    //     let fails = 0;
+    //
+    //     //헬스 체크 함수
+    //     const check = async () => {
+    //         try {
+    //             const res = await fetch(`${API_BASE}/health`, {
+    //                 method: 'GET',
+    //                 cache: 'no-store', //실제 서버에 물어봄
+    //                 credentials: 'omit', //살았니? 죽었니?
+    //             });
+    //             if (res.ok) {
+    //                 fails = 0; //살았으면 카운트 리셋
+    //                 return;
+    //             }
+    //             fails += 1; //죽었으면 카운트 증가
+    //         } catch {
+    //             fails += 1; //네트워크 에러
+    //         }
+    //         //강제 로그아웃
+    //         if (fails >= HEALTH_FAIL_LOGOUT) {
+    //             logoutRef.current();
+    //             toast.error('서버에 연결할 수 없어 로그아웃되었습니다.');
+    //         }
+    //     };
+    //     const id = setInterval(check, SERVER_HEALTH_MS); //주기적 실행
+    //     check(); //최초 즉시 1회 실행
+    //     return () => clearInterval(id); //로그아웃시 인터벌 정리
+    // }, [user]);
 
     const isAuthenticated = !!user;
 

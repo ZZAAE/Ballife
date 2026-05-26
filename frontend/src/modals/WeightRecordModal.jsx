@@ -1,32 +1,151 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Calendar } from 'lucide-react';
+import toast from 'react-hot-toast';
+import bioValueRecordApi from '../api/bioValueRecordApi';
+import userConfigApi from '../api/userConfigApi';
+import { useAuth } from '../contexts/AuthContext';
+import { USER_KEY } from '../api/api';
 
-const WeightRecordModal = ({ isOpen, onClose }) => {
-  const [weight, setWeight] = useState("70.5");
-  // 목표 관련 설정값 (나중에는 UserConfig에서 불러옴)
-  const targetWeight = 68.0;
-  const startWeight = 75.0; // 시작 체중 (전날 체중으로 먼저 띄워줘도 될듯?)
+const WEIGHT_CATEGORY = "Weight";
+
+
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem('user') ||
+      localStorage.getItem('loginUser');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
+  const { user } = useAuth();
+  const userId = resolveUserId(user);
+
+  const [weight, setWeight] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [targetWeight, setTargetWeight] = useState(null);
+  const [startWeight, setStartWeight] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen || !userId) return;
+
+    let cancelled = false;
+
+    Promise.allSettled([
+      userConfigApi.getTargetWeight(userId),
+      bioValueRecordApi.getLatestPageByCategory(userId, WEIGHT_CATEGORY),
+    ]).then(([targetRes, latestRes]) => {
+      if (cancelled) return;
+
+      if (targetRes.status === "fulfilled" && targetRes.value?.data != null) {
+        setTargetWeight(Number(targetRes.value.data));
+      }
+
+      if (latestRes.status === "fulfilled") {
+        const content = latestRes.value?.data?.content ?? [];
+        const last = content[0];
+        if (last?.weight != null) {
+          const lastWeight = Number(last.weight);
+          setStartWeight(lastWeight);
+          setWeight(String(lastWeight));
+        }
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, userId]);
 
   if (!isOpen) return null;
 
-  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭) // 수정 필요 (서비스에서 하던가 아님 프론트에서 해될듯)
+  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭)
   const calculateProgress = () => {
+    if (targetWeight == null || startWeight == null) return 0;
     const current = parseFloat(weight) || 0;
     if (current <= targetWeight) return 100;
     const totalToLose = startWeight - targetWeight;
+    if (totalToLose <= 0) return 0;
     const lostSoFar = startWeight - current;
     const percentage = (lostSoFar / totalToLose) * 100;
     return Math.max(0, Math.min(100, Math.round(percentage)));
   };
 
   const progress = calculateProgress();
-  const weightDiff = (parseFloat(weight || 0) - targetWeight).toFixed(1);
+  const weightDiff =
+    targetWeight == null
+      ? null
+      : (parseFloat(weight || 0) - targetWeight).toFixed(1);
 
   // 체중입력에 숫자 외 다른거 걸러줌
   const handleWeightChange = (e) => {
     const value = e.target.value;
     if (/^\d*\.?\d{0,1}$/.test(value)) {
       setWeight(value);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    const weightValue = parseFloat(weight);
+    if (!weightValue || weightValue <= 0) {
+      toast.error("체중을 정확히 입력해주세요.");
+      return;
+    }
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    const payload = {
+      recordDate,
+      recordTime,
+      category: WEIGHT_CATEGORY,
+      weight: weightValue,
+    };
+
+    setSubmitting(true);
+    try {
+      // 1. 오늘 같은 카테고리 기록이 이미 있는지 조회 (체중은 하루 1개만 유지)
+      const todayRes = await bioValueRecordApi.searchByDate(
+        userId,
+        WEIGHT_CATEGORY,
+        recordDate,
+      );
+      const existing = Array.isArray(todayRes.data) ? todayRes.data[0] : null;
+
+      let res;
+      if (existing?.recordId != null) {
+        // 2-a. 있으면 update
+        res = await bioValueRecordApi.updateBioValueRecord(
+          existing.recordId,
+          payload,
+        );
+        toast.success("오늘의 체중 기록이 수정되었습니다.");
+      } else {
+        // 2-b. 없으면 insert
+        res = await bioValueRecordApi.createBioValueRecord(userId, payload);
+        toast.success("체중이 기록되었습니다.");
+      }
+
+      onSaved?.(res.data);
+      onClose?.();
+    } catch (err) {
+      console.error("체중 기록 실패:", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -85,12 +204,16 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
             <div className="flex justify-between items-end px-1">
               <div>
                 <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">목표 체중</p>
-                <p className="text-2xl font-extrabold text-slate-800">{targetWeight.toFixed(1)} kg</p>
+                <p className="text-2xl font-extrabold text-slate-800">
+                  {targetWeight != null ? `${targetWeight.toFixed(1)} kg` : "— kg"}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">현재와의 차이</p>
-                <p className={`text-2xl font-extrabold ${parseFloat(weightDiff) <= 0 ? 'text-green-500' : 'text-blue-600'}`}>
-                   {parseFloat(weightDiff) > 0 ? `+ ${weightDiff}` : `${weightDiff}`} kg
+                <p className={`text-2xl font-extrabold ${weightDiff != null && parseFloat(weightDiff) <= 0 ? 'text-green-500' : 'text-blue-600'}`}>
+                   {weightDiff == null
+                     ? "— kg"
+                     : `${parseFloat(weightDiff) > 0 ? "+ " : ""}${weightDiff} kg`}
                 </p>
               </div>
             </div>
@@ -114,17 +237,22 @@ const WeightRecordModal = ({ isOpen, onClose }) => {
           <div className="rounded-[24px] bg-blue-50/40 p-5 border border-blue-100 flex gap-4">
             <div className="mt-0.5"><span className="text-blue-500 text-2xl">✦</span></div>
             <p className="text-[14px] leading-relaxed text-slate-600 font-medium">
-              {progress >= 100 
-                ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요." 
-                : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!
-                   이부분은 AI 조언 할건가 아니면 그냥 프로트에서 띄울것인가`}
+              {targetWeight == null
+                ? "목표 체중을 설정하면 달성률과 맞춤 조언을 확인할 수 있어요."
+                : progress >= 100
+                  ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요."
+                  : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!`}
             </p>
           </div>
 
           {/* Footer Button */}
           <div className="pt-4">
-            <button onClick={onClose} className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl">
-              기록 저장 및 확인
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {submitting ? "저장 중..." : "기록 저장 및 확인"}
             </button>
           </div>
         </div>
