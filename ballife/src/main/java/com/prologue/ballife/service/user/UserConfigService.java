@@ -40,8 +40,9 @@ public class UserConfigService {
     }
 
     public Integer getTargetDailyWaterIntake(Long userId) {
-        UserConfig userConfig = findUserConfigByUserId(userId);
-        return userConfig.getTargetDailyWaterIntake();
+        return userConfigRepository.findByUser_UserId(userId)
+                .map(UserConfig::getTargetDailyWaterIntake)
+                .orElse(0);
     }
 
     public Map<String, LocalTime> getMealTimes(Long userId) {
