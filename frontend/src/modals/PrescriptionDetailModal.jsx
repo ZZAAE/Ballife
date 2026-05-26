@@ -134,25 +134,16 @@ export default function PrescriptionDetailModal({ open, group, onClose }) {
 
               <div className="flex-1 grid grid-cols-3 gap-6">
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.12em] text-[#2563EB] uppercase mb-1">
-                    Medication Name
-                  </p>
                   <p className="text-[18px] font-semibold text-gray-800">
                     {medicine.name}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.12em] text-gray-500 uppercase mb-1">
-                    Purpose
-                  </p>
                   <p className="text-[15px] text-gray-700">{medicine.purpose}</p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.12em] text-gray-500 uppercase mb-1">
-                    Dosage
-                  </p>
                   <p className="text-[15px] text-gray-700 whitespace-pre-line">
                     {medicine.dosageText}
                   </p>
