@@ -19,6 +19,12 @@ const bioValueRecordApi = {
     });
   },
 
+  searchByDateBetween: (userId, category, start, end) => {
+    return api.get(`/bioValueRecords/searchRecordDateBetween/${userId}`, {
+      params: { category, start, end },
+    });
+  },
+
   // 카테고리별 최신 기록 1건 
   getLatestPageByCategory: (userId, category) => {
     return api.get(`/bioValueRecords/searchBioValuePage/${userId}`, {

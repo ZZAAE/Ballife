@@ -33,7 +33,6 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
   const [weight, setWeight] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [targetWeight, setTargetWeight] = useState(null);
-  const [startWeight, setStartWeight] = useState(null);
 
   useEffect(() => {
     if (!isOpen || !userId) return;
@@ -54,9 +53,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
         const content = latestRes.value?.data?.content ?? [];
         const last = content[0];
         if (last?.weight != null) {
-          const lastWeight = Number(last.weight);
-          setStartWeight(lastWeight);
-          setWeight(String(lastWeight));
+          setWeight(String(Number(last.weight)));
         }
       }
     });
@@ -68,15 +65,15 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
   if (!isOpen) return null;
 
-  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭)
+  // 달성률: 목표와의 절대 거리를 10kg 스케일로 환산 (1kg ≈ 10%)
+  // 0kg 차이 → 100%, 5kg → 50%, 10kg+ → 0%
+  const PROGRESS_SCALE_KG = 10;
   const calculateProgress = () => {
-    if (targetWeight == null || startWeight == null) return 0;
+    if (targetWeight == null) return 0;
     const current = parseFloat(weight) || 0;
-    if (current <= targetWeight) return 100;
-    const totalToLose = startWeight - targetWeight;
-    if (totalToLose <= 0) return 0;
-    const lostSoFar = startWeight - current;
-    const percentage = (lostSoFar / totalToLose) * 100;
+    if (!current) return 0;
+    const diff = Math.abs(current - targetWeight);
+    const percentage = 100 - (diff / PROGRESS_SCALE_KG) * 100;
     return Math.max(0, Math.min(100, Math.round(percentage)));
   };
 
