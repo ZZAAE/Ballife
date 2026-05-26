@@ -39,7 +39,7 @@ public class BioValueRecordController {
     @PostMapping("/{userId}") 
     public ResponseEntity<BioValueRecordDto.BioResponse> createBioValueRecord(
         @Parameter(description = "유저 UUID") @PathVariable Long userId,
-        @Valid @RequestBody BioValueRecordDto.CreateRequest request){
+        @Valid @org.springframework.web.bind.annotation.RequestBody BioValueRecordDto.CreateRequest request){
             BioValueRecordDto.BioResponse response = bioValueRecordService.createBioValueRecord(userId, request);
             return ResponseEntity.ok(response);
     }
@@ -48,7 +48,7 @@ public class BioValueRecordController {
     @PutMapping("/{recordId}")
     public ResponseEntity<BioValueRecordDto.BioResponse> updateBioValueRecord(
         @Parameter(description = "RecordID") @PathVariable Long recordId,
-        @Valid @RequestBody BioValueRecordDto.UpdateRequest request){
+        @Valid @org.springframework.web.bind.annotation.RequestBody BioValueRecordDto.UpdateRequest request){
             return ResponseEntity.ok(bioValueRecordService.updateBioValueRecord(recordId, request));
     }
 
