@@ -104,11 +104,11 @@ function DiseasePage() {
 	};
 
 	return (
-		<div className="flex min-h-[calc(100vh-10rem)]  bg-white px-8 py-10">
-			<div className="mx-auto flex min-h-full w-1/3 flex-col rounded-[28px]   bg-white px-8 py-10  sm:px-10">
+		<div className="flex min-h-screen items-center justify-center bg-white px-8 py-10">
+			<div className="flex w-1/3 flex-col rounded-[28px] bg-white px-8 py-10 sm:px-10">
 				<h1 className="text-3xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
 
-				<form onSubmit={handleSubmit} className="mt-10 flex flex-1 flex-col">
+				<form onSubmit={handleSubmit} className="mt-10 flex flex-col">
 					<div className="space-y-6">
 						{diseaseFields.map((field) => (
 							<div key={field.name} className="space-y-2">
@@ -153,7 +153,7 @@ function DiseasePage() {
 						))}
 					</div>
 
-					<Button type="submit" className="mt-auto h-12 w-full !rounded-lg !bg-black !text-sm !font-semibold !text-white hover:!bg-gray-900 focus:!ring-black">
+					<Button type="submit" className="mt-10 h-12 w-full !rounded-lg !bg-black !text-sm !font-semibold !text-white hover:!bg-gray-900 focus:!ring-black">
 						완료
 					</Button>
 				</form>

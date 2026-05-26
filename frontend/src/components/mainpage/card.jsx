@@ -130,7 +130,7 @@ const medicineCard = [
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {statusCards.map((card, idx) => (
               <Link to={`/check/${card.link}`} key={idx}>
-              <div className={`${card.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 min-h-[140px]`}>
+              <div className={`${card.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 min-h-[140px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
                 <div>
                   <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
                   <p className="text-xl font-bold">{card.value}</p>
@@ -147,7 +147,7 @@ const medicineCard = [
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {actionCards.map((card, idx) => (
               <Link to={`/check/${card.link}`} key={idx}>
-              <div className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-opacity min-h-[140px]`}>
+              <div className={`${card.color} ${card.textColor || 'text-slate-900'} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 min-h-[140px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
                 <div>
                   <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>
                   <p className={`text-lg font-bold ${card.labelColor || 'text-black'}`}>{card.value}</p>
@@ -165,7 +165,7 @@ const medicineCard = [
         <section className="lg:h-full">
           {medicineCard.map((card, idx) => (
             <Link to={`/check/${card.link}`} key={idx} className="block h-full">
-            <div className={`${card.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10`}>
+            <div className={`${card.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className={`text-xs ${card.overcolor || 'text-slate-400'} mb-1`}>{card.type}</p>

@@ -69,9 +69,9 @@ const dummy = {
 
 function ProgressBar({ progress }) {
   return (
-    <div className="mt-3 h-2 w-full rounded-full bg-gray-200">
+    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200">
       <div
-        className="h-2 rounded-full bg-[#0f1c33]"
+        className="h-1.5 rounded-full bg-[#0f1c33]"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -90,27 +90,27 @@ function MetricCard({
 }) {
   return (
     <div
-      className="flex min-h-[220px] flex-col justify-between rounded-2xl border border-gray-100 p-7 shadow-sm"
+      className="flex min-h-[150px] flex-col justify-between rounded-2xl border border-gray-100 p-5 shadow-sm"
       style={{ backgroundColor: bgColor || "#ffffff" }}
     >
-      <div className="mb-3 flex items-center justify-between text-sm text-gray-400">
+      <div className="flex items-center justify-between text-xs text-gray-500">
         <span>{label}</span>
         {badge && (
           <button
             type="button"
             onClick={onBadgeClick}
-            className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-500 hover:bg-blue-100 transition"
+            className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-500 hover:bg-blue-100 transition"
           >
             {badge}
           </button>
         )}
       </div>
-      <div className="flex items-end gap-1.5">
-        <span className="text-4xl font-bold text-gray-900">{value}</span>
-        <span className="mb-1.5 text-base text-gray-500">{unit}</span>
+      <div className="mt-2 flex items-end gap-1">
+        <span className="text-3xl font-bold text-gray-900">{value}</span>
+        <span className="mb-1 text-sm text-gray-500">{unit}</span>
       </div>
       {progress !== undefined && <ProgressBar progress={progress} />}
-      {sub && <p className="mt-3 text-xs text-gray-400">{sub}</p>}
+      {sub && <p className="mt-2 text-[11px] text-gray-400">{sub}</p>}
     </div>
   );
 }
@@ -220,55 +220,84 @@ function UserInformation() {
               <div className="flex flex-col gap-5 pr-8">
                 {/* 회원 정보 카드 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-                  <h3 className="mb-4 text-sm font-bold text-gray-800">
+                  <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
                     회원 정보
                   </h3>
-                  <dl className="space-y-3 text-sm">
+                  <dl className="space-y-4">
                     <div>
-                      <dt className="text-xs text-gray-400">이메일 주소</dt>
-                      <dd className="mt-0.5 font-medium text-gray-700">
+                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                        이메일 주소
+                      </dt>
+                      <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] break-all">
                         {profile.email}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-gray-400">휴대폰 번호</dt>
-                      <dd className="mt-0.5 font-medium text-gray-700">
+                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                        휴대폰 번호
+                      </dt>
+                      <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                         {dummy.phone}
                       </dd>
                     </div>
-                    <div className="flex gap-6">
+                    <div className="flex gap-8">
                       <div>
-                        <dt className="text-xs text-gray-400">생년월일</dt>
-                        <dd className="mt-0.5 font-medium text-gray-700">
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          생년월일
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {profile.birth}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-xs text-gray-400">성별</dt>
-                        <dd className="mt-0.5 font-medium text-gray-700">
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          성별
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A]">
                           {profile.gender}
                         </dd>
                       </div>
                     </div>
                     <div>
-                      <dt className="text-xs text-gray-400">질환</dt>
-                      <dd className="mt-0.5 font-medium text-gray-700">
+                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                        질환
+                      </dt>
+                      <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A]">
                         {profile.disease}
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-xs text-gray-400 mb-1">정상 혈당</dt>
-                      <dd className="space-y-0.5 text-gray-700">
-                        <p>공복: {dummy.bloodSugar.fasting}</p>
-                        <p>식사 1시간: {dummy.bloodSugar.after1h}</p>
-                        <p>식사 2시간: {dummy.bloodSugar.after2h}</p>
+                    <div className="border-t border-gray-100 pt-4">
+                      <dt className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                        정상 혈당
+                      </dt>
+                      <dd className="space-y-1 text-[13px] text-[#475569] tabular-nums">
+                        <div className="flex justify-between">
+                          <span className="text-[#64748B]">공복</span>
+                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.fasting}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#64748B]">식사 1시간</span>
+                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.after1h}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#64748B]">식사 2시간</span>
+                          <span className="font-medium text-[#0F172A]">{dummy.bloodSugar.after2h}</span>
+                        </div>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-gray-400 mb-1">정상 혈압</dt>
-                      <dd className="space-y-0.5 text-gray-700">
-                        <p>수축기: {dummy.bloodPressure.systolic}</p>
-                        <p>이완기: {dummy.bloodPressure.diastolic}</p>
+                      <dt className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                        정상 혈압
+                      </dt>
+                      <dd className="space-y-1 text-[13px] text-[#475569] tabular-nums">
+                        <div className="flex justify-between">
+                          <span className="text-[#64748B]">수축기</span>
+                          <span className="font-medium text-[#0F172A]">{dummy.bloodPressure.systolic}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#64748B]">이완기</span>
+                          <span className="font-medium text-[#0F172A]">{dummy.bloodPressure.diastolic}</span>
+                        </div>
                       </dd>
                     </div>
                   </dl>
@@ -350,26 +379,26 @@ function UserInformation() {
                 </div>
 
                 {/* 약 등록 + 하루 생활 루틴 */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 w-full">
+                <div className="grid w-full flex-1 grid-cols-1 gap-5 sm:grid-cols-2">
                   {/* 약 등록 */}
-                  <div className="flex min-h-[460px] flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:min-h-[600px]">
+                  <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-gray-800">
                         💊 약 등록
                       </h3>
                       <button className="text-xs text-blue-500 hover:underline">
-                        편집 ...
+                        편집
                       </button>
                     </div>
                     <div className="flex flex-1 items-center justify-center rounded-xl bg-gray-100 py-6">
                       <div className="text-center text-gray-400">
-                        <div className="mb-2 text-4xl">💊</div>
+                        <div className="mb-1 text-3xl">💊</div>
                         <p className="text-xs">처방전 이미지</p>
                         <p className="text-[10px] mt-0.5 text-gray-300">RX</p>
                       </div>
                     </div>
                     <button
-                      className="mt-3 h-10 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                      className="mt-3 h-9 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       onClick={() => SetPreResisterModalOpen(true)}
                     >
                       사진 업로드
@@ -377,8 +406,8 @@ function UserInformation() {
                   </div>
 
                   {/* 하루 생활 루틴 */}
-                  <div className="flex min-h-[460px] flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:min-h-[600px]">
-                    <div className="mb-4 flex items-center justify-between">
+                  <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-gray-800">
                         하루 생활 루틴
                       </h3>
@@ -393,7 +422,7 @@ function UserInformation() {
                       {dummy.routine.map((item) => (
                         <div
                           key={item.label}
-                          className="flex items-center justify-between border-b border-gray-100 py-4 last:border-0"
+                          className="flex items-center justify-between border-b border-gray-100 py-3 last:border-0"
                         >
                           <span className="text-sm text-gray-600">
                             {item.label}

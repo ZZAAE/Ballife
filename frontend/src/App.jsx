@@ -78,7 +78,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      <main className="py-12">
+      <main className="pt-12">
         <Header />
         <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
