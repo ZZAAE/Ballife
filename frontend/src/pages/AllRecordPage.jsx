@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { useParams, useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
@@ -19,6 +19,10 @@ import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
+import {
+  hydrateExerciseSessions,
+  loadExerciseRecords,
+} from "../utils/exerciseRecords";
 
 import {
   BloodPressureRecordItem,
@@ -199,8 +203,17 @@ function MealBox({ title, onClick }) {
   );
 }
 
+function formatDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function AllRecordPage() {
-  const [selectedDate, setSelectedDate] = useState("2026-05-15");
+  const [selectedDate, setSelectedDate] = useState(() =>
+    formatDateInputValue(new Date()),
+  );
   const dateInputRef = useRef(null);
 
   const [modalType, setModalType] = useState(null);
@@ -263,26 +276,7 @@ function AllRecordPage() {
     },
   ]);
 
-  const [exerciseRecords] = useState([
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "걷기",
-      kcal: 609,
-    },
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "줄넘기",
-      kcal: 120,
-    },
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "사이클",
-      kcal: 430,
-    },
-  ]);
+  const [storedExerciseSessions, setStoredExerciseSessions] = useState([]);
 
   const [weightRecords] = useState([
     {
@@ -304,7 +298,8 @@ function AllRecordPage() {
     breakfast: {
       time: "08:30",
       label: "아침 식사",
-      image: "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
+      image:
+        "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
       items: [
         {
           name: "닭가슴살 샐러드 🥗",
@@ -334,7 +329,8 @@ function AllRecordPage() {
     dinner: {
       time: "18:40",
       label: "저녁 식사",
-      image: "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
+      image:
+        "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
       items: [
         {
           name: "현미밥 🍚",
@@ -376,6 +372,34 @@ function AllRecordPage() {
 
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const userId = user?.userId ?? user?.id ?? 1;
+
+  useEffect(() => {
+    const syncExerciseRecords = () => {
+      setStoredExerciseSessions(
+        hydrateExerciseSessions(loadExerciseRecords(userId)),
+      );
+    };
+
+    syncExerciseRecords();
+    window.addEventListener("exercise-records-updated", syncExerciseRecords);
+
+    return () =>
+      window.removeEventListener(
+        "exercise-records-updated",
+        syncExerciseRecords,
+      );
+  }, [userId]);
+
+  const exerciseRecords = storedExerciseSessions
+    .filter((session) => session.dateIso?.slice(0, 10) === selectedDate)
+    .sort((left, right) => new Date(right.dateIso) - new Date(left.dateIso))
+    .map((session) => ({
+      exerciseDate: session.dateIso?.slice(0, 10),
+      exerciseTypeId: session.kind === "cardio" ? 3 : 4,
+      exerciseName: session.name,
+      kcal: session.calories,
+    }));
 
   //토큰 인증 테스트용
   // useEffect(() => {
@@ -566,7 +590,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="아침 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="아침 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.lunch ? (
@@ -579,7 +606,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="점심 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="점심 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.dinner ? (
@@ -592,7 +622,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="저녁 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="저녁 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.snack ? (
@@ -625,7 +658,13 @@ function AllRecordPage() {
 
       <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
 
-      <ExerciseModal isOpen={modalType === "exercise"} onClose={closeModal} />
+      <ExerciseModal
+        isOpen={modalType === "exercise"}
+        onClose={closeModal}
+        onSaved={(records) =>
+          setStoredExerciseSessions(hydrateExerciseSessions(records))
+        }
+      />
     </>
   );
 }
