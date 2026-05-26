@@ -15,22 +15,44 @@ const MEALS = [
 const TIMINGS = ["식전", "식후"];
 
 const getStatusInfo = (value) => {
-  if (value <= 100) 
-    return { 
-      label: "정상 범위 내에 있습니다", 
+  if (value <= 69)
+    return {
+      statusText: "저혈당",
+      label: "저혈당 상태입니다",
+      description: "혈당이 낮습니다. 당분이 포함된 음식을 섭취해주세요.",
+      color: "#60A5FA",
+      badge: "bg-[#EFF6FF] text-[#2563EB]",
+    };
+  if (value <= 99)
+    return {
+      statusText: "정상",
+      label: "이상적인 공복 혈당입니다",
+      description: "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요.",
       color: "#22C55E",
-      badge: "bg-[#ECFDF3] text-[#16A34A]"
+      badge: "bg-[#ECFDF3] text-[#16A34A]",
     };
-  if (value <= 180) 
-    return { 
-      label: "주의 범위에 있습니다", 
+  if (value <= 125)
+    return {
+      statusText: "주의",
+      label: "혈당 관리가 필요합니다",
+      description: "혈당이 다소 높습니다. 식단과 운동을 통한 관리가 필요합니다.",
+      color: "#FACC15",
+      badge: "bg-[#FEFCE8] text-[#CA8A04]",
+    };
+  if (value <= 180)
+    return {
+      statusText: "경고",
+      label: "높은 혈당입니다",
+      description: "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다.",
       color: "#FB923C",
-      badge: "bg-[#FFF7ED] text-[#EA580C]"
+      badge: "bg-[#FFF7ED] text-[#EA580C]",
     };
-  return { 
-    label: "경고 범위에 있습니다", 
+  return {
+    statusText: "위험",
+    label: "매우 높은 혈당입니다",
+    description: "매우 높은 혈당입니다. 즉시 의료진과 상담하시기 바랍니다.",
     color: "#F87171",
-    badge: "bg-[#FEF2F2] text-[#DC2626]"
+    badge: "bg-[#FEF2F2] text-[#DC2626]",
   };
 };
 
@@ -190,10 +212,17 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
       return;
     }
 
+    const category =
+      activeMeal === "공복"
+        ? "공복혈당"
+        : meal.hasTiming
+        ? `${activeMeal}${activeTiming}`
+        : activeMeal;
+
     const payload = {
       recordDate: selectedDate,
       recordTime: `${timeValue}:00`,
-      category: "BloodSugar",
+      category,
       bloodSugar: Math.round(currentVal),
     };
 
@@ -303,16 +332,24 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
           </div>
 
           {/* 안내 박스 */}
-          <div className="mt-5 space-y-1.5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              정상 혈당: 100mg/dL 미만
-            </p>
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              주의 범위: 100 ~ 180mg/dL
-            </p>
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              경고 범위: 180mg/dL 이상
-            </p>
+          <div className="mt-5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
+            <div className="grid grid-flow-col grid-rows-3 grid-cols-2 gap-x-6 gap-y-1.5">
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                저혈당: 0 ~ 69mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                정상: 70 ~ 99mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                주의: 100 ~ 125mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                경고: 126 ~ 180mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                위험: 181 ~ 300mg/dL
+              </p>
+            </div>
           </div>
         </div>
 
@@ -425,16 +462,18 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
             <div className="flex items-center justify-between mb-3">
               <span className="text-[15px] font-bold text-[#1E293B]">혈당 상태</span>
               <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${status.badge}`}>
-                {statusVal <= 100 ? "정상" : statusVal <= 180 ? "주의" : "경고"}
+                {status.statusText}
               </span>
             </div>
 
             {/* 슬라이더 */}
             <div className="relative h-[12px] w-full overflow-visible rounded-full mb-3">
               <div className="flex h-full overflow-hidden rounded-full">
-                <div className="w-1/3 bg-[#22C55E]" />
-                <div className="w-1/3 bg-[#FB923C]" />
-                <div className="w-1/3 bg-[#F87171]" />
+                <div className="h-full bg-[#60A5FA]" style={{ width: "23%" }} />
+                <div className="h-full bg-[#22C55E]" style={{ width: "10%" }} />
+                <div className="h-full bg-[#FACC15]" style={{ width: "8.67%" }} />
+                <div className="h-full bg-[#FB923C]" style={{ width: "18.33%" }} />
+                <div className="h-full bg-[#F87171]" style={{ width: "40%" }} />
               </div>
 
               <div
@@ -456,10 +495,12 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
               </div>
             </div>
 
-            <div className="flex justify-between px-0.5 text-[11px] font-medium text-[#94A3B8]">
-              <span>정상</span>
-              <span>주의</span>
-              <span>경고</span>
+            <div className="relative h-[16px] text-[11px] font-medium text-[#94A3B8]">
+              <span className="absolute -translate-x-1/2" style={{ left: "0%" }}>저혈당</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "23%" }}>정상</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "33%" }}>주의</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "41.67%" }}>경고</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "60%" }}>위험</span>
             </div>
           </div>
 
@@ -477,11 +518,7 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
                   {status.label}
                 </p>
                 <p className="mt-1.5 text-[12px] text-[#94A3B8]">
-                  {statusVal <= 100 
-                    ? "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요."
-                    : statusVal <= 180
-                    ? "혈당이 주의 범위에 있습니다. 가벼운 운동이나 건강한 간식을 권장합니다."
-                    : "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다."}
+                  {status.description}
                 </p>
               </div>
             </div>
