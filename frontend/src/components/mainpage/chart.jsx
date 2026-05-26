@@ -32,7 +32,7 @@ export default function ChartSection({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm md:p-10">
+    <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm md:p-8">
       <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <h2 className="text-lg font-bold text-gray-900">{title}</h2>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:justify-end">
@@ -78,7 +78,7 @@ export default function ChartSection({
         </div>
       </div>
 
-      <div className="relative h-[500px] rounded-xl border border-gray-200 bg-white p-1 sm:p-12">
+      <div className="relative h-[500px] rounded-xl border border-gray-200 bg-white p-4">
         <div className="absolute right-4 top-4 z-10 flex flex-wrap items-center gap-2 text-xs text-slate-500">
           {legends.map((legend) => (
             <span
