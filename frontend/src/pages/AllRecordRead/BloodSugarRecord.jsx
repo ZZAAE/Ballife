@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Sparkles, Gift } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import HealthIndicatorMenu from "../../components/HealthMenu";
 import {
   CartesianGrid,
@@ -15,6 +15,7 @@ import ChartSection from "../../components/record/ChartSection";
 import MetricCard from "../../components/record/MetricCard";
 import RecordTable from "../../components/record/RecordTable";
 import StatusBadge from "../../components/record/StatusBadge";
+import AIAnalysisCard from "../../components/record/AIAnalysisCard";
 // 더미데이터 
 const bgData = [
   { date: "05-08", fasting: 82, postMeal: 135 },
@@ -99,31 +100,7 @@ export default function BloodSugarRecord() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            {/* AI 분석 박스 */}
-            <aside className="mb-8 flex h-[calc(100vh-500px)] min-h-[280px] flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6">
-              <div className="mb-4 flex min-h-[38px] items-center justify-between gap-2">
-                <h2 className="flex items-center gap-2 text-[18px] font-bold text-[#0F172A]">
-                  <Sparkles className="h-[18px] w-[18px] text-[#0F172A]" strokeWidth={2.4} />
-                  AI 건강 분석
-                </h2>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F9FAFB]"
-                >
-                  <Gift className="h-3.5 w-3.5 text-[#0F172A]" strokeWidth={2.2} />
-                  리워드
-                </button>
-              </div>
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-8 text-center">
-                <Sparkles className="mb-3 h-6 w-6 text-[#94A3B8]" strokeWidth={1.8} />
-                <p className="text-sm font-semibold text-[#64748B]">
-                  분석 결과를 준비 중입니다
-                </p>
-                <p className="mt-1 text-xs text-[#94A3B8]">
-                  데이터가 누적되면 맞춤 인사이트를 제공해드려요
-                </p>
-              </div>
-            </aside>
+            <AIAnalysisCard />
 
             <ChartSection
               title="혈당 변화 추이"

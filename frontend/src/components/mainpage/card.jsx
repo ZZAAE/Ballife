@@ -125,8 +125,8 @@ const medicineCard = [
   };
 
     return (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-stretch">
-        <div className="space-y-4 md:space-y-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:items-stretch">
+        <div className="space-y-4 md:space-y-8 lg:col-span-3">
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {statusCards.map((card, idx) => (
               <Link to={`/check/${card.link}`} key={idx}>
