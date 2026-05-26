@@ -80,6 +80,7 @@ const MainPage = () => {
     dataUrl: "/Unity/Build.data",
     frameworkUrl: "/Unity/Build.framework.js",
     codeUrl: "/Unity/Build.wasm",
+    streamingAssetsUrl: "/Unity/StreamingAssets",
   });
   const loadingPercent = Math.round(loadingProgression * 100);
 

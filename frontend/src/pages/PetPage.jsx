@@ -7,6 +7,7 @@ export default function PetPage(){
         dataUrl: "/Unity/Build.data",
         frameworkUrl: "/Unity/Build.framework.js",
         codeUrl: "/Unity/Build.wasm",
+        streamingAssetsUrl: "/Unity/StreamingAssets",
     });
     return(
         <div className="h-[calc(100vh-151px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR']">

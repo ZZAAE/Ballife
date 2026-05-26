@@ -43,5 +43,10 @@ springdoc:
   show-actuator:
     true
 
+mfds:
+  api:
+    base-url: https://apis.data.go.kr/1471000/DrbEasyDrugInfoService
+    service-key: ${MFDS_SERVICE_KEY}  # 환경변수로 주입 (절대 코드에 하드코딩 X)
+
     #단계별로 스페이스 2칸
     #탭 사용 금지
