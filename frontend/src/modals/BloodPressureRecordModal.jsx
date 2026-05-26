@@ -1,12 +1,36 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Calendar } from "lucide-react";
+import toast from "react-hot-toast";
+import bioValueRecordApi from "../api/bioValueRecordApi";
+import { useAuth } from "../contexts/AuthContext";
+import { USER_KEY } from "../api/api";
 
+const BLOOD_PRESSURE_CATEGORY = "BloodPressure";
 
-function BloodPressureRecordModal({ isOpen, onClose }) {
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
+
+function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
+  const { user } = useAuth();
+  const userId = resolveUserId(user);
+
   const [activeTab, setActiveTab] = useState("아침");
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
-
+  const [submitting, setSubmitting] = useState(false);
 
   const dateInputRef = useRef(null);
 
@@ -22,6 +46,50 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
       dateInputRef.current.showPicker();
     } else {
       dateInputRef.current?.focus();
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    const s = parseInt(systolic, 10);
+    const d = parseInt(diastolic, 10);
+    if (!s || !d || s <= 0 || d <= 0) {
+      toast.error("수축기와 이완기 혈압을 모두 입력해주세요.");
+      return;
+    }
+    if (s <= d) {
+      toast.error("수축기 혈압은 이완기 혈압보다 커야 합니다.");
+      return;
+    }
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    const payload = {
+      recordDate,
+      recordTime,
+      category: `${BLOOD_PRESSURE_CATEGORY}_${activeTab}`,
+      systolicBP: s,
+      diastolicBP: d,
+    };
+
+    setSubmitting(true);
+    try {
+      const res = await bioValueRecordApi.createBioValueRecord(userId, payload);
+      toast.success("혈압이 기록되었습니다.");
+      onSaved?.(res.data);
+      setSystolic("");
+      setDiastolic("");
+      onClose?.();
+    } catch (err) {
+      console.error("혈압 기록 실패:", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -248,12 +316,14 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
         </div>
 
         {/* 저장 버튼 */}
-        <div onClick={onClose} className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
+        <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
           <button
             type="button"
-            className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98]"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            기록 저장 및 확인
+            {submitting ? "저장 중..." : "기록 저장 및 확인"}
           </button>
         </div>
       </div>
