@@ -19,7 +19,10 @@ public interface MealItemRepository extends JpaRepository<MealItem, Long> {
     Optional<MealItem> findByMeal_MealId(Long mealId);
     
     // mealId 목록으로 MealItem 조회
-    List<MealItem> findByMeal_MealIdIn(List<Long> mealIds); 
+    List<MealItem> findByMeal_MealIdIn(List<Long> mealIds);
+
+    // mealId 단건으로 음식 목록 조회 (한 끼에 음식 N개)
+    List<MealItem> findAllByMeal_MealId(Long mealId);
     
     // 일일 총 칼로리 계산 
     @Query("SELECT SUM(mi.calorie) FROM MealItem mi WHERE mi.meal.mealId IN :mealIds")

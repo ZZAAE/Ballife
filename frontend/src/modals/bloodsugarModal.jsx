@@ -3,6 +3,7 @@ import { Calendar, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import bioValueRecordApi from "../api/bioValueRecordApi";
+import { BIO_CATEGORY } from "../constants/bioCategory";
 
 const MEALS = [
   { id: "공복", label: "공복", hasTiming: false },
@@ -193,7 +194,7 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
     const payload = {
       recordDate: selectedDate,
       recordTime: `${timeValue}:00`,
-      category: "BloodSugar",
+      category: BIO_CATEGORY.BLOOD_SUGAR,
       bloodSugar: Math.round(currentVal),
     };
 

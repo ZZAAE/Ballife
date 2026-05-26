@@ -5,8 +5,9 @@ import bioValueRecordApi from '../api/bioValueRecordApi';
 import userConfigApi from '../api/userConfigApi';
 import { useAuth } from '../contexts/AuthContext';
 import { USER_KEY } from '../api/api';
+import { BIO_CATEGORY } from '../constants/bioCategory';
 
-const WEIGHT_CATEGORY = "Weight";
+const WEIGHT_CATEGORY = BIO_CATEGORY.WEIGHT;
 
 
 const resolveUserId = (user) => {

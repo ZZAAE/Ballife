@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { BIO_CATEGORY } from '../constants/bioCategory';
 
 
 // 데이터베이스에서 기존에 사용자가 저장한 최신 물먹은양, 목표 수분섭취량 가져와서 
@@ -55,7 +56,7 @@ const WaterRecordModal = ({
     const body = JSON.stringify({
       recordDate,
       recordTime,
-      category: 'water',
+      category: BIO_CATEGORY.WATER_INTAKE,
       waterIntakeCup: parsedCurrentCups,
     });
     const accessToken = localStorage.getItem('accessToken');

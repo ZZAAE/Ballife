@@ -117,11 +117,7 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
         }),
       );
 
-      const nextRecords = appendExerciseRecords(userId, savedRecords);
-      window.dispatchEvent(
-        new CustomEvent("exercise-records-updated", { detail: { userId } }),
-      );
-      onSaved?.(nextRecords);
+      onSaved?.();
       toast.success("운동 기록이 저장되었습니다.");
       onClose();
     } catch (error) {

@@ -37,3 +37,7 @@ export function createMockExercise(userId, payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function getMockExercisesByDate(userId, date) {
+  return request(`/mock/users/${userId}/exercises?date=${date}`);
+}

@@ -1,7 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
+import bioValueRecordApi from "../api/bioValueRecordApi";
+import mealApi from "../api/mealApi";
+import { getMockExercisesByDate } from "../api/exerciseApi";
+import { BIO_CATEGORY } from "../constants/bioCategory";
 
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
@@ -19,11 +23,6 @@ import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
-import {
-  hydrateExerciseSessions,
-  loadExerciseRecords,
-} from "../utils/exerciseRecords";
-
 import {
   BloodPressureRecordItem,
   BloodSugarRecordItem,
@@ -210,6 +209,81 @@ function formatDateInputValue(date) {
   return `${year}-${month}-${day}`;
 }
 
+// ─── 백엔드 응답 → 카드 컴포넌트 키 매퍼 ───
+const mapBpRecord = (r) => ({
+  recordDate: r.recordDate,
+  recordTime: r.recordTime,
+  systolicBp: r.systolicBP,
+  diastolicBp: r.diastolicBP,
+  mealTiming: null,
+});
+
+const mapBsRecord = (r) => ({
+  recordDate: r.recordDate,
+  recordTime: r.recordTime,
+  bloodsugar: r.bloodSugar,
+  mealTiming: null,
+});
+
+const mapWeightRecord = (r) => ({
+  recordDate: r.recordDate,
+  recordTime: r.recordTime,
+  weight: r.weight,
+});
+
+const mapWaterRecord = (r) => ({
+  recordDate: r.recordDate,
+  recordTime: r.recordTime,
+  amount: (r.waterIntakeCup ?? 0) * 200,
+});
+
+const mapExerciseRecord = (r) => ({
+  exerciseDate: r.exerciseDate,
+  exerciseTypeId: r.exerciseTypeId,
+  exerciseName: r.exerciseTypeId,
+  kcal: r.burnedCalorie,
+});
+
+const MEAL_CATEGORY_LABEL = {
+  BREAKFAST: "아침 식사",
+  LUNCH: "점심 식사",
+  DINNER: "저녁 식사",
+  SNACK: "간식",
+};
+
+const MEAL_CATEGORY_SLOT = {
+  BREAKFAST: "breakfast",
+  LUNCH: "lunch",
+  DINNER: "dinner",
+  SNACK: "snack",
+};
+
+const mapMealToCard = (meal, items) => ({
+  slot: MEAL_CATEGORY_SLOT[meal.mealCategory],
+  card: {
+    time: meal.mealTime ? String(meal.mealTime).slice(0, 5) : "",
+    label: MEAL_CATEGORY_LABEL[meal.mealCategory] ?? "식사",
+    image: meal.mealPhoto,
+    items: (items ?? []).map((it) => ({
+      name: it.foodName,
+      kcal: it.calorie ?? 0,
+      carb: it.carbohydrate ?? 0,
+      protein: it.protein ?? 0,
+      fat: it.saturatedFat ?? 0,
+      sugar: it.sugar ?? 0,
+      chol: it.cholesterol ?? 0,
+      na: it.sodium ?? 0,
+    })),
+  },
+});
+
+const EMPTY_MEAL_RECORDS = {
+  breakfast: null,
+  lunch: null,
+  dinner: null,
+  snack: null,
+};
+
 function AllRecordPage() {
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateInputValue(new Date()),
@@ -218,148 +292,56 @@ function AllRecordPage() {
 
   const [modalType, setModalType] = useState(null);
 
-  // 더미데이터: 기록 컴포넌트 디자인 확인용
-  const [bloodPressureRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "08:30:00",
-      mealTiming: "아침",
-      systolicBp: 160,
-      diastolicBp: 96,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "12:11:00",
-      mealTiming: "점심",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "20:42:00",
-      mealTiming: "저녁",
-      systolicBp: 123,
-      diastolicBp: 88,
-    },
-  ]);
+  // DB에서 불러오는 실제 기록들. 더미 세팅은 디자인 확인용으로 아래 주석에 보관.
+  const [bloodPressureRecords, setBloodPressureRecords] = useState([]);
+  const [bloodSugarRecords, setBloodSugarRecords] = useState([]);
+  const [weightRecords, setWeightRecords] = useState([]);
+  const [waterRecords, setWaterRecords] = useState([]);
+  const [exerciseRecords, setExerciseRecords] = useState([]);
+  const [mealRecords, setMealRecords] = useState(EMPTY_MEAL_RECORDS);
 
-  const [bloodSugarRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "08:30:00",
-      mealTiming: "아침 식전",
-      bloodsugar: 100,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "09:30:00",
-      mealTiming: "아침 식후",
-      bloodsugar: 150,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "12:30:00",
-      mealTiming: "점심 식전",
-      bloodsugar: 95,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:30:00",
-      mealTiming: "점심 식후",
-      bloodsugar: 128,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "18:30:00",
-      mealTiming: "저녁 식전",
-      bloodsugar: 89,
-    },
-  ]);
-
-  const [storedExerciseSessions, setStoredExerciseSessions] = useState([]);
-
-  const [weightRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:33:00",
-      weight: 78.2,
-    },
-  ]);
-
-  const [waterRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "13:33:00",
-      amount: 1400,
-    },
-  ]);
-
-  const [mealRecords] = useState({
-    breakfast: {
-      time: "08:30",
-      label: "아침 식사",
-      image:
-        "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
-      items: [
-        {
-          name: "닭가슴살 샐러드 🥗",
-          kcal: 320,
-          carb: 22,
-          protein: 35,
-          fat: 8,
-          sugar: 5,
-          chol: 40,
-          na: 300,
-        },
-        {
-          name: "고구마 🍠",
-          kcal: 180,
-          carb: 38,
-          protein: 2,
-          fat: 0,
-          sugar: 9,
-          chol: 0,
-          na: 20,
-        },
-      ],
-    },
-
-    lunch: null,
-
-    dinner: {
-      time: "18:40",
-      label: "저녁 식사",
-      image:
-        "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
-      items: [
-        {
-          name: "현미밥 🍚",
-          kcal: 250,
-          carb: 52,
-          protein: 5,
-          fat: 2,
-          sugar: 1,
-          chol: 0,
-          na: 10,
-        },
-        {
-          name: "된장찌개 🍲",
-          kcal: 180,
-          carb: 12,
-          protein: 14,
-          fat: 8,
-          sugar: 3,
-          chol: 25,
-          na: 720,
-        },
-      ],
-    },
-
-    snack: null,
-  });
+  // ─── 더미 세팅 보관 (디자인 확인용, 사용 안 함) ───
+  // const DUMMY_BLOOD_PRESSURE = [
+  //   { recordDate: "2026-05-09", recordTime: "08:30:00", mealTiming: "아침", systolicBp: 160, diastolicBp: 96 },
+  //   { recordDate: "2026-05-09", recordTime: "12:11:00", mealTiming: "점심", systolicBp: 120, diastolicBp: 80 },
+  //   { recordDate: "2026-05-09", recordTime: "20:42:00", mealTiming: "저녁", systolicBp: 123, diastolicBp: 88 },
+  // ];
+  // const DUMMY_BLOOD_SUGAR = [
+  //   { recordDate: "2026-05-09", recordTime: "08:30:00", mealTiming: "아침 식전", bloodsugar: 100 },
+  //   { recordDate: "2026-05-09", recordTime: "09:30:00", mealTiming: "아침 식후", bloodsugar: 150 },
+  //   { recordDate: "2026-05-09", recordTime: "12:30:00", mealTiming: "점심 식전", bloodsugar: 95 },
+  //   { recordDate: "2026-05-09", recordTime: "13:30:00", mealTiming: "점심 식후", bloodsugar: 128 },
+  //   { recordDate: "2026-05-09", recordTime: "18:30:00", mealTiming: "저녁 식전", bloodsugar: 89 },
+  // ];
+  // const DUMMY_WEIGHT = [{ recordDate: "2026-05-09", recordTime: "13:33:00", weight: 78.2 }];
+  // const DUMMY_WATER = [{ recordDate: "2026-05-09", recordTime: "13:33:00", amount: 1400 }];
+  // const DUMMY_MEALS = {
+  //   breakfast: {
+  //     time: "08:30",
+  //     label: "아침 식사",
+  //     image: "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
+  //     items: [
+  //       { name: "닭가슴살 샐러드 🥗", kcal: 320, carb: 22, protein: 35, fat: 8, sugar: 5, chol: 40, na: 300 },
+  //       { name: "고구마 🍠", kcal: 180, carb: 38, protein: 2, fat: 0, sugar: 9, chol: 0, na: 20 },
+  //     ],
+  //   },
+  //   lunch: null,
+  //   dinner: {
+  //     time: "18:40",
+  //     label: "저녁 식사",
+  //     image: "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
+  //     items: [
+  //       { name: "현미밥 🍚", kcal: 250, carb: 52, protein: 5, fat: 2, sugar: 1, chol: 0, na: 10 },
+  //       { name: "된장찌개 🍲", kcal: 180, carb: 12, protein: 14, fat: 8, sugar: 3, chol: 25, na: 720 },
+  //     ],
+  //   },
+  //   snack: null,
+  // };
 
   const closeModal = () => {
     setModalType(null);
+    // 모달이 닫힐 때마다 refetch (저장 후 화면 자동 갱신)
+    fetchAll();
   };
 
   const openDatePicker = () => {
@@ -374,32 +356,83 @@ function AllRecordPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const userId = user?.userId ?? user?.id ?? 1;
 
+  const fetchAll = useCallback(async () => {
+    if (!userId || !selectedDate) return;
+
+    const [bpRes, bsRes, wtRes, watRes, exRes, mealRes] =
+      await Promise.allSettled([
+        bioValueRecordApi.searchByDate(
+          userId,
+          BIO_CATEGORY.BLOOD_PRESSURE,
+          selectedDate,
+        ),
+        bioValueRecordApi.searchByDate(
+          userId,
+          BIO_CATEGORY.BLOOD_SUGAR,
+          selectedDate,
+        ),
+        bioValueRecordApi.searchByDate(
+          userId,
+          BIO_CATEGORY.WEIGHT,
+          selectedDate,
+        ),
+        bioValueRecordApi.searchByDate(
+          userId,
+          BIO_CATEGORY.WATER_INTAKE,
+          selectedDate,
+        ),
+        getMockExercisesByDate(userId, selectedDate),
+        mealApi.getTodayMeals(userId, selectedDate),
+      ]);
+
+    setBloodPressureRecords(
+      bpRes.status === "fulfilled"
+        ? (bpRes.value?.data ?? []).map(mapBpRecord)
+        : [],
+    );
+    setBloodSugarRecords(
+      bsRes.status === "fulfilled"
+        ? (bsRes.value?.data ?? []).map(mapBsRecord)
+        : [],
+    );
+    setWeightRecords(
+      wtRes.status === "fulfilled"
+        ? (wtRes.value?.data ?? []).map(mapWeightRecord)
+        : [],
+    );
+    setWaterRecords(
+      watRes.status === "fulfilled"
+        ? (watRes.value?.data ?? []).map(mapWaterRecord)
+        : [],
+    );
+    setExerciseRecords(
+      exRes.status === "fulfilled" ? (exRes.value ?? []).map(mapExerciseRecord) : [],
+    );
+
+    if (mealRes.status === "fulfilled") {
+      const meals = mealRes.value?.data ?? [];
+      const slots = { ...EMPTY_MEAL_RECORDS };
+      await Promise.all(
+        meals.map(async (meal) => {
+          try {
+            const itemsRes = await mealApi.getMealItemsByMealId(meal.mealId);
+            const { slot, card } = mapMealToCard(meal, itemsRes?.data ?? []);
+            if (slot) slots[slot] = card;
+          } catch {
+            // 한 끼 음식 조회 실패는 무시 (해당 슬롯은 비어있음 처리)
+          }
+        }),
+      );
+      setMealRecords(slots);
+    } else {
+      setMealRecords(EMPTY_MEAL_RECORDS);
+    }
+  }, [userId, selectedDate]);
+
   useEffect(() => {
-    const syncExerciseRecords = () => {
-      setStoredExerciseSessions(
-        hydrateExerciseSessions(loadExerciseRecords(userId)),
-      );
-    };
-
-    syncExerciseRecords();
-    window.addEventListener("exercise-records-updated", syncExerciseRecords);
-
-    return () =>
-      window.removeEventListener(
-        "exercise-records-updated",
-        syncExerciseRecords,
-      );
-  }, [userId]);
-
-  const exerciseRecords = storedExerciseSessions
-    .filter((session) => session.dateIso?.slice(0, 10) === selectedDate)
-    .sort((left, right) => new Date(right.dateIso) - new Date(left.dateIso))
-    .map((session) => ({
-      exerciseDate: session.dateIso?.slice(0, 10),
-      exerciseTypeId: session.kind === "cardio" ? 3 : 4,
-      exerciseName: session.name,
-      kcal: session.calories,
-    }));
+    // selectedDate / userId 가 바뀔 때마다 6개 카테고리 페치
+    fetchAll();
+  }, [fetchAll]);
 
   //토큰 인증 테스트용
   // useEffect(() => {
@@ -666,9 +699,7 @@ function AllRecordPage() {
       <ExerciseModal
         isOpen={modalType === "exercise"}
         onClose={closeModal}
-        onSaved={(records) =>
-          setStoredExerciseSessions(hydrateExerciseSessions(records))
-        }
+        onSaved={fetchAll}
       />
     </>
   );
