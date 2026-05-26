@@ -26,6 +26,13 @@ const bioValueRecordApi = {
     });
   },
 
+  // 카테고리별 페이지 조회 (page, size 직접 지정)
+  getPageByCategory: (userId, category, page = 0, size = 30) => {
+    return api.get(`/bioValueRecords/searchBioValuePage/${userId}`, {
+      params: { category, page, size },
+    });
+  },
+
   updateBioValueRecord: (recordId, payload) => {
     return api.put(`/bioValueRecords/${recordId}`, payload);
   },
