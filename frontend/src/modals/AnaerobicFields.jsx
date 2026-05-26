@@ -56,6 +56,17 @@ function AnaerobicFields({ row, onChange }) {
           className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
         />
       </div>
+
+      <div className="flex-[3] space-y-1">
+        <span className="text-[10px] text-gray-400">시간</span>
+        <input
+          type="text"
+          placeholder="13분30초"
+          value={row.durationText}
+          onChange={(event) => onChange({ durationText: event.target.value })}
+          className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+        />
+      </div>
     </>
   );
 }

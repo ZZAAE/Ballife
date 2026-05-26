@@ -4,12 +4,12 @@ import { Clock, X } from "lucide-react";
 /* ──────────────────────────────────────────────────────────────────────────
  * 하루 생활 루틴 수정 모달
  *  props:
- *   - open:      모달 열림 여부
- *   - onClose:   닫기 핸들러
- *   - onSaved:   저장 성공 시 콜백 (서버 응답 전달)
+ *   - open:           모달 열림 여부
+ *   - onClose:        닫기 핸들러
+ *   - onSubmit:       저장 핸들러 async (payload) => any. 부모가 백엔드 호출 담당.
+ *   - onSaved:        저장 성공 시 콜백 (onSubmit 반환값 전달)
  *   - initialRoutine: 초기 루틴 배열 [{ label, time }]
- *   - title:     상단 타이틀
- *   - submitUrl: 스프링부트 엔드포인트
+ *   - title:          상단 타이틀
  * ──────────────────────────────────────────────────────────────────────── */
 const DEFAULT_ROUTINE = [
   { label: "기상", time: "" },
@@ -22,10 +22,10 @@ const DEFAULT_ROUTINE = [
 export default function RoutineModal({
   open,
   onClose,
+  onSubmit,
   onSaved,
   initialRoutine,
   title = "하루 생활 루틴 수정",
-  submitUrl = "/api/routines",
 }) {
   const buildRoutine = (source) =>
     source && source.length > 0
@@ -55,6 +55,7 @@ export default function RoutineModal({
   };
 
   const handleSubmit = async () => {
+    if (!onSubmit) return;
     setSubmitting(true);
 
     const payload = {
@@ -65,14 +66,8 @@ export default function RoutineModal({
     };
 
     try {
-      const res = await fetch(submitUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json().catch(() => ({}));
-      onSaved?.(data);
+      const result = await onSubmit(payload);
+      onSaved?.(result);
       onClose?.();
     } catch (err) {
       console.error("루틴 저장 실패:", err);

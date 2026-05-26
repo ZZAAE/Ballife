@@ -59,6 +59,7 @@ export function createAnaerobicRow(id) {
     exerciseSet: 1,
     weightKg: "",
     exerciseReps: "",
+    durationText: "",
   };
 }
 
@@ -112,18 +113,23 @@ export function buildCreatePayload(kind, row, recordedAt) {
     ...formatDateParts(recordedAt),
   };
 
+  const durationSec = parseDurationToSeconds(row.durationText);
+  const exerciseMin = Math.max(1, Math.ceil(durationSec / 60));
+
   if (kind === "aerobic") {
-    const durationSec = parseDurationToSeconds(row.durationText);
     return {
       ...base,
-      exerciseMin: Math.max(1, Math.ceil(durationSec / 60)),
+      exerciseMin,
+      exerciseHard: row.intensity,
     };
   }
 
   return {
     ...base,
+    exerciseMin,
     exerciseSet: Number(row.exerciseSet) || 0,
     exerciseReps: Number(row.exerciseReps) || 0,
+    exerciseWeight: row.weightKg !== "" ? Number(row.weightKg) : null,
   };
 }
 
