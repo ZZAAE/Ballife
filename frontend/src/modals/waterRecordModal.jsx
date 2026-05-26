@@ -47,7 +47,7 @@ const WaterRecordModal = ({
   useEffect(() => {
     if (!isOpen || !userId) return;
     const today = getTodayStr();
-    bioValueRecordApi.searchByDate(userId, 'water', today)
+    bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.WATER_INTAKE, today)
       .then((res) => {
         const list = res.data ?? [];
         if (list.length > 0) {
@@ -87,7 +87,7 @@ const WaterRecordModal = ({
       // 오늘 기록이 있으면 UPDATE, 없으면 CREATE
       let existingId = todayRecordId;
       if (!existingId) {
-        const check = await bioValueRecordApi.searchByDate(userId, 'WaterIntake', today);
+        const check = await bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.WATER_INTAKE, today);
         const list = check.data ?? [];
         if (list.length > 0) existingId = list[0].recordId;
       }

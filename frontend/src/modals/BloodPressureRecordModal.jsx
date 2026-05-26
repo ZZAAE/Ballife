@@ -4,8 +4,7 @@ import toast from "react-hot-toast";
 import bioValueRecordApi from "../api/bioValueRecordApi";
 import { useAuth } from "../contexts/AuthContext";
 import { USER_KEY } from "../api/api";
-
-const BLOOD_PRESSURE_CATEGORY = "BloodPressure";
+import { BIO_CATEGORY } from "../constants/bioCategory";
 
 const resolveUserId = (user) => {
   const fromContext = user?.userId ?? user?.id ?? user?.memberId;
@@ -73,7 +72,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
     const payload = {
       recordDate,
       recordTime,
-      category: `${BLOOD_PRESSURE_CATEGORY}_${activeTab}`,
+      category: BIO_CATEGORY.BLOOD_PRESSURE,
       systolicBP: s,
       diastolicBP: d,
     };
