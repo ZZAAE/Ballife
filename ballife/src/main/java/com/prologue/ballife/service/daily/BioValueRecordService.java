@@ -157,19 +157,22 @@ public class BioValueRecordService {
                 record.setRecordTime(record.getRecordTime());                        
                 record.setSystolicBP(record.getSystolicBP());
                 record.setDiastolicBP(record.getDiastolicBP());
+                break;
             case "Weight":
-                record = bioValueRecordRepository.findLastSystolicBPRecordByUser(user)
+                record = bioValueRecordRepository.findLastWeightRecordByUser(user)
                             .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
         
                 record.setRecordDate(record.getRecordDate());
                 record.setRecordTime(record.getRecordTime());                        
                 record.setWeight(record.getWeight());
+                break;
             case "WaterIntake":
                 record = bioValueRecordRepository.findLastWaterIntakeCupRecordByUser(user)
                             .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
                 record.setRecordDate(record.getRecordDate());
                 record.setRecordTime(record.getRecordTime());                        
                 record.setWaterIntakeCup(record.getWaterIntakeCup());
+                break;
             default:
                 record = null;
                 break;

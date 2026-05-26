@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { useParams, useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 import Blood from "../assets/Record/Blood.svg";
 import Bp from "../assets/Record/Bp.svg";
@@ -19,6 +19,10 @@ import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
+import {
+  hydrateExerciseSessions,
+  loadExerciseRecords,
+} from "../utils/exerciseRecords";
 
 import {
   BloodPressureRecordItem,
@@ -33,7 +37,7 @@ function PlusButton({ size = 52, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex shrink-0 items-center justify-center rounded-full bg-[#E8EDF2]"
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
       style={{ width: size, height: size }}
       aria-label="기록 추가"
     >
@@ -47,7 +51,7 @@ function AddRecordBar({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[36px] w-full items-center justify-center rounded-[6px] bg-[#F3F4F6]"
+      className="flex h-[36px] w-full items-center justify-center rounded-[10px] bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
       aria-label="기록 추가"
     >
       <img
@@ -64,11 +68,11 @@ function EmptyRecordArea({ recordTitle, onAddClick }) {
     <>
       <PlusButton size={50} onClick={onAddClick} />
 
-      <p className="mt-[15px] text-[14px] font-[600] leading-none text-[#303740]">
+      <p className="mt-[15px] text-[14px] font-semibold leading-none text-[#0F172A]">
         {recordTitle}
       </p>
 
-      <p className="mt-[9px] text-[11px] font-medium leading-none text-[#3F4650]">
+      <p className="mt-[9px] text-[12px] font-medium leading-none text-[#64748B]">
         아직 기록되지 않았습니다.
       </p>
     </>
@@ -86,9 +90,9 @@ function LargeRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white ">
+    <section className="relative flex h-[250px] min-w-0 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
       <div
-        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        className="absolute left-0 top-0 h-full w-[4px]"
         style={{ backgroundColor: color }}
       />
 
@@ -96,10 +100,10 @@ function LargeRecordCard({
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
         <div>
-          <p className="text-[14px] font-[600] leading-none text-[#252A31]">
+          <p className="text-[14px] font-semibold leading-none text-[#0F172A]">
             {title}
           </p>
-          <p className="mt-[7px] whitespace-nowrap text-[10px] font-medium leading-none text-[#8D949E]">
+          <p className="mt-[7px] whitespace-nowrap text-[11px] font-medium leading-none text-[#94A3B8]">
             {subText}
           </p>
         </div>
@@ -110,7 +114,7 @@ function LargeRecordCard({
           className={
             hasRecords
               ? "flex h-[215px] w-full min-w-0 flex-col justify-start overflow-y-auto"
-              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9] p-[14px]"
+              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[12px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] p-[14px]"
           }
         >
           {children ?? (
@@ -135,16 +139,16 @@ function SmallRecordCard({
   hasRecords = false,
 }) {
   return (
-    <section className="relative flex h-[250px] min-w-0 rounded-[12px] border border-[#E7E7E7] bg-white">
+    <section className="relative flex h-[250px] min-w-0 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
       <div
-        className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px]"
+        className="absolute left-0 top-0 h-full w-[4px]"
         style={{ backgroundColor: color }}
       />
 
       <div className="flex w-[98px] shrink-0 flex-col items-center justify-center">
         <img src={icon} alt="" className="h-[34px] w-[34px] object-contain" />
 
-        <p className="mt-[17px] text-[14px] font-[600] leading-none text-[#252A31]">
+        <p className="mt-[17px] text-[14px] font-semibold leading-none text-[#0F172A]">
           {title}
         </p>
       </div>
@@ -154,7 +158,7 @@ function SmallRecordCard({
           className={
             hasRecords
               ? "flex h-[215px] w-full flex-col justify-start overflow-hidden"
-              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[7px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+              : "flex h-[215px] w-full flex-col items-center justify-center rounded-[12px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC]"
           }
         >
           {children ?? (
@@ -182,16 +186,16 @@ function MealBox({ title, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[380px] w-full items-center justify-center rounded-[12px] border border-dashed border-[#D2D9E3] bg-[#EEF3F9]"
+      className="flex h-[380px] w-full items-center justify-center rounded-[18px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] transition hover:bg-[#F1F5F9]"
     >
       <div className="flex flex-col items-center justify-center">
         <MealPlaceholderIcon />
 
-        <p className="mt-[22px] text-[16px] font-[600] leading-none text-[#303740]">
+        <p className="mt-[22px] text-[16px] font-semibold leading-none text-[#0F172A]">
           {title}
         </p>
 
-        <p className="mt-[10px] text-[11px] font-medium leading-none text-[#3F4650]">
+        <p className="mt-[10px] text-[12px] font-medium leading-none text-[#64748B]">
           아직 기록되지 않았습니다.
         </p>
       </div>
@@ -199,8 +203,17 @@ function MealBox({ title, onClick }) {
   );
 }
 
+function formatDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function AllRecordPage() {
-  const [selectedDate, setSelectedDate] = useState("2026-05-15");
+  const [selectedDate, setSelectedDate] = useState(() =>
+    formatDateInputValue(new Date()),
+  );
   const dateInputRef = useRef(null);
 
   const [modalType, setModalType] = useState(null);
@@ -263,26 +276,7 @@ function AllRecordPage() {
     },
   ]);
 
-  const [exerciseRecords] = useState([
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "걷기",
-      kcal: 609,
-    },
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "줄넘기",
-      kcal: 120,
-    },
-    {
-      exerciseDate: "2026-05-09",
-      exerciseTypeId: 3,
-      exerciseName: "사이클",
-      kcal: 430,
-    },
-  ]);
+  const [storedExerciseSessions, setStoredExerciseSessions] = useState([]);
 
   const [weightRecords] = useState([
     {
@@ -304,7 +298,8 @@ function AllRecordPage() {
     breakfast: {
       time: "08:30",
       label: "아침 식사",
-      image: "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
+      image:
+        "https://i.pinimg.com/736x/b8/62/b7/b862b74a0a1c6971155427c60c85405a.jpg",
       items: [
         {
           name: "닭가슴살 샐러드 🥗",
@@ -334,7 +329,8 @@ function AllRecordPage() {
     dinner: {
       time: "18:40",
       label: "저녁 식사",
-      image: "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
+      image:
+        "https://recipe1.ezmember.co.kr/cache/recipe/2023/01/04/4b577bb2d8e62cbf4513769a394848461.jpg",
       items: [
         {
           name: "현미밥 🍚",
@@ -376,6 +372,34 @@ function AllRecordPage() {
 
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const userId = user?.userId ?? user?.id ?? 1;
+
+  useEffect(() => {
+    const syncExerciseRecords = () => {
+      setStoredExerciseSessions(
+        hydrateExerciseSessions(loadExerciseRecords(userId)),
+      );
+    };
+
+    syncExerciseRecords();
+    window.addEventListener("exercise-records-updated", syncExerciseRecords);
+
+    return () =>
+      window.removeEventListener(
+        "exercise-records-updated",
+        syncExerciseRecords,
+      );
+  }, [userId]);
+
+  const exerciseRecords = storedExerciseSessions
+    .filter((session) => session.dateIso?.slice(0, 10) === selectedDate)
+    .sort((left, right) => new Date(right.dateIso) - new Date(left.dateIso))
+    .map((session) => ({
+      exerciseDate: session.dateIso?.slice(0, 10),
+      exerciseTypeId: session.kind === "cardio" ? 3 : 4,
+      exerciseName: session.name,
+      kcal: session.calories,
+    }));
 
   //토큰 인증 테스트용
   // useEffect(() => {
@@ -389,12 +413,17 @@ function AllRecordPage() {
 
   return (
     <>
-      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F3F3F3] font-['Noto_Sans_KR'] text-[#222222]">
-        <div className="w-full max-w-full px-[24px] pb-[40px] pt-[87px] md:px-[60px] xl:px-[60px]">
-          <div className="mb-[50px] flex items-center justify-between">
-            <h1 className="text-[32px] font-extrabold leading-none tracking-[-1.2px] text-[#252A31]">
-              전체 기록 관리
-            </h1>
+      <main className="min-h-[calc(100vh-70px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+        <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
+                전체 기록 관리
+              </h1>
+              <p className="mt-2 text-sm text-[#64748B]">
+                오늘 하루의 건강 기록을 한눈에 확인하세요.
+              </p>
+            </div>
 
             <div className="relative">
               <input
@@ -432,11 +461,11 @@ function AllRecordPage() {
             >
               {bloodPressureRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("bp")} />
+
                   {bloodPressureRecords.map((record, index) => (
                     <BloodPressureRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("bp")} />
                 </div>
               ) : null}
             </LargeRecordCard>
@@ -456,11 +485,11 @@ function AllRecordPage() {
             >
               {bloodSugarRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("blood")} />
+
                   {bloodSugarRecords.map((record, index) => (
                     <BloodSugarRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("blood")} />
                 </div>
               ) : null}
             </LargeRecordCard>
@@ -524,18 +553,18 @@ function AllRecordPage() {
             >
               {exerciseRecords.length > 0 ? (
                 <div className="flex w-full flex-col gap-[8px]">
+                  <AddRecordBar onClick={() => setModalType("exercise")} />
+
                   {exerciseRecords.map((record, index) => (
                     <ExerciseRecordItem key={index} record={record} />
                   ))}
-
-                  <AddRecordBar onClick={() => setModalType("exercise")} />
                 </div>
               ) : null}
             </LargeRecordCard>
           </div>
 
-          <section className="relative mt-[22px] rounded-[12px] border border-[#E5E5E5] bg-white px-[74px] pt-[43px] pb-[32px]">
-            <div className="absolute left-0 top-0 h-full w-[4px] rounded-l-[12px] bg-[#A142FF]" />
+          <section className="relative mt-[22px] overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white px-6 pt-[43px] pb-[32px] shadow-[0_4px_16px_rgba(15,23,42,0.04)] md:px-[74px]">
+            <div className="absolute left-0 top-0 h-full w-[4px] bg-[#A142FF]" />
 
             <div className="mb-[34px] flex items-center justify-center gap-[15px]">
               <img
@@ -545,11 +574,11 @@ function AllRecordPage() {
               />
 
               <div>
-                <p className="text-[14px] font-extrabold leading-none text-[#252A31]">
+                <p className="text-[14px] font-extrabold leading-none text-[#0F172A]">
                   오늘의 식단
                 </p>
 
-                <p className="mt-[8px] text-[10px] font-medium leading-none text-[#8D949E]">
+                <p className="mt-[8px] text-[11px] font-medium leading-none text-[#94A3B8]">
                   식단 기록 대기 중
                 </p>
               </div>
@@ -566,7 +595,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="아침 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="아침 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.lunch ? (
@@ -579,7 +611,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="점심 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="점심 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.dinner ? (
@@ -592,7 +627,10 @@ function AllRecordPage() {
                   onClick={() => setModalType("meal")}
                 />
               ) : (
-                <MealBox title="저녁 식사" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="저녁 식사"
+                  onClick={() => setModalType("meal")}
+                />
               )}
 
               {mealRecords.snack ? (
@@ -625,7 +663,13 @@ function AllRecordPage() {
 
       <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
 
-      <ExerciseModal isOpen={modalType === "exercise"} onClose={closeModal} />
+      <ExerciseModal
+        isOpen={modalType === "exercise"}
+        onClose={closeModal}
+        onSaved={(records) =>
+          setStoredExerciseSessions(hydrateExerciseSessions(records))
+        }
+      />
     </>
   );
 }

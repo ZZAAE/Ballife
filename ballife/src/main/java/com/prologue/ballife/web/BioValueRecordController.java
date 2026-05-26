@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.prologue.ballife.domain.daily.BioValueRecord;
 import com.prologue.ballife.service.daily.BioValueRecordService;
 import com.prologue.ballife.web.dto.daily.BioValueRecordDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "BioValueRecord", description = "생체 수치 기록 API")
 @RestController
@@ -39,7 +39,7 @@ public class BioValueRecordController {
     @PostMapping("/{userId}") 
     public ResponseEntity<BioValueRecordDto.BioResponse> createBioValueRecord(
         @Parameter(description = "유저 UUID") @PathVariable Long userId,
-        @Valid @RequestBody BioValueRecordDto.CreateRequest request){
+        @Valid @org.springframework.web.bind.annotation.RequestBody BioValueRecordDto.CreateRequest request){
             BioValueRecordDto.BioResponse response = bioValueRecordService.createBioValueRecord(userId, request);
             return ResponseEntity.ok(response);
     }
@@ -48,7 +48,7 @@ public class BioValueRecordController {
     @PutMapping("/{recordId}")
     public ResponseEntity<BioValueRecordDto.BioResponse> updateBioValueRecord(
         @Parameter(description = "RecordID") @PathVariable Long recordId,
-        @Valid @RequestBody BioValueRecordDto.UpdateRequest request){
+        @Valid @org.springframework.web.bind.annotation.RequestBody BioValueRecordDto.UpdateRequest request){
             return ResponseEntity.ok(bioValueRecordService.updateBioValueRecord(recordId, request));
     }
 

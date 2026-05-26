@@ -48,12 +48,12 @@ const meals = [
 ];
 
 const nutritionSummary = [
-  { label: "탄수화물",    current: 125,  target: 260,  unit: "g",  over: false },
-  { label: "단백질",     current: 65,   target: 120,  unit: "g",  over: false },
-  { label: "지방",       current: 132,  target: 70,   unit: "g",  over: true  },
-  { label: "당류",       current: 24,   target: 50,   unit: "g",  over: false },
-  { label: "나트륨",     current: 1120, target: 2000, unit: "mg", over: false },
-  { label: "콜레스테롤", current: 150,  target: 300,  unit: "mg", over: false },
+  { label: "탄수화물",    current: 125,  target: 260,  unit: "g",  over: false, barClass: "bg-slate-400",  textClass: "text-slate-500"  },
+  { label: "단백질",     current: 65,   target: 120,  unit: "g",  over: false, barClass: "bg-cyan-500",   textClass: "text-cyan-500"   },
+  { label: "지방",       current: 132,  target: 70,   unit: "g",  over: true,  barClass: "bg-orange-400", textClass: "text-orange-400" },
+  { label: "당류",       current: 24,   target: 50,   unit: "g",  over: false, barClass: "bg-pink-400",   textClass: "text-pink-400"   },
+  { label: "나트륨",     current: 1120, target: 2000, unit: "mg", over: false, barClass: "bg-yellow-500", textClass: "text-yellow-500" },
+  { label: "콜레스테롤", current: 150,  target: 300,  unit: "mg", over: false, barClass: "bg-indigo-400", textClass: "text-indigo-400" },
 ];
 
 // ── MealDetailModal용 데이터 변환 ─────────────────────────────────────────
@@ -110,13 +110,13 @@ function DonutChart({ value, max, size = 160, strokeWidth = 10, color = "#000" }
 }
 
 // ── ProgressBar ───────────────────────────────────────────────────────────
-function ProgressBar({ current, target, over }) {
+function ProgressBar({ current, target, over, barClass = "bg-[#111]" }) {
   const pct = Math.min((current / target) * 100, 100);
   return (
     <div className="h-[6px] rounded-[3px] bg-[#ebeef0] overflow-hidden w-full">
       <div
         className={`h-full rounded-[3px] transition-[width] duration-[800ms] ease-in-out ${
-          over ? "bg-[#bc2e16]" : "bg-[#111]"
+          over ? "bg-[#bc2e16]" : barClass
         }`}
         style={{ width: `${pct}%` }}
       />
@@ -148,10 +148,10 @@ export default function MealPage() {
           <div className="mb-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">
+                <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                   오늘의 식단 기록 확인
                 </h1>
-                <p className="mt-2 text-sm text-[#64748B]">
+                <p className="mb-8 text-sm text-gray-500">
                   지난 신체 변화를 분석한 결과입니다.
                 </p>
               </div>
@@ -277,7 +277,7 @@ export default function MealPage() {
                       </span>
                     </span>
                   </div>
-                  <ProgressBar current={n.current} target={n.target} over={n.over} />
+                  <ProgressBar current={n.current} target={n.target} over={n.over} barClass={n.barClass} />
                 </div>
               ))}
             </div>

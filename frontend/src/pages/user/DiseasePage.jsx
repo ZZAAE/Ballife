@@ -104,15 +104,15 @@ function DiseasePage() {
 	};
 
 	return (
-		<div className="flex min-h-[calc(100vh-10rem)]  bg-white px-8 py-10">
-			<div className="mx-auto flex min-h-full w-1/3 flex-col rounded-[28px]   bg-white px-8 py-10  sm:px-10">
-				<h1 className="text-3xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
+		<div className="flex h-screen items-center justify-center overflow-hidden bg-white px-8 py-6">
+			<div className="flex w-1/3 flex-col rounded-[28px] bg-white px-8 py-6 sm:px-10">
+				<h1 className="text-2xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
 
-				<form onSubmit={handleSubmit} className="mt-10 flex flex-1 flex-col">
-					<div className="space-y-6">
+				<form onSubmit={handleSubmit} className="mt-6 flex flex-col">
+					<div className="space-y-3">
 						{diseaseFields.map((field) => (
-							<div key={field.name} className="space-y-2">
-								<label htmlFor={field.name} className="block text-base font-semibold text-gray-900">
+							<div key={field.name} className="space-y-1.5">
+								<label htmlFor={field.name} className="block text-sm font-semibold text-gray-900">
 									{field.label}
 								</label>
 
@@ -122,7 +122,7 @@ function DiseasePage() {
 										name={field.name}
 										value={formData[field.name]}
 										onChange={handleChange}
-										className="h-12 w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 pr-12 text-sm text-gray-700 outline-none transition focus:border-gray-400 focus:bg-white"
+										className="h-11 w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 pr-12 text-sm text-gray-700 outline-none transition focus:border-gray-400 focus:bg-white"
 									>
 										{field.options.map((option) => (
 											<option key={option.value} value={option.value}>
@@ -153,7 +153,7 @@ function DiseasePage() {
 						))}
 					</div>
 
-					<Button type="submit" className="mt-auto h-12 w-full !rounded-lg !bg-black !text-sm !font-semibold !text-white hover:!bg-gray-900 focus:!ring-black">
+					<Button type="submit" className="mt-6 h-11 w-full !rounded-lg !bg-black !text-sm !font-semibold !text-white hover:!bg-gray-900 focus:!ring-black">
 						완료
 					</Button>
 				</form>

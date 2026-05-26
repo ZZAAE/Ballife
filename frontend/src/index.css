@@ -42,3 +42,23 @@ body {
   }
 
 }
+
+/* 리워드 +1 떠오르는 애니메이션 */
+@keyframes reward-float-up {
+  0% {
+    transform: translate(-50%, 0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -6px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -56px) scale(1);
+    opacity: 0;
+  }
+}
+
+.reward-float {
+  animation: reward-float-up 1s ease-out forwards;
+}

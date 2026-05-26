@@ -3,6 +3,17 @@ import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import authApi from "../../api/authApi";
 
+const EMAIL_DOMAINS = [
+  "naver.com",
+  "gmail.com",
+  "daum.net",
+  "hanmail.net",
+  "kakao.com",
+  "nate.com",
+  "hotmail.com",
+  "outlook.com",
+];
+
 function SignUpPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -14,18 +25,97 @@ function SignUpPage() {
     email: "",
     birthDate: "",
     nickname: "",
-    gender: "",
+    gender: "남성",
     weight: "",
     height: "",
     diseaseIndex: ""
   });
   const [errors, setErrors] = useState({});
 
+  const [loginIdStatus, setLoginIdStatus] = useState("idle"); // idle | checking | available | taken
+  const [checkingLoginId, setCheckingLoginId] = useState(false);
+
+  const [emailLocal, setEmailLocalState] = useState("");
+  const [emailDomain, setEmailDomainState] = useState("");
+  const [isCustomDomain, setIsCustomDomain] = useState(false);
+
+  const syncEmail = (local, domain) => {
+    const composed = local && domain ? `${local}@${domain}` : "";
+    setFormData((prev) => ({ ...prev, email: composed }));
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handleEmailLocalChange = (e) => {
+    const value = e.target.value;
+    setEmailLocalState(value);
+    syncEmail(value, emailDomain);
+  };
+
+  const handleEmailDomainChange = (e) => {
+    const value = e.target.value;
+    setEmailDomainState(value);
+    syncEmail(emailLocal, value);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "loginId") {
+      setLoginIdStatus("idle");
+    }
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleCheckLoginId = async () => {
+    if (!formData.loginId) {
+      setErrors((prev) => ({ ...prev, loginId: "아이디를 입력해주세요." }));
+      return;
+    }
+    if (formData.loginId.length < 5) {
+      setErrors((prev) => ({ ...prev, loginId: "아이디는 5자 이상이어야 합니다." }));
+      return;
+    }
+    setCheckingLoginId(true);
+    setLoginIdStatus("checking");
+    try {
+      const res = await authApi.checkUsername(formData.loginId);
+      const data = res?.data;
+      let available;
+      if (typeof data === "boolean") {
+        available = data;
+      } else if (typeof data?.available === "boolean") {
+        available = data.available;
+      } else if (typeof data?.exists === "boolean") {
+        available = !data.exists;
+      } else if (typeof data?.duplicated === "boolean") {
+        available = !data.duplicated;
+      } else {
+        available = false;
+      }
+      setLoginIdStatus(available ? "available" : "taken");
+    } catch (error) {
+      console.error("아이디 중복 확인 실패:", error);
+      toast.error("중복 확인에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      setLoginIdStatus("idle");
+    } finally {
+      setCheckingLoginId(false);
+    }
+  };
+
+  const handleDomainSelect = (e) => {
+    const value = e.target.value;
+    if (value === "__custom__") {
+      setIsCustomDomain(true);
+      setEmailDomainState("");
+      syncEmail(emailLocal, "");
+    } else {
+      setIsCustomDomain(false);
+      setEmailDomainState(value);
+      syncEmail(emailLocal, value);
     }
   };
 
@@ -36,6 +126,8 @@ function SignUpPage() {
       newErrors.loginId = "아이디를 입력해주세요.";
     } else if (formData.loginId.length < 5) {
       newErrors.loginId = "아이디는 5자 이상이어야 합니다.";
+    } else if (loginIdStatus !== "available") {
+      newErrors.loginId = "아이디 중복 확인을 완료해주세요.";
     }
 
     if (!formData.password) {
@@ -50,9 +142,9 @@ function SignUpPage() {
       newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
     }
 
-    if (!formData.email) {
+    if (!emailLocal || !emailDomain) {
       newErrors.email = "이메일을 입력해주세요.";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(`${emailLocal}@${emailDomain}`)) {
       newErrors.email = "올바른 이메일 형식이 아닙니다.";
     }
 
@@ -142,16 +234,32 @@ function SignUpPage() {
           {/* 아이디 */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-gray-800 mb-1">아이디</label>
-            <input
-              type="text"
-              name="loginId"
-              value={formData.loginId}
-              onChange={handleChange}
-              placeholder="아이디를 입력해주세요."
-              autoComplete="username"
-              className={inputClass("loginId")}
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                name="loginId"
+                value={formData.loginId}
+                onChange={handleChange}
+                placeholder="아이디를 입력해주세요."
+                autoComplete="username"
+                className={`${inputClass("loginId")} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={handleCheckLoginId}
+                disabled={checkingLoginId}
+                className="h-12 px-4 rounded bg-gray-800 text-white text-sm font-medium hover:bg-black transition disabled:opacity-60 whitespace-nowrap"
+              >
+                {checkingLoginId ? "확인 중..." : "중복 확인"}
+              </button>
+            </div>
             {errors.loginId && <p className="mt-1 text-xs text-red-500 pl-1">{errors.loginId}</p>}
+            {!errors.loginId && loginIdStatus === "available" && (
+              <p className="mt-1 text-xs text-green-600 pl-1">사용 가능한 아이디입니다.</p>
+            )}
+            {!errors.loginId && loginIdStatus === "taken" && (
+              <p className="mt-1 text-xs text-red-500 pl-1">이미 사용 중인 아이디입니다.</p>
+            )}
           </div>
 
           {/* 비밀번호 */}
@@ -199,16 +307,37 @@ function SignUpPage() {
 
           {/* 이메일 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">본인 확인인 이메일</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="example@email.com"
-              autoComplete="email"
-              className={inputClass("email")}
-            />
+            <label className="block text-sm font-medium text-gray-800 mb-1">본인 확인 이메일</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={emailLocal}
+                onChange={handleEmailLocalChange}
+                placeholder="example"
+                autoComplete="email"
+                className={`${inputClass("email")} flex-1 min-w-0`}
+              />
+              <span className="text-sm text-gray-500">@</span>
+              <input
+                type="text"
+                value={emailDomain}
+                onChange={handleEmailDomainChange}
+                readOnly={!isCustomDomain}
+                placeholder="email.com"
+                className={`${inputClass("email")} flex-1 min-w-0 ${!isCustomDomain ? "cursor-default" : ""}`}
+              />
+            </div>
+            <select
+              value={isCustomDomain ? "__custom__" : emailDomain}
+              onChange={handleDomainSelect}
+              className="mt-2 w-full h-12 px-3 bg-gray-100 rounded text-sm text-gray-800 outline-none border border-transparent focus:bg-white focus:border-gray-300"
+            >
+              <option value="">이메일 선택</option>
+              {EMAIL_DOMAINS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+              <option value="__custom__">직접 입력</option>
+            </select>
             {errors.email && <p className="mt-1 text-xs text-red-500 pl-1">{errors.email}</p>}
           </div>
 
@@ -265,22 +394,8 @@ function SignUpPage() {
             {errors.gender && <p className="mt-1 text-xs text-red-500 pl-1">{errors.gender}</p>}
           </div>
 
-          {/* 몸무게 / 키 — 나란히 */}
+          {/* 키 / 몸무게 — 나란히 */}
           <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-800 mb-1">몸무게</label>
-              <input
-                type="number"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                placeholder="kg"
-                step="0.1"
-                min="0"
-                className={inputClass("weight")}
-              />
-              {errors.weight && <p className="mt-1 text-xs text-red-500 pl-1">{errors.weight}</p>}
-            </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-800 mb-1">키</label>
               <input
@@ -294,6 +409,20 @@ function SignUpPage() {
                 className={inputClass("height")}
               />
               {errors.height && <p className="mt-1 text-xs text-red-500 pl-1">{errors.height}</p>}
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-800 mb-1">몸무게</label>
+              <input
+                type="number"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+                placeholder="kg"
+                step="0.1"
+                min="0"
+                className={inputClass("weight")}
+              />
+              {errors.weight && <p className="mt-1 text-xs text-red-500 pl-1">{errors.weight}</p>}
             </div>
           </div>
 

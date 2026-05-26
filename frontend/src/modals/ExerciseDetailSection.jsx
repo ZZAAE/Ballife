@@ -1,31 +1,15 @@
-import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import AnaerobicFields from "./AnaerobicFields";
 import AerobicFields from "./AerobicFields";
-
-let nextId = 1;
-
-function ExerciseDetailSection({ activeTab }) {
-  const [anaerobicRows, setAnaerobicRows] = useState([]);
-  const [aerobicRows, setAerobicRows] = useState([]);
-
+function ExerciseDetailSection({
+  activeTab,
+  anaerobicRows,
+  aerobicRows,
+  onAddRow,
+  onRemoveRow,
+  onRowChange,
+}) {
   const rows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
-
-  const addRow = () => {
-    if (activeTab === "anaerobic") {
-      setAnaerobicRows((prev) => [...prev, { id: nextId++ }]);
-    } else {
-      setAerobicRows((prev) => [...prev, { id: nextId++ }]);
-    }
-  };
-
-  const removeRow = (id) => {
-    if (activeTab === "anaerobic") {
-      setAnaerobicRows((prev) => prev.filter((r) => r.id !== id));
-    } else {
-      setAerobicRows((prev) => prev.filter((r) => r.id !== id));
-    }
-  };
 
   return (
     <div>
@@ -47,13 +31,24 @@ function ExerciseDetailSection({ activeTab }) {
           >
             <div className="flex items-end gap-2">
               {activeTab === "anaerobic" ? (
-                <AnaerobicFields />
+                <AnaerobicFields
+                  row={row}
+                  onChange={(changes) =>
+                    onRowChange("anaerobic", row.id, changes)
+                  }
+                />
               ) : (
-                <AerobicFields />
+                <AerobicFields
+                  row={row}
+                  onChange={(changes) =>
+                    onRowChange("aerobic", row.id, changes)
+                  }
+                />
               )}
 
               <button
-                onClick={() => removeRow(row.id)}
+                type="button"
+                onClick={() => onRemoveRow(activeTab, row.id)}
                 className="mb-0.5 p-2 text-red-400 transition-colors hover:text-red-600"
               >
                 <Trash2 size={20} />
@@ -64,7 +59,8 @@ function ExerciseDetailSection({ activeTab }) {
       </div>
 
       <button
-        onClick={addRow}
+        type="button"
+        onClick={() => onAddRow(activeTab)}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-100 py-4 text-sm font-medium text-gray-500 transition-all hover:bg-gray-50"
       >
         <Plus size={18} />

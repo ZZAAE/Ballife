@@ -241,10 +241,10 @@ export default function RecordSummary() {
           {/* Header */}
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <h1 className="mb-1 text-2xl font-bold text-[#0F172A] sm:text-3xl">
+              <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                 하루 기록
               </h1>
-              <p className="text-sm text-[#94A3B8]">
+              <p className="mb-8 text-sm text-gray-500">
                 하루의 신체 변화를 분석한 결과입니다.
               </p>
             </div>
@@ -273,35 +273,35 @@ export default function RecordSummary() {
             {/* 식단 Card */}
             <SummaryCard
               Icon={Utensils}
-              colorText="text-purple-600"
-              colorBackgorund="bg-purple-50"
+              colorText="text-red-600"
+              colorBackgorund="bg-red-50"
               labelName="식단"
               description="오늘의 섭취 kcal"
               record="1,450"
               unit="/ 2,100 kcal"
               bottomLabel="남은 섭취 칼로리 650kcal"
-              bottomeLabelColor="text-purple-600"
+              bottomeLabelColor="text-red-600"
             />
 
             {/* 운동 Card */}
             <SummaryCard
               Icon={Dumbbell}
-              colorText="text-emerald-600"
-              colorBackgorund="bg-emerald-50"
+              colorText="text-orange-600"
+              colorBackgorund="bg-orange-50"
               labelName="운동"
               description="오늘의 활동 시간"
               record="45"
               unit="분"
               bottomLabel="총 소모칼로리 500 kcal"
               //BottomIcon = {TrendingUp}
-              bottomeLabelColor="text-emerald-600"
+              bottomeLabelColor="text-orange-600"
             />
 
             {/* 체중 Card */}
             <SummaryCard
               Icon={Scale}
-              colorText="text-blue-600"
-              colorBackgorund="bg-blue-50"
+              colorText="text-yellow-600"
+              colorBackgorund="bg-yellow-50"
               labelName="체중"
               description="현재 체중 및 추세"
               record="72.4"

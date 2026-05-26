@@ -17,6 +17,13 @@ import {
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { ArrowRight } from "lucide-react";
 
+/* ============================================================
+ * 페이지 레벨 카드 공통 스타일 토큰
+ * - Calendar(rounded-3xl, shadow-sm, border-slate-100)와 통일
+ * ============================================================ */
+const CARD_STYLE =
+  "rounded-3xl border border-slate-100 bg-white shadow-sm";
+
 const bloodPressureData = [
   { date: "03-01", systolic: 128, diastolic: 82 },
   { date: "03-05", systolic: 125, diastolic: 80 },
@@ -174,161 +181,176 @@ const MainPage = () => {
       {/* <Header /> */}
       <div className="flex pt-[55px]">
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8 space-y-10">
+          <div className="max-w-[1280px] mx-auto px-4 py-6 space-y-6 sm:px-6 sm:py-8 sm:space-y-8 lg:space-y-10">
 
-        {/* Header & User Stats */}
-        <header className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
-          <h1 className="text-3xl font-bold text-[#0F172A]">김지수님 안녕하세요.</h1>
-          <div className="flex gap-6 text-sm">
-            <div><p className="text-xs text-[#94A3B8]">나이 / 성별</p><p className="font-semibold text-[#0F172A]">{userStats.ageGender}</p></div>
-            <div><p className="text-xs text-[#94A3B8]">키</p><p className="font-semibold text-[#0F172A]">{userStats.height}</p></div>
-            <div><p className="text-xs text-[#94A3B8]">몸무게</p><p className="font-semibold text-[#0F172A]">{userStats.weight}</p></div>
-            <div><p className="text-xs text-[#94A3B8]">BMI</p><p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p></div>
-          </div>
-        </header>
+            {/* ====================== 헤더 & 사용자 스탯 ====================== */}
+            <header className="pb-4 border-b border-[#E5E7EB]">
+              {/* 모바일: 인사말 위, 스탯 2×2 아래 */}
+              {/* lg+: 좌측 인사말, 우측 스탯 가로 */}
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#0F172A]">
+                  김지수님 안녕하세요.
+                </h1>
 
-        {/* 펫 섹션 */}
-        <section className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6">
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-            <div>
-              <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A]">
-                내 펫이 기다리고 있어요
-              </h2>
-              <p className="mt-2 text-sm lg:text-base text-[#64748B]">
-                펫과 함께 건강한 하루를 시작해보세요.
-              </p>
-              <Link
-                to="/member/pet"
-                className="group mt-5 inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#1E293B]"
-              >
-                내 펫 자세히 보기
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-              </Link>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-[520px]">
-              <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-white/80">
-                <Unity
-                  unityProvider={unityProvider}
-                  style={{
-                    width: '100%',
-                    height: 360,
-                    display: 'block',
-                    background: '#F0F7FF',
-                  }}
-                />
-                {!isLoaded && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                    <div className="mb-3 text-3xl">🐾</div>
-                    <p className="text-sm font-semibold text-blue-700">
-                      펫을 데려오는 중이에요…
-                    </p>
-                    <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-white/70">
-                      <div
-                        className="h-full rounded-full bg-blue-500 transition-all duration-300"
-                        style={{ width: `${loadingPercent}%` }}
-                      />
-                    </div>
-                    <p className="mt-2 text-xs font-semibold text-blue-500">
-                      {loadingPercent}%
-                    </p>
+                {/* 모바일: 2×2 그리드 / sm+: 가로 나열 */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:gap-6 text-sm">
+                  <div>
+                    <p className="text-xs text-[#94A3B8]">나이 / 성별</p>
+                    <p className="font-semibold text-[#0F172A]">{userStats.ageGender}</p>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Status Cards (Top Row) */}
-        <Card />
-
-        {/* Action Cards (Second Row) */}
-        
-
-        {/* Calendar & Chart Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Calendar Card */}
-          <Calendar />
-
-          {/* Chart Placeholder Card */}
-          <ChartSection
-            title="주간 건강 추이"
-            data={activeChart.data}
-            legends={activeChart.legends}
-            selectedType={selectedChartType}
-            onTypeChange={setSelectedChartType}
-            chartTypes={[
-              { value: "bloodSugar", label: "혈당" },
-              { value: "bloodPressure", label: "혈압" },
-              { value: "weight", label: "체중" },
-            ]}
-          >
-            {(filteredData) => (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#16a34a" stopOpacity={0.22} />
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.22} />
-                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
-                  <YAxis domain={activeChart.yDomain} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  {activeChart.areas.map((area) => (
-                    <Area
-                      key={area.key}
-                      type="monotone"
-                      dataKey={area.key}
-                      name={area.name}
-                      stroke={area.stroke}
-                      strokeWidth={3}
-                      fill={`url(#${area.gradientId})`}
-                      dot={{ fill: area.stroke, r: 4, stroke: "#fff", strokeWidth: 2 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  ))}
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </ChartSection>
-        </section>
-
-        {/* 건강 뉴스 섹션 */}
-        <section>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
-            <p className="text-[#64748B] text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
-              { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
-              { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
-            ].map((news, idx) => (
-              <div key={idx} className="bg-white rounded-[18px] overflow-hidden border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] group cursor-pointer">
-                <img src={news.img} alt={news.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="p-6">
-                  <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
-                  <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
+                  <div>
+                    <p className="text-xs text-[#94A3B8]">키</p>
+                    <p className="font-semibold text-[#0F172A]">{userStats.height}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#94A3B8]">몸무게</p>
+                    <p className="font-semibold text-[#0F172A]">{userStats.weight}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#94A3B8]">BMI</p>
+                    <p className={`font-semibold ${userStats.bmiColor}`}>{userStats.bmi}</p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
+            </header>
+
+            {/* ====================== 펫 섹션 ====================== */}
+            <section className="rounded-3xl border border-slate-700 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-950 p-6 shadow-[0_10px_26px_rgba(15,23,42,0.22)] sm:p-8">
+              <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8">
+                <div>
+                  <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-white">
+                    내 펫이 기다리고 있어요
+                  </h2>
+                  <p className="mt-2 text-sm lg:text-base text-slate-300">
+                    펫과 함께 건강한 하루를 시작해보세요.
+                  </p>
+                  <Link
+                    to="/member/pet"
+                    className="group mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+                  >
+                    내 펫 자세히 보기
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+
+                <div className="relative mx-auto w-full max-w-[520px]">
+                  <div className="relative overflow-hidden rounded-3xl">
+                    <Unity
+                      unityProvider={unityProvider}
+                      style={{
+                        width: '100%',
+                        height: 360,
+                        display: 'block',
+                        background: '#F0F7FF',
+                      }}
+                    />
+                    {!isLoaded && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                        <div className="mb-3 text-3xl">🐾</div>
+                        <p className="text-sm font-semibold text-blue-700">
+                          펫을 데려오는 중이에요…
+                        </p>
+                        <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-white/70">
+                          <div
+                            className="h-full rounded-full bg-blue-500 transition-all duration-300"
+                            style={{ width: `${loadingPercent}%` }}
+                          />
+                        </div>
+                        <p className="mt-2 text-xs font-semibold text-blue-500">
+                          {loadingPercent}%
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* ====================== Status Cards ====================== */}
+            <Card />
+
+            {/* ====================== Calendar & Chart ====================== */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <Calendar />
+
+              <ChartSection
+                title="주간 건강 추이"
+                data={activeChart.data}
+                legends={activeChart.legends}
+                selectedType={selectedChartType}
+                onTypeChange={setSelectedChartType}
+                chartTypes={[
+                  { value: "bloodSugar", label: "혈당" },
+                  { value: "bloodPressure", label: "혈압" },
+                  { value: "weight", label: "체중" },
+                ]}
+              >
+                {(filteredData) => (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
+                          <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#16a34a" stopOpacity={0.22} />
+                          <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.22} />
+                          <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
+                      <YAxis domain={activeChart.yDomain} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      {activeChart.areas.map((area) => (
+                        <Area
+                          key={area.key}
+                          type="monotone"
+                          dataKey={area.key}
+                          name={area.name}
+                          stroke={area.stroke}
+                          strokeWidth={3}
+                          fill={`url(#${area.gradientId})`}
+                          dot={{ fill: area.stroke, r: 4, stroke: "#fff", strokeWidth: 2 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      ))}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartSection>
+            </section>
+
+            {/* ====================== 건강 뉴스 ====================== */}
+            <section>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
+                <p className="text-[#64748B] text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {[
+                  { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
+                  { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
+                  { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
+                ].map((news, idx) => (
+                  <div key={idx} className={`${CARD_STYLE} overflow-hidden group cursor-pointer transition hover:shadow-md`}>
+                    <img src={news.img} alt={news.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="p-6">
+                      <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
+                      <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
 
           </div>
         </main>
