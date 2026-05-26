@@ -1,6 +1,7 @@
-import { useId, useState } from 'react';
+import { useId, useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { BIO_CATEGORY } from '../constants/bioCategory';
+import bioValueRecordApi from '../api/bioValueRecordApi';
 
 
 // 데이터베이스에서 기존에 사용자가 저장한 최신 물먹은양, 목표 수분섭취량 가져와서 
@@ -27,11 +28,39 @@ const WaterRecordModal = ({
   onClose,
   onSave,
   currentAmount = 1400, // 먹은 물 양
-  targetAmount = 1900, // 목표치
+  targetAmount = 2000, // 목표치
 }) => {
   const clipPathId = useId();
   const { user } = useAuth();
-  const [inputAmount, setInputAmount] = useState(() => String(Math.round(currentAmount / 200)));
+  const [inputAmount, setInputAmount] = useState('0');
+  const [todayRecordId, setTodayRecordId] = useState(null);
+
+  const userId = user?.userId ?? user?.id;
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const getTodayStr = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  };
+
+  // 모달 열릴 때 오늘 물 기록 조회 → 있으면 recordId + 컵 수 로드
+  useEffect(() => {
+    if (!isOpen || !userId) return;
+    const today = getTodayStr();
+    bioValueRecordApi.searchByDate(userId, 'water', today)
+      .then((res) => {
+        const list = res.data ?? [];
+        if (list.length > 0) {
+          const rec = list[0];
+          setTodayRecordId(rec.recordId);
+          setInputAmount(String(rec.waterIntakeCup ?? 0));
+        } else {
+          setTodayRecordId(null);
+          setInputAmount('0');
+        }
+      })
+      .catch(() => {});
+  }, [isOpen, userId]);
 
 
   const parsedCurrentCups = Number(inputAmount) || 0;
@@ -42,38 +71,33 @@ const WaterRecordModal = ({
   const fillY = 132 - fillHeight;
   const feedbackMessage = getProgressMessage(progress);
 
-  const handleAmountChange = (event) => {
-    const nextValue = event.target.value.replace(/[^0-9]/g, '');
-    setInputAmount(nextValue);
-  };
-
   const handleSave = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     const now = new Date();
-    const pad = (n) => String(n).padStart(2, '0');
-    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const today = getTodayStr();
     const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    const body = JSON.stringify({
-      recordDate,
+    const payload = {
+      recordDate: today,
       recordTime,
       category: BIO_CATEGORY.WATER_INTAKE,
       waterIntakeCup: parsedCurrentCups,
-    });
-    const accessToken = localStorage.getItem('accessToken');
+    };
+
     try {
-      const res = await fetch(`http://localhost:8080/api/bioValueRecords/${user.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error('서버 에러:', err);
-        return;
+      // 오늘 기록이 있으면 UPDATE, 없으면 CREATE
+      let existingId = todayRecordId;
+      if (!existingId) {
+        const check = await bioValueRecordApi.searchByDate(userId, 'WaterIntake', today);
+        const list = check.data ?? [];
+        if (list.length > 0) existingId = list[0].recordId;
       }
+
+      if (existingId) {
+        await bioValueRecordApi.updateBioValueRecord(existingId, payload);
+      } else {
+        await bioValueRecordApi.createBioValueRecord(userId, payload);
+      }
+
       if (onSave) onSave(parsedCurrentCups);
       onClose?.();
     } catch (error) {
@@ -119,18 +143,31 @@ const WaterRecordModal = ({
 
           <div className="relative py-2">
             <div className="absolute right-0 top-2 text-right">
-              <div className="flex items-end justify-end gap-3 leading-none">
-              <label htmlFor="water-amount" className="sr-only">현재 수분 섭취량 입력</label>
-              <input
-                id="water-amount"
-                type="text"
-                inputMode="numeric"
-                value={inputAmount}
-                onChange={handleAmountChange}
-                placeholder="0"
-                className="w-[280px] border-0 bg-transparent p-0 text-right text-[80px] font-bold tracking-tighter text-slate-900 outline-none placeholder:text-slate-200"
-              />
-              <span className="pb-3 text-4xl font-bold text-slate-300">컵</span>
+              <div className="flex items-center justify-end gap-4 leading-none">
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={() => setInputAmount(String(parsedCurrentCups + 1))}
+                  className="w-12 h-12 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-sm"
+                  aria-label="컵 수 증가"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                </button>
+                <span className="text-[80px] font-bold tracking-tighter text-slate-900 w-[160px] text-center leading-none select-none">
+                  {parsedCurrentCups}
+                </span>
+                <button
+                  onClick={() => setInputAmount(String(Math.max(0, parsedCurrentCups - 1)))}
+                  className="w-12 h-12 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-sm"
+                  aria-label="컵 수 감소"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              </div>
+              <span className="text-4xl font-bold text-slate-300 self-center">컵</span>
             </div>
               <div className="mt-2 space-y-1">
                 <p className="text-[12px] font-semibold text-slate-500">현재 수분 섭취량</p>
