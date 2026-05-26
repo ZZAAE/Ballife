@@ -64,7 +64,7 @@ export default function BloodSugarRecord() {
         <main className="min-w-0 flex-1">
           <div className="max-w-[1280px] mx-auto px-6 py-8">
           <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">혈당 기록 확인</h1>
-          <p className="mt-2 mb-6 text-sm text-[#64748B]">지난 혈당 변화를 분석한 결과입니다.</p>
+          <p className="mb-8 text-sm text-gray-500">지난 혈당 변화를 분석한 결과입니다.</p>
 
           <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard className="ring-1 ring-rose-100 bg-gradient-to-br from-rose-50/40 to-white">
