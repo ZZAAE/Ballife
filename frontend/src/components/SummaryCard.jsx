@@ -12,9 +12,9 @@ const SummaryCard = forwardRef(
     BottomIcon,
     bottomLabel,
     bottomeLabelColor,
-  }) => {
+  }, ref) => {
     return (
-      <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <div ref={ref} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
         <div className="flex items-start justify-between mb-5">
           <div
             className={`w-11 h-11 rounded-xl ${colorBackgorund} flex items-center justify-center`}
