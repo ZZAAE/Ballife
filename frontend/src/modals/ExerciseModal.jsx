@@ -1,39 +1,55 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import ExerciseModalHeader from "./ExerciseModalHeader";
-import ExerciseModalTabs from "./ExerciseModalTabs";
-import ExerciseDetailSection from "./ExerciseDetailSection";
-import ExpectedCalorieCard from "./ExpectedCalorieCard";
-import ExerciseSubmitButton from "./ExerciseSubmitButton";
+import { Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { createExercise } from "../api/exerciseApi";
 import {
-  appendExerciseRecords,
+  createExercise,
+  deleteExercise,
+  updateExercise,
+} from "../api/exerciseApi";
+import {
+  CARDIO_OPTIONS,
+  STRENGTH_OPTIONS,
   buildCreatePayload,
-  buildStoredExerciseRecord,
   createAerobicRow,
   createAnaerobicRow,
   parseDurationToSeconds,
+  recordToRow,
 } from "../utils/exerciseRecords";
 
 let nextId = 1;
 
-function ExerciseModal({ isOpen, onClose, onSaved }) {
+function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("anaerobic");
   const [anaerobicRows, setAnaerobicRows] = useState([]);
   const [aerobicRows, setAerobicRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const isEditMode = !!editingRecord;
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
+    if (editingRecord) {
+      const { kind, row } = recordToRow(editingRecord, nextId++);
+      setActiveTab(kind);
+      if (kind === "aerobic") {
+        setAerobicRows([row]);
+        setAnaerobicRows([createAnaerobicRow(nextId++)]);
+      } else {
+        setAnaerobicRows([row]);
+        setAerobicRows([createAerobicRow(nextId++)]);
+      }
+      return;
+    }
+
     setActiveTab("anaerobic");
     setAnaerobicRows([createAnaerobicRow(nextId++)]);
     setAerobicRows([createAerobicRow(nextId++)]);
-  }, [isOpen]);
+  }, [isOpen, editingRecord]);
 
   const currentRows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
 
@@ -94,6 +110,27 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
     return null;
   };
 
+  const handleDelete = async () => {
+    if (!isEditMode || !editingRecord) return;
+    if (!window.confirm("이 운동 기록을 삭제할까요?")) return;
+    const userId = user?.userId ?? user?.id ?? 1;
+    const targetId = editingRecord.serverId ?? editingRecord.id;
+    setIsDeleting(true);
+    try {
+      await deleteExercise(userId, targetId);
+      window.dispatchEvent(
+        new CustomEvent("exercise-records-updated", { detail: { userId } }),
+      );
+      onSaved?.();
+      toast.success("운동 기록이 삭제되었습니다.");
+      onClose();
+    } catch (error) {
+      toast.error(error.message || "운동 기록 삭제에 실패했습니다.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     const validationMessage = validateRows();
     if (validationMessage) {
@@ -105,34 +142,50 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
     setIsSaving(true);
 
     try {
-      const savedRecords = await Promise.all(
+      if (isEditMode) {
+        const row = currentRows[0];
+        const recordedAt = editingRecord.dateIso
+          ? new Date(editingRecord.dateIso)
+          : new Date();
+        const payload = buildCreatePayload(activeTab, row, recordedAt);
+        await updateExercise(
+          userId,
+          editingRecord.serverId ?? editingRecord.id,
+          payload,
+        );
+        window.dispatchEvent(
+          new CustomEvent("exercise-records-updated", { detail: { userId } }),
+        );
+        onSaved?.();
+        toast.success("운동 기록이 수정되었습니다.");
+        onClose();
+        return;
+      }
+
+      await Promise.all(
         currentRows.map(async (row, index) => {
           const recordedAt = new Date();
           recordedAt.setSeconds(recordedAt.getSeconds() + index);
-
-          const response = await createExercise(
+          await createExercise(
             userId,
             buildCreatePayload(activeTab, row, recordedAt),
-          );
-
-          return buildStoredExerciseRecord(
-            response,
-            activeTab,
-            row,
-            recordedAt,
           );
         }),
       );
 
-      const nextRecords = appendExerciseRecords(userId, savedRecords);
       window.dispatchEvent(
         new CustomEvent("exercise-records-updated", { detail: { userId } }),
       );
-      onSaved?.(nextRecords);
+      onSaved?.();
       toast.success("운동 기록이 저장되었습니다.");
       onClose();
     } catch (error) {
-      toast.error(error.message || "운동 기록 저장에 실패했습니다.");
+      toast.error(
+        error.message ||
+          (isEditMode
+            ? "운동 기록 수정에 실패했습니다."
+            : "운동 기록 저장에 실패했습니다."),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -151,36 +204,328 @@ function ExerciseModal({ isOpen, onClose, onSaved }) {
       >
         {/* 고정 상단 영역 */}
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-          <ExerciseModalHeader onClose={onClose} />
-          <ExerciseModalTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+          {/* 헤더 */}
+          <div className="relative px-8 pb-4 pt-8">
+            <button
+              onClick={onClose}
+              className="absolute right-6 top-6 text-gray-400 hover:text-gray-600"
+            >
+              <X size={24} />
+            </button>
+
+            <h2 className="text-2xl font-bold text-gray-900">
+              {isEditMode ? "운동 기록 수정" : "운동 기록하기"}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {isEditMode
+                ? "선택한 운동 기록을 수정합니다."
+                : "오늘의 노력을 정밀하게 기록하세요."}
+            </p>
+          </div>
+
+          {/* 탭 */}
+          <div className="flex border-b border-gray-100 px-8">
+            <button
+              onClick={() => !isEditMode && setActiveTab("anaerobic")}
+              disabled={isEditMode && activeTab !== "anaerobic"}
+              className={`flex-1 py-4 text-sm font-semibold transition-all ${
+                activeTab === "anaerobic"
+                  ? "border-b-2 border-blue-600 bg-blue-50/30 text-blue-600"
+                  : "text-gray-400 hover:bg-gray-50"
+              } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
+            >
+              무산소 (Anaerobic)
+            </button>
+
+            <button
+              onClick={() => !isEditMode && setActiveTab("aerobic")}
+              disabled={isEditMode && activeTab !== "aerobic"}
+              className={`flex-1 py-4 text-sm font-semibold transition-all ${
+                activeTab === "aerobic"
+                  ? "border-b-2 border-blue-600 bg-blue-50/30 text-blue-600"
+                  : "text-gray-400 hover:bg-gray-50"
+              } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
+            >
+              유산소 (Aerobic)
+            </button>
+          </div>
         </div>
 
         {/* 스크롤 영역 */}
         <div className="flex-1 overflow-y-auto px-6 py-4 xl:px-8 xl:py-5">
           <div className="space-y-4">
-            <ExpectedCalorieCard />
-            <ExerciseDetailSection
-              activeTab={activeTab}
-              anaerobicRows={anaerobicRows}
-              aerobicRows={aerobicRows}
-              onAddRow={handleAddRow}
-              onRemoveRow={handleRemoveRow}
-              onRowChange={handleRowChange}
-            />
+            {/* 예상 소모 칼로리 카드 */}
+            <div className="flex items-center gap-4 rounded-2xl border-l-4 border-blue-500 bg-gray-100/80 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <span className="text-xl">🔥</span>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-medium text-gray-500">
+                  예상 소모 칼로리
+                </p>
+                <p className="text-xl font-bold text-gray-900">
+                  <span className="text-sm font-normal text-gray-500">
+                    kcal
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* 세트별 상세 기록 */}
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <label className="text-xs font-medium text-gray-500">
+                  세트별 상세 기록
+                </label>
+
+                <span className="rounded-md bg-blue-100 px-2 py-1 text-[10px] font-bold text-blue-600">
+                  기록 중
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {currentRows.map((row) => (
+                  <div
+                    key={row.id}
+                    className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4"
+                  >
+                    <div className="flex items-end gap-2">
+                      {activeTab === "anaerobic" ? (
+                        <>
+                          <div className="flex-[2] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              운동 종류
+                            </span>
+                            <select
+                              value={row.exerciseTypeId}
+                              onChange={(event) =>
+                                handleRowChange("anaerobic", row.id, {
+                                  exerciseTypeId: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            >
+                              {STRENGTH_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex-1 space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              세트
+                            </span>
+                            <select
+                              value={row.exerciseSet}
+                              onChange={(event) =>
+                                handleRowChange("anaerobic", row.id, {
+                                  exerciseSet: Number(event.target.value),
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm text-center"
+                            >
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                                <option key={n} value={n}>
+                                  {n}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex-[2] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              중량 (KG)
+                            </span>
+                            <input
+                              type="number"
+                              placeholder="60"
+                              value={row.weightKg}
+                              onChange={(event) =>
+                                handleRowChange("anaerobic", row.id, {
+                                  weightKg: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            />
+                          </div>
+
+                          <div className="flex-[2] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              횟수 (REPS)
+                            </span>
+                            <input
+                              type="number"
+                              placeholder="12"
+                              value={row.exerciseReps}
+                              onChange={(event) =>
+                                handleRowChange("anaerobic", row.id, {
+                                  exerciseReps: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            />
+                          </div>
+
+                          <div className="flex-[3] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              시간
+                            </span>
+                            <input
+                              type="text"
+                              placeholder="13분30초"
+                              value={row.durationText}
+                              onChange={(event) =>
+                                handleRowChange("anaerobic", row.id, {
+                                  durationText: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex-[2] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              운동 종류
+                            </span>
+                            <select
+                              value={row.exerciseTypeId}
+                              onChange={(event) =>
+                                handleRowChange("aerobic", row.id, {
+                                  exerciseTypeId: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            >
+                              {CARDIO_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex-[3] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              킬로미터
+                            </span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              placeholder="3KM"
+                              value={row.distanceKm}
+                              onChange={(event) =>
+                                handleRowChange("aerobic", row.id, {
+                                  distanceKm: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            />
+                          </div>
+
+                          <div className="flex-[3] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              시간
+                            </span>
+                            <input
+                              type="text"
+                              placeholder="13분30초"
+                              value={row.durationText}
+                              onChange={(event) =>
+                                handleRowChange("aerobic", row.id, {
+                                  durationText: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            />
+                          </div>
+
+                          <div className="flex-[2] space-y-1">
+                            <span className="text-[10px] text-gray-400">
+                              강도
+                            </span>
+                            <select
+                              value={row.intensity}
+                              onChange={(event) =>
+                                handleRowChange("aerobic", row.id, {
+                                  intensity: event.target.value,
+                                })
+                              }
+                              className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
+                            >
+                              <option value="낮음">낮음</option>
+                              <option value="보통">보통</option>
+                              <option value="높음">높음</option>
+                            </select>
+                          </div>
+                        </>
+                      )}
+
+                      {!isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRow(activeTab, row.id)}
+                          className="mb-0.5 p-2 text-red-400 transition-colors hover:text-red-600"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {!isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => handleAddRow(activeTab)}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-100 py-4 text-sm font-medium text-gray-500 transition-all hover:bg-gray-50"
+                >
+                  <Plus size={18} />
+                  추가하기
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* 고정 하단 버튼 */}
         <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
-          <ExerciseSubmitButton
-            onClick={handleSubmit}
-            disabled={isSaving || currentRows.length === 0}
-            loading={isSaving}
-            count={currentRows.length}
-          />
+          {isEditMode ? (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting || isSaving}
+                className="w-[140px] rounded-[24px] border border-red-200 bg-white py-5 text-base font-bold text-red-500 shadow-sm transition-all hover:bg-red-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeleting ? "삭제 중..." : "삭제"}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSaving || isDeleting || currentRows.length === 0}
+                className="flex-1 rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              >
+                {isSaving ? "저장 중..." : "수정 완료"}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSaving || currentRows.length === 0}
+              className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            >
+              {isSaving
+                ? "저장 중..."
+                : `기록 저장 및 확인${currentRows.length > 0 ? ` (${currentRows.length})` : ""}`}
+            </button>
+          )}
         </div>
       </div>
     </div>

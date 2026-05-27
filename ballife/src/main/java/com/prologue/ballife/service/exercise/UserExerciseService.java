@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
+import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.exercise.UserExerciseRepository;
 import com.prologue.ballife.repository.exerciseMongo.ExerciseTypeRepository;
+import com.prologue.ballife.repository.exerciseMongo.UserExerciseDetailRepository;
 import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.exercise.UserExerciseDetailDto;
 import com.prologue.ballife.web.dto.exercise.UserExerciseDto;
@@ -48,6 +50,7 @@ public class UserExerciseService {
     private final UserRepository userRepository;
     private final ExerciseTypeRepository exerciseTypeRepository;
     private final UserExerciseDetailService userExerciseDetailService;
+    private final UserExerciseDetailRepository userExerciseDetailRepository;
 
     // 특정 날짜의 소모 칼로리 합산 (기록 없으면 0)
     @Transactional(readOnly = true)
@@ -65,6 +68,53 @@ public class UserExerciseService {
 
         return exercises.stream()
                 .map(ue -> UserExerciseDto.Response.from(ue, typeMap.get(ue.getExerciseTypeId())))
+                .collect(Collectors.toList());
+    }
+
+    // 기간 내 모든 운동 기록을 MongoDB 상세까지 한 번에 조인하여 반환
+    @Transactional(readOnly = true)
+    public List<UserExerciseDto.DetailedResponse> getUserExercisesWithDetails(
+            Long userId, LocalDate startDate, LocalDate endDate) {
+        List<UserExercise> exercises = userExerciseRepository
+                .findByUser_UserIdAndExerciseDateBetweenAndIsDeletedFalse(userId, startDate, endDate);
+
+        if (exercises.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, ExerciseType> typeMap = loadExerciseTypeMap(exercises);
+
+        List<Long> exerciseIds = exercises.stream()
+                .map(UserExercise::getUserExerciseId)
+                .collect(Collectors.toList());
+
+        Map<Long, UserExerciseDetail> detailMap = userExerciseDetailRepository
+                .findByUserExerciseIdIn(exerciseIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        UserExerciseDetail::getUserExerciseId,
+                        Function.identity(),
+                        (a, b) -> a));
+
+        return exercises.stream()
+                .map(ue -> {
+                    ExerciseType type = typeMap.get(ue.getExerciseTypeId());
+                    UserExerciseDetail detail = detailMap.get(ue.getUserExerciseId());
+                    return UserExerciseDto.DetailedResponse.builder()
+                            .userExerciseId(ue.getUserExerciseId())
+                            .exerciseTypeId(ue.getExerciseTypeId())
+                            .exerciseName(type != null ? type.getExerciseName() : null)
+                            .exerciseCategory(type != null ? type.getExerciseCategory() : null)
+                            .exerciseDate(ue.getExerciseDate())
+                            .exerciseTime(ue.getExerciseTime())
+                            .burnedCalorie(ue.getBurnedCalorie())
+                            .exerciseMin(detail != null ? detail.getExerciseMin() : null)
+                            .exerciseSet(detail != null ? detail.getExerciseSet() : null)
+                            .exerciseReps(detail != null ? detail.getExerciseReps() : null)
+                            .exerciseWeight(detail != null ? detail.getExerciseWeight() : null)
+                            .exerciseHard(detail != null ? detail.getExerciseHard() : null)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -168,8 +218,9 @@ public class UserExerciseService {
         UserExercise userExercise = userExerciseRepository.findById(userExerciseId)
                 .orElseThrow(() -> new ResourceNotFoundException("운동 기록", userExerciseId));
 
-        userExercise.softDelete();
+        // MongoDB 상세 먼저 정리한 뒤 MySQL 본행을 실제 삭제
         userExerciseDetailService.deleteByUserExerciseId(userExerciseId);
+        userExerciseRepository.delete(userExercise);
     }
 
     // MongoDB user_exercise_detail 단건 조회
