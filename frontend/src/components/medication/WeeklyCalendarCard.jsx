@@ -1,14 +1,7 @@
 import { Check, Circle, Moon, Pill, Sun, Triangle, X } from "lucide-react";
-import { weekData } from "./medicationData";
+import { getCurrentWeekData } from "./medicationData";
 
 const DEFAULT_DRUGS = ["혈압약", "당뇨약"];
-
-// 데모용 상비약 기록 - 요일/시간대별로 복용했던 상비약
-const PRN_RECORDS = {
-  "TUE-lunch": ["타이레놀 500mg"],
-  "WED-dinner": ["겔포스 1포"],
-  "FRI-morning": ["비타민 C"],
-};
 
 const getScheduleStatus = (drugs) => {
   if (!drugs || drugs.length === 0) return null;
@@ -24,7 +17,27 @@ const STATUS_LABEL = {
   miss: "미복용",
 };
 
-export default function WeeklyCalendarCard({ todaySchedules }) {
+// 시간 문자열(HH:MM)을 아침/점심/저녁 슬롯으로 매핑. 시간이 없으면 morning으로 기본
+const getTimeSlot = (timeStr) => {
+  if (!timeStr) return "morning";
+  const [hh] = timeStr.split(":");
+  const h = parseInt(hh, 10);
+  if (Number.isNaN(h)) return "morning";
+  if (h < 11) return "morning";
+  if (h < 17) return "lunch";
+  return "dinner";
+};
+
+const formatDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], todayKey }) {
+  const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
+
   const rows = [
     { key: "morning", label: "아침 (08:00)", icon: Sun },
     { key: "lunch", label: "점심 (13:00)", icon: Sun },
@@ -57,7 +70,25 @@ export default function WeeklyCalendarCard({ todaySchedules }) {
     }));
   };
 
-  const getCellPrn = (item, rowKey) => PRN_RECORDS[`${item.day}-${rowKey}`] || [];
+  // 각 셀의 실제 날짜를 today 기준 인덱스 오프셋으로 계산
+  const todayIndex = weekData.findIndex((it) => it.today);
+  const todayDate = todayKey ? new Date(todayKey + "T00:00:00") : null;
+
+  const getCellDateKey = (cellIndex) => {
+    if (todayIndex < 0 || !todayDate) return null;
+    const offset = cellIndex - todayIndex;
+    const d = new Date(todayDate);
+    d.setDate(d.getDate() + offset);
+    return formatDateKey(d);
+  };
+
+  const getCellPrn = (item, rowKey, cellIndex) => {
+    const cellDate = getCellDateKey(cellIndex);
+    if (!cellDate || prnRecords.length === 0) return [];
+    return prnRecords
+      .filter((r) => r.date === cellDate && getTimeSlot(r.time) === rowKey)
+      .map((r) => (r.dosage ? `${r.drugName} (${r.dosage})` : r.drugName));
+  };
 
   return (
     <div className="flex-1 min-w-0 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
@@ -108,7 +139,7 @@ export default function WeeklyCalendarCard({ todaySchedules }) {
                   {weekData.map((item, index) => {
                     const status = getCellStatus(item, row.key);
                     const drugs = getCellDrugs(item, row.key);
-                    const prn = getCellPrn(item, row.key);
+                    const prn = getCellPrn(item, row.key, index);
                     const hasContent = drugs.length > 0 || prn.length > 0;
 
                     return (

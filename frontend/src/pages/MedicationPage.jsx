@@ -200,7 +200,8 @@ export default function MedicationPage() {
             />
 
             <SavedRecordsCard
-              records={savedRecords.filter((r) => r.date === todayKey)}
+              records={savedRecords}
+              todayKey={todayKey}
               onDeleteRecord={handleDeleteRecord}
             />
           </div>
@@ -214,13 +215,17 @@ export default function MedicationPage() {
             />
             <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
               <MemoCard />
-              <WeeklyCalendarCard todaySchedules={todaySchedules} />
+              <WeeklyCalendarCard
+                todaySchedules={todaySchedules}
+                prnRecords={savedRecords}
+                todayKey={todayKey}
+              />
             </div>
           </div>
         </section>
 
         {/* 처방 약 목록 */}
-        <section className="mt-12">
+        <section className="mt-6">
           <PrescriptionListCard onSelectGroup={openPrescriptionModal} />
         </section>
       </div>
