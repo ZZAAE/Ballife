@@ -26,12 +26,30 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
     boolean existsByUser(User user);
 
     //특정 유저의 특정 카테코리의 특정 날짜의 존재하는 기록정보가 있는지 반환
-    boolean existsByUserAndCategoryAndRecordDate(User user, String category, LocalDate date);
-    
+    // category prefix 매칭 (예: "BloodPressure" 로 "BloodPressure-아침"까지 매칭)
+    @Query("SELECT COUNT(b) > 0 FROM BioValueRecord b "
+           + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%') "
+           + "AND b.recordDate = :date")
+    boolean existsByUserAndCategoryAndRecordDate(@Param("user") User user,
+                                                 @Param("category") String category,
+                                                 @Param("date") LocalDate date);
+
     //특정 유저의 특정 카테고리의 특정 날짜에 존재하는 기록정보를 모두 불러옴
-    List<BioValueRecord> findByUserAndCategoryAndRecordDate(User user, String category, LocalDate date);
+    @Query("SELECT b FROM BioValueRecord b "
+           + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%') "
+           + "AND b.recordDate = :date")
+    List<BioValueRecord> findByUserAndCategoryAndRecordDate(@Param("user") User user,
+                                                            @Param("category") String category,
+                                                            @Param("date") LocalDate date);
+
     //특정 유저의 특정 카테고리의  특정 기간에 존재하는 기록정보를 모두 불러옴
-    List<BioValueRecord> findByUserAndCategoryAndRecordDateBetween(User user, String category, LocalDate recordDateStart, LocalDate recordDateEnd);
+    @Query("SELECT b FROM BioValueRecord b "
+           + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%') "
+           + "AND b.recordDate BETWEEN :start AND :end")
+    List<BioValueRecord> findByUserAndCategoryAndRecordDateBetween(@Param("user") User user,
+                                                                   @Param("category") String category,
+                                                                   @Param("start") LocalDate recordDateStart,
+                                                                   @Param("end") LocalDate recordDateEnd);
     //특정 유저의 정보를 모두 불러옴
     List<BioValueRecord> findAllByUser(User user);
 
@@ -59,6 +77,12 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
            + "ORDER BY b.recordDate DESC, b.recordTime DESC LIMIT 1")
     Optional<BioValueRecord> findLastWaterIntakeCupRecordByUser(@Param("user") User user);
 
-    //카테고리별로 Page로 불러옴
-    Page<BioValueRecord> findByUserAndCategory(User user, String category, Pageable pageable);
+    //카테고리별로 Page로 불러옴 (prefix 매칭)
+    @Query(value = "SELECT b FROM BioValueRecord b "
+                 + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%')",
+           countQuery = "SELECT COUNT(b) FROM BioValueRecord b "
+                      + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%')")
+    Page<BioValueRecord> findByUserAndCategory(@Param("user") User user,
+                                               @Param("category") String category,
+                                               Pageable pageable);
 }

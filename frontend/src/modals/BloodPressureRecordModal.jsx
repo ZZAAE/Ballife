@@ -72,7 +72,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
     const payload = {
       recordDate,
       recordTime,
-      category: BIO_CATEGORY.BLOOD_PRESSURE,
+      category: `${BIO_CATEGORY.BLOOD_PRESSURE}-${activeTab}`,
       systolicBP: s,
       diastolicBP: d,
     };
