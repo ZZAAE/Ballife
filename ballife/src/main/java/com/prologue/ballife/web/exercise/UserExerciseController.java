@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.prologue.ballife.service.exercise.UserExerciseService;
+import com.prologue.ballife.web.dto.exercise.UserExerciseDetailDto;
 import com.prologue.ballife.web.dto.exercise.UserExerciseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +46,30 @@ public class UserExerciseController {
             @Parameter(description = "조회 날짜 (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         // 서비스에서 조회한 결과를 200 OK 와 함께 반환
         return ResponseEntity.ok(userExerciseService.getUserExercisesByDate(userId, date));
+    }
+
+    // 기간 + 상세 정보까지 한 번에 조회 (목록 페이지 1회 호출용)
+    @Operation(summary = "기간별 운동 + 상세 동시 조회",
+            description = "start ~ end 기간의 운동 기록과 MongoDB 상세(분/세트/반복/무게/강도) 를 합쳐 반환합니다.")
+    @GetMapping("/detailed")
+    public ResponseEntity<List<UserExerciseDto.DetailedResponse>> getUserExercisesWithDetails(
+            @Parameter(description = "유저 ID") @PathVariable Long userId,
+            @Parameter(description = "시작 날짜 (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @Parameter(description = "종료 날짜 (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        return ResponseEntity.ok(userExerciseService.getUserExercisesWithDetails(userId, start, end));
+    }
+
+    // ──────────────────────────────────────────────────
+    // GET /api/users/{userId}/exercises/burned-calorie?date=yyyy-MM-dd
+    // 특정 날짜의 소모 칼로리 합계 (기본값: 오늘)
+    // ──────────────────────────────────────────────────
+    @Operation(summary = "날짜별 소모 칼로리 합계", description = "특정 날짜의 소모 칼로리 합계를 반환합니다.")
+    @GetMapping("/burned-calorie")
+    public ResponseEntity<Integer> getBurnedCalorieByDate(
+            @Parameter(description = "유저 ID") @PathVariable Long userId,
+            @Parameter(description = "조회 날짜 (yyyy-MM-dd). 미지정 시 오늘") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate target = date != null ? date : LocalDate.now();
+        return ResponseEntity.ok(userExerciseService.getBurnedCalorieByDate(userId, target));
     }
 
     // ──────────────────────────────────────────────────
@@ -90,5 +115,31 @@ public class UserExerciseController {
             @Parameter(description = "운동 기록 ID") @PathVariable Long userExerciseId) {
         userExerciseService.deleteUserExercise(userExerciseId);
         return ResponseEntity.noContent().build();
+    }
+
+    // ──────────────────────────────────────────────────
+    // GET /api/users/{userId}/exercises/{userExerciseId}/detail
+    // 운동 기록 상세(MongoDB user_exercise_detail) 조회
+    // ──────────────────────────────────────────────────
+    @Operation(summary = "운동 상세 기록 조회", description = "운동 기록의 상세(분/세트/반복 등)를 MongoDB 에서 조회합니다.")
+    @GetMapping("/{userExerciseId}/detail")
+    public ResponseEntity<UserExerciseDetailDto.Response> getUserExerciseDetail(
+            @Parameter(description = "유저 ID") @PathVariable Long userId,
+            @Parameter(description = "운동 기록 ID") @PathVariable Long userExerciseId) {
+        return ResponseEntity.ok(userExerciseService.getUserExerciseDetail(userExerciseId));
+    }
+
+    // ──────────────────────────────────────────────────
+    // PUT /api/users/{userId}/exercises/{userExerciseId}/detail
+    // 운동 상세(분/세트/반복/무게/강도)만 부분 수정
+    // null 인 필드는 기존 값을 유지함 (PATCH 의미)
+    // ──────────────────────────────────────────────────
+    @Operation(summary = "운동 상세 기록 수정", description = "MongoDB user_exercise_detail 의 필드를 부분 수정합니다.")
+    @PutMapping("/{userExerciseId}/detail")
+    public ResponseEntity<UserExerciseDetailDto.Response> updateUserExerciseDetail(
+            @Parameter(description = "유저 ID") @PathVariable Long userId,
+            @Parameter(description = "운동 기록 ID") @PathVariable Long userExerciseId,
+            @Valid @RequestBody UserExerciseDetailDto.UpdateRequest request) {
+        return ResponseEntity.ok(userExerciseService.updateUserExerciseDetail(userExerciseId, request));
     }
 }

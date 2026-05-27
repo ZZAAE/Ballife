@@ -33,7 +33,8 @@ public class Meal {
     @Column(name = "MEAL_TIME", nullable = false)
     private LocalTime mealTime;
 
-    @Column(name = "MEAL_PHOTO", length = 300)
+    // 사용자 업로드 이미지는 base64 data URL 형태로 저장 (크기가 클 수 있어 TEXT)
+    @Column(name = "MEAL_PHOTO", columnDefinition = "MEDIUMTEXT")
     private String mealPhoto;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -1,4 +1,57 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import mealApi from "../../api/mealApi";
+import { useAuth } from "../../contexts/AuthContext";
+
+const MEAL_CATEGORY_LABEL = {
+  BREAKFAST: "아침",
+  LUNCH: "점심",
+  DINNER: "저녁",
+  SNACK: "간식",
+};
+const MEAL_CATEGORY_ORDER = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
+
+const mapItemToCardFormat = (item) => ({
+  name: item.foodName,
+  kcal: item.calorie ?? 0,
+  carb: item.carbohydrate ?? 0,
+  protein: item.protein ?? 0,
+  fat: item.saturatedFat ?? 0,
+  sugar: item.sugar ?? 0,
+  chol: item.cholesterol ?? 0,
+  na: item.sodium ?? 0,
+});
+
+// MealDetailModal용 데이터 변환 (MealPage와 동일)
+function buildMealData(meal) {
+  if (!meal) return null;
+  const sum = (key) => meal.items.reduce((s, i) => s + (i[key] || 0), 0);
+  return {
+    mealType: `${meal.label} 식사`,
+    foods: meal.items.map((item, idx) => ({
+      id: idx + 1,
+      name: item.name,
+      calories: item.kcal,
+      nutrition: {
+        carbs: item.carb,
+        protein: item.protein,
+        fat: item.fat,
+        sugar: item.sugar,
+        cholesterol: item.chol,
+        sodium: item.na,
+      },
+      image: meal.image,
+    })),
+    totalNutrition: {
+      carbs: sum("carb"),
+      protein: sum("protein"),
+      fat: sum("fat"),
+      sugar: sum("sugar"),
+      cholesterol: sum("chol"),
+      sodium: sum("na"),
+    },
+    totalCalories: sum("kcal"),
+  };
+}
 import {
   BarChart,
   Bar,
@@ -54,157 +107,6 @@ const bloodPressureData = [
   { time: "저녁", systolic: 190, diastolic: 135 },
 ];
 
-const meals = [
-  {
-    time: "08:30 AM",
-    label: "아침",
-    color: "from-slate-600 to-slate-800",
-    image:
-      "https://www.eatingwell.com/thmb/n8Rjp-E1188nog-vkyCjo9DUVgs=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/4582990-010ef0d31a42459d827486f0e2019538.jpg",
-    items: [
-      {
-        name: "그릭 요거트와 블루베리",
-        kcal: 245,
-        carb: 18,
-        protein: 12,
-        fat: 8,
-        sugar: 4,
-        chol: 5,
-        na: 2,
-      },
-      {
-        name: "아몬드 한 줌",
-        kcal: 160,
-        carb: 6,
-        protein: 6,
-        fat: 14,
-        sugar: 1,
-        chol: 0,
-        na: 0,
-      },
-      {
-        name: "라면 큰거",
-        kcal: 400,
-        carb: 28,
-        protein: 6,
-        fat: 19,
-        sugar: 1,
-        chol: 5,
-        na: 11,
-      },
-    ],
-  },
-  {
-    time: "12:45 PM",
-    label: "점심",
-    color: "from-emerald-600 to-emerald-800",
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-    items: [
-      {
-        name: "연어 샐러드",
-        kcal: 480,
-        carb: 12,
-        protein: 34,
-        fat: 28,
-        sugar: 3,
-        chol: 45,
-        na: 1,
-      },
-      {
-        name: "현미밥 반 공기",
-        kcal: 150,
-        carb: 32,
-        protein: 3,
-        fat: 1,
-        sugar: 0,
-        chol: 0,
-        na: 0,
-      },
-    ],
-  },
-  {
-    time: "07:15 PM",
-    label: "저녁",
-    color: "from-orange-500 to-orange-700",
-    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
-    items: [
-      {
-        name: "닭가슴살 구이",
-        kcal: 310,
-        carb: 0,
-        protein: 47,
-        fat: 12,
-        sugar: 0,
-        chol: 75,
-        na: 0,
-      },
-      {
-        name: "구운 고구마와 야채",
-        kcal: 220,
-        carb: 45,
-        protein: 4,
-        fat: 1,
-        sugar: 0,
-        chol: 0,
-        na: 0,
-      },
-    ],
-  },
-  {
-    time: "04:00 PM",
-    label: "간식",
-    color: "from-violet-500 to-violet-700",
-    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
-    items: [
-      {
-        name: "사과와 땅콩버터",
-        kcal: 190,
-        carb: 22,
-        protein: 4,
-        fat: 11,
-        sugar: 15,
-      },
-      {
-        name: "단백질 쉐이크",
-        kcal: 120,
-        carb: 3,
-        protein: 24,
-        fat: 1,
-        sugar: 1,
-        chol: 15,
-        na: 5,
-      },
-    ],
-  },
-  {
-    time: "08:00 PM",
-    label: "간식",
-    color: "from-violet-500 to-violet-700",
-    image: "https://www.marketresearchintellect.com/images/blogs/best-doughnut-brands.webp",
-    items: [
-      {
-        name: "도넛",
-        kcal: 400,
-        carb: 22,
-        protein: 4,
-        fat: 60,
-        chol: 80,
-        sugar: 80,
-      },
-      {
-        name: "밀크 쉐이크",
-        kcal: 330,
-        carb: 1,
-        protein: 5,
-        fat: 1,
-        sugar: 80,
-        chol: 1,
-        na: 5,
-      },
-    ],
-  },
-];
-
 const MacroBadge = ({ label, value, unit = "g" }) => (
   <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-400 bg-slate-50 rounded px-1.5 py-0.5">
     <span className="text-slate-500 font-medium">{label}</span> {value}
@@ -213,7 +115,8 @@ const MacroBadge = ({ label, value, unit = "g" }) => (
 );
 
 export default function RecordSummary() {
-  const [isMealModalOpen, setMealModalOpen] = useState(false);
+  const { user } = useAuth();
+  const [selectedMeal, setSelectedMeal] = useState(null);
   const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => {
     const t = new Date();
@@ -223,6 +126,58 @@ export default function RecordSummary() {
     return `${yyyy}-${mm}-${dd}`;
   });
   const dateInputRef = useRef(null);
+
+  // 식단 데이터 fetch (MealPage와 동일 로직)
+  const [meals, setMeals] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      if (!user?.id) {
+        setMeals([]);
+        return;
+      }
+      try {
+        const res = await mealApi.getTodayMeals(user.id, selectedDate);
+        const mealsData = res.data || [];
+        const itemsPerMeal = await Promise.all(
+          mealsData.map((m) =>
+            mealApi.getMealItemsByMealId(m.mealId).then((r) => r.data || []),
+          ),
+        );
+        if (cancelled) return;
+
+        const groupedByCategory = {};
+        mealsData.forEach((m, idx) => {
+          const cat = m.mealCategory;
+          if (!groupedByCategory[cat]) {
+            groupedByCategory[cat] = {
+              id: cat,
+              label: MEAL_CATEGORY_LABEL[cat] || cat,
+              time: (m.mealTime || "").slice(0, 5),
+              image: m.mealPhoto || null,
+              items: [],
+            };
+          }
+          groupedByCategory[cat].items = groupedByCategory[cat].items.concat(
+            itemsPerMeal[idx].map(mapItemToCardFormat),
+          );
+        });
+
+        const ordered = MEAL_CATEGORY_ORDER
+          .map((c) => groupedByCategory[c])
+          .filter(Boolean);
+        setMeals(ordered);
+      } catch (err) {
+        console.error("식단 조회 실패:", err);
+        if (!cancelled) setMeals([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, selectedDate]);
 
   const openDatePicker = () => {
     if (dateInputRef.current?.showPicker) {
@@ -525,23 +480,49 @@ export default function RecordSummary() {
             </div>
           </div>
           {meals.length === 0 ? (
-            <div className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6">
-              <p className="text-center text-sm text-[#94A3B8] py-12">
-                식단 기록이 없습니다.
+            <div className="mb-9 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-white py-16 px-6">
+              <div
+                className="mb-5 flex h-[64px] w-[64px] items-center justify-center rounded-2xl"
+                style={{ background: "#F1F5F9", color: "#94A3B8" }}
+              >
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 11h18" />
+                  <path d="M12 11V3" />
+                  <path d="M5 11a7 7 0 0 0 14 0" />
+                  <path d="M9 21h6" />
+                  <path d="M12 17v4" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-[16px] font-semibold text-[#0F172A]">
+                기록된 식단이 없습니다
+              </h3>
+              <p className="text-center text-[13px] leading-relaxed text-[#64748B]">
+                <span className="font-semibold text-[#475569]">전체 기록 관리</span> 페이지에서<br />
+                오늘의 식단을 등록해보세요.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-2">
-              <div className="flex gap-4">
-                {meals.map((meal, idx) => (
-                  <MealRecordCard
-                    key={idx}
-                    {...meal}
-                    onClick={() => setMealModalOpen(true)}
-                    className="min-w-[calc(26%-10px)] flex-shrink-0"
-                  />
-                ))}
-              </div>
+            <div className="flex gap-4 mb-9 flex-wrap">
+              {meals.map((meal) => (
+                <MealRecordCard
+                  key={meal.id}
+                  time={meal.time}
+                  label={meal.label}
+                  items={meal.items}
+                  image={meal.image}
+                  onClick={() => setSelectedMeal(meal)}
+                  className="w-[300px] shrink-0 cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
+                />
+              ))}
             </div>
           )}
           </div>
@@ -553,8 +534,9 @@ export default function RecordSummary() {
           onClose={() => setTimeLineModelOpen(false)}
         />
         <MealDetailModal
-          isOpen={isMealModalOpen}
-          onClose={() => setMealModalOpen(false)}
+          isOpen={!!selectedMeal}
+          mealData={buildMealData(selectedMeal)}
+          onClose={() => setSelectedMeal(null)}
         />
       </div>
     </div>

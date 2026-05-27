@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.prologue.ballife.domain.exercise.UserExercise;
 import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 
 import jakarta.validation.constraints.Size;
@@ -19,9 +18,17 @@ public class UserExerciseDetailDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
+        // 유산소: 운동 시간 (분)
+        private Integer exerciseMin;
+        // 무산소: 세트 수
+        private Integer exerciseSet;
+        // 무산소: 반복 수
+        private Integer exerciseReps;
+        // 무산소: 무게 (kg)
+        private Integer exerciseWeight;
+
         @Size(max = 10, message = "운동 강도는 최대 10자까지 허용됩니다.")
         private String exerciseHard;
-
     }
 
     // 사용자 운동 상세 기록 수정 요청 DTO

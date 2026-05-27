@@ -1,11 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import ExerciseModal from "../modals/ExerciseModal";
 import { useAuth } from "../contexts/AuthContext";
+import { getExercisesInRange } from "../api/exerciseApi";
 import {
+  dbExerciseToRecord,
   hydrateExerciseSessions,
   ICON_BY_TYPE,
-  loadExerciseRecords,
 } from "../utils/exerciseRecords";
+
+function formatYmd(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 /* ---------- 유틸 ---------- */
 function startOfWeek(date) {
@@ -193,11 +202,16 @@ function SummaryCard({ label, totalSec, sessions, kcal }) {
   );
 }
 
-function SessionRow({ session }) {
+function SessionRow({ session, onClick }) {
   const emoji =
     ICON_BY_TYPE[session.iconType] ?? (session.kind === "cardio" ? "🚶" : "🏋️");
   return (
-    <div className="flex items-center gap-4 py-3">
+    <button
+      type="button"
+      onClick={() => onClick?.(session)}
+      className="flex w-full items-center gap-4 py-3 text-left transition hover:bg-gray-50"
+      aria-label="운동 기록 수정"
+    >
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xl">
         {emoji}
       </div>
@@ -219,11 +233,11 @@ function SessionRow({ session }) {
           {formatTimeOfDay(session.date)}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
-function DaySection({ date, sessions }) {
+function DaySection({ date, sessions, onSelectSession }) {
   const totalSec = sessions.reduce((acc, s) => acc + s.durationSec, 0);
   const kcal = sessions.reduce((acc, s) => acc + s.calories, 0);
   return (
@@ -241,7 +255,7 @@ function DaySection({ date, sessions }) {
       </div>
       <div className="divide-y divide-gray-100">
         {sessions.map((s) => (
-          <SessionRow key={s.id} session={s} />
+          <SessionRow key={s.id} session={s} onClick={onSelectSession} />
         ))}
       </div>
     </div>
@@ -261,20 +275,61 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   const [filterDay, setFilterDay] = useState(null);
   const [sortOrder, setSortOrder] = useState("desc"); // "desc" | "asc"
   const [storedSessions, setStoredSessions] = useState([]);
+  const [editingRecord, setEditingRecord] = useState(null);
   const userId = user?.userId ?? user?.id ?? 1;
 
-  useEffect(() => {
-    const syncRecords = () => {
-      setStoredSessions(hydrateExerciseSessions(loadExerciseRecords(userId)));
-    };
+  const handleEditSession = (session) => {
+    setEditingRecord({
+      id: session.id,
+      serverId: session.serverId ?? session.id,
+      exerciseTypeId: session.exerciseTypeId,
+      kind: session.kind,
+      dateIso: session.dateIso,
+      durationSec: session.durationSec,
+      distanceKm: session.distanceKm,
+      sets: session.sets,
+      reps: session.reps,
+      weightKg: session.weightKg,
+      intensity: session.intensity,
+    });
+  };
 
-    syncRecords();
-    window.addEventListener("exercise-records-updated", syncRecords);
-    return () =>
-      window.removeEventListener("exercise-records-updated", syncRecords);
-  }, [userId]);
+  const handleCloseEdit = () => {
+    setEditingRecord(null);
+  };
 
   const weekStart = useMemo(() => startOfWeek(viewDate), [viewDate]);
+
+  const fetchWeek = useCallback(async () => {
+    if (!userId) return;
+    const end = new Date(weekStart);
+    end.setDate(weekStart.getDate() + 6);
+    try {
+      const list = await getExercisesInRange(
+        userId,
+        formatYmd(weekStart),
+        formatYmd(end),
+      );
+      console.debug("[ExercisePage] fetched", list);
+      const records = (list || []).map(dbExerciseToRecord);
+      setStoredSessions(hydrateExerciseSessions(records));
+    } catch (error) {
+      console.error("[ExercisePage] fetchWeek failed:", error);
+      toast.error(`운동 기록 조회 실패: ${error.message || error}`);
+      setStoredSessions([]);
+    }
+  }, [userId, weekStart]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchWeek();
+    const onUpdated = () => {
+      void fetchWeek();
+    };
+    window.addEventListener("exercise-records-updated", onUpdated);
+    return () =>
+      window.removeEventListener("exercise-records-updated", onUpdated);
+  }, [fetchWeek]);
 
   // 선택 주(일~토)에 해당하는 세션
   const thisWeekSessions = useMemo(
@@ -389,6 +444,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
                   key={g.date.toISOString()}
                   date={g.date}
                   sessions={g.sessions}
+                  onSelectSession={handleEditSession}
                 />
               ))
             ) : (
@@ -405,9 +461,14 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
       <ExerciseModal
         isOpen={isModalOpen}
         onClose={onCloseModal}
-        onSaved={(records) =>
-          setStoredSessions(hydrateExerciseSessions(records))
-        }
+        onSaved={fetchWeek}
+      />
+
+      <ExerciseModal
+        isOpen={!!editingRecord}
+        onClose={handleCloseEdit}
+        onSaved={fetchWeek}
+        editingRecord={editingRecord}
       />
     </div>
   );

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { X, Calendar } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import bioValueRecordApi from '../api/bioValueRecordApi';
 import userConfigApi from '../api/userConfigApi';
 import { useAuth } from '../contexts/AuthContext';
 import { USER_KEY } from '../api/api';
+import { BIO_CATEGORY } from '../constants/bioCategory';
 
-const WEIGHT_CATEGORY = "Weight";
+const WEIGHT_CATEGORY = BIO_CATEGORY.WEIGHT;
 
 
 const resolveUserId = (user) => {
@@ -32,7 +33,6 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
   const [weight, setWeight] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [targetWeight, setTargetWeight] = useState(null);
-  const [startWeight, setStartWeight] = useState(null);
 
   useEffect(() => {
     if (!isOpen || !userId) return;
@@ -53,9 +53,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
         const content = latestRes.value?.data?.content ?? [];
         const last = content[0];
         if (last?.weight != null) {
-          const lastWeight = Number(last.weight);
-          setStartWeight(lastWeight);
-          setWeight(String(lastWeight));
+          setWeight(String(Number(last.weight)));
         }
       }
     });
@@ -67,15 +65,15 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
   if (!isOpen) return null;
 
-  // 1. 달성률 계산 로직 (시작체중 - 목표체중 대비 현재 감량 폭)
+  // 달성률: 목표와의 절대 거리를 10kg 스케일로 환산 (1kg ≈ 10%)
+  // 0kg 차이 → 100%, 5kg → 50%, 10kg+ → 0%
+  const PROGRESS_SCALE_KG = 10;
   const calculateProgress = () => {
-    if (targetWeight == null || startWeight == null) return 0;
+    if (targetWeight == null) return 0;
     const current = parseFloat(weight) || 0;
-    if (current <= targetWeight) return 100;
-    const totalToLose = startWeight - targetWeight;
-    if (totalToLose <= 0) return 0;
-    const lostSoFar = startWeight - current;
-    const percentage = (lostSoFar / totalToLose) * 100;
+    if (!current) return 0;
+    const diff = Math.abs(current - targetWeight);
+    const percentage = 100 - (diff / PROGRESS_SCALE_KG) * 100;
     return Math.max(0, Math.min(100, Math.round(percentage)));
   };
 
@@ -150,36 +148,27 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm px-4 py-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-[672px] h-[785px] flex flex-col rounded-[32px] bg-white shadow-2xl animate-in fade-in zoom-in duration-200 p-10">
-        
+      <div className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">체중 기록하기</h2>
-            <p className="text-sm text-slate-400 mt-1 font-medium">오늘의 체중을 기록하세요.</p>
+            <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">체중 기록하기</h2>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">오늘의 체중을 기록하세요.</p>
           </div>
-          <button onClick={onClose} style={{
-              background: "none", border: "none", cursor: "pointer", padding: 4,
-              color: "#bbb", fontSize: 20, lineHeight: 1,
-            }}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="닫기"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+          >
+            <X size={18} strokeWidth={2.2} />
+          </button>
         </div>
 
         <div className="flex-1 flex flex-col justify-between">
@@ -233,16 +222,23 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
             </div>
           </div>
 
-          {/* Insight Card */}
-          <div className="rounded-[24px] bg-blue-50/40 p-5 border border-blue-100 flex gap-4">
-            <div className="mt-0.5"><span className="text-blue-500 text-2xl">✦</span></div>
-            <p className="text-[14px] leading-relaxed text-slate-600 font-medium">
-              {targetWeight == null
-                ? "목표 체중을 설정하면 달성률과 맞춤 조언을 확인할 수 있어요."
-                : progress >= 100
-                  ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요."
-                  : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!`}
-            </p>
+          {/* AI 조언 카드 */}
+          <div className="overflow-hidden rounded-[20px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
+            <div className="flex items-start gap-3 px-4 py-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
+              </div>
+
+              <div className="flex-1">
+                <p className="text-[13px] leading-relaxed text-[#475569]">
+                  {targetWeight == null
+                    ? "목표 체중을 설정하면 달성률과 맞춤 조언을 확인할 수 있어요."
+                    : progress >= 100
+                      ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요."
+                      : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!`}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Footer Button */}
@@ -250,7 +246,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white transition-all active:scale-[0.98] hover:bg-[#25253d] shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? "저장 중..." : "기록 저장 및 확인"}
             </button>
