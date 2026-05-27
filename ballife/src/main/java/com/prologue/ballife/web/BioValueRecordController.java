@@ -122,13 +122,13 @@ public class BioValueRecordController {
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "200") int size) {
         List<String> bloodSugarCategories = List.of(
-            "공복혈당", "아침식전", "아침식후", "점심식전", "점심식후", "저녁식전", "저녁식후", "취침전"
+            "BloodSugar-공복", "BloodSugar-아침식전", "BloodSugar-아침식후", "BloodSugar-점심식전", "BloodSugar-점심식후", "BloodSugar-저녁식전", "BloodSugar-저녁식후", "BloodSugar-취침전"
         );
         return ResponseEntity.ok(
             bioValueRecordService.getBioValuPageByCategoryIn(userId, bloodSugarCategories, page, size)
         );
     }
-    
+
     @Operation(summary = "생체 수치 정보 삭제")
     @DeleteMapping("/{recordId}")
     public ResponseEntity<Void> deleteBioValueRecord

@@ -7,6 +7,10 @@ const bioValueRecordApi = {
     });
   },
 
+  getAllBioValueRecords: (userId) => {
+    return api.get(`/bioValueRecords/search/${userId}`);
+  },
+
   getLastBioValueRecord: (userId, category) => {
     return api.get(`/bioValueRecords/searchBioValueTop/${userId}`, {
       params: { category },
@@ -39,18 +43,11 @@ const bioValueRecordApi = {
     });
   },
 
-<<<<<<< HEAD
   getPageByCategorySugar: (userId, page = 0, size = 200) => {
   return api.get(`/bioValueRecords/searchBioValuePageBloodSugar/${userId}`, {
     params: { page, size },
   });
 },
-=======
-  // 유저의 모든 생체 기록 조회 (메인페이지/페이지별 필터링용)
-  getAllBioValueRecords: (userId) => {
-    return api.get(`/bioValueRecords/search/${userId}`);
-  },
->>>>>>> 959c92ffa995b049598443b57d3c535d151f99d2
 
   updateBioValueRecord: (recordId, payload) => {
     return api.put(`/bioValueRecords/${recordId}`, payload);

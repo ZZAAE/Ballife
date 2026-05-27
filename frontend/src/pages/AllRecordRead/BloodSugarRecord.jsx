@@ -97,13 +97,14 @@ export default function BloodSugarRecord() {
   const filteredRecords = [...records]
     .filter((r) => r.recordDate >= filterStart && r.recordDate <= filterEnd);
 
-  // category → 4개 그룹 매핑 헬퍼
+  // category → 4개 그룹 매핑 헬퍼 (BloodSugar-아침식전 등 새 형식 지원)
   const toGroup = (cat) => {
     if (!cat) return null;
-    if (cat === "공복혈당" || cat === "공복") return "공복";
-    if (cat.includes("식전")) return "식전";
-    if (cat.includes("식후")) return "식후";
-    if (cat === "취침전") return "취침전";
+    const suffix = cat.includes("-") ? cat.split("-")[1] : cat;
+    if (suffix === "공복" || suffix === "공복혈당") return "공복";
+    if (suffix.includes("식전")) return "식전";
+    if (suffix.includes("식후")) return "식후";
+    if (suffix === "취침전") return "취침전";
     return null;
   };
 
