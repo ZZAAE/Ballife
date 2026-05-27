@@ -17,7 +17,7 @@ spring:
     mongodb:
       host: localhost #배포할때는 실제 서버 주소가 들어감
       port: 27017
-      database: shopping_assistant # 데이터베이스명
+      database: ballife # 데이터베이스명
 
   security:
     jwt:

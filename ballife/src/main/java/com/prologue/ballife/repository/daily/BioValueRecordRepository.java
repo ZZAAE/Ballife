@@ -61,4 +61,7 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
 
     //카테고리별로 Page로 불러옴
     Page<BioValueRecord> findByUserAndCategory(User user, String category, Pageable pageable);
+
+    //카테고리별로 Page로 불러옴
+    Page<BioValueRecord> findByUserAndCategoryIn(User user, List<String> category, Pageable pageable);
 }

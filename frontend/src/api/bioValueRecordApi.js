@@ -33,6 +33,12 @@ const bioValueRecordApi = {
     });
   },
 
+  getPageByCategorySugar: (userId, page = 0, size = 200) => {
+  return api.get(`/bioValueRecords/searchBioValuePageBloodSugar/${userId}`, {
+    params: { page, size },
+  });
+},
+
   updateBioValueRecord: (recordId, payload) => {
     return api.put(`/bioValueRecords/${recordId}`, payload);
   },

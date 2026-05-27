@@ -3,9 +3,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import { USER_KEY } from "../../api/api";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import {
+  AreaChart,
+  Area,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -16,7 +16,7 @@ import ChartSection from "../../components/record/ChartSection";
 import MetricCard from "../../components/record/MetricCard";
 import AIAnalysisCard from "../../components/record/AIAnalysisCard";
 
-const BLOOD_SUGAR_CATEGORY = "BloodSugar";
+//const BLOOD_SUGAR_CATEGORY = "BloodSugar";
 
 const resolveUserId = (user) => {
   const fromContext = user?.userId ?? user?.id ?? user?.memberId;
@@ -68,6 +68,8 @@ export default function BloodSugarRecord() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [chartView, setChartView] = useState("mealtime"); // "mealtime" | "fasting"
+
   const [pendingStart, setPendingStart] = useState(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]);
   const [pendingEnd, setPendingEnd] = useState(() => new Date().toISOString().split("T")[0]);
   const [filterStart, setFilterStart] = useState(pendingStart);
@@ -82,7 +84,7 @@ export default function BloodSugarRecord() {
     if (!userId) return;
     setLoading(true);
     bioValueRecordApi
-      .getPageByCategory(userId, BLOOD_SUGAR_CATEGORY, 0, 200)
+      .getPageByCategorySugar(userId, 0, 200)
       .then((res) => {
         const content = res.data?.content ?? [];
         setRecords(content);
@@ -95,25 +97,49 @@ export default function BloodSugarRecord() {
   const filteredRecords = [...records]
     .filter((r) => r.recordDate >= filterStart && r.recordDate <= filterEnd);
 
-  // 차트용: 오름차순 정렬
+  // category → 4개 그룹 매핑 헬퍼
+  const toGroup = (cat) => {
+    if (!cat) return null;
+    if (cat === "공복혈당" || cat === "공복") return "공복";
+    if (cat.includes("식전")) return "식전";
+    if (cat.includes("식후")) return "식후";
+    if (cat === "취침전") return "취침전";
+    return null;
+  };
+
+  // 차트용: 오름차순 정렬, 4그룹 필드로 변환
   const chartData = [...filteredRecords]
     .reverse()
-    .map((r) => ({
-      date: `${r.recordDate ? r.recordDate.slice(5) : ""}|${r.recordTime ? r.recordTime.slice(0, 5) : ""}`,
-      bloodSugar: r.bloodSugar ?? null,
-    }));
+    .map((r) => {
+      const group = toGroup(r.category);
+      return {
+        date: `${r.recordDate ? r.recordDate.slice(5) : ""}|${r.recordTime ? r.recordTime.slice(0, 5) : ""}`,
+        공복: group === "공복" ? (r.bloodSugar ?? null) : null,
+        식전: group === "식전" ? (r.bloodSugar ?? null) : null,
+        식후: group === "식후" ? (r.bloodSugar ?? null) : null,
+        취침전: group === "취침전" ? (r.bloodSugar ?? null) : null,
+      };
+    });
 
-  // 요약 통계 (필터 기간 기준)
-  const validValues = filteredRecords.map((r) => r.bloodSugar).filter((v) => v != null);
-  const avg =
-    validValues.length > 0
-      ? Math.round(validValues.reduce((s, v) => s + v, 0) / validValues.length)
-      : null;
-  const latest = filteredRecords[0] ?? null;
-  const latestLabel =
-    latest?.recordDate && latest?.recordTime
-      ? `${latest.recordDate} ${latest.recordTime.slice(0, 5)}`
-      : null;
+  // 뷰별 관련 데이터만 필터링 (선 연결 개선)
+  const mealtimeData = chartData.filter((r) => r.식전 !== null || r.식후 !== null);
+  const fastingData  = chartData.filter((r) => r.공복 !== null || r.취침전 !== null);
+
+  // 그룹별 평균
+  const avgByGroup = (group) => {
+    const vals = filteredRecords
+      .filter((r) => toGroup(r.category) === group)
+      .map((r) => r.bloodSugar)
+      .filter((v) => v != null);
+    return vals.length > 0 ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : null;
+  };
+  const avgMealBefore = avgByGroup("식전");
+  const avgMealAfter  = avgByGroup("식후");
+
+  // 그룹별 최근 수치 (filteredRecords는 내림차순)
+  const latestMealBefore = filteredRecords.find((r) => toGroup(r.category) === "식전");
+  const latestMealAfter  = filteredRecords.find((r) => toGroup(r.category) === "식후");
+  const latestFasting    = filteredRecords.find((r) => toGroup(r.category) === "공복");
 
   // 필터 기간 기록 수 + 날짜 범위
   const dataStart = filterStart;
@@ -131,8 +157,12 @@ export default function BloodSugarRecord() {
               <MetricCard className="ring-1 ring-rose-100 bg-gradient-to-br from-rose-50/40 to-white">
                 <span className="text-sm font-semibold text-rose-500">평균 혈당</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
-                  <span className="text-[44px] font-extrabold leading-none tracking-tight text-rose-500">
-                    {loading ? "…" : (avg ?? "--")}
+                  <span className="text-[44px] font-extrabold leading-none tracking-tight text-blue-500">
+                    {loading ? "…" : (avgMealBefore ?? "--")}
+                  </span>
+                  <span className="pb-1 text-xl text-[#94A3B8]">/</span>
+                  <span className="text-[44px] font-extrabold leading-none tracking-tight text-red-500">
+                    {loading ? "…" : (avgMealAfter ?? "--")}
                   </span>
                   <span className="pb-1 text-sm font-semibold text-[#64748B]">mg/dL</span>
                 </div>
@@ -145,14 +175,20 @@ export default function BloodSugarRecord() {
               <MetricCard>
                 <span className="text-xs font-medium text-[#64748B]">최근 혈당</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
-                  <span className="text-4xl font-bold leading-none text-[#0F172A]">
-                    {loading ? "…" : (latest?.bloodSugar ?? "--")}
+                  <span className="text-4xl font-bold leading-none text-blue-500">
+                    {loading ? "…" : (latestMealBefore?.bloodSugar ?? "--")}
+                  </span>
+                  <span className="pb-1 text-xl text-[#94A3B8]">/</span>
+                  <span className="text-4xl font-bold leading-none text-red-500">
+                    {loading ? "…" : (latestMealAfter?.bloodSugar ?? "--")}
+                  </span>
+                  <span className="pb-1 text-xl text-[#94A3B8]">/</span>
+                  <span className="text-4xl font-bold leading-none text-slate-400">
+                    {loading ? "…" : (latestFasting?.bloodSugar ?? "--")}
                   </span>
                   <span className="pb-1 text-sm text-[#64748B]">mg/dL</span>
                 </div>
-                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">
-                  {latestLabel ?? "기록 없음"}
-                </p>
+                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">식전 / 식후 / 공복</p>
               </MetricCard>
 
               <MetricCard>
@@ -180,6 +216,32 @@ export default function BloodSugarRecord() {
                 onEndDateChange={setPendingEnd}
                 onApply={handleApply}
                 chartClassName="h-[calc(100vh-500px)] min-h-[280px] xl:col-span-2"
+                headerExtra={
+                  <div className="inline-flex rounded-full bg-slate-100 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setChartView("mealtime")}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                        chartView === "mealtime"
+                          ? "bg-white text-slate-900 shadow-sm"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      식전 · 식후
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setChartView("fasting")}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                        chartView === "fasting"
+                          ? "bg-white text-slate-900 shadow-sm"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      공복 · 취침전
+                    </button>
+                  </div>
+                }
               >
                 {chartData.length === 0 ? (
                   <div className="flex h-full items-center justify-center text-sm text-slate-400">
@@ -187,14 +249,42 @@ export default function BloodSugarRecord() {
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                    <AreaChart data={chartView === "mealtime" ? mealtimeData : fastingData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="mealBeforeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="mealAfterGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="fastingGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="bedtimeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
                       <Legend verticalAlign="top" align="right" height={36} iconType="circle" wrapperStyle={{ fontSize: 12, paddingBottom: 10 }} />
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                       <XAxis dataKey="date" tick={<CustomXTick />} height={45} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
                       <YAxis domain={[0, 250]} ticks={[0, 50, 100, 150, 200, 250]} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Line type="monotone" dataKey="bloodSugar" name="혈당" stroke="#f43f5e" strokeWidth={2.5} dot={{ fill: "#fff", stroke: "#f43f5e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls />
-                    </LineChart>
+                      {chartView === "mealtime" ? (
+                        <>
+                          <Area type="monotone" dataKey="식전" name="식전" stroke="#3b82f6" strokeWidth={2.5} fill="url(#mealBeforeGrad)" dot={{ fill: "#fff", stroke: "#3b82f6", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="식후" name="식후" stroke="#22c55e" strokeWidth={2.5} fill="url(#mealAfterGrad)" dot={{ fill: "#fff", stroke: "#22c55e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                        </>
+                      ) : (
+                        <>
+                          <Area type="monotone" dataKey="공복" name="공복" stroke="#f43f5e" strokeWidth={2.5} fill="url(#fastingGrad)" dot={{ fill: "#fff", stroke: "#f43f5e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="취침전" name="취침전" stroke="#a855f7" strokeWidth={2.5} fill="url(#bedtimeGrad)" dot={{ fill: "#fff", stroke: "#a855f7", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                        </>
+                      )}
+                    </AreaChart>
                   </ResponsiveContainer>
                 )}
               </ChartSection>

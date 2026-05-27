@@ -2,13 +2,14 @@ import { CalendarDays } from "lucide-react";
 
 // 차트 영역 컴포넌트
 // startDate, endDate는 사용자 입력으로 날짜 받아와서 나중에 수정 필요 할 수도? 
-export default function ChartSection({ title, startDate, endDate, legends = [], children, chartClassName = "h-[320px]", onStartDateChange, onEndDateChange, onApply }) {
+export default function ChartSection({ title, startDate, endDate, legends = [], children, chartClassName = "h-[320px]", onStartDateChange, onEndDateChange, onApply, headerExtra }) {
   const isInteractive = typeof onApply === "function";
   return (
     <div className={`mb-8 flex flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6 ${chartClassName}`}>
       <div className="mb-4 flex min-h-[38px] flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <h2 className="text-[18px] font-bold text-[#0F172A]">{title}</h2>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:justify-end">
+          {headerExtra}
           <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#64748B]">
             {!isInteractive && <CalendarDays size={14} />}
             {isInteractive ? (

@@ -191,6 +191,15 @@ public class BioValueRecordService {
         return bioRecords.map(BioValueRecordDto.BioResponse::from);
     }
 
+    public Page<BioValueRecordDto.BioResponse> getBioValuPageByCategoryIn(Long userId, List<String> category, int page, int size){
+        User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("유저가 존재하지 않음", userId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("recordDate", "recordTime").descending());
+        Page<BioValueRecord> bioRecords = bioValueRecordRepository.findByUserAndCategoryIn(user, category,pageable);
+        return bioRecords.map(BioValueRecordDto.BioResponse::from);
+    }
+
     //생체 수치 정보 삭제
     public void deleteBioValueRecord(Long recordId){
         BioValueRecord record = bioValueRecordRepository.findById(recordId)
