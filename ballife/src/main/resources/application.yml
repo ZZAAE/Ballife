@@ -17,7 +17,7 @@ spring:
     mongodb:
       host: localhost #배포할때는 실제 서버 주소가 들어감
       port: 27017
-      database: shopping_assistant # 데이터베이스명
+      database: Ballife # 데이터베이스명
 
   security:
     jwt:
@@ -45,7 +45,7 @@ springdoc:
 
 mfds:
   api:
-    base-url: https://apis.data.go.kr/1471000/DrbEasyDrugInfoService
+    base-url: 	https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
     service-key: ${MFDS_SERVICE_KEY}  # 환경변수로 주입 (절대 코드에 하드코딩 X)
 
     #단계별로 스페이스 2칸
