@@ -1,9 +1,9 @@
 import api from "./api";
 
 const newsApi = {
-  // 메인 카드뉴스 목록 (하이닥 RSS 기반, 백엔드 캐시)
-  getCards: () => {
-    return api.get("/news/cards");
+  // 카테고리별 카드뉴스 (전체/당뇨/고혈압/통풍/비만/골다공증/고지혈증)
+  getCards: (category = "전체") => {
+    return api.get("/news/cards", { params: { category } });
   },
 };
 
