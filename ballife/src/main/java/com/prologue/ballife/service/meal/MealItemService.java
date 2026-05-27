@@ -99,6 +99,13 @@ public class MealItemService {
         return MealItemDto.MealItemResponse.from(mealItem);
     }
 
+    // 특정 mealId에 속한 전체 MealItem 조회
+    public List<MealItemDto.MealItemResponse> getMealItemsByMealId(Long mealId){
+        return mealItemRepository.findAllByMeal_MealId(mealId).stream()
+            .map(MealItemDto.MealItemResponse::from)
+            .collect(Collectors.toList());
+    }
+
     // 하루치 영양소
     public List<Double> getMealTotalNut(Long userId, LocalDate date){
         List<Long> mealIds = mealItemRepository.findMealIdsByMealDateAndUser_UserId(date, userId);

@@ -1,6 +1,12 @@
 import api from "./api";
 
 const userConfigApi = {
+  getUserConfig: (userId) =>
+    api.get(`/user-config/${userId}`),
+
+  updateUserConfig: (userId, payload) =>
+    api.put(`/user-config/${userId}`, payload),
+
   getTargetWeight: (userId) =>
     api.get(`/user-config/${userId}/targetWeight`),
 

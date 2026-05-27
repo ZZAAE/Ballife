@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import com.prologue.ballife.domain.meal.Meal;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
+import com.prologue.ballife.repository.meal.MealItemRepository;
 import com.prologue.ballife.repository.meal.MealRepository;
 import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.meal.MealDto;
@@ -23,6 +24,7 @@ import com.prologue.ballife.web.dto.meal.MealDto;
 public class MealService {
 
     private final MealRepository mealRepository;
+    private final MealItemRepository mealItemRepository;
     private final UserRepository userRepository;
 
     // 식사 작성 (피그마 상 식사 등록 버튼 누르자마자 생성 이후 식단 등록에서 취소 누르면 바로 삭제)
@@ -61,7 +63,7 @@ public class MealService {
         return MealDto.MealResponse.from(meal);
     }
 
-    // 식사 삭제
+    // 식사 삭제 (연결된 MealItem 먼저 일괄 삭제 후 Meal 삭제)
     @Transactional
     public void deleteMeal(Long mealId, Long userId){
         Meal meal = mealRepository.findById(mealId)
@@ -72,6 +74,7 @@ public class MealService {
                 org.springframework.http.HttpStatus.FORBIDDEN, "본인 식사만 삭제할 수 있습니다.");
         }
 
+        mealItemRepository.deleteAllByMealId(mealId);
         mealRepository.delete(meal);
     }
 

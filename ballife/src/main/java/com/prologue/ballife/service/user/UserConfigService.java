@@ -7,8 +7,12 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.domain.user.UserConfig;
 import com.prologue.ballife.repository.user.UserConfigRepository;
+import com.prologue.ballife.repository.user.UserRepository;
+import com.prologue.ballife.web.dto.user.UserConfigDto.ConfigUpdateRequest;
+import com.prologue.ballife.web.dto.user.UserConfigDto.UserConfigResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +22,21 @@ import lombok.RequiredArgsConstructor;
 public class UserConfigService {
 
     private final UserConfigRepository userConfigRepository;
+    private final UserRepository userRepository;
 
     private UserConfig findUserConfigByUserId(Long userId) {
         return userConfigRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 설정 정보가 없습니다. userId=" + userId));
+    }
+
+    public UserConfigResponse getUserConfig(Long userId) {
+        UserConfig userConfig = userConfigRepository.findByUser_UserId(userId)
+                .orElseGet(() -> {
+                    User user = userRepository.findByUserId(userId)
+                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId=" + userId));
+                    return UserConfig.builder().user(user).build();
+                });
+        return UserConfigResponse.from(userConfig);
     }
 
     public Double getTargetWeight(Long userId) {
@@ -40,8 +55,9 @@ public class UserConfigService {
     }
 
     public Integer getTargetDailyWaterIntake(Long userId) {
-        UserConfig userConfig = findUserConfigByUserId(userId);
-        return userConfig.getTargetDailyWaterIntake();
+        return userConfigRepository.findByUser_UserId(userId)
+                .map(UserConfig::getTargetDailyWaterIntake)
+                .orElse(0);
     }
 
     public Map<String, LocalTime> getMealTimes(Long userId) {
@@ -53,5 +69,47 @@ public class UserConfigService {
         mealTimes.put("dinnerTime", userConfig.getDinnerTime());
 
         return mealTimes;
+    }
+
+    // 목표/루틴 통합 upsert. null이 아닌 필드만 적용한다.
+    @Transactional
+    public UserConfigResponse upsertUserConfig(Long userId, ConfigUpdateRequest request) {
+        UserConfig userConfig = userConfigRepository.findByUser_UserId(userId)
+                .orElseGet(() -> {
+                    User user = userRepository.findByUserId(userId)
+                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId=" + userId));
+                    return UserConfig.builder().user(user).build();
+                });
+
+        if (request.getTargetWeight() != null) {
+            userConfig.setTargetWeight(request.getTargetWeight());
+        }
+        if (request.getTargetDailyCaloriesBurned() != null) {
+            userConfig.setTargetDailyCaloriesBurned(request.getTargetDailyCaloriesBurned());
+        }
+        if (request.getTargetDailyCaloriesIntake() != null) {
+            userConfig.setTargetDailyCaloriesIntake(request.getTargetDailyCaloriesIntake());
+        }
+        if (request.getTargetDailyWaterIntake() != null) {
+            userConfig.setTargetDailyWaterIntake(request.getTargetDailyWaterIntake());
+        }
+        if (request.getWakeupTime() != null) {
+            userConfig.setWakeupTime(request.getWakeupTime());
+        }
+        if (request.getBreakfastTime() != null) {
+            userConfig.setBreakfastTime(request.getBreakfastTime());
+        }
+        if (request.getLunchTime() != null) {
+            userConfig.setLunchTime(request.getLunchTime());
+        }
+        if (request.getDinnerTime() != null) {
+            userConfig.setDinnerTime(request.getDinnerTime());
+        }
+        if (request.getBedTime() != null) {
+            userConfig.setBedTime(request.getBedTime());
+        }
+
+        UserConfig saved = userConfigRepository.save(userConfig);
+        return UserConfigResponse.from(saved);
     }
 }

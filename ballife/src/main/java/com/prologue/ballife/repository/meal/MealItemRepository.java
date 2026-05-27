@@ -4,6 +4,7 @@ package com.prologue.ballife.repository.meal;
 import com.prologue.ballife.domain.meal.MealItem;
 import com.prologue.ballife.domain.meal.Meal.MealCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,9 +18,17 @@ public interface MealItemRepository extends JpaRepository<MealItem, Long> {
     
     Optional<MealItem> findByMealItemId(Long mealItemId);
     Optional<MealItem> findByMeal_MealId(Long mealId);
-    
+
+    // 특정 mealId에 속한 모든 MealItem 조회
+    List<MealItem> findAllByMeal_MealId(Long mealId);
+
+    // 특정 mealId에 속한 모든 MealItem 삭제 (Meal 삭제 시 cascade 대용)
+    @Modifying
+    @Query("DELETE FROM MealItem mi WHERE mi.meal.mealId = :mealId")
+    void deleteAllByMealId(@Param("mealId") Long mealId);
+
     // mealId 목록으로 MealItem 조회
-    List<MealItem> findByMeal_MealIdIn(List<Long> mealIds); 
+    List<MealItem> findByMeal_MealIdIn(List<Long> mealIds);
     
     // 일일 총 칼로리 계산 
     @Query("SELECT SUM(mi.calorie) FROM MealItem mi WHERE mi.meal.mealId IN :mealIds")

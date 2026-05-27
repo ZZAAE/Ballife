@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Clock, Sparkles, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import bioValueRecordApi from "../api/bioValueRecordApi";
+import { BIO_CATEGORY } from "../constants/bioCategory";
 
 const MEALS = [
   { id: "공복", label: "공복", hasTiming: false },
@@ -15,22 +16,44 @@ const MEALS = [
 const TIMINGS = ["식전", "식후"];
 
 const getStatusInfo = (value) => {
-  if (value <= 100) 
-    return { 
-      label: "정상 범위 내에 있습니다", 
+  if (value <= 69)
+    return {
+      statusText: "저혈당",
+      label: "저혈당 상태입니다",
+      description: "혈당이 낮습니다. 당분이 포함된 음식을 섭취해주세요.",
+      color: "#60A5FA",
+      badge: "bg-[#EFF6FF] text-[#2563EB]",
+    };
+  if (value <= 99)
+    return {
+      statusText: "정상",
+      label: "이상적인 공복 혈당입니다",
+      description: "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요.",
       color: "#22C55E",
-      badge: "bg-[#ECFDF3] text-[#16A34A]"
+      badge: "bg-[#ECFDF3] text-[#16A34A]",
     };
-  if (value <= 180) 
-    return { 
-      label: "주의 범위에 있습니다", 
+  if (value <= 125)
+    return {
+      statusText: "주의",
+      label: "혈당 관리가 필요합니다",
+      description: "혈당이 다소 높습니다. 식단과 운동을 통한 관리가 필요합니다.",
+      color: "#FACC15",
+      badge: "bg-[#FEFCE8] text-[#CA8A04]",
+    };
+  if (value <= 180)
+    return {
+      statusText: "경고",
+      label: "높은 혈당입니다",
+      description: "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다.",
       color: "#FB923C",
-      badge: "bg-[#FFF7ED] text-[#EA580C]"
+      badge: "bg-[#FFF7ED] text-[#EA580C]",
     };
-  return { 
-    label: "경고 범위에 있습니다", 
+  return {
+    statusText: "위험",
+    label: "매우 높은 혈당입니다",
+    description: "매우 높은 혈당입니다. 즉시 의료진과 상담하시기 바랍니다.",
     color: "#F87171",
-    badge: "bg-[#FEF2F2] text-[#DC2626]"
+    badge: "bg-[#FEF2F2] text-[#DC2626]",
   };
 };
 
@@ -46,9 +69,32 @@ const makeDefaultRecord = () => ({
   saved: false,
 });
 
-export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
+// "BloodSugar-아침식전" 같은 카테고리에서 meal/timing 추출
+const parseBsCategory = (category) => {
+  if (typeof category !== "string" || !category.includes("-"))
+    return { meal: "공복", timing: "식전" };
+  const suffix = category.split("-")[1];
+  if (suffix === "공복") return { meal: "공복", timing: "식전" };
+  if (suffix === "취침전") return { meal: "취침전", timing: "식전" };
+  for (const m of ["아침", "점심", "저녁"]) {
+    if (suffix.startsWith(m)) {
+      const t = suffix.slice(m.length) === "식후" ? "식후" : "식전";
+      return { meal: m, timing: t };
+    }
+  }
+  return { meal: "공복", timing: "식전" };
+};
+
+export default function BloodSugarModal({
+  isOpen = true,
+  onClose = () => {},
+  onSaved,
+  editingRecord = null,
+}) {
   const { user } = useAuth();
+  const isEditMode = Boolean(editingRecord?.recordId);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -190,23 +236,63 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
       return;
     }
 
-    const payload = {
-      recordDate: selectedDate,
-      recordTime: `${timeValue}:00`,
-      category: "BloodSugar",
-      bloodSugar: Math.round(currentVal),
-    };
+    const suffix = meal.hasTiming
+      ? `${activeMeal}${activeTiming}`
+      : activeMeal;
 
     try {
       setIsSaving(true);
-      await bioValueRecordApi.createBioValueRecord(userId, payload);
-      updateCurrentRecord({ saved: true });
-      toast.success("혈당이 저장되었습니다");
-      onClose();
+      if (isEditMode) {
+        const payload = {
+          recordDate:
+            typeof editingRecord.recordDate === "string"
+              ? editingRecord.recordDate.slice(0, 10)
+              : selectedDate,
+          recordTime: `${timeValue}:00`,
+          category: `${BIO_CATEGORY.BLOOD_SUGAR}-${suffix}`,
+          bloodSugar: Math.round(currentVal),
+        };
+        await bioValueRecordApi.updateBioValueRecord(
+          editingRecord.recordId,
+          payload
+        );
+        toast.success("혈당 기록이 수정되었습니다");
+        onSaved?.(null);
+        onClose();
+      } else {
+        const payload = {
+          recordDate: selectedDate,
+          recordTime: `${timeValue}:00`,
+          category: `${BIO_CATEGORY.BLOOD_SUGAR}-${suffix}`,
+          bloodSugar: Math.round(currentVal),
+        };
+        await bioValueRecordApi.createBioValueRecord(userId, payload);
+        updateCurrentRecord({ saved: true });
+        toast.success("혈당이 저장되었습니다");
+        onClose();
+      }
     } catch {
       // 에러 토스트는 api 인터셉터에서 처리됨
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (e) => {
+    e?.stopPropagation();
+    if (!isEditMode || isDeleting) return;
+    if (!window.confirm("이 혈당 기록을 삭제하시겠어요?")) return;
+
+    setIsDeleting(true);
+    try {
+      await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
+      toast.success("혈당 기록이 삭제되었습니다");
+      onSaved?.(null);
+      onClose();
+    } catch {
+      // 인터셉터 처리
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -264,55 +350,96 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
     }
   }, [isOpen]);
 
+  // 모달 오픈 시 editingRecord에 맞춰 폼 초기화
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingRecord) {
+      const { meal, timing } = parseBsCategory(editingRecord.category);
+      const dateStr =
+        typeof editingRecord.recordDate === "string"
+          ? editingRecord.recordDate.slice(0, 10)
+          : new Date().toISOString().split("T")[0];
+      const value = editingRecord.bloodsugar != null ? editingRecord.bloodsugar : 0;
+      const pct = Math.max(0, Math.min(100, (value / maxVal) * 100));
+      const time =
+        typeof editingRecord.recordTime === "string"
+          ? editingRecord.recordTime.slice(0, 5)
+          : getCurrentTime();
+      const mealInfo = MEALS.find((m) => m.id === meal);
+      const key = mealInfo?.hasTiming ? `${meal}_${timing}` : meal;
+
+      setSelectedDate(dateStr);
+      setActiveMeal(meal);
+      setActiveTiming(timing);
+      setRecordsByDate({
+        [dateStr]: {
+          [key]: {
+            pct,
+            value: value > 0 ? Number(value).toFixed(1) : "00.0",
+            time,
+            saved: true,
+          },
+        },
+      });
+    } else {
+      setSelectedDate(new Date().toISOString().split("T")[0]);
+      setActiveMeal("공복");
+      setActiveTiming("식전");
+      setRecordsByDate({});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingRecord]);
+
   if (!isOpen) return null;
 
   return (
-    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm">
       <div className="relative flex w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]" onClick={(e) => e.stopPropagation()}>
-        
+
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                혈당 기록하기
+                {isEditMode ? "혈당 기록 수정" : "혈당 기록하기"}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
-                오늘의 혈당을 기록하세요.
+                {isEditMode
+                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
+                  : "오늘의 혈당을 기록하세요."}
               </p>
             </div>
 
-            <button onClick={onClose} style={{
-              background: "none", border: "none", cursor: "pointer", padding: 4,
-              color: "#bbb", fontSize: 20, lineHeight: 1,
-            }}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="닫기"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+            >
+              <X size={18} strokeWidth={2.2} />
             </button>
           </div>
 
           {/* 안내 박스 */}
-          <div className="mt-5 space-y-1.5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              정상 혈당: 100mg/dL 미만
-            </p>
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              주의 범위: 100 ~ 180mg/dL
-            </p>
-            <p className="text-[13px] leading-relaxed text-[#64748B]">
-              경고 범위: 180mg/dL 이상
-            </p>
+          <div className="mt-5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
+            <div className="grid grid-flow-col grid-rows-3 grid-cols-2 gap-x-6 gap-y-1.5">
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                저혈당: 0 ~ 69mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                정상: 70 ~ 99mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                주의: 100 ~ 125mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                경고: 126 ~ 180mg/dL
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#64748B]">
+                위험: 181 ~ 300mg/dL
+              </p>
+            </div>
           </div>
         </div>
 
@@ -410,10 +537,10 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
                 onBlur={handleInputBlur}
                 placeholder="00.0"
                 className="text-[72px] font-bold leading-none tracking-[-0.04em] bg-transparent border-none outline-none placeholder:text-[#CBD5E1] focus:placeholder:text-[#94A3B8] transition-colors"
-                style={{ 
-                  width: isFocused ? "auto" : "200px", 
+                style={{
+                  width: isFocused ? "auto" : "200px",
                   textAlign: "center",
-                  color: isSaved ? "#0F172A" : "#CBD5E1"
+                  color: isFocused || currentVal > 0 ? "#0F172A" : "#CBD5E1"
                 }}
               />
               <span className="text-[18px] font-semibold text-[#94A3B8] ml-1">mg/dL</span>
@@ -425,16 +552,18 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
             <div className="flex items-center justify-between mb-3">
               <span className="text-[15px] font-bold text-[#1E293B]">혈당 상태</span>
               <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${status.badge}`}>
-                {statusVal <= 100 ? "정상" : statusVal <= 180 ? "주의" : "경고"}
+                {status.statusText}
               </span>
             </div>
 
             {/* 슬라이더 */}
             <div className="relative h-[12px] w-full overflow-visible rounded-full mb-3">
               <div className="flex h-full overflow-hidden rounded-full">
-                <div className="w-1/3 bg-[#22C55E]" />
-                <div className="w-1/3 bg-[#FB923C]" />
-                <div className="w-1/3 bg-[#F87171]" />
+                <div className="h-full bg-[#60A5FA]" style={{ width: "23%" }} />
+                <div className="h-full bg-[#22C55E]" style={{ width: "10%" }} />
+                <div className="h-full bg-[#FACC15]" style={{ width: "8.67%" }} />
+                <div className="h-full bg-[#FB923C]" style={{ width: "18.33%" }} />
+                <div className="h-full bg-[#F87171]" style={{ width: "40%" }} />
               </div>
 
               <div
@@ -456,32 +585,28 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
               </div>
             </div>
 
-            <div className="flex justify-between px-0.5 text-[11px] font-medium text-[#94A3B8]">
-              <span>정상</span>
-              <span>주의</span>
-              <span>경고</span>
+            <div className="relative h-[16px] text-[11px] font-medium text-[#94A3B8]">
+              <span className="absolute -translate-x-1/2" style={{ left: "0%" }}>저혈당</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "23%" }}>정상</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "33%" }}>주의</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "41.67%" }}>경고</span>
+              <span className="absolute -translate-x-1/2" style={{ left: "60%" }}>위험</span>
             </div>
           </div>
 
-          {/* 안내 카드 */}
-          <div className="overflow-hidden rounded-[24px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF] p-4 mb-6">
-            <div className="flex items-start gap-3">
+          {/* AI 조언 카드 */}
+          <div className="mb-6 overflow-hidden rounded-[20px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
+            <div className="flex items-start gap-3 px-4 py-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z" />
-                </svg>
+                <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
               </div>
 
-              <div>
+              <div className="flex-1 space-y-1">
                 <p className="text-[13px] leading-relaxed text-[#475569]">
                   {status.label}
                 </p>
-                <p className="mt-1.5 text-[12px] text-[#94A3B8]">
-                  {statusVal <= 100 
-                    ? "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요."
-                    : statusVal <= 180
-                    ? "혈당이 주의 범위에 있습니다. 가벼운 운동이나 건강한 간식을 권장합니다."
-                    : "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다."}
+                <p className="text-[12px] text-[#94A3B8]">
+                  {status.description}
                 </p>
               </div>
             </div>
@@ -490,17 +615,31 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
 
         {/* 저장 버튼 */}
         <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
-              isSaved
-                ? "bg-[#0f172a] text-white hover:bg-[#1a1a2e] active:scale-[0.98]"
-                : "bg-[#1a1a2e] text-white hover:bg-[#25253d] active:scale-[0.98]"
-            }`}
-          >
-            {isSaving ? "저장 중..." : isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
-          </button>
+          <div className={isEditMode ? "flex gap-3" : ""}>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isSaving || isDeleting}
+                className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "삭제 중..." : "삭제"}
+              </button>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={isSaving || isDeleting}
+              className={`${isEditMode ? "flex-1" : "w-full"} rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed`}
+            >
+              {isSaving
+                ? "저장 중..."
+                : isEditMode
+                ? "수정 저장"
+                : isSaved
+                ? "저장 완료 ✓"
+                : "기록 저장 및 확인"}
+            </button>
+          </div>
         </div>
     </div>
     </div>

@@ -2,73 +2,152 @@ package com.prologue.ballife.service.exercise;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
+import com.prologue.ballife.domain.exercise.UserExerciseDetail;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.exercise.UserExerciseRepository;
 import com.prologue.ballife.repository.exerciseMongo.ExerciseTypeRepository;
+import com.prologue.ballife.repository.exerciseMongo.UserExerciseDetailRepository;
 import com.prologue.ballife.repository.user.UserRepository;
+import com.prologue.ballife.web.dto.exercise.UserExerciseDetailDto;
 import com.prologue.ballife.web.dto.exercise.UserExerciseDto;
 
 import lombok.RequiredArgsConstructor;
 
-// 사용자 운동 기록(UserExercise)에 대한 비즈니스 로직을 처리하는 서비스 클래스
-// MySQL(JPA) + MongoDB 를 함께 사용하는 하이브리드 구조
-// 클래스 레벨에 @Transactional(readOnly = true) 를 걸어두고,
-// 데이터를 변경하는 메서드에만 @Transactional 을 별도로 붙임
+// user_exercise  -> MySQL (JPA)
+// exercise_type, user_exercise_detail -> MongoDB
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserExerciseService {
 
-    // 사용자 운동 기록 레포지토리 (MySQL / JPA)
-    private final UserExerciseRepository userExerciseRepository;
-    // 사용자 레포지토리 (MySQL / JPA)
-    private final UserRepository userRepository;
-    // 운동 종류 레포지토리 (MongoDB)
-    private final ExerciseTypeRepository exerciseTypeRepository;
+    // 프론트에서 영문 키를 넘기는 경우 운동명으로 매핑
+    private static final Map<String, String> EXERCISE_TYPE_ALIASES = Map.ofEntries(
+            Map.entry("cycling", "사이클"),
+            Map.entry("running", "러닝"),
+            Map.entry("jumprope", "줄넘기"),
+            Map.entry("walking", "걷기"),
+            Map.entry("stair", "천국의 계단"),
+            Map.entry("dumbbellpress", "벤치프레스"),
+            Map.entry("squat", "스쿼트"),
+            Map.entry("deadlift", "데드리프트"),
+            Map.entry("shoulderpress", "숄더프레스"),
+            Map.entry("barbellrow", "바벨로우"));
 
-    // ──────────────────────────────────────────────────
-    // 날짜별 운동 기록 조회
-    // 흐름: userId + date 로 해당 날짜에 등록된 운동 기록 전체를 조회 → DTO 리스트로 변환해 반환
-    // ──────────────────────────────────────────────────
+    private final UserExerciseRepository userExerciseRepository;
+    private final UserRepository userRepository;
+    private final ExerciseTypeRepository exerciseTypeRepository;
+    private final UserExerciseDetailService userExerciseDetailService;
+    private final UserExerciseDetailRepository userExerciseDetailRepository;
+
+    // 특정 날짜의 소모 칼로리 합산 (기록 없으면 0)
+    @Transactional(readOnly = true)
+    public Integer getBurnedCalorieByDate(Long userId, LocalDate date) {
+        Integer sum = userExerciseRepository.sumBurnedCalorieByUserIdAndDate(userId, date, date);
+        return sum != null ? sum : 0;
+    }
+
     @Transactional(readOnly = true)
     public List<UserExerciseDto.Response> getUserExercisesByDate(Long userId, LocalDate date) {
-        return userExerciseRepository
-                // userId 와 exerciseDate 가 일치하고 삭제되지 않은 레코드 조회
-                .findByUser_UserIdAndExerciseDateAndIsDeletedFalse(userId, date)
-                .stream()
-                // 각 엔티티를 Response DTO 로 변환
-                .map(UserExerciseDto.Response::from)
+        List<UserExercise> exercises = userExerciseRepository
+                .findByUser_UserIdAndExerciseDateAndIsDeletedFalse(userId, date);
+
+        Map<String, ExerciseType> typeMap = loadExerciseTypeMap(exercises);
+
+        return exercises.stream()
+                .map(ue -> UserExerciseDto.Response.from(ue, typeMap.get(ue.getExerciseTypeId())))
                 .collect(Collectors.toList());
     }
 
-    // ──────────────────────────────────────────────────
-    // 운동 기록 등록
-    // 흐름: 유저 조회 → 운동 종류 조회 → 칼로리 계산 → 엔티티 생성 → MySQL 저장
-    // ──────────────────────────────────────────────────
+    // 기간 내 모든 운동 기록을 MongoDB 상세까지 한 번에 조인하여 반환
+    @Transactional(readOnly = true)
+    public List<UserExerciseDto.DetailedResponse> getUserExercisesWithDetails(
+            Long userId, LocalDate startDate, LocalDate endDate) {
+        List<UserExercise> exercises = userExerciseRepository
+                .findByUser_UserIdAndExerciseDateBetweenAndIsDeletedFalse(userId, startDate, endDate);
+
+        if (exercises.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, ExerciseType> typeMap = loadExerciseTypeMap(exercises);
+
+        List<Long> exerciseIds = exercises.stream()
+                .map(UserExercise::getUserExerciseId)
+                .collect(Collectors.toList());
+
+        Map<Long, UserExerciseDetail> detailMap = userExerciseDetailRepository
+                .findByUserExerciseIdIn(exerciseIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        UserExerciseDetail::getUserExerciseId,
+                        Function.identity(),
+                        (a, b) -> a));
+
+        return exercises.stream()
+                .map(ue -> {
+                    ExerciseType type = typeMap.get(ue.getExerciseTypeId());
+                    UserExerciseDetail detail = detailMap.get(ue.getUserExerciseId());
+                    return UserExerciseDto.DetailedResponse.builder()
+                            .userExerciseId(ue.getUserExerciseId())
+                            .exerciseTypeId(ue.getExerciseTypeId())
+                            .exerciseName(type != null ? type.getExerciseName() : null)
+                            .exerciseCategory(type != null ? type.getExerciseCategory() : null)
+                            .exerciseDate(ue.getExerciseDate())
+                            .exerciseTime(ue.getExerciseTime())
+                            .burnedCalorie(ue.getBurnedCalorie())
+                            .exerciseMin(detail != null ? detail.getExerciseMin() : null)
+                            .exerciseSet(detail != null ? detail.getExerciseSet() : null)
+                            .exerciseReps(detail != null ? detail.getExerciseReps() : null)
+                            .exerciseWeight(detail != null ? detail.getExerciseWeight() : null)
+                            .exerciseHard(detail != null ? detail.getExerciseHard() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 운동 기록 목록에 등장하는 exerciseTypeId 들을 한 번의 IN 쿼리로 가져와 Map 으로 매핑
+    private Map<String, ExerciseType> loadExerciseTypeMap(List<UserExercise> exercises) {
+        Set<String> typeIds = exercises.stream()
+                .map(UserExercise::getExerciseTypeId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (typeIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Iterable<ExerciseType> found = exerciseTypeRepository.findAllById(typeIds);
+        return StreamSupport.stream(found.spliterator(), false)
+                .collect(Collectors.toMap(ExerciseType::getExerciseTypeId, Function.identity()));
+    }
+
     @Transactional
     public UserExerciseDto.Response createUserExercise(Long userId, UserExerciseDto.CreateRequest request) {
 
-        // 유저 조회 (없으면 ResourceNotFoundException 발생)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("유저", userId));
 
-        // 운동 종류 조회 (ExerciseType 은 MongoDB 에 저장되어 있음)
-        ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", request.getExerciseTypeId()));
+        ExerciseType exerciseType = resolveExerciseType(request.getExerciseTypeId());
 
-        // 칼로리 계산 (유산소: 분 × 단위칼로리 / 무산소: 세트 × 반복 × 단위칼로리)
-        int burnedCalorie = calculateCalorie(exerciseType, request);
+        int burnedCalorie = calculateCalorie(exerciseType,
+                request.getExerciseMin(),
+                request.getExerciseSet(),
+                request.getExerciseReps(),
+                user.getWeight());
 
-        // UserExercise 엔티티 생성
-        // exerciseTypeId 는 MongoDB ObjectId 를 String 으로 변환해 MySQL 에 저장 (FK 제약 없음)
         UserExercise userExercise = UserExercise.builder()
                 .user(user)
                 .exerciseTypeId(exerciseType.getExerciseTypeId())
@@ -77,76 +156,147 @@ public class UserExerciseService {
                 .burnedCalorie(burnedCalorie)
                 .build();
 
-        // MySQL 에 저장 후 저장된 엔티티를 Response DTO 로 변환해 반환
-        return UserExerciseDto.Response.from(userExerciseRepository.save(userExercise));
+        UserExercise saved = userExerciseRepository.save(userExercise);
+
+        // 상세 정보(분/세트/반복/무게/강도)는 MongoDB user_exercise_detail 에 저장
+        userExerciseDetailService.create(saved.getUserExerciseId(),
+                UserExerciseDetailDto.CreateRequest.builder()
+                        .exerciseMin(request.getExerciseMin())
+                        .exerciseSet(request.getExerciseSet())
+                        .exerciseReps(request.getExerciseReps())
+                        .exerciseWeight(request.getExerciseWeight())
+                        .exerciseHard(request.getExerciseHard())
+                        .build());
+
+        return UserExerciseDto.Response.from(saved, exerciseType);
     }
 
-    // ──────────────────────────────────────────────────
-    // 운동 기록 수정
-    // 흐름: 기존 기록 조회 → 운동 종류 재조회 → 칼로리 재계산 → 필드 업데이트 → 저장
-    // UpdateRequest 에는 exerciseTypeId, exerciseDate, burnedCalorie 가 포함됨
-    // ──────────────────────────────────────────────────
     @Transactional
     public UserExerciseDto.Response updateUserExercise(Long userExerciseId, UserExerciseDto.UpdateRequest request) {
 
-        // 수정 대상 운동 기록 조회 (없으면 ResourceNotFoundException 발생)
         UserExercise userExercise = userExerciseRepository.findById(userExerciseId)
                 .orElseThrow(() -> new ResourceNotFoundException("운동 기록", userExerciseId));
 
-        // 변경할 운동 종류 조회 (MongoDB)
-        ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", request.getExerciseTypeId()));
+        ExerciseType exerciseType = resolveExerciseType(request.getExerciseTypeId());
 
-        // UpdateRequest 에 burnedCalorie 가 직접 입력된 경우 그 값을 사용하고,
-        // 없으면 exerciseType 의 단위칼로리 기준으로 재계산 (분당 단위는 기존 exerciseTime 기준)
-        int burnedCalorie = request.getBurnedCalorie() != null
-                ? request.getBurnedCalorie()
-                : (exerciseType.getCaloriePerUnit() != null ? exerciseType.getCaloriePerUnit() : 0);
+        // MongoDB detail 부분 갱신 (null 필드는 기존 값 유지)
+        userExerciseDetailService.update(userExerciseId,
+                UserExerciseDetailDto.UpdateRequest.builder()
+                        .exerciseMin(request.getExerciseMin())
+                        .exerciseSet(request.getExerciseSet())
+                        .exerciseReps(request.getExerciseReps())
+                        .exerciseWeight(request.getExerciseWeight())
+                        .exerciseHard(request.getExerciseHard())
+                        .build());
 
-        // 엔티티 필드 업데이트 (JPA 더티 체킹으로 트랜잭션 종료 시 자동 UPDATE 쿼리 실행)
+        // 칼로리는 클라이언트가 직접 지정했으면 그 값을, 아니면 서버에서 재계산
+        int burnedCalorie;
+        if (request.getBurnedCalorie() != null) {
+            burnedCalorie = request.getBurnedCalorie();
+        } else {
+            Double userWeight = userExercise.getUser() != null ? userExercise.getUser().getWeight() : null;
+            burnedCalorie = calculateCalorie(exerciseType,
+                    request.getExerciseMin(),
+                    request.getExerciseSet(),
+                    request.getExerciseReps(),
+                    userWeight);
+        }
+
         userExercise.setExerciseTypeId(exerciseType.getExerciseTypeId());
         userExercise.setExerciseDate(request.getExerciseDate());
+        if (request.getExerciseTime() != null) {
+            userExercise.setExerciseTime(request.getExerciseTime());
+        }
         userExercise.setBurnedCalorie(burnedCalorie);
 
-        // 변경된 엔티티를 Response DTO 로 변환해 반환
-        return UserExerciseDto.Response.from(userExercise);
+        return UserExerciseDto.Response.from(userExercise, exerciseType);
     }
 
-    // ──────────────────────────────────────────────────
-    // 운동 기록 삭제
-    // 흐름: 존재 여부 확인 → 없으면 예외 → 있으면 삭제
-    // ──────────────────────────────────────────────────
     @Transactional
     public void deleteUserExercise(Long userExerciseId) {
 
-        // 삭제 대상 운동 기록 조회 (없으면 ResourceNotFoundException 발생)
         UserExercise userExercise = userExerciseRepository.findById(userExerciseId)
                 .orElseThrow(() -> new ResourceNotFoundException("운동 기록", userExerciseId));
 
-        // 소프트 삭제 (실제 DB 에서 싹제지 않고 isDeleted = true 로 변경)
-        userExercise.softDelete();
+        // MongoDB 상세 먼저 정리한 뒤 MySQL 본행을 실제 삭제
+        userExerciseDetailService.deleteByUserExerciseId(userExerciseId);
+        userExerciseRepository.delete(userExercise);
     }
 
-    // 도움 받음
-    // ──────────────────────────────────────────────────
-    // 칼로리 계산 (private 헬퍼 메서드)
-    // 유산소(분당): exerciseMin × caloriePerUnit
-    // 무산소(회당): exerciseSet × exerciseReps × caloriePerUnit
-    // exerciseType.getCalorieUnit() 값으로 유산소/무산소 구분
-    // ──────────────────────────────────────────────────
-    private int calculateCalorie(ExerciseType exerciseType, UserExerciseDto.CreateRequest request) {
-        // 단위 칼로리 (null 이면 0 으로 처리)
-        int perUnit = exerciseType.getCaloriePerUnit() != null ? exerciseType.getCaloriePerUnit() : 0;
+    // MongoDB user_exercise_detail 단건 조회
+    @Transactional(readOnly = true)
+    public UserExerciseDetailDto.Response getUserExerciseDetail(Long userExerciseId) {
+        return userExerciseDetailService.findByUserExerciseId(userExerciseId);
+    }
 
-        if ("분당".equals(exerciseType.getCalorieUnit())) {
-            // 유산소: 운동 시간(분) × 분당 칼로리
-            int min = request.getExerciseMin() != null ? request.getExerciseMin() : 0;
-            return min * perUnit;
-        } else {
-            // 무산소: 세트 수 × 반복 수 × 회당 칼로리
-            int set = request.getExerciseSet() != null ? request.getExerciseSet() : 0;
-            int reps = request.getExerciseReps() != null ? request.getExerciseReps() : 0;
-            return set * reps * perUnit;
+    // 상세 정보만 부분 수정 (PATCH 의미)
+    @Transactional
+    public UserExerciseDetailDto.Response updateUserExerciseDetail(
+            Long userExerciseId, UserExerciseDetailDto.UpdateRequest request) {
+        return userExerciseDetailService.update(userExerciseId, request);
+    }
+
+    // 칼로리 계산 공식: MET × 체중(kg) × 운동시간(h)
+    // - 무산소 운동인데 exerciseMin 이 없거나 0 이면 sets × reps × 3초 로 시간을 추정
+    //   (체육관 기준 1 rep ≒ 3초, 세트 간 휴식은 칼로리에 포함하지 않음)
+    // - 체중이 비었으면 의미 있는 값을 계산할 수 없으므로 0 을 반환
+    private static final int SECONDS_PER_REP = 3;
+    private static final String AEROBIC = "유산소";
+
+    private int calculateCalorie(ExerciseType exerciseType,
+            Integer exerciseMin,
+            Integer exerciseSet,
+            Integer exerciseReps,
+            Double userWeightKg) {
+        if (userWeightKg == null || userWeightKg <= 0) {
+            return 0;
         }
+        Double metValue = exerciseType.getMet();
+        if (metValue == null || metValue <= 0) {
+            return 0;
+        }
+
+        double hours = resolveExerciseHours(exerciseType, exerciseMin, exerciseSet, exerciseReps);
+        if (hours <= 0) {
+            return 0;
+        }
+
+        return (int) Math.round(metValue * userWeightKg * hours);
+    }
+
+    private double resolveExerciseHours(ExerciseType exerciseType,
+            Integer exerciseMin, Integer exerciseSet, Integer exerciseReps) {
+        if (exerciseMin != null && exerciseMin > 0) {
+            return exerciseMin / 60.0;
+        }
+        // 무산소: 분이 비면 sets × reps × 3초 로 추정
+        boolean isAnaerobic = !AEROBIC.equals(exerciseType.getExerciseCategory());
+        if (isAnaerobic && exerciseSet != null && exerciseSet > 0
+                && exerciseReps != null && exerciseReps > 0) {
+            return (exerciseSet * exerciseReps * SECONDS_PER_REP) / 3600.0;
+        }
+        return 0.0;
+    }
+
+    private ExerciseType resolveExerciseType(String exerciseTypeKey) {
+        if (exerciseTypeKey == null || exerciseTypeKey.isBlank()) {
+            throw new ResourceNotFoundException("운동 종류", exerciseTypeKey);
+        }
+
+        // 1) ObjectId(24자 hex) 로 보이면 _id 조회
+        if (exerciseTypeKey.length() == 24 && exerciseTypeKey.chars().allMatch(c -> isHexDigit((char) c))) {
+            return exerciseTypeRepository.findById(exerciseTypeKey)
+                    .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeKey));
+        }
+
+        // 2) 영문 별칭이면 한글 운동명으로 변환
+        String resolvedName = EXERCISE_TYPE_ALIASES.getOrDefault(exerciseTypeKey, exerciseTypeKey);
+
+        return exerciseTypeRepository.findByExerciseName(resolvedName)
+                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeKey));
+    }
+
+    private static boolean isHexDigit(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 }

@@ -12,6 +12,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
+  ReferenceDot,
   ResponsiveContainer,
 } from "recharts";
 import { Unity, useUnityContext } from "react-unity-webgl";
@@ -91,6 +93,7 @@ const MainPage = () => {
         legends: [
           { label: "수축기", color: "#2563eb" },
           { label: "이완기", color: "#06b6d4" },
+          { label: "목표", color: "#94A3B8", dashed: true },
         ],
         unit: "mmHg",
         yDomain: [60, 150],
@@ -108,12 +111,19 @@ const MainPage = () => {
             gradientId: "diastolicGrad",
           },
         ],
+        references: [
+          { value: 120, label: "목표 수축기 120", color: "#94A3B8" },
+          { value: 80, label: "목표 이완기 80", color: "#94A3B8" },
+        ],
       },
       bloodSugar: {
         data: bloodSugarData,
-        legends: [{ label: "혈당", color: "#16a34a" }],
+        legends: [
+          { label: "혈당", color: "#16a34a" },
+          { label: "목표", color: "#94A3B8", dashed: true },
+        ],
         unit: "mg/dL",
-        yDomain: [80, 140],
+        yDomain: [60, 150],
         areas: [
           {
             key: "glucose",
@@ -122,12 +132,18 @@ const MainPage = () => {
             gradientId: "glucoseGrad",
           },
         ],
+        references: [
+          { value: 100, label: "목표 100", color: "#94A3B8" },
+        ],
       },
       weight: {
         data: weightData,
-        legends: [{ label: "체중", color: "#f97316" }],
+        legends: [
+          { label: "체중", color: "#f97316" },
+          { label: "목표", color: "#94A3B8", dashed: true },
+        ],
         unit: "kg",
-        yDomain: [75, 80],
+        yDomain: [74, 80],
         areas: [
           {
             key: "weight",
@@ -135,6 +151,9 @@ const MainPage = () => {
             stroke: "#f97316",
             gradientId: "weightGrad",
           },
+        ],
+        references: [
+          { value: 76, label: "목표 76", color: "#94A3B8" },
         ],
       },
     };
@@ -153,24 +172,20 @@ const MainPage = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div
-          style={{
-            background: "#fff",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-            padding: "10px 16px",
-            fontSize: 13,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
-        >
-          <p
-            style={{ fontWeight: 600, marginBottom: 4, color: "#2d3335" }}
-          >{`2026-${label}`}</p>
-          {payload.map((p) => (
-            <p key={p.dataKey} style={{ color: p.color, margin: "2px 0" }}>
-              {p.name}: <strong>{p.value}</strong> {activeChart.unit}
-            </p>
-          ))}
+        <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+          <p className="text-[12px] font-semibold text-[#0F172A] mb-2">{`2026-${label}`}</p>
+          <div className="space-y-1">
+            {payload.map((p) => (
+              <div key={p.dataKey} className="flex items-center gap-2 text-[12px]">
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: p.color }} />
+                <span className="text-[#64748B]">{p.name}</span>
+                <span className="ml-auto font-bold text-[#0F172A]">
+                  {p.value}
+                  <span className="ml-0.5 text-[10px] font-medium text-[#94A3B8]">{activeChart.unit}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
@@ -278,6 +293,8 @@ const MainPage = () => {
                 title="주간 건강 추이"
                 data={activeChart.data}
                 legends={activeChart.legends}
+                areas={activeChart.areas}
+                unit={activeChart.unit}
                 selectedType={selectedChartType}
                 onTypeChange={setSelectedChartType}
                 chartTypes={[
@@ -286,31 +303,137 @@ const MainPage = () => {
                   { value: "weight", label: "체중" },
                 ]}
               >
-                {(filteredData) => (
+                {(filteredData) => {
+                  // 데이터+기준선 기준 Y축 동적 도메인 (위/아래 빈 공간 최소화)
+                  const allValues = [];
+                  activeChart.areas.forEach((a) => {
+                    filteredData.forEach((d) => {
+                      if (d[a.key] != null) allValues.push(d[a.key]);
+                    });
+                  });
+                  activeChart.references?.forEach((r) => allValues.push(r.value));
+                  const dataMin = allValues.length ? Math.min(...allValues) : 0;
+                  const dataMax = allValues.length ? Math.max(...allValues) : 100;
+                  const range = dataMax - dataMin || 1;
+                  const pad = Math.max(range * 0.18, 3);
+                  const yDomain = [
+                    Math.floor(dataMin - pad),
+                    Math.ceil(dataMax + pad),
+                  ];
+
+                  // 각 데이터 키별 min/max 점 위치 계산
+                  const extremes = activeChart.areas.flatMap((a) => {
+                    let maxRow, minRow;
+                    filteredData.forEach((d) => {
+                      const v = d[a.key];
+                      if (v == null) return;
+                      if (!maxRow || v > maxRow[a.key]) maxRow = d;
+                      if (!minRow || v < minRow[a.key]) minRow = d;
+                    });
+                    const result = [];
+                    if (maxRow)
+                      result.push({
+                        type: "max",
+                        areaKey: a.key,
+                        stroke: a.stroke,
+                        date: maxRow.date,
+                        value: maxRow[a.key],
+                      });
+                    if (minRow && minRow !== maxRow)
+                      result.push({
+                        type: "min",
+                        areaKey: a.key,
+                        stroke: a.stroke,
+                        date: minRow.date,
+                        value: minRow[a.key],
+                      });
+                    return result;
+                  });
+
+                  return (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <AreaChart data={filteredData} margin={{ top: 40, right: 16, left: 0, bottom: 28 }}>
                       <defs>
                         <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#2563eb" stopOpacity={0.18} />
+                          <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
-                          <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.16} />
+                          <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#16a34a" stopOpacity={0.22} />
-                          <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#16a34a" stopOpacity={0.2} />
+                          <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.22} />
-                          <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.2} />
+                          <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={{ stroke: "#e5e7eb" }} tickLine={false} />
-                      <YAxis domain={activeChart.yDomain} tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
+                      <CartesianGrid strokeDasharray="4 6" stroke="#EEF2F7" vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: 13, fill: "#475569", fontWeight: 700 }}
+                        axisLine={false}
+                        tickLine={false}
+                        dy={8}
+                      />
+                      <YAxis
+                        domain={yDomain}
+                        tick={{ fontSize: 13, fill: "#475569", fontWeight: 700 }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={46}
+                      />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={{ stroke: "#CBD5E1", strokeWidth: 1, strokeDasharray: "4 4" }}
+                      />
+
+                      {/* 목표 기준선 (점선 위에 흰 배지로 라벨) */}
+                      {activeChart.references?.map((ref) => {
+                        const labelText = ref.label;
+                        const pillWidth = labelText.length * 9 + 18;
+                        return (
+                          <ReferenceLine
+                            key={`${ref.label}-${ref.value}`}
+                            y={ref.value}
+                            stroke="#CBD5E1"
+                            strokeDasharray="6 6"
+                            strokeWidth={1.5}
+                            label={(props) => {
+                              const { viewBox } = props;
+                              const cx = viewBox.x + viewBox.width - pillWidth - 6;
+                              const cy = viewBox.y - 14;
+                              return (
+                                <g>
+                                  <rect
+                                    x={cx}
+                                    y={cy - 12}
+                                    width={pillWidth}
+                                    height={24}
+                                    rx={12}
+                                    fill="#F1F5F9"
+                                  />
+                                  <text
+                                    x={cx + pillWidth / 2}
+                                    y={cy + 5}
+                                    textAnchor="middle"
+                                    fontSize={13}
+                                    fontWeight={800}
+                                    fill="#475569"
+                                  >
+                                    {labelText}
+                                  </text>
+                                </g>
+                              );
+                            }}
+                            ifOverflow="extendDomain"
+                          />
+                        );
+                      })}
+
                       {activeChart.areas.map((area) => (
                         <Area
                           key={area.key}
@@ -318,15 +441,65 @@ const MainPage = () => {
                           dataKey={area.key}
                           name={area.name}
                           stroke={area.stroke}
-                          strokeWidth={3}
+                          strokeWidth={2.5}
                           fill={`url(#${area.gradientId})`}
-                          dot={{ fill: area.stroke, r: 4, stroke: "#fff", strokeWidth: 2 }}
-                          activeDot={{ r: 6 }}
+                          dot={{ r: 3, fill: "#fff", stroke: area.stroke, strokeWidth: 2 }}
+                          activeDot={{ r: 6, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
                         />
                       ))}
+
+                      {/* Max/Min 강조 점 */}
+                      {extremes.map((e) => {
+                        const isMax = e.type === "max";
+                        const bg = isMax ? "#FEE2E2" : "#DCFCE7";
+                        const fg = isMax ? "#DC2626" : "#16A34A";
+                        const valueStr = String(e.value);
+                        const pillWidth = valueStr.length * 10 + 18;
+                        return (
+                          <ReferenceDot
+                            key={`${e.areaKey}-${e.type}`}
+                            x={e.date}
+                            y={e.value}
+                            r={8}
+                            fill={e.stroke}
+                            stroke="#fff"
+                            strokeWidth={3}
+                            ifOverflow="extendDomain"
+                            label={(props) => {
+                              const { viewBox } = props;
+                              const cx = viewBox.cx ?? viewBox.x;
+                              const cy = viewBox.cy ?? viewBox.y;
+                              const labelY = isMax ? cy - 24 : cy + 24;
+                              return (
+                                <g>
+                                  <rect
+                                    x={cx - pillWidth / 2}
+                                    y={labelY - 13}
+                                    width={pillWidth}
+                                    height={26}
+                                    rx={13}
+                                    fill={bg}
+                                  />
+                                  <text
+                                    x={cx}
+                                    y={labelY + 5}
+                                    textAnchor="middle"
+                                    fontSize={15}
+                                    fontWeight={800}
+                                    fill={fg}
+                                  >
+                                    {e.value}
+                                  </text>
+                                </g>
+                              );
+                            }}
+                          />
+                        );
+                      })}
                     </AreaChart>
                   </ResponsiveContainer>
-                )}
+                  );
+                }}
               </ChartSection>
             </section>
 

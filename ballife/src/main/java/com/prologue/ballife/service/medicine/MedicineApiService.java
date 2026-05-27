@@ -24,28 +24,28 @@ public class MedicineApiService {
     @Value("${mfds.api.service-key}")
     private String serviceKey;
 
-    public Optional<MedicineApiResponse.MediApiItem> fetchByItemName(String itemName){
-        URI uri = UriComponentsBuilder
-                .fromHttpUrl(baseUrl + "/getDrugPrdtPrmsnDtlInq06")
-                .queryParam("serviceKey", serviceKey)
-                .queryParam("item_name", itemName)
-                .queryParam("type", "json")
-                .queryParam("numOfRows", 1)
-                .queryParam("pageNo", 1)
-                .build()
-                .encode(StandardCharsets.UTF_8)
-                .toUri();
-        try{
-            MedicineApiResponse response = webClient.get()
-                                .uri(uri)
-                                .retrieve()
-                                .bodyToMono(MedicineApiResponse.class)
-                                .block();
+    // public Optional<MedicineApiResponse.MediApiItem> fetchByItemName(String itemName){
+    //     URI uri = UriComponentsBuilder
+    //             .fromHttpUrl(baseUrl + "/getDrugPrdtPrmsnDtlInq06")
+    //             .queryParam("serviceKey", serviceKey)
+    //             .queryParam("item_name", itemName)
+    //             .queryParam("type", "json")
+    //             .queryParam("numOfRows", 1)
+    //             .queryParam("pageNo", 1)
+    //             .build()
+    //             .encode(StandardCharsets.UTF_8)
+    //             .toUri();
+    //     try{
+    //         MedicineApiResponse response = webClient.get()
+    //                             .uri(uri)
+    //                             .retrieve()
+    //                             .bodyToMono(MedicineApiResponse.class)
+    //                             .block();
             
             
-        } catch (Exception e){
+    //     } catch (Exception e){
 
-        }
+    //     }
         
-    }
+    // }
 }

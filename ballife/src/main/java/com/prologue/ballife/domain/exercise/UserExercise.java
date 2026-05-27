@@ -10,7 +10,7 @@ import com.prologue.ballife.domain.user.User;
 
 // 사용자 운동 기록을 저장하는 JPA 엔티티
 // MySQL 의 user_exercise 테이블과 1:1 로 매핑됨
-// 운동 종류(ExerciseType)는 MongoDB 에 저장되어 있어 FK 대신 ID(String) 만 보관함
+// 운동 종류(ExerciseType)는 MySQL exercise_type 테이블의 ID 를 참조함
 
 // @Entity: 이 클래스가 JPA 가 관리하는 테이블 매핑 객체임을 선언
 @Entity
@@ -44,9 +44,8 @@ public class UserExercise {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 운동 종류 식별자 (MongoDB ExerciseType 컬렉션의 ObjectId)
-    // MySQL ↔ MongoDB 간 직접 FK 를 걸 수 없으므로 ID 값(String) 만 저장
-    @Column(name = "exercise_type_id")
+    // 운동 종류 식별자 (MongoDB exercise_type 컬렉션의 _id, ObjectId 문자열)
+    @Column(name = "exercise_type_id", length = 24)
     private String exerciseTypeId;
 
     // 운동을 수행한 날짜 (필수값)

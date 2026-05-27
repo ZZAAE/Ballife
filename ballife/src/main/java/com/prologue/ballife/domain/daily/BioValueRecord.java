@@ -31,7 +31,7 @@ public class BioValueRecord {
     @Column(name="RECORD_TIME", nullable = false)
     private LocalTime recordTime;
 
-    @Column(name="CATEGORY", nullable = false, length = 10)
+    @Column(name="CATEGORY", nullable = false, length = 50)
     private String category;
 
     @Column(name="BLOODSUGAR", nullable = true)
