@@ -1,4 +1,4 @@
-package com.prologue.ballife.repository.medicine;
+package com.prologue.ballife.repository.medicineMongo;
 
 import com.prologue.ballife.domain.medicine.Medicine;
 

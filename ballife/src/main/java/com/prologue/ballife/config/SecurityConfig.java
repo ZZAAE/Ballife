@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/medicines").permitAll() //임시코드
                         .requestMatchers("/api/auth/**").permitAll() // 회원가입 토큰없이 접근 가능
                         .requestMatchers("/api/mock/**").permitAll() // 임시 mock API 확인용
                         .requestMatchers(HttpMethod.PUT, "/api/users/disease/**").permitAll() // 회원가입시 질병 정보 업데이트 토큰 없이

@@ -11,6 +11,8 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MedicineApiResponse {
     
+    private Header header;
+    private Body body;
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Header{
