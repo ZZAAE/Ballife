@@ -19,11 +19,16 @@ const bioValueRecordApi = {
     });
   },
 
-  // 카테고리별 최신 기록 1건 
+  // 카테고리별 최신 기록 1건
   getLatestPageByCategory: (userId, category) => {
     return api.get(`/bioValueRecords/searchBioValuePage/${userId}`, {
       params: { category, page: 0, size: 1 },
     });
+  },
+
+  // 유저의 모든 생체 기록 조회 (메인페이지/페이지별 필터링용)
+  getAllBioValueRecords: (userId) => {
+    return api.get(`/bioValueRecords/search/${userId}`);
   },
 
   updateBioValueRecord: (recordId, payload) => {
