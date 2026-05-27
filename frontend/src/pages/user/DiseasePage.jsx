@@ -7,18 +7,21 @@ import authApi from "../../api/authApi";
 
 
 const diseaseFields = [
-	{ name: 'hyperlipidemia', label: '고지혈증 보유 여부',
+	{ name: 'hyperlipidemia', label: '이상지지혈증 보유 여부',
         options: [
             { value: 'NONE', label: '해당 없음' },
-            { value: 'type1', label: '1형' },
-            { value: 'type2', label: '2형' },
+            { value: 'type1', label: '고콜레스테롤혈증' },
+            { value: 'type2', label: '고LDL콜레스테롤혈증' },
+			{ value: 'type3', label: '고중성지방혈증' },
+            { value: 'type4', label: '저HDL콜레스테롤혈증' }
         ]
     },
 	{ name: 'hypertension', label: '고혈압 보유 여부',
         options: [
             { value: 'NONE', label: '해당 없음' },
-            { value: 'mild', label: '경증' },
-            { value: 'severe', label: '중증' },
+            { value: 'type1', label: '고혈압 전단계' },
+            { value: 'type2', label: '1기' },
+			{ value: 'type3', label: '2기' },
         ]
      },
 	{ name: 'osteoporosis', label: '골다공증 보유 여부',
