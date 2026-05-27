@@ -47,43 +47,37 @@ public class PostService {
             return PostDto.PostResponse.from(postRepository.save(post));
     }
 
+    // 정렬 조건 빌더 — 1차 기준 + postId DESC tie-break
+    private Sort buildSort(String sort) {
+        Sort tieBreak = Sort.by(Sort.Direction.DESC, "postId");
+        return switch (sort) {
+            case "views" -> Sort.by(Sort.Direction.DESC, "viewCount").and(tieBreak);
+            case "recommend" -> Sort.by(Sort.Direction.DESC, "upVote").and(tieBreak);
+            default -> Sort.by(Sort.Direction.DESC, "createdAt").and(tieBreak);
+        };
+    }
+
     // 전체 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPosts(int page, int size, String sort) {
-        Pageable pageable = switch (sort) {
-        case "views" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
-        case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
-        default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    };
+        Pageable pageable = PageRequest.of(page, size, buildSort(sort));
         return postRepository.findByIsDeletedFalse(pageable).map(PostDto.PostListResponse::from);
     }
 
     // 카테고리별 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsByCategory(int page, int size, Post.CATEGORY category, String sort) {
-        Pageable pageable = switch (sort) {
-        case "views" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
-        case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
-        default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    };
+        Pageable pageable = PageRequest.of(page, size, buildSort(sort));
         return postRepository.findByCategoryAndIsDeletedFalse(category, pageable).map(PostDto.PostListResponse::from);
     }
 
     // 검색으로 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsBySearch(int page, int size, String sort, String keyword) {
-        Pageable pageable = switch (sort) {
-        case "views" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
-        case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
-        default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    };
+        Pageable pageable = PageRequest.of(page, size, buildSort(sort));
         return postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageable).map(PostDto.PostListResponse::from);
     }
 
     // 카테고리 내에서 검색으로 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsByCategoryWithKeyword(int page, int size, Post.CATEGORY category, String sort, String keyword) {
-        Pageable pageable = switch (sort) {
-        case "views" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
-        case "recommend" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upVote"));
-        default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    };
+        Pageable pageable = PageRequest.of(page, size, buildSort(sort));
         return postRepository.findByCategoryAndTitleContainingAndIsDeletedFalse(category, keyword, pageable).map(PostDto.PostListResponse::from);
     }
 

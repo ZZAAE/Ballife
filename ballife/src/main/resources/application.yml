@@ -29,6 +29,11 @@ openai:
   model: gpt-3.5-turbo # 모델버젼
   max-tokens: 1000 #응답 길이
 
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
 logging:
   level:
     org.hibernate.SQL: debug #SQL 쿼리 로그 출력

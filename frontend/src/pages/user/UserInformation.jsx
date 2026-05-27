@@ -121,7 +121,12 @@ function UserInformation() {
     const fetchMember = async () => {
       try {
         const { data } = await userApi.getMember(userId);
-        setMemberProfile(data);
+        // 백엔드는 profileImage 를 모르므로 localStorage 캐시의 사진을 유지
+        const cached = loadCachedMemberProfile();
+        setMemberProfile({
+          ...data,
+          profileImage: cached.profileImage ?? data.profileImage ?? null,
+        });
       } catch (error) {
         toast.error("회원 정보를 불러오지 못했습니다.");
       }
