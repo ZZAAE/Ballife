@@ -155,6 +155,50 @@ function UserInformation() {
     profileImage: memberProfile?.profileImage ?? null,
   };
 
+  const fallback = (value) => (value == null || value === "" ? "?" : value);
+
+  const normalBloodSugar = {
+    fasting: memberProfile?.normalFastingGlucose ?? null,
+    afterMeal1h: memberProfile?.normalGlucoseAfter1h ?? null,
+    afterMeal2h: memberProfile?.normalGlucoseAfter2h ?? null,
+  };
+
+  const normalBloodPressure = {
+    systolic: memberProfile?.normalSystolicBP ?? null,
+    diastolic: memberProfile?.normalDiastolicBP ?? null,
+  };
+
+  const formatDateRange = (start, end) => {
+    const fmt = (d) =>
+      `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(
+        d.getDate(),
+      ).padStart(2, "0")}`;
+    return `${fmt(start)} ~ ${fmt(end)}`;
+  };
+
+  const buildWeeklyReports = () => {
+    const reports = memberProfile?.recentReports;
+    if (!Array.isArray(reports) || reports.length === 0) return [];
+
+    return reports.map((report) => {
+      let periodLabel = "?";
+      if (report?.weekStart && report?.weekEnd) {
+        const start = new Date(report.weekStart);
+        const end = new Date(report.weekEnd);
+        if (!isNaN(start) && !isNaN(end)) {
+          periodLabel = formatDateRange(start, end);
+        }
+      }
+      return {
+        icon: report?.icon ?? "📊",
+        title: report?.title ?? "?",
+        period: periodLabel,
+      };
+    });
+  };
+
+  const recentReports = buildWeeklyReports();
+
   // 백엔드 데이터를 UI 표시용으로 변환
   const goals = {
     weight: userConfig?.targetWeight ?? null,
@@ -318,6 +362,111 @@ function UserInformation() {
                       </dd>
                     </div>
                   </dl>
+
+                  {/* 정상 혈당 */}
+                  <div className="mt-5 border-t border-gray-100 pt-5">
+                    <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                      정상 혈당
+                    </p>
+                    <dl className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-[13px] text-[#475569]">공복</dt>
+                        <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {fallback(normalBloodSugar.fasting)}
+                          {normalBloodSugar.fasting != null && (
+                            <span className="ml-1 text-[12px] font-medium text-[#64748B]">
+                              mg/dL
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <dt className="text-[13px] text-[#475569]">식사 1시간</dt>
+                        <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {fallback(normalBloodSugar.afterMeal1h)}
+                          {normalBloodSugar.afterMeal1h != null && (
+                            <span className="ml-1 text-[12px] font-medium text-[#64748B]">
+                              mg/dL
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <dt className="text-[13px] text-[#475569]">식사 2시간</dt>
+                        <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {fallback(normalBloodSugar.afterMeal2h)}
+                          {normalBloodSugar.afterMeal2h != null && (
+                            <span className="ml-1 text-[12px] font-medium text-[#64748B]">
+                              mg/dL
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  {/* 정상 혈압 */}
+                  <div className="mt-5 border-t border-gray-100 pt-5">
+                    <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                      정상 혈압
+                    </p>
+                    <dl className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-[13px] text-[#475569]">수축기</dt>
+                        <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {fallback(normalBloodPressure.systolic)}
+                          {normalBloodPressure.systolic != null && (
+                            <span className="ml-1 text-[12px] font-medium text-[#64748B]">
+                              mmHg
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <dt className="text-[13px] text-[#475569]">이완기</dt>
+                        <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {fallback(normalBloodPressure.diastolic)}
+                          {normalBloodPressure.diastolic != null && (
+                            <span className="ml-1 text-[12px] font-medium text-[#64748B]">
+                              mmHg
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+
+                {/* 최근 데이터 리포트 (주간) */}
+                <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+                  <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
+                    최근 데이터 리포트
+                  </h3>
+                  {recentReports.length === 0 ? (
+                    <p className="text-[13px] text-[#94A3B8]">?</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {recentReports.map((report, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-base">
+                            {report.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[13px] font-semibold text-[#0F172A]">
+                              {report.title}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-[#94A3B8] tabular-nums">
+                              {report.period}
+                            </p>
+                          </div>
+                          <span className="text-[#CBD5E1]">›</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
 

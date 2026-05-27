@@ -37,15 +37,15 @@ public class ExerciseTypeDataInitializer implements ApplicationRunner {
                 ExerciseType.builder().exerciseName("천국의 계단").exerciseCategory("유산소").calorieUnit("분당")
                         .caloriePerUnit(0).met(8.8).build(),
                 ExerciseType.builder().exerciseName("벤치프레스").exerciseCategory("무산소").calorieUnit("회당")
-                        .caloriePerUnit(1).met(6.0).build(),
+                        .caloriePerUnit(0).met(6.0).build(),
                 ExerciseType.builder().exerciseName("스쿼트").exerciseCategory("무산소").calorieUnit("회당")
-                        .caloriePerUnit(1).met(6.0).build(),
+                        .caloriePerUnit(0).met(6.0).build(),
                 ExerciseType.builder().exerciseName("데드리프트").exerciseCategory("무산소").calorieUnit("회당")
-                        .caloriePerUnit(2).met(6.0).build(),
+                        .caloriePerUnit(0).met(6.0).build(),
                 ExerciseType.builder().exerciseName("숄더프레스").exerciseCategory("무산소").calorieUnit("회당")
-                        .caloriePerUnit(1).met(6.0).build(),
+                        .caloriePerUnit(0).met(6.0).build(),
                 ExerciseType.builder().exerciseName("바벨로우").exerciseCategory("무산소").calorieUnit("회당")
-                        .caloriePerUnit(1).met(6.0).build());
+                        .caloriePerUnit(0).met(6.0).build());
 
         exerciseTypeRepository.saveAll(seeds);
     }

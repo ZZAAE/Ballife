@@ -185,19 +185,46 @@ public class UserExerciseService {
         return userExerciseDetailService.update(userExerciseId, request);
     }
 
-    // 유산소/무산소 공통 공식: MET × 체중(kg) × 운동시간(h)
-    // exerciseSet, exerciseReps 는 더 이상 칼로리 계산에 사용되지 않지만
-    // 상세 기록(MongoDB)에는 그대로 저장된다.
+    // 칼로리 계산 공식: MET × 체중(kg) × 운동시간(h)
+    // - 무산소 운동인데 exerciseMin 이 없거나 0 이면 sets × reps × 3초 로 시간을 추정
+    //   (체육관 기준 1 rep ≒ 3초, 세트 간 휴식은 칼로리에 포함하지 않음)
+    // - 체중이 비었으면 의미 있는 값을 계산할 수 없으므로 0 을 반환
+    private static final int SECONDS_PER_REP = 3;
+    private static final String AEROBIC = "유산소";
+
     private int calculateCalorie(ExerciseType exerciseType,
             Integer exerciseMin,
             Integer exerciseSet,
             Integer exerciseReps,
             Double userWeightKg) {
-        double met = exerciseType.getMet() != null ? exerciseType.getMet() : 0.0;
-        double weight = userWeightKg != null ? userWeightKg : 0.0;
-        int min = exerciseMin != null ? exerciseMin : 0;
-        double hours = min / 60.0;
-        return (int) Math.round(met * weight * hours);
+        if (userWeightKg == null || userWeightKg <= 0) {
+            return 0;
+        }
+        Double metValue = exerciseType.getMet();
+        if (metValue == null || metValue <= 0) {
+            return 0;
+        }
+
+        double hours = resolveExerciseHours(exerciseType, exerciseMin, exerciseSet, exerciseReps);
+        if (hours <= 0) {
+            return 0;
+        }
+
+        return (int) Math.round(metValue * userWeightKg * hours);
+    }
+
+    private double resolveExerciseHours(ExerciseType exerciseType,
+            Integer exerciseMin, Integer exerciseSet, Integer exerciseReps) {
+        if (exerciseMin != null && exerciseMin > 0) {
+            return exerciseMin / 60.0;
+        }
+        // 무산소: 분이 비면 sets × reps × 3초 로 추정
+        boolean isAnaerobic = !AEROBIC.equals(exerciseType.getExerciseCategory());
+        if (isAnaerobic && exerciseSet != null && exerciseSet > 0
+                && exerciseReps != null && exerciseReps > 0) {
+            return (exerciseSet * exerciseReps * SECONDS_PER_REP) / 3600.0;
+        }
+        return 0.0;
     }
 
     private ExerciseType resolveExerciseType(String exerciseTypeKey) {
