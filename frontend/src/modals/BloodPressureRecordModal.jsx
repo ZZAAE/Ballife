@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import bioValueRecordApi from "../api/bioValueRecordApi";
@@ -22,18 +22,46 @@ const resolveUserId = (user) => {
   }
 };
 
-function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
+function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null }) {
   const { user } = useAuth();
   const userId = resolveUserId(user);
+
+  const isEditMode = Boolean(editingRecord?.recordId);
 
   const [activeTab, setActiveTab] = useState("아침");
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const dateInputRef = useRef(null);
 
   const tabs = ["아침", "점심", "저녁", "취침전"];
+
+  // 모달이 열릴 때 editingRecord에 맞춰 폼 초기화
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingRecord) {
+      const timing =
+        typeof editingRecord.category === "string" &&
+        editingRecord.category.includes("-")
+          ? editingRecord.category.split("-")[1]
+          : null;
+      setActiveTab(tabs.includes(timing) ? timing : "아침");
+      setSystolic(
+        editingRecord.systolicBp != null ? String(editingRecord.systolicBp) : ""
+      );
+      setDiastolic(
+        editingRecord.diastolicBp != null ? String(editingRecord.diastolicBp) : ""
+      );
+    } else {
+      setActiveTab("아침");
+      setSystolic("");
+      setDiastolic("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingRecord]);
 
   const handleNumberChange = (setter) => (e) => {
     const onlyNumber = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
@@ -64,31 +92,69 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
       return;
     }
 
-    const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-
-    const payload = {
-      recordDate,
-      recordTime,
-      category: `${BIO_CATEGORY.BLOOD_PRESSURE}-${activeTab}`,
-      systolicBP: s,
-      diastolicBP: d,
-    };
+    const category = `${BIO_CATEGORY.BLOOD_PRESSURE}-${activeTab}`;
 
     setSubmitting(true);
     try {
-      const res = await bioValueRecordApi.createBioValueRecord(userId, payload);
-      toast.success("혈압이 기록되었습니다.");
-      onSaved?.(res.data);
+      if (isEditMode) {
+        // 기존 recordDate/recordTime 유지하고 값/카테고리만 수정
+        const payload = {
+          recordDate: editingRecord.recordDate,
+          recordTime:
+            typeof editingRecord.recordTime === "string" &&
+            editingRecord.recordTime.length === 5
+              ? `${editingRecord.recordTime}:00`
+              : editingRecord.recordTime,
+          category,
+          systolicBP: s,
+          diastolicBP: d,
+        };
+        const res = await bioValueRecordApi.updateBioValueRecord(
+          editingRecord.recordId,
+          payload
+        );
+        toast.success("혈압 기록이 수정되었습니다.");
+        onSaved?.(res.data);
+      } else {
+        const now = new Date();
+        const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const payload = {
+          recordDate,
+          recordTime,
+          category,
+          systolicBP: s,
+          diastolicBP: d,
+        };
+        const res = await bioValueRecordApi.createBioValueRecord(userId, payload);
+        toast.success("혈압이 기록되었습니다.");
+        onSaved?.(res.data);
+      }
       setSystolic("");
       setDiastolic("");
       onClose?.();
     } catch (err) {
-      console.error("혈압 기록 실패:", err);
+      console.error(isEditMode ? "혈압 기록 수정 실패:" : "혈압 기록 실패:", err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isEditMode) return;
+    if (!window.confirm("이 혈압 기록을 삭제하시겠어요?")) return;
+
+    setDeleting(true);
+    try {
+      await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
+      toast.success("혈압 기록이 삭제되었습니다.");
+      onSaved?.(null);
+      onClose?.();
+    } catch (err) {
+      console.error("혈압 기록 삭제 실패:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -157,10 +223,12 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                혈압 기록하기
+                {isEditMode ? "혈압 기록 수정" : "혈압 기록하기"}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
-                오늘의 혈압 상태를 간단하게 확인하고 기록해보세요.
+                {isEditMode
+                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
+                  : "오늘의 혈압 상태를 간단하게 확인하고 기록해보세요."}
               </p>
             </div>
 
@@ -316,14 +384,30 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved }) {
 
         {/* 저장 버튼 */}
         <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {submitting ? "저장 중..." : "기록 저장 및 확인"}
-          </button>
+          <div className={isEditMode ? "flex gap-3" : ""}>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={submitting || deleting}
+                className="flex-1 rounded-[24px] border-2 border-[#FCA5A5] bg-white py-5 text-xl font-bold text-[#DC2626] transition-all hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {deleting ? "삭제 중..." : "삭제"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting || deleting}
+              className="flex-1 rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {submitting
+                ? "저장 중..."
+                : isEditMode
+                ? "수정 저장"
+                : "기록 저장 및 확인"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

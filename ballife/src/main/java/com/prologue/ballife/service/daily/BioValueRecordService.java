@@ -172,6 +172,7 @@ public class BioValueRecordService {
     }
 
     //생체 수치 정보 삭제
+    @Transactional
     public void deleteBioValueRecord(Long recordId){
         BioValueRecord record = bioValueRecordRepository.findById(recordId)
                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 정보", recordId));

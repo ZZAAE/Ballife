@@ -69,9 +69,32 @@ const makeDefaultRecord = () => ({
   saved: false,
 });
 
-export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
+// "BloodSugar-아침식전" 같은 카테고리에서 meal/timing 추출
+const parseBsCategory = (category) => {
+  if (typeof category !== "string" || !category.includes("-"))
+    return { meal: "공복", timing: "식전" };
+  const suffix = category.split("-")[1];
+  if (suffix === "공복") return { meal: "공복", timing: "식전" };
+  if (suffix === "취침전") return { meal: "취침전", timing: "식전" };
+  for (const m of ["아침", "점심", "저녁"]) {
+    if (suffix.startsWith(m)) {
+      const t = suffix.slice(m.length) === "식후" ? "식후" : "식전";
+      return { meal: m, timing: t };
+    }
+  }
+  return { meal: "공복", timing: "식전" };
+};
+
+export default function BloodSugarModal({
+  isOpen = true,
+  onClose = () => {},
+  onSaved,
+  editingRecord = null,
+}) {
   const { user } = useAuth();
+  const isEditMode = Boolean(editingRecord?.recordId);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -213,30 +236,63 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
       return;
     }
 
-    const category =
-      activeMeal === "공복"
-        ? "공복혈당"
-        : meal.hasTiming
-        ? `${activeMeal}${activeTiming}`
-        : activeMeal;
-
-    const payload = {
-      recordDate: selectedDate,
-      recordTime: `${timeValue}:00`,
-      category: BIO_CATEGORY.BLOOD_SUGAR,
-      bloodSugar: Math.round(currentVal),
-    };
+    const suffix = meal.hasTiming
+      ? `${activeMeal}${activeTiming}`
+      : activeMeal;
 
     try {
       setIsSaving(true);
-      await bioValueRecordApi.createBioValueRecord(userId, payload);
-      updateCurrentRecord({ saved: true });
-      toast.success("혈당이 저장되었습니다");
-      onClose();
+      if (isEditMode) {
+        const payload = {
+          recordDate:
+            typeof editingRecord.recordDate === "string"
+              ? editingRecord.recordDate.slice(0, 10)
+              : selectedDate,
+          recordTime: `${timeValue}:00`,
+          category: `${BIO_CATEGORY.BLOOD_SUGAR}-${suffix}`,
+          bloodSugar: Math.round(currentVal),
+        };
+        await bioValueRecordApi.updateBioValueRecord(
+          editingRecord.recordId,
+          payload
+        );
+        toast.success("혈당 기록이 수정되었습니다");
+        onSaved?.(null);
+        onClose();
+      } else {
+        const payload = {
+          recordDate: selectedDate,
+          recordTime: `${timeValue}:00`,
+          category: `${BIO_CATEGORY.BLOOD_SUGAR}-${suffix}`,
+          bloodSugar: Math.round(currentVal),
+        };
+        await bioValueRecordApi.createBioValueRecord(userId, payload);
+        updateCurrentRecord({ saved: true });
+        toast.success("혈당이 저장되었습니다");
+        onClose();
+      }
     } catch {
       // 에러 토스트는 api 인터셉터에서 처리됨
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (e) => {
+    e?.stopPropagation();
+    if (!isEditMode || isDeleting) return;
+    if (!window.confirm("이 혈당 기록을 삭제하시겠어요?")) return;
+
+    setIsDeleting(true);
+    try {
+      await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
+      toast.success("혈당 기록이 삭제되었습니다");
+      onSaved?.(null);
+      onClose();
+    } catch {
+      // 인터셉터 처리
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -294,6 +350,47 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
     }
   }, [isOpen]);
 
+  // 모달 오픈 시 editingRecord에 맞춰 폼 초기화
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingRecord) {
+      const { meal, timing } = parseBsCategory(editingRecord.category);
+      const dateStr =
+        typeof editingRecord.recordDate === "string"
+          ? editingRecord.recordDate.slice(0, 10)
+          : new Date().toISOString().split("T")[0];
+      const value = editingRecord.bloodsugar != null ? editingRecord.bloodsugar : 0;
+      const pct = Math.max(0, Math.min(100, (value / maxVal) * 100));
+      const time =
+        typeof editingRecord.recordTime === "string"
+          ? editingRecord.recordTime.slice(0, 5)
+          : getCurrentTime();
+      const mealInfo = MEALS.find((m) => m.id === meal);
+      const key = mealInfo?.hasTiming ? `${meal}_${timing}` : meal;
+
+      setSelectedDate(dateStr);
+      setActiveMeal(meal);
+      setActiveTiming(timing);
+      setRecordsByDate({
+        [dateStr]: {
+          [key]: {
+            pct,
+            value: value > 0 ? Number(value).toFixed(1) : "00.0",
+            time,
+            saved: true,
+          },
+        },
+      });
+    } else {
+      setSelectedDate(new Date().toISOString().split("T")[0]);
+      setActiveMeal("공복");
+      setActiveTiming("식전");
+      setRecordsByDate({});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingRecord]);
+
   if (!isOpen) return null;
 
   return (
@@ -305,10 +402,12 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                혈당 기록하기
+                {isEditMode ? "혈당 기록 수정" : "혈당 기록하기"}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
-                오늘의 혈당을 기록하세요.
+                {isEditMode
+                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
+                  : "오늘의 혈당을 기록하세요."}
               </p>
             </div>
 
@@ -528,17 +627,35 @@ export default function BloodSugarModal({ isOpen = true, onClose = () => {} }) {
 
         {/* 저장 버튼 */}
         <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`w-full rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
-              isSaved
-                ? "bg-[#0f172a] text-white hover:bg-[#1a1a2e] active:scale-[0.98]"
-                : "bg-[#1a1a2e] text-white hover:bg-[#25253d] active:scale-[0.98]"
-            }`}
-          >
-            {isSaving ? "저장 중..." : isSaved ? "저장 완료 ✓" : "기록 저장 및 확인"}
-          </button>
+          <div className={isEditMode ? "flex gap-3" : ""}>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isSaving || isDeleting}
+                className="flex-1 rounded-[24px] border-2 border-[#FCA5A5] bg-white py-5 text-xl font-bold text-[#DC2626] transition-all hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "삭제 중..." : "삭제"}
+              </button>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={isSaving || isDeleting}
+              className={`flex-1 rounded-[24px] py-5 text-xl font-bold transition-all shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
+                isSaved
+                  ? "bg-[#0f172a] text-white hover:bg-[#1a1a2e] active:scale-[0.98]"
+                  : "bg-[#1a1a2e] text-white hover:bg-[#25253d] active:scale-[0.98]"
+              }`}
+            >
+              {isSaving
+                ? "저장 중..."
+                : isEditMode
+                ? "수정 저장"
+                : isSaved
+                ? "저장 완료 ✓"
+                : "기록 저장 및 확인"}
+            </button>
+          </div>
         </div>
     </div>
     </div>

@@ -216,22 +216,28 @@ function formatDateInputValue(date) {
 }
 
 // ─── 백엔드 응답 → 카드 컴포넌트 키 매퍼 ───
+const extractMealTiming = (category) =>
+  typeof category === "string" && category.includes("-")
+    ? category.split("-")[1]
+    : "";
+
 const mapBpRecord = (r) => ({
+  recordId: r.recordId,
+  category: r.category,
   recordDate: r.recordDate,
   recordTime: r.recordTime,
   systolicBp: r.systolicBP,
   diastolicBp: r.diastolicBP,
-  mealTiming:
-    typeof r.category === "string" && r.category.includes("-")
-      ? r.category.split("-")[1]
-      : "",
+  mealTiming: extractMealTiming(r.category),
 });
 
 const mapBsRecord = (r) => ({
+  recordId: r.recordId,
+  category: r.category,
   recordDate: r.recordDate,
   recordTime: r.recordTime,
   bloodsugar: r.bloodSugar,
-  mealTiming: null,
+  mealTiming: extractMealTiming(r.category),
 });
 
 const mapWeightRecord = (r) => ({
@@ -300,6 +306,8 @@ function AllRecordPage() {
   const dateInputRef = useRef(null);
 
   const [modalType, setModalType] = useState(null);
+  const [editingBp, setEditingBp] = useState(null);
+  const [editingBs, setEditingBs] = useState(null);
 
   // DB에서 불러오는 실제 기록들. 더미 세팅은 디자인 확인용으로 아래 주석에 보관.
   const [bloodPressureRecords, setBloodPressureRecords] = useState([]);
@@ -351,15 +359,7 @@ function AllRecordPage() {
             .sort((a, b) =>
               (a.recordTime || "").localeCompare(b.recordTime || "")
             )
-            .map((r) => ({
-              recordDate: r.recordDate,
-              recordTime: r.recordTime,
-              mealTiming: r.category.includes("-")
-                ? r.category.split("-")[1]
-                : "",
-              systolicBp: r.systolicBP,
-              diastolicBp: r.diastolicBP,
-            }));
+            .map(mapBpRecord);
           setBloodPressureRecords(filtered);
         })
         .catch((err) => console.error("혈압 기록 조회 실패:", err));
@@ -412,8 +412,20 @@ function AllRecordPage() {
 
   const closeModal = () => {
     setModalType(null);
+    setEditingBp(null);
+    setEditingBs(null);
     // 모달이 닫힐 때마다 refetch (저장 후 화면 자동 갱신)
     fetchAll();
+  };
+
+  const handleEditBp = (record) => {
+    setEditingBp(record);
+    setModalType("bp");
+  };
+
+  const handleEditBs = (record) => {
+    setEditingBs(record);
+    setModalType("blood");
   };
 
   const openDatePicker = () => {
@@ -567,7 +579,13 @@ function AllRecordPage() {
                   <AddRecordBar onClick={() => setModalType("bp")} />
 
                   {bloodPressureRecords.map((record, index) => (
-                    <BloodPressureRecordItem key={index} record={record} />
+                    <BloodPressureRecordItem
+                      key={record.recordId ?? index}
+                      record={record}
+                      onClick={
+                        record.recordId ? () => handleEditBp(record) : undefined
+                      }
+                    />
                   ))}
                 </div>
               ) : null}
@@ -591,7 +609,13 @@ function AllRecordPage() {
                   <AddRecordBar onClick={() => setModalType("blood")} />
 
                   {bloodSugarRecords.map((record, index) => (
-                    <BloodSugarRecordItem key={index} record={record} />
+                    <BloodSugarRecordItem
+                      key={record.recordId ?? index}
+                      record={record}
+                      onClick={
+                        record.recordId ? () => handleEditBs(record) : undefined
+                      }
+                    />
                   ))}
                 </div>
               ) : null}
@@ -756,9 +780,14 @@ function AllRecordPage() {
       <BloodPressureRecordModal
         isOpen={modalType === "bp"}
         onClose={closeModal}
+        editingRecord={editingBp}
       />
 
-      <BloodsugarModal isOpen={modalType === "blood"} onClose={closeModal} />
+      <BloodsugarModal
+        isOpen={modalType === "blood"}
+        onClose={closeModal}
+        editingRecord={editingBs}
+      />
 
       <MealRegisterModal isOpen={modalType === "meal"} onClose={closeModal} />
 
