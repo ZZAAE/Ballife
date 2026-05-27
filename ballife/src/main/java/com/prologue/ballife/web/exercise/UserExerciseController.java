@@ -48,6 +48,17 @@ public class UserExerciseController {
         return ResponseEntity.ok(userExerciseService.getUserExercisesByDate(userId, date));
     }
 
+    // 기간 + 상세 정보까지 한 번에 조회 (목록 페이지 1회 호출용)
+    @Operation(summary = "기간별 운동 + 상세 동시 조회",
+            description = "start ~ end 기간의 운동 기록과 MongoDB 상세(분/세트/반복/무게/강도) 를 합쳐 반환합니다.")
+    @GetMapping("/detailed")
+    public ResponseEntity<List<UserExerciseDto.DetailedResponse>> getUserExercisesWithDetails(
+            @Parameter(description = "유저 ID") @PathVariable Long userId,
+            @Parameter(description = "시작 날짜 (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @Parameter(description = "종료 날짜 (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        return ResponseEntity.ok(userExerciseService.getUserExercisesWithDetails(userId, start, end));
+    }
+
     // ──────────────────────────────────────────────────
     // GET /api/users/{userId}/exercises/burned-calorie?date=yyyy-MM-dd
     // 특정 날짜의 소모 칼로리 합계 (기본값: 오늘)

@@ -87,14 +87,25 @@ export function BloodSugarRecordItem({ record, onClick }) {
   );
 }
 
-export function ExerciseRecordItem({ record }) {
-  return (
+export function ExerciseRecordItem({ record, onClick }) {
+  const content = (
     <SimpleRecordItem
       leftText={exerciseTypeMap[record.exerciseTypeId] ?? "운동"}
       centerText={record.exerciseName ?? "러닝"}
       value={record.kcal ?? 120}
       unit="Kcal"
     />
+  );
+  if (!onClick) return content;
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(record)}
+      className="block w-full text-left transition hover:brightness-95"
+      aria-label="운동 기록 수정"
+    >
+      {content}
+    </button>
   );
 }
 

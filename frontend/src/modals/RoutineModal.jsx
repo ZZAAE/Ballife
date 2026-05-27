@@ -1,5 +1,102 @@
 import { useState } from "react";
-import { Clock, X } from "lucide-react";
+import { Clock, X, ChevronDown } from "lucide-react";
+
+const HOUR12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")); // "01" ~ "12"
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+
+// "HH:mm" (24h) → { meridiem: "AM"|"PM", hour12: "01"~"12", minute: "00" }
+const parseTime = (time) => {
+  if (!time || typeof time !== "string" || !time.includes(":")) {
+    return { meridiem: "", hour12: "", minute: "" };
+  }
+  const [hStr, mStr] = time.split(":");
+  const h24 = Number(hStr);
+  if (Number.isNaN(h24)) return { meridiem: "", hour12: "", minute: "" };
+  const meridiem = h24 < 12 ? "AM" : "PM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return {
+    meridiem,
+    hour12: String(h12).padStart(2, "0"),
+    minute: mStr ?? "",
+  };
+};
+
+// { meridiem, hour12, minute } → "HH:mm" (24h)
+const composeTime = (meridiem, hour12, minute) => {
+  if (!meridiem && !hour12 && !minute) return "";
+  const m = meridiem || "AM";
+  const h12 = Number(hour12 || "12");
+  let h24 = h12 % 12;
+  if (m === "PM") h24 += 12;
+  return `${String(h24).padStart(2, "0")}:${minute || "00"}`;
+};
+
+function TimeSelect({ value, onChange }) {
+  const { meridiem, hour12, minute } = parseTime(value);
+
+  const selectClass =
+    "appearance-none h-9 pl-3 pr-7 rounded-lg bg-gray-100 text-[13px] text-gray-700 outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition cursor-pointer";
+
+  return (
+    <div className="flex items-center gap-1.5 justify-end">
+      {/* 오전/오후 */}
+      <div className="relative">
+        <select
+          value={meridiem}
+          onChange={(e) => onChange(composeTime(e.target.value, hour12, minute))}
+          className={selectClass}
+          aria-label="오전/오후"
+        >
+          <option value="" disabled>
+            오전/오후
+          </option>
+          <option value="AM">오전</option>
+          <option value="PM">오후</option>
+        </select>
+        <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+      </div>
+      {/* 시 */}
+      <div className="relative">
+        <select
+          value={hour12}
+          onChange={(e) => onChange(composeTime(meridiem, e.target.value, minute))}
+          className={selectClass}
+          aria-label="시"
+        >
+          <option value="" disabled>
+            시
+          </option>
+          {HOUR12.map((h) => (
+            <option key={h} value={h}>
+              {h}시
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+      </div>
+      <span className="text-gray-400 text-[13px]">:</span>
+      {/* 분 */}
+      <div className="relative">
+        <select
+          value={minute}
+          onChange={(e) => onChange(composeTime(meridiem, hour12, e.target.value))}
+          className={selectClass}
+          aria-label="분"
+        >
+          <option value="" disabled>
+            분
+          </option>
+          {MINUTES.map((m) => (
+            <option key={m} value={m}>
+              {m}분
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
  * 하루 생활 루틴 수정 모달
@@ -114,18 +211,16 @@ export default function RoutineModal({
               {routine.map((item, idx) => (
                 <div
                   key={item.label}
-                  className={`grid grid-cols-[1fr_140px] gap-3 items-center px-4 py-3 bg-white ${
+                  className={`grid grid-cols-[1fr_auto] gap-3 items-center px-4 py-3 bg-white ${
                     idx !== routine.length - 1 ? "border-b border-gray-100" : ""
                   }`}
                 >
                   <span className="text-[14px] font-medium text-gray-800">
                     {item.label}
                   </span>
-                  <input
-                    type="time"
+                  <TimeSelect
                     value={item.time}
-                    onChange={(e) => handleTimeChange(item.label, e.target.value)}
-                    className="h-9 px-3 rounded-lg bg-gray-100 text-[13px] text-gray-700 outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition"
+                    onChange={(v) => handleTimeChange(item.label, v)}
                   />
                 </div>
               ))}

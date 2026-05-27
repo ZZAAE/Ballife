@@ -42,12 +42,28 @@ export function createExercise(userId, payload) {
   });
 }
 
-export function getMockExercisesByDate(userId, date) {
-  return request(`/users/${userId}/exercises?date=${date}`);
+export function updateExercise(userId, userExerciseId, payload) {
+  return request(`/users/${userId}/exercises/${userExerciseId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteExercise(userId, userExerciseId) {
+  return request(`/users/${userId}/exercises/${userExerciseId}`, {
+    method: "DELETE",
+  });
 }
 
 // 특정 날짜(미지정 시 오늘)의 소모 칼로리 합계
 export function getBurnedCalorieByDate(userId, date) {
   const query = date ? `?date=${date}` : "";
   return request(`/users/${userId}/exercises/burned-calorie${query}`);
+}
+
+// 기간 내 운동 + 상세를 한 번에 가져옴
+export function getExercisesInRange(userId, startDate, endDate) {
+  return request(
+    `/users/${userId}/exercises/detailed?start=${startDate}&end=${endDate}`,
+  );
 }

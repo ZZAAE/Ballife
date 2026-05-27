@@ -18,5 +18,8 @@ public interface UserExerciseDetailRepository extends MongoRepository<UserExerci
     // 운동 기록 1건당 상세가 여러 개 들어오는 케이스 대비 (현재는 미사용이나 안전망)
     List<UserExerciseDetail> findByUserExerciseId(Long userExerciseId);
 
+    // 여러 운동 기록 ID 에 대한 상세를 한 번에 조회 (목록 페이지 N+1 방지)
+    List<UserExerciseDetail> findByUserExerciseIdIn(List<Long> userExerciseIds);
+
     void deleteByUserExerciseId(Long userExerciseId);
 }

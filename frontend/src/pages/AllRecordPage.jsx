@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
+import { USER_KEY } from "../api/api";
 import bioValueRecordApi from "../api/bioValueRecordApi";
 import mealApi from "../api/mealApi";
-import { getMockExercisesByDate } from "../api/exerciseApi";
+import { getExercisesInRange } from "../api/exerciseApi";
 import { BIO_CATEGORY } from "../constants/bioCategory";
 
 import Blood from "../assets/Record/Blood.svg";
@@ -23,6 +24,11 @@ import WaterRecordModal from "../modals/WaterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
+import {
+  dbExerciseToRecord,
+  hydrateExerciseSessions,
+} from "../utils/exerciseRecords";
+
 import {
   BloodPressureRecordItem,
   BloodSugarRecordItem,
@@ -246,13 +252,6 @@ const mapWaterRecord = (r) => ({
   amount: (r.waterIntakeCup ?? 0) * 200,
 });
 
-const mapExerciseRecord = (r) => ({
-  exerciseDate: r.exerciseDate,
-  exerciseTypeId: r.exerciseTypeId,
-  exerciseName: r.exerciseTypeId,
-  kcal: r.burnedCalorie,
-});
-
 const MEAL_CATEGORY_LABEL = {
   BREAKFAST: "아침 식사",
   LUNCH: "점심 식사",
@@ -313,7 +312,7 @@ function AllRecordPage() {
   const [bloodSugarRecords, setBloodSugarRecords] = useState([]);
   const [weightRecords, setWeightRecords] = useState([]);
   const [waterRecords, setWaterRecords] = useState([]);
-  const [exerciseRecords, setExerciseRecords] = useState([]);
+  const [storedExerciseSessions, setStoredExerciseSessions] = useState([]);
   const [mealRecords, setMealRecords] = useState(EMPTY_MEAL_RECORDS);
   // 로그인 유저 id 추출 (context 우선, localStorage 폴백)
   const { user } = useAuth();
@@ -337,6 +336,7 @@ function AllRecordPage() {
   // 선택 날짜에 해당하는 혈압 기록 API 조회 + 폴링
   useEffect(() => {
     if (!userId || !selectedDate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBloodPressureRecords([]);
       return;
     }
@@ -443,12 +443,10 @@ function AllRecordPage() {
     }
   };
 
-  const navigate = useNavigate();
-
   const fetchAll = useCallback(async () => {
     if (!userId || !selectedDate) return;
 
-    const [bpRes, bsRes, wtRes, watRes, exRes, mealRes] =
+    const [bpRes, bsRes, wtRes, watRes, mealRes] =
       await Promise.allSettled([
         bioValueRecordApi.searchByDate(
           userId,
@@ -470,7 +468,6 @@ function AllRecordPage() {
           BIO_CATEGORY.WATER_INTAKE,
           selectedDate,
         ),
-        getMockExercisesByDate(userId, selectedDate),
         mealApi.getTodayMeals(userId, selectedDate),
       ]);
 
@@ -494,9 +491,6 @@ function AllRecordPage() {
         ? (watRes.value?.data ?? []).map(mapWaterRecord)
         : [],
     );
-    setExerciseRecords(
-      exRes.status === "fulfilled" ? (exRes.value ?? []).map(mapExerciseRecord) : [],
-    );
 
     if (mealRes.status === "fulfilled") {
       const meals = mealRes.value?.data ?? [];
@@ -518,10 +512,65 @@ function AllRecordPage() {
     }
   }, [userId, selectedDate]);
 
+  const fetchExercisesForDate = useCallback(async () => {
+    if (!userId || !selectedDate) return;
+    try {
+      const list = await getExercisesInRange(userId, selectedDate, selectedDate);
+      console.debug("[AllRecordPage] fetched", list);
+      const records = (list || []).map(dbExerciseToRecord);
+      setStoredExerciseSessions(hydrateExerciseSessions(records));
+    } catch (error) {
+      console.error("[AllRecordPage] fetchExercisesForDate failed:", error);
+      toast.error(`운동 기록 조회 실패: ${error.message || error}`);
+      setStoredExerciseSessions([]);
+    }
+  }, [userId, selectedDate]);
+
   useEffect(() => {
-    // selectedDate / userId 가 바뀔 때마다 6개 카테고리 페치
+    // selectedDate / userId 가 바뀔 때마다 bio/식단 카테고리 페치
     fetchAll();
   }, [fetchAll]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchExercisesForDate();
+    const onUpdated = () => {
+      void fetchExercisesForDate();
+    };
+    window.addEventListener("exercise-records-updated", onUpdated);
+    return () =>
+      window.removeEventListener("exercise-records-updated", onUpdated);
+  }, [fetchExercisesForDate]);
+
+  const exerciseRecords = storedExerciseSessions
+    .filter((session) => session.dateIso?.slice(0, 10) === selectedDate)
+    .sort((left, right) => new Date(right.dateIso) - new Date(left.dateIso))
+    .map((session) => ({
+      exerciseDate: session.dateIso?.slice(0, 10),
+      exerciseTypeId: session.kind === "cardio" ? 3 : 4,
+      exerciseName: session.name,
+      kcal: session.calories,
+      session,
+    }));
+
+  const [editingExercise, setEditingExercise] = useState(null);
+
+  const handleEditExercise = (session) => {
+    setEditingExercise({
+      id: session.id,
+      serverId: session.serverId ?? session.id,
+      exerciseTypeId: session.exerciseTypeId,
+      kind: session.kind,
+      dateIso: session.dateIso,
+      durationSec: session.durationSec,
+      distanceKm: session.distanceKm,
+      sets: session.sets,
+      reps: session.reps,
+      weightKg: session.weightKg,
+      intensity: session.intensity,
+    });
+  };
+
 
   //토큰 인증 테스트용
   // useEffect(() => {
@@ -690,7 +739,11 @@ function AllRecordPage() {
                   <AddRecordBar onClick={() => setModalType("exercise")} />
 
                   {exerciseRecords.map((record, index) => (
-                    <ExerciseRecordItem key={index} record={record} />
+                    <ExerciseRecordItem
+                      key={index}
+                      record={record}
+                      onClick={() => handleEditExercise(record.session)}
+                    />
                   ))}
                 </div>
               ) : null}
@@ -825,7 +878,14 @@ function AllRecordPage() {
       <ExerciseModal
         isOpen={modalType === "exercise"}
         onClose={closeModal}
-        onSaved={fetchAll}
+        onSaved={fetchExercisesForDate}
+      />
+
+      <ExerciseModal
+        isOpen={!!editingExercise}
+        onClose={() => setEditingExercise(null)}
+        onSaved={fetchExercisesForDate}
+        editingRecord={editingExercise}
       />
     </>
   );

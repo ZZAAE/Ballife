@@ -68,6 +68,29 @@ public class UserExerciseDto {
         private Integer burnedCalorie;
     }
 
+    // 사용자 운동 기록 + 상세(분/세트/반복/무게/강도)를 한 객체로 합친 응답 DTO
+    // 목록 페이지에서 한 번의 호출로 모든 정보를 받기 위함
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DetailedResponse {
+        private Long userExerciseId;
+        private String exerciseTypeId;
+        private String exerciseName;
+        private String exerciseCategory; // 유산소 / 무산소
+        private java.time.LocalDate exerciseDate;
+        private java.time.LocalTime exerciseTime;
+        private Integer burnedCalorie;
+
+        // MongoDB user_exercise_detail
+        private Integer exerciseMin;
+        private Integer exerciseSet;
+        private Integer exerciseReps;
+        private Integer exerciseWeight;
+        private String exerciseHard;
+    }
+
     // 사용자 운동 기록 응답 DTO
     @Data
     @Builder

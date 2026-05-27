@@ -6,7 +6,17 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import userApi from "../../api/userApi";
 import userConfigApi from "../../api/userConfigApi";
+import bioValueRecordApi from "../../api/bioValueRecordApi";
+import mealApi from "../../api/mealApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+
+const ML_PER_CUP = 200;
+
+const formatTodayDate = () => {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 import { useAuth } from "../../contexts/AuthContext";
 import {
   formatDiseaseSummary,
@@ -36,9 +46,9 @@ const formatNumber = (n) => (n == null ? "—" : Number(n).toLocaleString());
 
 function ProgressBar({ progress }) {
   return (
-    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200">
+    <div className="mt-2 h-2 w-full rounded-full bg-white/70">
       <div
-        className="h-1.5 rounded-full bg-[#0f1c33]"
+        className="h-2 rounded-full bg-[#0f1c33]"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -94,6 +104,8 @@ function UserInformation() {
   );
   const [userConfig, setUserConfig] = useState(null);
   const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
+  const [todayWaterCup, setTodayWaterCup] = useState(0);
+  const [todayIntakeCalorie, setTodayIntakeCalorie] = useState(0);
 
   useEffect(() => {
     if (!userId) {
@@ -134,9 +146,41 @@ function UserInformation() {
       }
     };
 
+    const fetchTodayWater = async () => {
+      try {
+        const { data } = await bioValueRecordApi.searchByDate(
+          userId,
+          "water",
+          formatTodayDate(),
+        );
+        const totalCups = (data || []).reduce(
+          (sum, r) => sum + (r.waterIntakeCup || 0),
+          0,
+        );
+        setTodayWaterCup(totalCups);
+      } catch (error) {
+        setTodayWaterCup(0);
+      }
+    };
+
+    const fetchTodayIntakeCalorie = async () => {
+      try {
+        const { data } = await mealApi.getDayTotalNutrient(
+          userId,
+          formatTodayDate(),
+        );
+        const kcal = Array.isArray(data) ? Number(data[0]) || 0 : 0;
+        setTodayIntakeCalorie(kcal);
+      } catch (error) {
+        setTodayIntakeCalorie(0);
+      }
+    };
+
     fetchMember();
     fetchUserConfig();
     fetchTodayBurnedCalorie();
+    fetchTodayWater();
+    fetchTodayIntakeCalorie();
     const syncDraftProfile = (event) => {
       setMemberProfile((prev) => ({ ...prev, ...(event.detail || {}) }));
     };
@@ -157,15 +201,16 @@ function UserInformation() {
 
   const fallback = (value) => (value == null || value === "" ? "?" : value);
 
+  // 정상 기준치 (출처: 대한당뇨병학회 / 미국심장협회 가이드라인)
   const normalBloodSugar = {
-    fasting: memberProfile?.normalFastingGlucose ?? null,
-    afterMeal1h: memberProfile?.normalGlucoseAfter1h ?? null,
-    afterMeal2h: memberProfile?.normalGlucoseAfter2h ?? null,
+    fasting: memberProfile?.normalFastingGlucose ?? "70~99",
+    afterMeal1h: memberProfile?.normalGlucoseAfter1h ?? "<180",
+    afterMeal2h: memberProfile?.normalGlucoseAfter2h ?? "<140",
   };
 
   const normalBloodPressure = {
-    systolic: memberProfile?.normalSystolicBP ?? null,
-    diastolic: memberProfile?.normalDiastolicBP ?? null,
+    systolic: memberProfile?.normalSystolicBP ?? "<120",
+    diastolic: memberProfile?.normalDiastolicBP ?? "<80",
   };
 
   const formatDateRange = (start, end) => {
@@ -224,9 +269,23 @@ function UserInformation() {
       : todayBurnedCalorie != null
         ? `현재 소모 칼로리 ${formatNumber(todayBurnedCalorie)}kcal`
         : undefined;
-  const calorieInSub = `현재 섭취 칼로리 ?kcal / ${
-    goals.calorieIn ? `${formatNumber(goals.calorieIn)}kcal` : "?kcal"
-  } 달성`;
+  const calorieInProgress =
+    goals.calorieIn && todayIntakeCalorie != null
+      ? Math.min(100, Math.round((todayIntakeCalorie / goals.calorieIn) * 100))
+      : undefined;
+  const calorieInSub = goals.calorieIn
+    ? `현재 섭취 칼로리 ${formatNumber(Math.round(todayIntakeCalorie))}kcal / ${formatNumber(goals.calorieIn)}kcal 달성`
+    : `현재 섭취 칼로리 ${formatNumber(Math.round(todayIntakeCalorie))}kcal`;
+
+  const waterCurrentMl = todayWaterCup * ML_PER_CUP;
+  const waterTargetMl = goals.water ? goals.water * ML_PER_CUP : 0;
+  const waterProgress =
+    goals.water && waterTargetMl > 0
+      ? Math.min(100, Math.round((waterCurrentMl / waterTargetMl) * 100))
+      : undefined;
+  const waterSub = goals.water
+    ? `${formatNumber(waterCurrentMl)} ml / ${formatNumber(waterTargetMl)} ml`
+    : undefined;
 
   const routine = ROUTINE_FIELDS.map((f) => ({
     label: f.label,
@@ -489,6 +548,8 @@ function UserInformation() {
                     badge="수정"
                     value={goals.water ?? "—"}
                     unit="잔"
+                    progress={waterProgress}
+                    sub={waterSub}
                     bgColor="#E4E9ED"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
@@ -497,6 +558,7 @@ function UserInformation() {
                     badge="수정"
                     value={formatNumber(goals.calorieIn)}
                     unit="kcal"
+                    progress={calorieInProgress}
                     sub={calorieInSub}
                     bgColor="#E4E9ED"
                     onBadgeClick={() => setTargetModalOpen(true)}
