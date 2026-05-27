@@ -62,6 +62,15 @@ public class MealItemController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "식사의 전체 식단 조회", description = "MealId에 속한 모든 MealItem 조회.")
+    @GetMapping("/byMeal/{mealId}")
+    public ResponseEntity<List<MealItemDto.MealItemResponse>> getMealItemsByMealId(
+        @PathVariable Long mealId
+    ){
+        List<MealItemDto.MealItemResponse> response = mealItemService.getMealItemsByMealId(mealId);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "하루 영양소 조회", description = "userId, date로 하루 영양소 조회.")
     @GetMapping("/Nut")
     public List<Double> getMealTotalNut(

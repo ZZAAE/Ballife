@@ -30,13 +30,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final ObjectMapper objectMapper;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final ObjectMapper objectMapper;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -63,45 +63,47 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll() // 카드뉴스 (공개 데이터, JWT 불필요)
                         // 나머지 인증이 필요한 주소는 이 밑에
 
-                        // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라
-                        // 그럼)
-                        .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는 이렇게 하는걸 고려)
-                );
+                                                // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도
+                                                // (수업용 코드라
+                                                // 그럼)
+                                                .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는
+                                                                              // 이렇게 하는걸 고려)
+                                );
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    private void writeJsonMessage(HttpServletResponse response, int status, String message) throws IOException {
-        response.setStatus(status);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(
-                objectMapper.writeValueAsString(java.util.Map.of("message", message)));
-    }
+        private void writeJsonMessage(HttpServletResponse response, int status, String message) throws IOException {
+                response.setStatus(status);
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write(
+                                objectMapper.writeValueAsString(java.util.Map.of("message", message)));
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 Origin (프론트엔드 주소)
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "http://127.0.0.1:*"));
+                // 허용할 Origin (프론트엔드 주소)
+                configuration.setAllowedOriginPatterns(List.of(
+                                "http://localhost:*",
+                                "http://127.0.0.1:*"));
 
-        // 허용할 HTTP 메서드
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                // 허용할 HTTP 메서드
+                configuration.setAllowedMethods(Arrays.asList(
+                                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // 허용할 헤더
-        configuration.setAllowedHeaders(List.of("*"));
+                // 허용할 헤더
+                configuration.setAllowedHeaders(List.of("*"));
 
-        // 인증 정보 포함 허용 (쿠키, Authorization 헤더 등)
-        configuration.setAllowCredentials(true);
+                // 인증 정보 포함 허용 (쿠키, Authorization 헤더 등)
+                configuration.setAllowCredentials(true);
 
-        // 모든 경로에 적용
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+                // 모든 경로에 적용
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
 
-        return source;
-    }
+                return source;
+        }
 }

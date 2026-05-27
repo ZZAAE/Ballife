@@ -6,10 +6,10 @@ import { Dumbbell, Flame, Scale, Target, X, Droplet } from "lucide-react";
  *  props:
  *   - open:           모달 열림 여부
  *   - onClose:        닫기 핸들러
- *   - onSaved:        저장 성공 시 콜백 (서버 응답 전달)
+ *   - onSubmit:       저장 핸들러 async (payload) => any. 부모가 백엔드 호출 담당.
+ *   - onSaved:        저장 성공 시 콜백 (onSubmit 반환값 전달)
  *   - initialTargets: { weight, water, calorieIn, calorieOut }
  *   - title:          상단 타이틀
- *   - submitUrl:      스프링부트 엔드포인트
  * ──────────────────────────────────────────────────────────────────────── */
 const DEFAULT_TARGETS = {
   weight: "",
@@ -75,10 +75,10 @@ const sanitize = (source) => ({
 export default function TargetModal({
   open,
   onClose,
+  onSubmit,
   onSaved,
   initialTargets,
   title = "목표 지표 수정",
-  submitUrl = "/api/targets",
 }) {
   const [targets, setTargets] = useState(() =>
     initialTargets ? sanitize(initialTargets) : DEFAULT_TARGETS,
@@ -104,6 +104,7 @@ export default function TargetModal({
   };
 
   const handleSubmit = async () => {
+    if (!onSubmit) return;
     setSubmitting(true);
 
     const payload = {
@@ -114,14 +115,8 @@ export default function TargetModal({
     };
 
     try {
-      const res = await fetch(submitUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json().catch(() => ({}));
-      onSaved?.(data);
+      const result = await onSubmit(payload);
+      onSaved?.(result);
       onClose?.();
     } catch (err) {
       console.error("목표 지표 저장 실패:", err);
