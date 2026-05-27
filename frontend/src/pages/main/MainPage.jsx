@@ -75,27 +75,16 @@ const weightData = [
   { date: "05-06", weight: 76.8 },
 ];
 
-const NEWS_CATEGORIES = [
-  "전체",
-  "당뇨",
-  "고혈압",
-  "통풍",
-  "비만",
-  "골다공증",
-  "고지혈증",
-];
-
 const MainPage = () => {
   const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
   const [newsCards, setNewsCards] = useState([]);
-  const [newsCategory, setNewsCategory] = useState("전체");
   const [newsLoading, setNewsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setNewsLoading(true);
     newsApi
-      .getCards(newsCategory)
+      .getCards()
       .then((res) => {
         if (cancelled) return;
         setNewsCards(Array.isArray(res?.data) ? res.data : []);
@@ -109,7 +98,7 @@ const MainPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [newsCategory]);
+  }, []);
 
   const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/Unity/Build.loader.js",
@@ -538,29 +527,11 @@ const MainPage = () => {
 
             {/* ====================== 건강 뉴스 ====================== */}
             <section>
-              <div className="mb-5">
+              <div className="mb-6">
                 <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
                 <p className="text-[#64748B] text-sm mt-1">
                   하이닥에서 큐레이션한 건강 정보를 만나보세요.
                 </p>
-              </div>
-
-              {/* 카테고리 버튼 */}
-              <div className="mb-6 flex flex-wrap gap-2">
-                {NEWS_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setNewsCategory(cat)}
-                    className={`rounded-full px-4 py-1.5 text-[13px] font-bold transition ${
-                      newsCategory === cat
-                        ? "bg-[#0F172A] text-white"
-                        : "bg-white border border-[#E5E7EB] text-[#64748B] hover:bg-[#F8FAFC]"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
               </div>
 
               {newsLoading ? (
@@ -620,7 +591,7 @@ const MainPage = () => {
 
               {!newsLoading && newsCards.length === 0 && (
                 <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-10 text-center text-sm text-[#94A3B8]">
-                  {newsCategory} 관련 뉴스를 불러오지 못했습니다.
+                  뉴스를 불러오지 못했습니다.
                 </div>
               )}
             </section>

@@ -7,7 +7,7 @@ import authApi from "../../api/authApi";
 
 
 const diseaseFields = [
-	{ name: 'hyperlipidemia', label: '이상지지혈증 보유 여부',
+	{ name: 'hyperlipidemia', label: '고지혈증 보유 여부',
         options: [
             { value: 'NONE', label: '해당 없음' },
             { value: 'type1', label: '고콜레스테롤혈증' },
