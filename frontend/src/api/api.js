@@ -74,7 +74,20 @@ api.interceptors.response.use(
             localStorage.removeItem(USER_KEY);
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            //window.location.href = './login' 
+
+            // 사용자 기록 캐시 정리 — 다음 로그인 시 DB 에서 다시 불러오도록
+            for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+                if (
+                    key.startsWith('ballife.exerciseRecords.') ||
+                    key === 'savedMedicationRecords' ||
+                    key.startsWith('medicationSchedules_')
+                ) {
+                    localStorage.removeItem(key);
+                }
+            }
+            //window.location.href = './login'
         }
 
         return Promise.reject(error);

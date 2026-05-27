@@ -6,6 +6,7 @@ import {
   createExercise,
   deleteExercise,
   updateExercise,
+  getExerciseTypes,
 } from "../api/exerciseApi";
 import {
   CARDIO_OPTIONS,
@@ -26,7 +27,21 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
   const [aerobicRows, setAerobicRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [exerciseTypes, setExerciseTypes] = useState([]);
   const isEditMode = !!editingRecord;
+
+  useEffect(() => {
+    const loadExerciseTypes = async () => {
+      try {
+        const types = await getExerciseTypes();
+        setExerciseTypes(types);
+      } catch (error) {
+        console.error("운동 종류 로드 실패:", error);
+      }
+    };
+
+    loadExerciseTypes();
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -108,6 +123,61 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
     }
 
     return null;
+  };
+
+  const calculateExpectedCalorie = () => {
+    const rows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
+    if (rows.length === 0) return 0;
+
+    const userWeight = user?.weight;
+    if (!userWeight || userWeight <= 0) {
+      console.warn("사용자 체중 없음:", userWeight);
+      return 0;
+    }
+
+    const totalCalories = rows.reduce((sum, row) => {
+      const exerciseName = activeTab === "anaerobic"
+        ? STRENGTH_OPTIONS.find((opt) => opt.value === row.exerciseTypeId)?.label
+        : CARDIO_OPTIONS.find((opt) => opt.value === row.exerciseTypeId)?.label;
+
+      const exerciseType = exerciseTypes.find(
+        (type) => type.exerciseName === exerciseName
+      );
+
+      if (!exerciseType) {
+        console.warn("운동 종류를 찾을 수 없음:", exerciseName, "운동 타입 리스트:", exerciseTypes);
+        return sum;
+      }
+
+      if (!exerciseType.met || exerciseType.met <= 0) {
+        console.warn("MET 값이 없음:", exerciseName, exerciseType.met);
+        return sum;
+      }
+
+      let hours = 0;
+      const durationSec = parseDurationToSeconds(row.durationText);
+
+      if (durationSec > 0) {
+        hours = durationSec / 3600.0;
+      } else if (activeTab === "anaerobic") {
+        const sets = Number(row.exerciseSet) || 0;
+        const reps = Number(row.exerciseReps) || 0;
+        if (sets > 0 && reps > 0) {
+          hours = (sets * reps * 3) / 3600.0;
+        }
+      }
+
+      if (hours <= 0) {
+        console.warn("시간이 0 이상이어야 함:", hours);
+        return sum;
+      }
+
+      const calories = Math.round(exerciseType.met * userWeight * hours);
+      console.log(`${exerciseName}: ${exerciseType.met} × ${userWeight} × ${hours.toFixed(4)} = ${calories} kcal`);
+      return sum + calories;
+    }, 0);
+
+    return totalCalories;
   };
 
   const handleDelete = async () => {
@@ -270,8 +340,9 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                   예상 소모 칼로리
                 </p>
                 <p className="text-xl font-bold text-gray-900">
+                  {calculateExpectedCalorie()}
                   <span className="text-sm font-normal text-gray-500">
-                    kcal
+                    {" "}kcal
                   </span>
                 </p>
               </div>

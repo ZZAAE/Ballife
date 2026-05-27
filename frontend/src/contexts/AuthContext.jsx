@@ -101,6 +101,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(ACCESS_TOKEN_KEY); //accessToken 키 삭제
     localStorage.removeItem("user"); // 혹시 남아있을수도 있는 최초 데이터 삭제
     localStorage.removeItem("token"); // 혹시 남아있을수도 있는 최초 데이터 삭제
+
+    // 회원 프로필 캐시도 비움 — 다른 계정 로그인 시 이전 정보가 잠깐 노출되는 것 방지
+    localStorage.removeItem("ballife.memberProfileDraft");
+    localStorage.removeItem("ballife.profileImage");
+
+    // 사용자 기록 캐시 정리 — 다음 로그인 시 DB 에서 다시 불러오도록
+    // (운동 기록 / 복약 기록 / 일일 복약 스케줄)
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (
+        key.startsWith("ballife.exerciseRecords.") ||
+        key === "savedMedicationRecords" ||
+        key.startsWith("medicationSchedules_")
+      ) {
+        localStorage.removeItem(key);
+      }
+    }
   }, []);
 
   /** 로그인 중일 때만: 서버가 응답하지 않으면(다운 등) 연속 실패 후 로그아웃 */

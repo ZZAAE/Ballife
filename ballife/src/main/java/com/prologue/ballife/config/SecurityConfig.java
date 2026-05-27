@@ -59,6 +59,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/error").permitAll()
                                                 .requestMatchers("/api/auth/**").permitAll() // 회원가입 토큰없이 접근 가능
+                                                .requestMatchers("/api/exercise-types").permitAll() // 운동 종류 조회
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // 관리자 전용
                                                 .requestMatchers("/api/users/*/exercises/**").permitAll() // 운동 기록 개발
                                                                                                           // 확인용

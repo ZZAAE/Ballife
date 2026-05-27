@@ -340,6 +340,29 @@ function UserInformation() {
     return data;
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+        <div className="flex pt-[55px]">
+          <main className="min-w-0 flex-1">
+            <div className="mx-auto box-border max-w-[1280px] px-6 py-20 text-center">
+              <p className="text-base text-[#64748B]">
+                로그인이 필요한 페이지입니다.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="mt-4 rounded-lg bg-[#0f1c33] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+              >
+                로그인 하러 가기
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
