@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import bioValueRecordApi from '../api/bioValueRecordApi';
+import userApi from '../api/userApi';
 import userConfigApi from '../api/userConfigApi';
 import { useAuth } from '../contexts/AuthContext';
 import { USER_KEY } from '../api/api';
 import { BIO_CATEGORY } from '../constants/bioCategory';
+import { persistMemberProfile, loadCachedMemberProfile } from '../utils/userProfile';
 
 const WEIGHT_CATEGORY = BIO_CATEGORY.WEIGHT;
 
@@ -136,6 +138,19 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
         // 2-b. 없으면 insert
         res = await bioValueRecordApi.createBioValueRecord(userId, payload);
         toast.success("체중이 기록되었습니다.");
+      }
+
+      // 3. 회원정보의 현재 체중(member.weight)도 동기화 — UserInformation 페이지의 "현재 체중" 갱신용
+      try {
+        const { data: updatedMember } = await userApi.updateMember(userId, {
+          weight: weightValue,
+        });
+        persistMemberProfile({
+          ...loadCachedMemberProfile(),
+          ...updatedMember,
+        });
+      } catch (memberErr) {
+        console.error("회원 체중 동기화 실패:", memberErr);
       }
 
       onSaved?.(res.data);
