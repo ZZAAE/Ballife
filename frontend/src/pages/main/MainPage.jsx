@@ -33,54 +33,6 @@ import { ArrowRight } from "lucide-react";
 const CARD_STYLE =
   "rounded-3xl border border-slate-100 bg-white shadow-sm";
 
-const bloodPressureData = [
-  { date: "03-01", systolic: 128, diastolic: 82 },
-  { date: "03-05", systolic: 125, diastolic: 80 },
-  { date: "03-10", systolic: 130, diastolic: 84 },
-  { date: "03-15", systolic: 122, diastolic: 79 },
-  { date: "03-20", systolic: 118, diastolic: 76 },
-  { date: "03-25", systolic: 119, diastolic: 77 },
-  { date: "03-31", systolic: 116, diastolic: 74 },
-  { date: "04-05", systolic: 121, diastolic: 78 },
-  { date: "04-12", systolic: 118, diastolic: 75 },
-  { date: "04-20", systolic: 115, diastolic: 73 },
-  { date: "04-28", systolic: 117, diastolic: 76 },
-  { date: "05-01", systolic: 114, diastolic: 72 },
-  { date: "05-06", systolic: 112, diastolic: 70 },
-];
-
-const bloodSugarData = [
-  { date: "03-01", glucose: 118 },
-  { date: "03-05", glucose: 114 },
-  { date: "03-10", glucose: 121 },
-  { date: "03-15", glucose: 110 },
-  { date: "03-20", glucose: 108 },
-  { date: "03-25", glucose: 115 },
-  { date: "03-31", glucose: 112 },
-  { date: "04-05", glucose: 109 },
-  { date: "04-12", glucose: 107 },
-  { date: "04-20", glucose: 104 },
-  { date: "04-28", glucose: 106 },
-  { date: "05-01", glucose: 103 },
-  { date: "05-06", glucose: 101 },
-];
-
-const weightData = [
-  { date: "03-01", weight: 78.5 },
-  { date: "03-05", weight: 78.3 },
-  { date: "03-10", weight: 78.4 },
-  { date: "03-15", weight: 78.1 },
-  { date: "03-20", weight: 77.9 },
-  { date: "03-25", weight: 78.0 },
-  { date: "03-31", weight: 77.8 },
-  { date: "04-05", weight: 77.6 },
-  { date: "04-12", weight: 77.5 },
-  { date: "04-20", weight: 77.3 },
-  { date: "04-28", weight: 77.1 },
-  { date: "05-01", weight: 77.0 },
-  { date: "05-06", weight: 76.8 },
-];
-
 const pad2 = (n) => String(n).padStart(2, "0");
 const formatToday = () => {
   const d = new Date();
@@ -128,13 +80,14 @@ const MainPage = () => {
   const [newsLoading, setNewsLoading] = useState(true);
 
   const [memberProfile, setMemberProfile] = useState(null);
-  const [latestBloodSugar, setLatestBloodSugar] = useState(null);
-  const [latestBloodPressure, setLatestBloodPressure] = useState(null);
-  const [latestWeight, setLatestWeight] = useState(null);
+  const [bloodSugarRecords, setBloodSugarRecords] = useState([]);
+  const [bloodPressureRecords, setBloodPressureRecords] = useState([]);
+  const [weightRecords, setWeightRecords] = useState([]);
   const [todayMealKcal, setTodayMealKcal] = useState(null);
   const [todayBurnedKcal, setTodayBurnedKcal] = useState(null);
   const [todayWaterCups, setTodayWaterCups] = useState(0);
   const [targetWaterCups, setTargetWaterCups] = useState(null);
+  const [targetWeight, setTargetWeight] = useState(null);
   const [medicineData, setMedicineData] = useState(() => buildMedicineData());
 
   useEffect(() => {
@@ -144,45 +97,29 @@ const MainPage = () => {
 
     const tasks = [
       bioValueRecordApi
-        .getLatestPageByCategory(userId, "BloodSugar")
+        .getPageByCategory(userId, "BloodSugar", 0, 90)
         .then((res) => {
           if (cancelled) return;
-          const rec = res?.data?.content?.[0];
-          if (rec?.bloodSugar != null) {
-            setLatestBloodSugar({
-              value: Number(rec.bloodSugar),
-              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
-            });
-          }
+          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
+          setBloodSugarRecords(list);
         })
         .catch(() => {}),
 
       bioValueRecordApi
-        .getLatestPageByCategory(userId, "BloodPressure")
+        .getPageByCategory(userId, "BloodPressure", 0, 90)
         .then((res) => {
           if (cancelled) return;
-          const rec = res?.data?.content?.[0];
-          if (rec?.systolicBP != null && rec?.diastolicBP != null) {
-            setLatestBloodPressure({
-              systolic: Number(rec.systolicBP),
-              diastolic: Number(rec.diastolicBP),
-              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
-            });
-          }
+          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
+          setBloodPressureRecords(list);
         })
         .catch(() => {}),
 
       bioValueRecordApi
-        .getLatestPageByCategory(userId, "Weight")
+        .getPageByCategory(userId, "Weight", 0, 90)
         .then((res) => {
           if (cancelled) return;
-          const rec = res?.data?.content?.[0];
-          if (rec?.weight != null) {
-            setLatestWeight({
-              value: Number(rec.weight),
-              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
-            });
-          }
+          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
+          setWeightRecords(list);
         })
         .catch(() => {}),
 
@@ -225,6 +162,14 @@ const MainPage = () => {
         .then((res) => {
           if (cancelled) return;
           if (res?.data != null) setTargetWaterCups(Number(res.data));
+        })
+        .catch(() => {}),
+
+      userConfigApi
+        .getTargetWeight(userId)
+        .then((res) => {
+          if (cancelled) return;
+          if (res?.data != null) setTargetWeight(Number(res.data));
         })
         .catch(() => {}),
 
@@ -288,17 +233,108 @@ const MainPage = () => {
   });
   const loadingPercent = Math.round(loadingProgression * 100);
 
+  const bloodPressureChartData = useMemo(() => {
+    if (!bloodPressureRecords.length) return [];
+    const byDate = new Map();
+    bloodPressureRecords.forEach((r) => {
+      const date = String(r?.recordDate || "").slice(5, 10);
+      if (!date || r.systolicBP == null || r.diastolicBP == null) return;
+      if (!byDate.has(date)) byDate.set(date, []);
+      byDate.get(date).push({ s: Number(r.systolicBP), d: Number(r.diastolicBP) });
+    });
+    return Array.from(byDate.entries())
+      .map(([date, arr]) => ({
+        date,
+        systolic: Math.round(arr.reduce((s, x) => s + x.s, 0) / arr.length),
+        diastolic: Math.round(arr.reduce((s, x) => s + x.d, 0) / arr.length),
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [bloodPressureRecords]);
+
+  const bloodSugarChartData = useMemo(() => {
+    if (!bloodSugarRecords.length) return [];
+    const byDate = new Map();
+    bloodSugarRecords.forEach((r) => {
+      const date = String(r?.recordDate || "").slice(5, 10);
+      if (!date || r.bloodSugar == null) return;
+      if (!byDate.has(date)) byDate.set(date, []);
+      byDate.get(date).push(Number(r.bloodSugar));
+    });
+    return Array.from(byDate.entries())
+      .map(([date, arr]) => ({
+        date,
+        glucose: Math.round(arr.reduce((s, x) => s + x, 0) / arr.length),
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [bloodSugarRecords]);
+
+  const weightChartData = useMemo(() => {
+    if (!weightRecords.length) return [];
+    const byDate = new Map();
+    weightRecords.forEach((r) => {
+      const date = String(r?.recordDate || "").slice(5, 10);
+      if (!date || r.weight == null) return;
+      if (!byDate.has(date)) byDate.set(date, []);
+      byDate.get(date).push(Number(r.weight));
+    });
+    return Array.from(byDate.entries())
+      .map(([date, arr]) => ({
+        date,
+        weight: +(arr.reduce((s, x) => s + x, 0) / arr.length).toFixed(1),
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [weightRecords]);
+
+  const bpReferences = useMemo(() => {
+    const sysMax = (() => {
+      const raw = memberProfile?.normalSystolicBP;
+      if (raw == null) return 120;
+      const m = String(raw).match(/(\d+(?:\.\d+)?)/);
+      return m ? Number(m[1]) : 120;
+    })();
+    const diaMax = (() => {
+      const raw = memberProfile?.normalDiastolicBP;
+      if (raw == null) return 80;
+      const m = String(raw).match(/(\d+(?:\.\d+)?)/);
+      return m ? Number(m[1]) : 80;
+    })();
+    return [
+      { value: sysMax, label: `목표 수축기 ${sysMax}`, color: "#94A3B8" },
+      { value: diaMax, label: `목표 이완기 ${diaMax}`, color: "#94A3B8" },
+    ];
+  }, [memberProfile]);
+
+  const bloodSugarReferences = useMemo(() => {
+    const raw = memberProfile?.normalFastingGlucose;
+    let target = 100;
+    if (raw != null) {
+      const m = String(raw).match(/(\d+(?:\.\d+)?)\s*[~-]\s*(\d+(?:\.\d+)?)/);
+      if (m) target = Number(m[2]);
+      else {
+        const single = String(raw).match(/(\d+(?:\.\d+)?)/);
+        if (single) target = Number(single[1]);
+      }
+    }
+    return [{ value: target, label: `목표 ${target}`, color: "#94A3B8" }];
+  }, [memberProfile]);
+
+  const weightReferences = useMemo(() => {
+    if (targetWeight == null) return [];
+    return [
+      { value: targetWeight, label: `목표 ${targetWeight}`, color: "#94A3B8" },
+    ];
+  }, [targetWeight]);
+
   const chartConfig = useMemo(() => {
     return {
       bloodPressure: {
-        data: bloodPressureData,
+        data: bloodPressureChartData,
         legends: [
           { label: "수축기", color: "#2563eb" },
           { label: "이완기", color: "#06b6d4" },
           { label: "목표", color: "#94A3B8", dashed: true },
         ],
         unit: "mmHg",
-        yDomain: [60, 150],
         areas: [
           {
             key: "systolic",
@@ -313,19 +349,15 @@ const MainPage = () => {
             gradientId: "diastolicGrad",
           },
         ],
-        references: [
-          { value: 120, label: "목표 수축기 120", color: "#94A3B8" },
-          { value: 80, label: "목표 이완기 80", color: "#94A3B8" },
-        ],
+        references: bpReferences,
       },
       bloodSugar: {
-        data: bloodSugarData,
+        data: bloodSugarChartData,
         legends: [
           { label: "혈당", color: "#16a34a" },
           { label: "목표", color: "#94A3B8", dashed: true },
         ],
         unit: "mg/dL",
-        yDomain: [60, 150],
         areas: [
           {
             key: "glucose",
@@ -334,18 +366,17 @@ const MainPage = () => {
             gradientId: "glucoseGrad",
           },
         ],
-        references: [
-          { value: 100, label: "목표 100", color: "#94A3B8" },
-        ],
+        references: bloodSugarReferences,
       },
       weight: {
-        data: weightData,
+        data: weightChartData,
         legends: [
           { label: "체중", color: "#f97316" },
-          { label: "목표", color: "#94A3B8", dashed: true },
+          ...(targetWeight != null
+            ? [{ label: "목표", color: "#94A3B8", dashed: true }]
+            : []),
         ],
         unit: "kg",
-        yDomain: [74, 80],
         areas: [
           {
             key: "weight",
@@ -354,14 +385,48 @@ const MainPage = () => {
             gradientId: "weightGrad",
           },
         ],
-        references: [
-          { value: 76, label: "목표 76", color: "#94A3B8" },
-        ],
+        references: weightReferences,
       },
     };
-  }, []);
+  }, [
+    bloodPressureChartData,
+    bloodSugarChartData,
+    weightChartData,
+    bpReferences,
+    bloodSugarReferences,
+    weightReferences,
+    targetWeight,
+  ]);
 
   const activeChart = chartConfig[selectedChartType];
+
+  const latestBloodSugar = useMemo(() => {
+    const rec = bloodSugarRecords[0];
+    if (!rec || rec.bloodSugar == null) return null;
+    return {
+      value: Number(rec.bloodSugar),
+      recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+    };
+  }, [bloodSugarRecords]);
+
+  const latestBloodPressure = useMemo(() => {
+    const rec = bloodPressureRecords[0];
+    if (!rec || rec.systolicBP == null || rec.diastolicBP == null) return null;
+    return {
+      systolic: Number(rec.systolicBP),
+      diastolic: Number(rec.diastolicBP),
+      recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+    };
+  }, [bloodPressureRecords]);
+
+  const latestWeight = useMemo(() => {
+    const rec = weightRecords[0];
+    if (!rec || rec.weight == null) return null;
+    return {
+      value: Number(rec.weight),
+      recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+    };
+  }, [weightRecords]);
 
   const cardData = useMemo(
     () => ({
@@ -442,7 +507,7 @@ const MainPage = () => {
     if (active && payload && payload.length) {
       return (
         <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-          <p className="text-[12px] font-semibold text-[#0F172A] mb-2">{`2026-${label}`}</p>
+          <p className="text-[12px] font-semibold text-[#0F172A] mb-2">{`${new Date().getFullYear()}-${label}`}</p>
           <div className="space-y-1">
             {payload.map((p) => (
               <div key={p.dataKey} className="flex items-center gap-2 text-[12px]">
