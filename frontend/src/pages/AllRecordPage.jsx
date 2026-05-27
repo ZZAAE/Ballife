@@ -24,12 +24,6 @@ import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
 import {
-  hydrateExerciseSessions,
-  loadExerciseRecords,
-} from "../utils/exerciseRecords";
-import { USER_KEY } from "../api/api";
-
-import {
   BloodPressureRecordItem,
   BloodSugarRecordItem,
   ExerciseRecordItem,
@@ -276,6 +270,8 @@ const MEAL_CATEGORY_SLOT = {
 const mapMealToCard = (meal, items) => ({
   slot: MEAL_CATEGORY_SLOT[meal.mealCategory],
   card: {
+    mealId: meal.mealId,
+    category: meal.mealCategory,
     time: meal.mealTime ? String(meal.mealTime).slice(0, 5) : "",
     label: MEAL_CATEGORY_LABEL[meal.mealCategory] ?? "식사",
     image: meal.mealPhoto,
@@ -289,6 +285,7 @@ const mapMealToCard = (meal, items) => ({
       chol: it.cholesterol ?? 0,
       na: it.sodium ?? 0,
     })),
+    rawItems: items ?? [],
   },
 });
 
@@ -308,6 +305,8 @@ function AllRecordPage() {
   const [modalType, setModalType] = useState(null);
   const [editingBp, setEditingBp] = useState(null);
   const [editingBs, setEditingBs] = useState(null);
+  const [editingMeal, setEditingMeal] = useState(null);
+  const [mealModalCategory, setMealModalCategory] = useState("BREAKFAST");
 
   // DB에서 불러오는 실제 기록들. 더미 세팅은 디자인 확인용으로 아래 주석에 보관.
   const [bloodPressureRecords, setBloodPressureRecords] = useState([]);
@@ -414,6 +413,7 @@ function AllRecordPage() {
     setModalType(null);
     setEditingBp(null);
     setEditingBs(null);
+    setEditingMeal(null);
     // 모달이 닫힐 때마다 refetch (저장 후 화면 자동 갱신)
     fetchAll();
   };
@@ -426,6 +426,13 @@ function AllRecordPage() {
   const handleEditBs = (record) => {
     setEditingBs(record);
     setModalType("blood");
+  };
+
+  // 식단 카드 클릭 → 기존 meal 데이터를 모달에 전달하며 열기
+  const handleEditMeal = (card, fallbackCategory) => {
+    setEditingMeal(card ?? null);
+    setMealModalCategory(card?.category ?? fallbackCategory);
+    setModalType("meal");
   };
 
   const openDatePicker = () => {
@@ -719,12 +726,14 @@ function AllRecordPage() {
                   image={mealRecords.breakfast.image}
                   items={mealRecords.breakfast.items}
                   className="h-[380px]"
-                  onClick={() => setModalType("meal")}
+                  onClick={() =>
+                    handleEditMeal(mealRecords.breakfast, "BREAKFAST")
+                  }
                 />
               ) : (
                 <MealBox
                   title="아침 식사"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(null, "BREAKFAST")}
                 />
               )}
 
@@ -735,12 +744,12 @@ function AllRecordPage() {
                   image={mealRecords.lunch.image}
                   items={mealRecords.lunch.items}
                   className="h-[380px]"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(mealRecords.lunch, "LUNCH")}
                 />
               ) : (
                 <MealBox
                   title="점심 식사"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(null, "LUNCH")}
                 />
               )}
 
@@ -751,12 +760,12 @@ function AllRecordPage() {
                   image={mealRecords.dinner.image}
                   items={mealRecords.dinner.items}
                   className="h-[380px]"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(mealRecords.dinner, "DINNER")}
                 />
               ) : (
                 <MealBox
                   title="저녁 식사"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(null, "DINNER")}
                 />
               )}
 
@@ -767,10 +776,13 @@ function AllRecordPage() {
                   image={mealRecords.snack.image}
                   items={mealRecords.snack.items}
                   className="h-[380px]"
-                  onClick={() => setModalType("meal")}
+                  onClick={() => handleEditMeal(mealRecords.snack, "SNACK")}
                 />
               ) : (
-                <MealBox title="간식" onClick={() => setModalType("meal")} />
+                <MealBox
+                  title="간식"
+                  onClick={() => handleEditMeal(null, "SNACK")}
+                />
               )}
             </div>
           </section>
@@ -789,7 +801,22 @@ function AllRecordPage() {
         editingRecord={editingBs}
       />
 
-      <MealRegisterModal isOpen={modalType === "meal"} onClose={closeModal} />
+      <MealRegisterModal
+        key={
+          modalType === "meal"
+            ? `meal-${editingMeal?.mealId ?? `new-${mealModalCategory}`}`
+            : "meal-closed"
+        }
+        isOpen={modalType === "meal"}
+        onClose={closeModal}
+        category={mealModalCategory}
+        selectedDate={selectedDate}
+        onSaved={fetchAll}
+        initialMealId={editingMeal?.mealId ?? null}
+        initialMealTime={editingMeal?.time ?? null}
+        initialMealPhoto={editingMeal?.image ?? null}
+        initialChips={editingMeal?.rawItems ?? []}
+      />
 
       <WaterRecordModal isOpen={modalType === "water"} onClose={closeModal} />
 

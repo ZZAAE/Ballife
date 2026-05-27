@@ -1,60 +1,37 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import MealRecordCard from "../components/MealRecordCard";
 import MealDetailModal from "../modals/MealDetailModal";
+import mealApi from "../api/mealApi";
+import { useAuth } from "../contexts/AuthContext";
 
-// ── 데이터 ─────────────────────────────────────────────────────────────────
-// MealRecordCard가 기대하는 필드명: na (나트륨), chol (콜레스테롤)
-const meals = [
-  {
-    id: "breakfast",
-    label: "아침",
-    time: "08:30",
-    image: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400&h=300&fit=crop",
-    items: [
-      { name: "그릭 요거트와 블루베리", kcal: 245, carb: 18, protein: 12, fat: 8,  sugar: 4,  chol: 5,  na: 80  },
-      { name: "아몬드 한 줌",           kcal: 160, carb: 6,  protein: 6,  fat: 14, sugar: 1,  chol: 0,  na: 0   },
-    ],
-  },
-  {
-    id: "lunch",
-    label: "점심",
-    time: "12:45",
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-    items: [
-      { name: "연어 샐러드",      kcal: 480, carb: 12, protein: 34, fat: 28, sugar: 3, chol: 45, na: 60  },
-      { name: "현미밥 반 공기",   kcal: 150, carb: 32, protein: 3,  fat: 1,  sugar: 0, chol: 0,  na: 10  },
-    ],
-  },
-  {
-    id: "dinner",
-    label: "저녁",
-    time: "19:15",
-    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop",
-    items: [
-      { name: "닭가슴살 구이",        kcal: 310, carb: 0,  protein: 42, fat: 12, sugar: 0, chol: 75, na: 120 },
-      { name: "구운 고구마와 야채",   kcal: 220, carb: 45, protein: 4,  fat: 1,  sugar: 8, chol: 0,  na: 30  },
-    ],
-  },
-  {
-    id: "snack",
-    label: "간식",
-    time: "16:00",
-    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
-    items: [
-      { name: "사과와 땅콩버터", kcal: 190, carb: 22, protein: 4,  fat: 11, sugar: 15, chol: 0,  na: 70 },
-      { name: "단백질 쉐이크",   kcal: 120, carb: 3,  protein: 24, fat: 1,  sugar: 1,  chol: 15, na: 50 },
-    ],
-  },
-];
+const MEAL_CATEGORY_LABEL = {
+  BREAKFAST: "아침",
+  LUNCH: "점심",
+  DINNER: "저녁",
+  SNACK: "간식",
+};
+const MEAL_CATEGORY_ORDER = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
 
-const nutritionSummary = [
-  { label: "탄수화물",    current: 125,  target: 260,  unit: "g",  over: false, barClass: "bg-slate-400",  textClass: "text-slate-500"  },
-  { label: "단백질",     current: 65,   target: 120,  unit: "g",  over: false, barClass: "bg-cyan-500",   textClass: "text-cyan-500"   },
-  { label: "지방",       current: 132,  target: 70,   unit: "g",  over: true,  barClass: "bg-orange-400", textClass: "text-orange-400" },
-  { label: "당류",       current: 24,   target: 50,   unit: "g",  over: false, barClass: "bg-pink-400",   textClass: "text-pink-400"   },
-  { label: "나트륨",     current: 1120, target: 2000, unit: "mg", over: false, barClass: "bg-yellow-500", textClass: "text-yellow-500" },
-  { label: "콜레스테롤", current: 150,  target: 300,  unit: "mg", over: false, barClass: "bg-indigo-400", textClass: "text-indigo-400" },
-];
+// 영양소 권장 기준치 (디스플레이용)
+const NUTRITION_TARGETS = {
+  carb: 260,
+  protein: 120,
+  fat: 70,
+  sugar: 50,
+  na: 2000,
+  chol: 300,
+};
+
+const mapItemToCardFormat = (item) => ({
+  name: item.foodName,
+  kcal: item.calorie ?? 0,
+  carb: item.carbohydrate ?? 0,
+  protein: item.protein ?? 0,
+  fat: item.saturatedFat ?? 0,
+  sugar: item.sugar ?? 0,
+  chol: item.cholesterol ?? 0,
+  na: item.sodium ?? 0,
+});
 
 // ── MealDetailModal용 데이터 변환 ─────────────────────────────────────────
 function buildMealData(meal) {
@@ -126,17 +103,85 @@ function ProgressBar({ current, target, over, barClass = "bg-[#111]" }) {
 
 // ── MealPage ──────────────────────────────────────────────────────────────
 export default function MealPage() {
+  const { user } = useAuth();
+
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
   const dateInputRef = useRef(null);
 
-  const totalCal    = 1420;
-  const targetCal   = 2100;
-  const burned      = 350;
-  const remaining   = targetCal - totalCal;
-  const achievement = Math.round((totalCal / targetCal) * 100);
+  const [meals, setMeals] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      if (!user?.id) {
+        setMeals([]);
+        return;
+      }
+      try {
+        const res = await mealApi.getTodayMeals(user.id, selectedDate);
+        const mealsData = res.data || [];
+        const itemsPerMeal = await Promise.all(
+          mealsData.map((m) =>
+            mealApi.getMealItemsByMealId(m.mealId).then((r) => r.data || [])
+          )
+        );
+        if (cancelled) return;
+
+        const groupedByCategory = {};
+        mealsData.forEach((m, idx) => {
+          const cat = m.mealCategory;
+          if (!groupedByCategory[cat]) {
+            groupedByCategory[cat] = {
+              id: cat,
+              label: MEAL_CATEGORY_LABEL[cat] || cat,
+              time: (m.mealTime || "").slice(0, 5),
+              image: m.mealPhoto || null,
+              items: [],
+            };
+          }
+          groupedByCategory[cat].items = groupedByCategory[cat].items.concat(
+            itemsPerMeal[idx].map(mapItemToCardFormat)
+          );
+        });
+
+        const ordered = MEAL_CATEGORY_ORDER
+          .map((c) => groupedByCategory[c])
+          .filter(Boolean);
+        setMeals(ordered);
+      } catch (err) {
+        console.error("식단 조회 실패:", err);
+        if (!cancelled) setMeals([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, selectedDate]);
+
+  // 합계 계산
+  const sumKey = (key) =>
+    meals.reduce(
+      (acc, m) => acc + m.items.reduce((a, i) => a + (i[key] || 0), 0),
+      0
+    );
+  const totalCal = sumKey("kcal");
+  const targetCal = 2100;
+  const burned = 0;
+  const remaining = Math.max(targetCal - totalCal, 0);
+  const achievement = targetCal > 0 ? Math.round((totalCal / targetCal) * 100) : 0;
+
+  const nutritionSummary = [
+    { label: "탄수화물",    current: Math.round(sumKey("carb")),    target: NUTRITION_TARGETS.carb,    unit: "g",  over: sumKey("carb")    > NUTRITION_TARGETS.carb },
+    { label: "단백질",      current: Math.round(sumKey("protein")), target: NUTRITION_TARGETS.protein, unit: "g",  over: sumKey("protein") > NUTRITION_TARGETS.protein },
+    { label: "지방",        current: Math.round(sumKey("fat")),     target: NUTRITION_TARGETS.fat,     unit: "g",  over: sumKey("fat")     > NUTRITION_TARGETS.fat },
+    { label: "당류",        current: Math.round(sumKey("sugar")),   target: NUTRITION_TARGETS.sugar,   unit: "g",  over: sumKey("sugar")   > NUTRITION_TARGETS.sugar },
+    { label: "나트륨",      current: Math.round(sumKey("na")),      target: NUTRITION_TARGETS.na,      unit: "mg", over: sumKey("na")      > NUTRITION_TARGETS.na },
+    { label: "콜레스테롤",  current: Math.round(sumKey("chol")),    target: NUTRITION_TARGETS.chol,    unit: "mg", over: sumKey("chol")    > NUTRITION_TARGETS.chol },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
@@ -185,9 +230,11 @@ export default function MealPage() {
               <div className="relative w-40 h-40 mb-4">
                 <DonutChart value={totalCal} max={targetCal} size={160} strokeWidth={10} color="#111" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[36px] font-semibold text-[#040d1b]">1,420</span>
+                  <span className="text-[36px] font-semibold text-[#040d1b]">
+                    {totalCal.toLocaleString()}
+                  </span>
                   <span className="text-[12px] font-semibold text-slate-400 uppercase">
-                    / 2,100 kcal
+                    / {targetCal.toLocaleString()} kcal
                   </span>
                 </div>
               </div>
@@ -244,19 +291,52 @@ export default function MealPage() {
           <h2 className="text-xl font-medium text-[#040d1b] mt-0 mb-4">
             오늘의 식단 기록 확인
           </h2>
-          <div className="flex gap-4 mb-9 flex-wrap">
-            {meals.map((meal) => (
-              <MealRecordCard
-                key={meal.id}
-                time={meal.time}
-                label={meal.label}
-                items={meal.items}
-                image={meal.image}
-                onClick={() => setSelectedMeal(meal)}
-                className="min-w-[260px] flex-[1_1_260px] cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
-              />
-            ))}
-          </div>
+          {meals.length > 0 ? (
+            <div className="flex gap-4 mb-9 flex-wrap">
+              {meals.map((meal) => (
+                <MealRecordCard
+                  key={meal.id}
+                  time={meal.time}
+                  label={meal.label}
+                  items={meal.items}
+                  image={meal.image}
+                  onClick={() => setSelectedMeal(meal)}
+                  className="w-[300px] shrink-0 cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mb-9 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-white py-16 px-6">
+              <div
+                className="mb-5 flex h-[64px] w-[64px] items-center justify-center rounded-2xl"
+                style={{ background: "#F1F5F9", color: "#94A3B8" }}
+              >
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 11h18" />
+                  <path d="M12 11V3" />
+                  <path d="M5 11a7 7 0 0 0 14 0" />
+                  <path d="M9 21h6" />
+                  <path d="M12 17v4" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-[16px] font-semibold text-[#0F172A]">
+                기록된 식단이 없습니다
+              </h3>
+              <p className="text-center text-[13px] leading-relaxed text-[#64748B]">
+                <span className="font-semibold text-[#475569]">전체 기록 관리</span> 페이지에서<br />
+                오늘의 식단을 등록해보세요.
+              </p>
+            </div>
+          )}
 
           {/* ── 영양 성분 분석 ─────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl p-7">

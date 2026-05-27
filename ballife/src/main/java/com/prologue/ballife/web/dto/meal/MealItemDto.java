@@ -130,10 +130,10 @@ public class MealItemDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MealItemResponse{
-        
+
         // 음식 식별자, 음식 이름, 칼로리, 탄수화물, 당, 나트륨, 콜레스테롤, 포화지방, 단백질
         private Long mealItemId;
-        private Meal meal;
+        private Long mealId;
         private String foodName;
         private Integer calorie;
         private Double carbohydrate;
@@ -147,7 +147,7 @@ public class MealItemDto {
         public static MealItemResponse from(MealItem mealItem) {
             return MealItemResponse.builder()
                     .mealItemId(mealItem.getMealItemId())
-                    .meal(mealItem.getMeal())
+                    .mealId(mealItem.getMeal() != null ? mealItem.getMeal().getMealId() : null)
                     .foodName(mealItem.getFoodName())
                     .calorie(mealItem.getCalorie())
                     .carbohydrate(mealItem.getCarbohydrate())

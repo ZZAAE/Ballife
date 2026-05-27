@@ -44,22 +44,31 @@ const MealRecordCard = ({
       onClick={onClick}
       className={`block overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
     >
-      <div className="relative h-[180px]">
-        {image ? (
+      <div
+        className="relative h-[180px]"
+        style={{
+          background: image
+            ? undefined
+            : "linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 100%)",
+        }}
+      >
+        {image && (
           <img src={image} alt={label} className="h-full w-full object-cover" />
-        ) : (
-          <img
-            src="https://saladpanda.co.kr/web/product/extra/big/202407/a039af315a7e721c8e8cb37b387fe90f.jpg"
-            alt={label}
-            className="h-full w-full object-cover"
-          />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
+        {image && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
+        )}
 
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <span className="text-[14px] font-[500] text-white/75">{time}</span>
-          <p className="mt-1 text-[19px] font-[700] leading-none text-white">
+          <span
+            className={`text-[14px] font-[500] ${image ? "text-white/75" : "text-[#64748B]"}`}
+          >
+            {time}
+          </span>
+          <p
+            className={`mt-1 text-[19px] font-[700] leading-none ${image ? "text-white" : "text-[#0F172A]"}`}
+          >
             {label}
           </p>
         </div>

@@ -99,11 +99,11 @@ public class MealItemService {
         return MealItemDto.MealItemResponse.from(mealItem);
     }
 
-    // 한끼(mealId)에 속한 음식 목록 전체 조회
+    // 특정 mealId에 속한 전체 MealItem 조회
     public List<MealItemDto.MealItemResponse> getMealItemsByMealId(Long mealId){
         return mealItemRepository.findAllByMeal_MealId(mealId).stream()
-                .map(MealItemDto.MealItemResponse::from)
-                .collect(Collectors.toList());
+            .map(MealItemDto.MealItemResponse::from)
+            .collect(Collectors.toList());
     }
 
     // 하루치 영양소
