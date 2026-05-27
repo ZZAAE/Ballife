@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import newsApi from "../../api/newsApi";
+import bioValueRecordApi from "../../api/bioValueRecordApi";
+import mealApi from "../../api/mealApi";
+import userApi from "../../api/userApi";
+import userConfigApi from "../../api/userConfigApi";
+import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
 import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
@@ -75,10 +81,184 @@ const weightData = [
   { date: "05-06", weight: 76.8 },
 ];
 
+const pad2 = (n) => String(n).padStart(2, "0");
+const formatToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+};
+
+const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
+
+const readMedicationSchedules = (dateKey) => {
+  try {
+    const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const buildMedicineData = () => {
+  const todayKey = formatToday();
+  const schedules = readMedicationSchedules(todayKey);
+
+  let todayRemaining = 0;
+  const itemSet = new Set();
+  schedules.forEach((s) => {
+    (s.drugs || []).forEach((d) => {
+      itemSet.add(d.name);
+      if (!d.taken) todayRemaining += 1;
+    });
+  });
+
+  const items = Array.from(itemSet);
+  const groups = items.length > 0 ? [{ name: "처방 그룹", items }] : [];
+
+  return { todayRemaining, groups };
+};
+
 const MainPage = () => {
+  const { user } = useAuth();
+  const userId = user?.userId ?? user?.id ?? null;
+
   const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
   const [newsCards, setNewsCards] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
+
+  const [memberProfile, setMemberProfile] = useState(null);
+  const [latestBloodSugar, setLatestBloodSugar] = useState(null);
+  const [latestBloodPressure, setLatestBloodPressure] = useState(null);
+  const [latestWeight, setLatestWeight] = useState(null);
+  const [todayMealKcal, setTodayMealKcal] = useState(null);
+  const [todayBurnedKcal, setTodayBurnedKcal] = useState(null);
+  const [todayWaterCups, setTodayWaterCups] = useState(0);
+  const [targetWaterCups, setTargetWaterCups] = useState(null);
+  const [medicineData, setMedicineData] = useState(() => buildMedicineData());
+
+  useEffect(() => {
+    if (!userId) return undefined;
+    let cancelled = false;
+    const today = formatToday();
+
+    const tasks = [
+      bioValueRecordApi
+        .getLatestPageByCategory(userId, "BloodSugar")
+        .then((res) => {
+          if (cancelled) return;
+          const rec = res?.data?.content?.[0];
+          if (rec?.bloodSugar != null) {
+            setLatestBloodSugar({
+              value: Number(rec.bloodSugar),
+              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+            });
+          }
+        })
+        .catch(() => {}),
+
+      bioValueRecordApi
+        .getLatestPageByCategory(userId, "BloodPressure")
+        .then((res) => {
+          if (cancelled) return;
+          const rec = res?.data?.content?.[0];
+          if (rec?.systolicBP != null && rec?.diastolicBP != null) {
+            setLatestBloodPressure({
+              systolic: Number(rec.systolicBP),
+              diastolic: Number(rec.diastolicBP),
+              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+            });
+          }
+        })
+        .catch(() => {}),
+
+      bioValueRecordApi
+        .getLatestPageByCategory(userId, "Weight")
+        .then((res) => {
+          if (cancelled) return;
+          const rec = res?.data?.content?.[0];
+          if (rec?.weight != null) {
+            setLatestWeight({
+              value: Number(rec.weight),
+              recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
+            });
+          }
+        })
+        .catch(() => {}),
+
+      mealApi
+        .getDayTotalNutrient(userId, today)
+        .then((res) => {
+          if (cancelled) return;
+          const data = res?.data;
+          const kcal = Array.isArray(data) ? Number(data[0]) || 0 : 0;
+          setTodayMealKcal(kcal);
+        })
+        .catch(() => {
+          if (!cancelled) setTodayMealKcal(0);
+        }),
+
+      getBurnedCalorieByDate(userId)
+        .then((value) => {
+          if (cancelled) return;
+          setTodayBurnedKcal(Number(value) || 0);
+        })
+        .catch(() => {
+          if (!cancelled) setTodayBurnedKcal(0);
+        }),
+
+      bioValueRecordApi
+        .searchByDate(userId, "water", today)
+        .then((res) => {
+          if (cancelled) return;
+          const list = Array.isArray(res?.data) ? res.data : [];
+          const cups = list.reduce(
+            (sum, r) => sum + (r.waterIntakeCup || 0),
+            0,
+          );
+          setTodayWaterCups(cups);
+        })
+        .catch(() => {}),
+
+      userConfigApi
+        .getTargetDailyWaterIntake(userId)
+        .then((res) => {
+          if (cancelled) return;
+          if (res?.data != null) setTargetWaterCups(Number(res.data));
+        })
+        .catch(() => {}),
+
+      userApi
+        .getMember(userId)
+        .then((res) => {
+          if (cancelled) return;
+          if (res?.data) setMemberProfile(res.data);
+        })
+        .catch(() => {}),
+    ];
+
+    Promise.allSettled(tasks);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // 복약 데이터는 localStorage 기반이라 포커스/가시성 변화 때 재계산
+  useEffect(() => {
+    const refresh = () => setMedicineData(buildMedicineData());
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,13 +363,80 @@ const MainPage = () => {
 
   const activeChart = chartConfig[selectedChartType];
 
-  const userStats = {
-    ageGender: "45세 / 남성",
-    height: "175cm",
-    weight: "78kg",
-    bmi: "25.5 (과체중)",
-    bmiColor: "text-red-500",
+  const cardData = useMemo(
+    () => ({
+      bloodSugar: latestBloodSugar,
+      bloodPressure: latestBloodPressure,
+      weight: latestWeight,
+      todayMealKcal,
+      todayBurnedKcal,
+      water: { cups: todayWaterCups, targetCups: targetWaterCups },
+      medicine: medicineData,
+      normal: {
+        bloodSugar: memberProfile?.normalFastingGlucose,
+        systolicBP: memberProfile?.normalSystolicBP,
+        diastolicBP: memberProfile?.normalDiastolicBP,
+      },
+    }),
+    [
+      latestBloodSugar,
+      latestBloodPressure,
+      latestWeight,
+      todayMealKcal,
+      todayBurnedKcal,
+      todayWaterCups,
+      targetWaterCups,
+      medicineData,
+      memberProfile,
+    ],
+  );
+
+  const computeAgeFromBirth = (birthDate) => {
+    if (!birthDate) return null;
+    const b = new Date(birthDate);
+    if (Number.isNaN(b.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - b.getFullYear();
+    const m = now.getMonth() - b.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age -= 1;
+    return age;
   };
+
+  const age = computeAgeFromBirth(memberProfile?.birthDate);
+  const gender = memberProfile?.gender ?? null;
+  const heightCm = memberProfile?.height ?? null;
+  const profileWeightKg = latestWeight?.value ?? memberProfile?.weight ?? null;
+  const bmiValue =
+    profileWeightKg != null && heightCm
+      ? Number((profileWeightKg / ((heightCm / 100) * (heightCm / 100))).toFixed(1))
+      : null;
+  const bmiLabel = (() => {
+    if (bmiValue == null) return "—";
+    if (bmiValue < 18.5) return `${bmiValue} (저체중)`;
+    if (bmiValue < 23) return `${bmiValue} (정상)`;
+    if (bmiValue < 25) return `${bmiValue} (과체중)`;
+    return `${bmiValue} (비만)`;
+  })();
+  const bmiColor = (() => {
+    if (bmiValue == null) return "text-[#0F172A]";
+    if (bmiValue < 18.5) return "text-blue-500";
+    if (bmiValue < 23) return "text-emerald-600";
+    if (bmiValue < 25) return "text-amber-500";
+    return "text-red-500";
+  })();
+
+  const userStats = {
+    ageGender:
+      age != null || gender
+        ? `${age != null ? `${age}세` : "—"}${gender ? ` / ${gender}` : ""}`
+        : "—",
+    height: heightCm != null ? `${heightCm}cm` : "—",
+    weight: profileWeightKg != null ? `${profileWeightKg}kg` : "—",
+    bmi: bmiLabel,
+    bmiColor,
+  };
+
+  const displayName = memberProfile?.username ?? user?.nickname ?? "회원";
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -227,7 +474,7 @@ const MainPage = () => {
               {/* lg+: 좌측 인사말, 우측 스탯 가로 */}
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#0F172A]">
-                  김지수님 안녕하세요.
+                  {displayName}님 안녕하세요.
                 </h1>
 
                 {/* 모바일: 2×2 그리드 / sm+: 가로 나열 */}
@@ -305,7 +552,7 @@ const MainPage = () => {
             </section>
 
             {/* ====================== Status Cards ====================== */}
-            <Card />
+            <Card data={cardData} />
 
             {/* ====================== Calendar & Chart ====================== */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
