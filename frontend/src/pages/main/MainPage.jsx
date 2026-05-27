@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import newsApi from "../../api/newsApi";
 import Header from "../../components/Header";
 import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
@@ -76,6 +77,21 @@ const weightData = [
 
 const MainPage = () => {
   const [selectedChartType, setSelectedChartType] = useState("bloodPressure");
+  const [newsCards, setNewsCards] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    newsApi
+      .getCards()
+      .then((res) => {
+        if (cancelled) return;
+        setNewsCards(Array.isArray(res?.data) ? res.data : []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/Unity/Build.loader.js",
@@ -506,23 +522,65 @@ const MainPage = () => {
             <section>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
-                <p className="text-[#64748B] text-sm mt-1">전문가가 큐레이션한 건강 정보를 만나보세요.</p>
+                <p className="text-[#64748B] text-sm mt-1">
+                  하이닥에서 큐레이션한 건강 정보를 만나보세요.
+                </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {[
-                  { category: 'MEDICAL', title: 'Regular blood pressure control reduces stroke risk', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop' },
-                  { category: 'PREVENTION', title: 'Guide to regular checkups for complication prevention', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop' },
-                  { category: 'NUTRITION', title: 'Diet trends for blood sugar management', color: 'bg-[#F1F5F9] text-[#0F172A]', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=400&auto=format&fit=crop' },
-                ].map((news, idx) => (
-                  <div key={idx} className={`${CARD_STYLE} overflow-hidden group cursor-pointer transition hover:shadow-md`}>
-                    <img src={news.img} alt={news.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="p-6">
-                      <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${news.color}`}>{news.category}</span>
-                      <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug">{news.title}</p>
+
+              {newsCards.length === 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className={`${CARD_STYLE} overflow-hidden animate-pulse`}
+                    >
+                      <div className="h-48 w-full bg-slate-100" />
+                      <div className="p-6 space-y-2">
+                        <div className="h-3 w-16 rounded bg-slate-100" />
+                        <div className="h-4 w-full rounded bg-slate-100" />
+                        <div className="h-4 w-2/3 rounded bg-slate-100" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {newsCards.map((news, idx) => (
+                    <a
+                      key={news.link || idx}
+                      href={news.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${CARD_STYLE} overflow-hidden group cursor-pointer transition hover:shadow-md block`}
+                    >
+                      {news.thumbnail ? (
+                        <img
+                          src={news.thumbnail}
+                          alt={news.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="flex h-48 w-full items-center justify-center bg-slate-100 text-3xl">
+                          📰
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded bg-[#F1F5F9] text-[#0F172A]">
+                          HIDOC
+                        </span>
+                        <p className="mt-3 text-sm font-semibold text-[#0F172A] leading-snug line-clamp-2">
+                          {news.title}
+                        </p>
+                        {news.pubDate && (
+                          <p className="mt-2 text-[11px] text-[#94A3B8]">
+                            {news.pubDate}
+                          </p>
+                        )}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </section>
 
           </div>

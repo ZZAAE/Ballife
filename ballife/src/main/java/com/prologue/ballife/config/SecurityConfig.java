@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/users/disease/**").permitAll() // 회원가입시 질병 정보 업데이트 토큰 없이
                                                                                               // 접근 가능
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll() // 프론트 서버 생존 폴링 (JWT 불필요)
+                        .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll() // 카드뉴스 (공개 데이터, JWT 불필요)
                         // 나머지 인증이 필요한 주소는 이 밑에
 
                         // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라
