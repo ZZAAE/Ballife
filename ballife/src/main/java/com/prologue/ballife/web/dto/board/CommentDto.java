@@ -3,7 +3,6 @@ package com.prologue.ballife.web.dto.board;
 import java.time.LocalDateTime;
 
 import com.prologue.ballife.domain.board.Comment;
-import com.prologue.ballife.domain.board.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -35,12 +34,13 @@ public class CommentDto {
     public static class CommentResponse { // 글을 클릭했을 때 주는 상세 정보
         private Long id;
         private Long userId;
-        private Post postId;
+        private Long postId;
         private String userNickname;
         private String imageUrl;
         private String content;
         private Long parentComment;
         private Integer level;
+        private Integer upVote;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
@@ -52,12 +52,13 @@ public class CommentDto {
             return CommentResponse.builder()
                     .id(comment.getCommentId())
                     .userId(comment.getUserId().getUserId())
-                    .postId(comment.getPostId())
+                    .postId(comment.getPostId() != null ? comment.getPostId().getPostId() : null)
                     .userNickname(userNickname)
                     .imageUrl(comment.getImageUrl())
                     .content(comment.getContent())
                     .parentComment(comment.getParentComment())
                     .level(comment.getLevel())
+                    .upVote(comment.getUpVote())
                     .createdAt(comment.getCreatedAt())
                     .updatedAt(comment.getUpdatedAt())
                     .build();

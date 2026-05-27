@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import postApi from "../../api/boardApi";
+import commentApi from "../../api/commentApi";
 import { useAuth } from "../../contexts/AuthContext";
-import { DUMMY_POSTS } from "./dummyPosts";
 
 function normalizeContentHtml(content) {
   if (!content) {
@@ -39,60 +39,55 @@ export default function PostDetailPage() {
     { value: "QNA", label: "질문" },
   ];
 
-  // [더미 상세 로직 시작] 백엔드 연결 전 목록과 같은 더미 데이터 사용
-  const dummyPost = useMemo(
-    () =>
-      DUMMY_POSTS.find(
-        (currentPost) => String(currentPost.id) === String(postId),
-      ) ?? null,
-    [postId],
-  );
+  const normalizeComment = (raw) => ({
+    id: raw.id,
+    author: raw.userNickname ?? "익명",
+    userId: raw.userId,
+    content: raw.content,
+    createdAt: raw.createdAt,
+    upVote: raw.upVote ?? 0,
+    parentComment: raw.parentComment ?? null,
+    level: raw.level ?? 1,
+  });
+
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await commentApi.getCommentsByPost(postId);
+      setCommentState((res.data || []).map(normalizeComment));
+    } catch (error) {
+      console.warn("[PostDetailPage] getCommentsByPost failed:", error);
+      setCommentState([]);
+    }
+  }, [postId]);
 
   useEffect(() => {
     let isMounted = true;
-
-    const applyPost = (nextPost) => {
-      setPost(nextPost);
-      setCommentState(
-        (nextPost?.comments ?? []).map((comment) => ({
-          ...comment,
-          upVote: comment.upVote ?? 0,
-          reportCount: comment.reportCount ?? 0,
-        })),
-      );
-    };
 
     (async () => {
       try {
         setLoading(true);
         const response = await postApi.getPost(postId);
-        if (!isMounted) {
-          return;
-        }
-        applyPost(response.data);
+        if (!isMounted) return;
+        setPost(response.data);
+        // 상세 페이지 진입 시 조회수 +1 (실패해도 화면은 그대로)
+        postApi.upViewCount(postId).catch((err) =>
+          console.warn("[PostDetailPage] upViewCount failed:", err),
+        );
+        // 댓글 목록 별도 호출
+        await fetchComments();
       } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        if (dummyPost) {
-          applyPost(dummyPost);
-        } else {
-          navigate("/boards");
-          return;
-        }
+        if (!isMounted) return;
+        console.error("[PostDetailPage] getPost failed:", error);
+        navigate("/boards");
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     })();
 
     return () => {
       isMounted = false;
     };
-  }, [dummyPost, navigate, postId]);
-  // [상세 로직 끝]
+  }, [navigate, postId, fetchComments]);
 
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
@@ -114,45 +109,65 @@ export default function PostDetailPage() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const handleCommentSubmit = () => {
+  const handleCommentSubmit = async () => {
     if (!commentDraft.trim()) {
       toast.error("댓글 내용을 입력해주세요.");
       return;
     }
-
-    setCommentState((currentComments) => [
-      ...currentComments,
-      {
-        id: Date.now(),
-        author: user?.nickname || user?.username || "콩콩이식사",
+    if (!user?.userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    try {
+      await commentApi.createComment(user.userId, postId, {
         content: commentDraft.trim(),
-        createdAt: new Date().toISOString(),
-        upVote: 0,
-        reportCount: 0,
-      },
-    ]);
-    setCommentDraft("");
-    toast.success("댓글이 등록되었습니다.");
+        level: 1,
+      });
+      setCommentDraft("");
+      await fetchComments();
+      toast.success("댓글이 등록되었습니다.");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.errors?.[0]?.defaultMessage ||
+          "댓글 등록에 실패했습니다.",
+      );
+    }
   };
 
-  const handleCommentReaction = (commentId, type) => {
-    setCommentState((currentComments) =>
-      currentComments.map((comment) => {
-        if (comment.id !== commentId) {
-          return comment;
-        }
+  const handleCommentUpVote = async (commentId) => {
+    try {
+      await commentApi.upVote(commentId);
+      setCommentState((currentComments) =>
+        currentComments.map((comment) =>
+          comment.id === commentId
+            ? { ...comment, upVote: (comment.upVote ?? 0) + 1 }
+            : comment,
+        ),
+      );
+      toast.success("댓글을 추천했습니다.");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "댓글 추천에 실패했습니다.",
+      );
+    }
+  };
 
-        if (type === "upvote") {
-          return { ...comment, upVote: (comment.upVote ?? 0) + 1 };
-        }
-
-        return { ...comment, reportCount: (comment.reportCount ?? 0) + 1 };
-      }),
-    );
-
-    toast.success(
-      type === "upvote" ? "댓글을 추천했습니다." : "댓글을 신고했습니다.",
-    );
+  const handleCommentDelete = async (commentId) => {
+    if (!user?.userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    if (!window.confirm("이 댓글을 삭제할까요?")) return;
+    try {
+      await commentApi.deleteComment(user.userId, commentId);
+      await fetchComments();
+      toast.success("댓글이 삭제되었습니다.");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "댓글 삭제에 실패했습니다.",
+      );
+    }
   };
 
   return (
@@ -236,11 +251,19 @@ export default function PostDetailPage() {
             <div className="mt-8 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setUpVote(
-                    (currentValue) => (currentValue ?? post.upVote ?? 0) + 1,
-                  );
-                  toast.success("추천되었습니다.");
+                onClick={async () => {
+                  try {
+                    await postApi.upVote(postId);
+                    setUpVote(
+                      (currentValue) => (currentValue ?? post.upVote ?? 0) + 1,
+                    );
+                    toast.success("추천되었습니다.");
+                  } catch (error) {
+                    toast.error(
+                      error.response?.data?.message ||
+                        "추천에 실패했습니다.",
+                    );
+                  }
                 }}
                 className="rounded-md border border-[#d9dde3] bg-[#f8fafc] px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-[#f1f5f9]"
               >
@@ -250,10 +273,18 @@ export default function PostDetailPage() {
               {user?.userId === post.userId && (
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     if (!window.confirm("이 글을 삭제할까요?")) return;
-                    toast.success("더미 게시글이므로 목록으로 이동합니다.");
-                    navigate("/boards");
+                    try {
+                      await postApi.deletePost(user.userId, post.postId ?? post.id);
+                      toast.success("게시글이 삭제되었습니다.");
+                      navigate("/boards");
+                    } catch (error) {
+                      toast.error(
+                        error.response?.data?.message ||
+                          "게시글 삭제에 실패했습니다.",
+                      );
+                    }
                   }}
                   className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-5 py-2 text-sm font-semibold text-[#c24141] hover:bg-[#feecec]"
                 >
@@ -325,9 +356,7 @@ export default function PostDetailPage() {
                         <div className="mt-3 flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              handleCommentReaction(comment.id, "upvote")
-                            }
+                            onClick={() => handleCommentUpVote(comment.id)}
                             className="rounded-md border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
                           >
                             추천 {comment.upVote ?? 0}
@@ -340,15 +369,15 @@ export default function PostDetailPage() {
                       <span className="text-[11px] text-gray-400">
                         {formatDate(comment.createdAt)}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleCommentReaction(comment.id, "report")
-                        }
-                        className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
-                      >
-                        신고
-                      </button>
+                      {user?.userId === comment.userId && (
+                        <button
+                          type="button"
+                          onClick={() => handleCommentDelete(comment.id)}
+                          className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
+                        >
+                          삭제
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

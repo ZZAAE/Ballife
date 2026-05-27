@@ -1,16 +1,30 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
+import bioValueRecordApi from "../../api/bioValueRecordApi";
+import mealApi from "../../api/mealApi";
+import { getExercisesInRange } from "../../api/exerciseApi";
+import { useAuth } from "../../contexts/AuthContext";
 
-// 더미 타임라인 데이터 — API 연동 시 교체
-const dummyTimeline = [
-  { id: 1, time: "08:15", category: "체중", color: "yellow", title: "체중 측정", value: "58.0kg", valueSub: "↓ 0.5kg" },
-  { id: 2, time: "08:30", category: "식단", color: "red", title: "아침 식사", value: "450 kcal" },
-  { id: 3, time: "09:00", category: "혈압", color: "purple", title: "혈압 측정", value: "118/70", valueUnit: "mmHg" },
-  { id: 4, time: "10:30", category: "혈당", color: "blue", title: "혈당 체크", value: "112", valueUnit: "mg/dL" },
-  { id: 5, time: "11:30", category: "수분", color: "sky", title: "수분 섭취", value: "250ml" },
-  { id: 6, time: "13:00", category: "복약", color: "green", title: "종합 비타민", value: "1정" },
-  { id: 7, time: "14:00", category: "운동", color: "orange", title: "운동 (걷기)", subtitle: "30분", value: "120", valueUnit: "kcal" },
-];
+const ML_PER_CUP = 200;
+const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
+
+const pad2 = (n) => String(n).padStart(2, "0");
+const toDateStr = (year, month, day) =>
+  `${year}-${pad2(month + 1)}-${pad2(day)}`;
+const sliceTime = (t) => (t ? String(t).slice(0, 5) : "");
+
+const MEAL_LABEL = {
+  BREAKFAST: "아침 식사",
+  LUNCH: "점심 식사",
+  DINNER: "저녁 식사",
+  SNACK: "간식",
+};
+
+const SCHEDULE_LABEL = {
+  morning: "아침 복약",
+  lunch: "점심 복약",
+  dinner: "저녁 복약",
+};
 
 const categoryDot = {
   식단: "bg-rose-400",
@@ -22,14 +36,155 @@ const categoryDot = {
   체중: "bg-amber-400",
 };
 
+const isCategoryStartWith = (cat, prefix) =>
+  typeof cat === "string" && cat.startsWith(prefix);
+
+const buildBioItemsForDate = (records, dateStr) => {
+  if (!Array.isArray(records)) return [];
+  return records
+    .filter((r) => String(r?.recordDate || "").slice(0, 10) === dateStr)
+    .map((r, idx) => {
+      const time = sliceTime(r.recordTime) || "00:00";
+      const id = `bio-${r.recordId ?? `${dateStr}-${idx}`}`;
+      if (r.bloodSugar != null && isCategoryStartWith(r.category, "BloodSugar")) {
+        return {
+          id,
+          time,
+          category: "혈당",
+          color: "blue",
+          title: "혈당 체크",
+          value: String(r.bloodSugar),
+          valueUnit: "mg/dL",
+        };
+      }
+      if (
+        r.systolicBP != null &&
+        r.diastolicBP != null &&
+        isCategoryStartWith(r.category, "BloodPressure")
+      ) {
+        return {
+          id,
+          time,
+          category: "혈압",
+          color: "purple",
+          title: "혈압 측정",
+          value: `${r.systolicBP}/${r.diastolicBP}`,
+          valueUnit: "mmHg",
+        };
+      }
+      if (r.weight != null && isCategoryStartWith(r.category, "Weight")) {
+        return {
+          id,
+          time,
+          category: "체중",
+          color: "yellow",
+          title: "체중 측정",
+          value: `${r.weight}kg`,
+        };
+      }
+      if (r.waterIntakeCup != null) {
+        const ml = Number(r.waterIntakeCup) * ML_PER_CUP;
+        return {
+          id,
+          time,
+          category: "수분",
+          color: "sky",
+          title: "수분 섭취",
+          value: `${ml}ml`,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+};
+
+const buildExerciseItemsForDate = (records, dateStr) => {
+  if (!Array.isArray(records)) return [];
+  return records
+    .filter((r) => String(r?.exerciseDate || "").slice(0, 10) === dateStr)
+    .map((r, idx) => {
+      const time = sliceTime(r.exerciseTime) || "00:00";
+      const minutes = Number(r.exerciseMin) || 0;
+      return {
+        id: `ex-${r.userExerciseId ?? `${dateStr}-${idx}`}`,
+        time,
+        category: "운동",
+        color: "orange",
+        title: `운동 (${r.exerciseName ?? "운동"})`,
+        subtitle: minutes > 0 ? `${minutes}분` : undefined,
+        value: r.burnedCalorie != null ? String(Math.round(r.burnedCalorie)) : undefined,
+        valueUnit: r.burnedCalorie != null ? "kcal" : undefined,
+      };
+    });
+};
+
+const buildMedicineItemsForDate = (dateStr) => {
+  try {
+    const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateStr);
+    if (!raw) return [];
+    const schedules = JSON.parse(raw);
+    if (!Array.isArray(schedules)) return [];
+    const items = [];
+    schedules.forEach((s, sIdx) => {
+      const taken = (s.drugs || []).filter((d) => d.taken);
+      if (taken.length === 0) return;
+      items.push({
+        id: `med-${dateStr}-${s.id ?? sIdx}`,
+        time: sliceTime(s.time) || "00:00",
+        category: "복약",
+        color: "green",
+        title: SCHEDULE_LABEL[s.id] || s.name || "복약",
+        subtitle: taken.map((d) => d.name).join(", "),
+        value: `${taken.length}건`,
+      });
+    });
+    return items;
+  } catch {
+    return [];
+  }
+};
+
+const buildMealItemsForDate = (meals, mealItemsByMealId, dateStr) => {
+  if (!Array.isArray(meals)) return [];
+  return meals
+    .filter((m) => String(m?.mealDate || "").slice(0, 10) === dateStr)
+    .map((m) => {
+      const items = mealItemsByMealId?.[m.mealId] ?? [];
+      const totalKcal = items.reduce(
+        (sum, it) => sum + (Number(it.calorie) || 0),
+        0,
+      );
+      return {
+        id: `meal-${m.mealId}`,
+        time: sliceTime(m.mealTime) || "00:00",
+        category: "식단",
+        color: "red",
+        title: MEAL_LABEL[m.mealCategory] ?? "식사",
+        value: totalKcal > 0 ? `${Math.round(totalKcal)} kcal` : undefined,
+      };
+    });
+};
+
+const sortByTime = (items) =>
+  [...items].sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+
 function Calendar() {
   const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+  const { user } = useAuth();
+  const userId = user?.userId ?? user?.id ?? null;
+
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [hoveredCell, setHoveredCell] = useState(null); // { day, rect } | null
-  const [modalDate, setModalDate] = useState(null); // { year, month, day } | null
+  const [hoveredCell, setHoveredCell] = useState(null);
+  const [modalDate, setModalDate] = useState(null);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
   const pickerRef = useRef(null);
+
+  const [bioRecords, setBioRecords] = useState([]);
+  const [exerciseRecords, setExerciseRecords] = useState([]);
+  const [modalMeals, setModalMeals] = useState([]);
+  const [modalMealItems, setModalMealItems] = useState({});
+  const [modalLoading, setModalLoading] = useState(false);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -38,17 +193,122 @@ function Calendar() {
   const { daysInMonth, firstDayOfWeek, totalCells } = useMemo(() => {
     const firstDate = new Date(year, month, 1);
     const lastDate = new Date(year, month + 1, 0);
-
     const firstDay = firstDate.getDay();
     const daysCount = lastDate.getDate();
     const cells = Math.ceil((firstDay + daysCount) / 7) * 7;
-
     return {
       daysInMonth: daysCount,
       firstDayOfWeek: firstDay,
       totalCells: cells,
     };
   }, [year, month]);
+
+  // 사용자 변경 시 모든 BioValue 기록 1회 로딩 (월 필터링은 클라이언트 측에서 처리)
+  useEffect(() => {
+    if (!userId) {
+      setBioRecords([]);
+      return undefined;
+    }
+    let cancelled = false;
+    bioValueRecordApi
+      .getAllBioValueRecords(userId)
+      .then((res) => {
+        if (cancelled) return;
+        setBioRecords(Array.isArray(res?.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setBioRecords([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // 월 변경 시 해당 월의 운동 기록 페치
+  useEffect(() => {
+    if (!userId) {
+      setExerciseRecords([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const start = toDateStr(year, month, 1);
+    const end = toDateStr(year, month, daysInMonth);
+    getExercisesInRange(userId, start, end)
+      .then((list) => {
+        if (cancelled) return;
+        setExerciseRecords(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {
+        if (!cancelled) setExerciseRecords([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, year, month, daysInMonth]);
+
+  // 모달 열림 시 해당 날짜의 식단(끼니 + 음식 항목) 페치
+  const loadMealsForDate = useCallback(
+    async (dateStr) => {
+      if (!userId || !dateStr) {
+        setModalMeals([]);
+        setModalMealItems({});
+        return;
+      }
+      setModalLoading(true);
+      try {
+        const res = await mealApi.getTodayMeals(userId, dateStr);
+        const meals = Array.isArray(res?.data) ? res.data : [];
+        setModalMeals(meals);
+
+        const itemEntries = await Promise.all(
+          meals.map(async (m) => {
+            try {
+              const itemsRes = await mealApi.getMealItemsByMealId(m.mealId);
+              return [m.mealId, Array.isArray(itemsRes?.data) ? itemsRes.data : []];
+            } catch {
+              return [m.mealId, []];
+            }
+          }),
+        );
+        const itemMap = {};
+        itemEntries.forEach(([mealId, items]) => {
+          itemMap[mealId] = items;
+        });
+        setModalMealItems(itemMap);
+      } catch {
+        setModalMeals([]);
+        setModalMealItems({});
+      } finally {
+        setModalLoading(false);
+      }
+    },
+    [userId],
+  );
+
+  useEffect(() => {
+    if (!modalDate) {
+      setModalMeals([]);
+      setModalMealItems({});
+      return;
+    }
+    const dateStr = toDateStr(modalDate.year, modalDate.month, modalDate.day);
+    loadMealsForDate(dateStr);
+  }, [modalDate, loadMealsForDate]);
+
+  // 날짜별 식단 외 아이템 캐시 (월 단위 데이터 기반)
+  const baseItemsByDate = useMemo(() => {
+    const map = {};
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const dateStr = toDateStr(year, month, day);
+      const items = [
+        ...buildBioItemsForDate(bioRecords, dateStr),
+        ...buildExerciseItemsForDate(exerciseRecords, dateStr),
+        ...buildMedicineItemsForDate(dateStr),
+      ];
+      if (items.length > 0) map[dateStr] = sortByTime(items);
+    }
+    return map;
+  }, [bioRecords, exerciseRecords, year, month, daysInMonth]);
 
   const moveMonth = (offset) => {
     setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
@@ -104,17 +364,21 @@ function Calendar() {
     });
   };
 
-  // 모달에 전달할 데이터 (날짜만 동적, items는 더미)
+  // 모달에 전달할 데이터 (식단 포함)
   const buildModalData = () => {
     if (!modalDate) return null;
+    const dateStr = toDateStr(modalDate.year, modalDate.month, modalDate.day);
     const dateObj = new Date(modalDate.year, modalDate.month, modalDate.day);
     const weekdayKor = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const baseItems = baseItemsByDate[dateStr] || [];
+    const mealItems = buildMealItemsForDate(modalMeals, modalMealItems, dateStr);
+    const items = sortByTime([...baseItems, ...mealItems]);
     return {
       month: `${modalDate.month + 1}월`,
       day: weekdayKor[dateObj.getDay()],
       date: `${modalDate.year}년 ${modalDate.month + 1}월 ${modalDate.day}일`,
-      // items는 일단 더미 — API 연동 시 이 부분만 교체
-      items: dummyTimeline,
+      items,
+      loading: modalLoading,
     };
   };
 
@@ -126,6 +390,9 @@ function Calendar() {
     if (!isCurrentMonth) {
       return <div key={`empty-${index}`} className="aspect-square rounded-xl bg-slate-50/60" />;
     }
+
+    const dateStr = toDateStr(year, month, dayNumber);
+    const hasItems = (baseItemsByDate[dateStr]?.length ?? 0) > 0;
 
     const dayColor =
       dayOfWeek === 0 ? "text-red-500" : dayOfWeek === 6 ? "text-blue-500" : "text-slate-700";
@@ -152,6 +419,9 @@ function Calendar() {
           >
             {dayNumber}
           </span>
+          {hasItems && (
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400" aria-hidden="true" />
+          )}
         </div>
       </div>
     );
@@ -176,13 +446,16 @@ function Calendar() {
       left,
       width: popoverWidth,
       zIndex: 50,
-      pointerEvents: "none", // 팝오버 위에 마우스 올라가도 깜빡임 방지
+      pointerEvents: "none",
     };
   };
 
-  // 호버 미리보기 — 간단한 요약만
-  const previewItems = hoveredCell ? dummyTimeline.slice(0, 4) : [];
-  const totalCount = hoveredCell ? dummyTimeline.length : 0;
+  const hoveredDateStr = hoveredCell
+    ? toDateStr(year, month, hoveredCell.day)
+    : null;
+  const hoveredItems = hoveredDateStr ? baseItemsByDate[hoveredDateStr] || [] : [];
+  const previewItems = hoveredItems.slice(0, 4);
+  const totalCount = hoveredItems.length;
 
   return (
     <>

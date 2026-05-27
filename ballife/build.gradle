@@ -31,6 +31,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.mysql:mysql-connector-j'
 
+	// 카드뉴스 RSS/HTML 파싱 (하이닥 등 외부 뉴스)
+	implementation 'org.jsoup:jsoup:1.17.2'
+
 	compileOnly 'org.projectlombok:lombok'
 
 	//JWt토큰 (로그인 인증용)

@@ -3,6 +3,9 @@ import { Sparkles, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { BIO_CATEGORY } from '../constants/bioCategory';
 import bioValueRecordApi from '../api/bioValueRecordApi';
+import userConfigApi from '../api/userConfigApi';
+
+const DEFAULT_TARGET_CUPS = 10;
 
 
 // 데이터베이스에서 기존에 사용자가 저장한 최신 물먹은양, 목표 수분섭취량 가져와서 
@@ -35,6 +38,7 @@ const WaterRecordModal = ({
   const { user } = useAuth();
   const [inputAmount, setInputAmount] = useState('0');
   const [todayRecordId, setTodayRecordId] = useState(null);
+  const [targetCups, setTargetCups] = useState(DEFAULT_TARGET_CUPS);
 
   const userId = user?.userId ?? user?.id;
 
@@ -63,10 +67,24 @@ const WaterRecordModal = ({
       .catch(() => {});
   }, [isOpen, userId]);
 
+  // 모달 열릴 때 user_config에서 목표 수분 섭취량 조회
+  useEffect(() => {
+    if (!isOpen || !userId) return;
+    userConfigApi.getTargetDailyWaterIntake(userId)
+      .then((res) => {
+        const val = res.data;
+        setTargetCups((val != null && val > 0) ? val : DEFAULT_TARGET_CUPS);
+      })
+      .catch(() => {
+        setTargetCups(DEFAULT_TARGET_CUPS);
+      });
+  }, [isOpen, userId]);
+
 
   const parsedCurrentCups = Number(inputAmount) || 0;
   const parsedCurrentMl = parsedCurrentCups * 200;
-  const safeTargetAmount = targetAmount > 0 ? targetAmount : 1;
+  const targetAmountMl = targetCups * 200;
+  const safeTargetAmount = targetAmountMl > 0 ? targetAmountMl : 1;
   const progress = Math.max(0, Math.min(Math.round((parsedCurrentMl / safeTargetAmount) * 100)));
   const fillHeight = Math.max(0, Math.min(132, (progress / 100) * 132));
   const fillY = 132 - fillHeight;
@@ -197,7 +215,7 @@ const WaterRecordModal = ({
 
             <div className="absolute bottom-3 left-0">
               <p className="text-[12px] font-semibold text-slate-400">목표 수분 섭취량</p>
-              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{Math.round(targetAmount / 200)}컵</p>
+              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{targetCups}컵</p>
             </div>
           </div>
 

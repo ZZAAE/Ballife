@@ -31,10 +31,12 @@ public class Post {
     @Column(name = "TITLE", unique = false, nullable = false, length = 50)
     private String title;
 
-    @Column(name = "CONTENT", unique = false, nullable = false, length = 5000)
+    // 본문에 base64 인라인 이미지가 들어올 수 있어 LONGTEXT 로 저장
+    @Column(name = "CONTENT", nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(name = "IMAGE_URL", unique = false, nullable = true, length = 300)
+    // 썸네일/대표 이미지도 base64 가 들어올 수 있어 LONGTEXT 로 저장
+    @Column(name = "IMAGE_URL", nullable = true, columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     @Column(name = "CREATED_AT", nullable = false)
