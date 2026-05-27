@@ -76,14 +76,34 @@ function ProfileEditPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("프로필 사진은 5MB 이하만 업로드할 수 있습니다.");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("프로필 사진은 10MB 이하만 업로드할 수 있습니다.");
       return;
     }
 
+    // localStorage quota 초과 방지를 위해 256x256 JPEG 으로 축소
     const reader = new FileReader();
     reader.onload = () => {
-      setProfileImage(typeof reader.result === "string" ? reader.result : null);
+      const src = typeof reader.result === "string" ? reader.result : null;
+      if (!src) return;
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 256;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        setProfileImage(dataUrl);
+      };
+      img.onerror = () => {
+        toast.error("이미지를 불러올 수 없습니다.");
+      };
+      img.src = src;
     };
     reader.readAsDataURL(file);
   };
@@ -100,10 +120,16 @@ function ProfileEditPage() {
 
     try {
       setSaving(true);
+      // 0 이나 빈 문자열은 backend @DecimalMin(0.1) 에 걸리므로 null 로 보냄
+      const numOrNull = (v) => {
+        if (v === "" || v == null) return null;
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : null;
+      };
       const payload = {
         nickname: formData.nickname.trim(),
-        weight: formData.weight === "" ? null : Number(formData.weight),
-        height: formData.height === "" ? null : Number(formData.height),
+        weight: numOrNull(formData.weight),
+        height: numOrNull(formData.height),
       };
 
       if (!userId) {
@@ -125,6 +151,13 @@ function ProfileEditPage() {
       toast.success("회원 정보가 수정되었습니다.");
       navigate("/member");
     } catch (error) {
+      const serverMessage =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0]?.defaultMessage ||
+        error.response?.data?.error ||
+        error.message;
+      console.error("[ProfileEditPage] updateMember failed:", error.response?.data || error);
+
       if (hasProfileImageChanged) {
         persistMemberProfile({
           ...previousProfile,
@@ -135,9 +168,7 @@ function ProfileEditPage() {
         return;
       }
 
-      toast.error(
-        error.response?.data?.message || "회원 정보 수정에 실패했습니다.",
-      );
+      toast.error(serverMessage || "회원 정보 수정에 실패했습니다.");
     } finally {
       setSaving(false);
     }

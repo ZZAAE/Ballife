@@ -58,6 +58,18 @@ export const DISEASE_FIELDS = [
 ];
 
 export const MEMBER_PROFILE_STORAGE_KEY = "ballife.memberProfileDraft";
+export const PROFILE_IMAGE_STORAGE_KEY = "ballife.profileImage";
+
+// localStorage quota 안전한 setItem — 실패해도 앱이 죽지 않도록
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    console.warn(`[userProfile] localStorage setItem failed for ${key}:`, error);
+    return false;
+  }
+}
 
 export const DEMO_MEMBER_PROFILE = {
   userId: 0,
@@ -129,16 +141,28 @@ export function loadCachedMemberProfile() {
     localStorage.getItem(MEMBER_PROFILE_STORAGE_KEY) || "null",
   );
   const loginUser = JSON.parse(localStorage.getItem("loginUser") || "null");
+  const standaloneImage = localStorage.getItem(PROFILE_IMAGE_STORAGE_KEY);
 
-  return {
+  const merged = {
     ...DEMO_MEMBER_PROFILE,
     ...(loginUser || {}),
     ...(draft || {}),
   };
+
+  // 별도 키로 저장된 이미지가 있으면 우선 적용
+  if (standaloneImage) {
+    merged.profileImage = standaloneImage;
+  }
+  return merged;
 }
 
 export function persistMemberProfile(profile) {
   const current = loadCachedMemberProfile();
+  const resolvedImage =
+    profile.profileImage === undefined
+      ? current.profileImage
+      : profile.profileImage;
+
   const next = {
     ...current,
     id: profile.userId ?? current.userId,
@@ -151,15 +175,22 @@ export function persistMemberProfile(profile) {
     height: profile.height ?? current.height,
     diseaseIndex: profile.diseaseIndex ?? current.diseaseIndex,
     email: profile.email ?? current.email,
-    profileImage:
-      profile.profileImage === undefined
-        ? current.profileImage
-        : profile.profileImage,
+    profileImage: resolvedImage,
   };
 
-  localStorage.setItem(MEMBER_PROFILE_STORAGE_KEY, JSON.stringify(next));
-  localStorage.setItem("loginUser", JSON.stringify(next));
-  localStorage.setItem("user", JSON.stringify(next));
+  // 사진은 별도 키로 1회만 저장하고, 다른 키들에는 사진 빼고 저장 — quota 절약
+  const withoutImage = { ...next, profileImage: null };
+  const serialized = JSON.stringify(withoutImage);
+  safeSetItem(MEMBER_PROFILE_STORAGE_KEY, serialized);
+  safeSetItem("loginUser", serialized);
+  safeSetItem("user", serialized);
+
+  if (resolvedImage) {
+    safeSetItem(PROFILE_IMAGE_STORAGE_KEY, resolvedImage);
+  } else {
+    localStorage.removeItem(PROFILE_IMAGE_STORAGE_KEY);
+  }
+
   window.dispatchEvent(
     new CustomEvent("member-profile-updated", { detail: next }),
   );

@@ -1,44 +1,54 @@
-import { useMemo, useState } from "react";
-// import boardApi from "../../api/boardApi";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { DUMMY_POSTS, PAGE_SIZE } from "./dummyPosts";
+import boardApi from "../../api/boardApi";
 
-// 로그인 auth 구현 필요
-// 내가쓴거 : getBoardByCategory(카테고리별로 검색)
+const PAGE_SIZE = 10;
 
 function BoardListPage() {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
+  const [posts, setPosts] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
-  const location = useLocation(); // 게시판 초기화 위해 필요함 링크에서 카테고리값 추출
-  const givenCategory = location.state?.category ?? "ALL"; // 디테일에서 넘어온 값이 있나 확인
+  const location = useLocation();
+  const givenCategory = location.state?.category ?? "ALL";
 
-  const [category, setCategory] = useState(givenCategory || "ALL"); // 초기값: 전체조회
-  const [sort, setSort] = useState("latest"); // 초기값: 날짜순,   latest|views|recommend
-  const [searchKeyword, setSearchKeyword] = useState(""); // 검색기능
-  const [keyword, setKeyword] = useState(""); // 검색키워드 저장
+  const [category, setCategory] = useState(givenCategory || "ALL");
+  const [sort, setSort] = useState("latest"); // latest | views | recommend
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [keyword, setKeyword] = useState("");
 
-  // 기본적으로 전체 게시글 조회
-  // useEffect(() => {
-  //     (async () => {
-  //         try {
-  //             setLoading(true);
-  //             const res = await boardApi.getPosts(
-  //                 page,
-  //                 10,
-  //                 category === "ALL" ? undefined : category,
-  //                 sort,
-  //                 searchKeyword || undefined
-  //             );
-  //             setPosts(res.data.content ?? []);
-  //             setTotalPages(res.data.totalPages ?? 0);
-  //         } catch (error) {
-  //             console.error(error);
-  //         } finally{
-  //             setLoading(false);
-  //         }
-  //     })();
-  // }, [page, category, sort, searchKeyword]); // 페이지, 카테고리, 정렬법 변경시 리랜더링
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await boardApi.getPosts(
+          page,
+          PAGE_SIZE,
+          category === "ALL" ? undefined : category,
+          sort,
+          searchKeyword || undefined,
+        );
+        if (cancelled) return;
+        setPosts(res.data?.content ?? []);
+        setTotalPages(res.data?.totalPages ?? 0);
+        setTotalElements(res.data?.totalElements ?? 0);
+      } catch (error) {
+        if (cancelled) return;
+        console.error("[BoardListPage] getPosts failed:", error);
+        setPosts([]);
+        setTotalPages(0);
+        setTotalElements(0);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [page, category, sort, searchKeyword]);
 
   // 카테고리 한글화
   const categories = [
@@ -57,46 +67,6 @@ function BoardListPage() {
     const options = { year: "numeric", month: "2-digit", day: "2-digit" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-
-  // [더미 데이터 로직 시작] 검색, 정렬, 카테고리 필터를 프런트에서 처리
-  const filteredPosts = useMemo(() => {
-    let result = [...DUMMY_POSTS];
-
-    if (category !== "ALL") {
-      result = result.filter((post) => post.category === category);
-    }
-
-    if (searchKeyword.trim()) {
-      const normalizedKeyword = searchKeyword.toLowerCase();
-      result = result.filter(
-        (post) =>
-          post.title.toLowerCase().includes(normalizedKeyword) ||
-          post.userNickname.toLowerCase().includes(normalizedKeyword),
-      );
-    }
-
-    result.sort((leftPost, rightPost) => {
-      if (sort === "views") {
-        return rightPost.viewCount - leftPost.viewCount;
-      }
-
-      if (sort === "recommend") {
-        return rightPost.upVote - leftPost.upVote;
-      }
-
-      return new Date(rightPost.createdAt) - new Date(leftPost.createdAt);
-    });
-
-    return result;
-  }, [category, searchKeyword, sort]);
-
-  const totalPages = Math.ceil(filteredPosts.length / PAGE_SIZE);
-
-  const posts = useMemo(() => {
-    const startIndex = page * PAGE_SIZE;
-    return filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [filteredPosts, page]);
-  // [더미 데이터 로직 끝]
 
   // 카테고리, 정렬법 변경, 검색시 1페이지로
   const handleCategoryChange = (nextCategory) => {
@@ -209,13 +179,14 @@ function BoardListPage() {
           </thead>
           <tbody>
             {posts.length > 0 ? (
-              posts.map((post) => (
+              posts.map((post, index) => (
                 <tr
                   key={post.id}
                   className="border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#F9FAFB]"
                 >
                   <td className="px-4 py-3 text-center text-[#94A3B8]">
-                    {post.id} {/* {page * 10 + index + 1} */}
+                    {/* 정렬 방식과 무관하게 항상 내림차순 행번호 표시 */}
+                    {totalElements - (page * PAGE_SIZE + index)}
                   </td>
                   <td className="px-4 py-3 text-center text-[#64748B]">
                     {categories.find((c) => c.value === post.category)?.label}

@@ -92,6 +92,7 @@ function MetricCard({
   );
 }
 
+
 function UserInformation() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -121,7 +122,12 @@ function UserInformation() {
     const fetchMember = async () => {
       try {
         const { data } = await userApi.getMember(userId);
-        setMemberProfile(data);
+        // 백엔드는 profileImage 를 모르므로 localStorage 캐시의 사진을 유지
+        const cached = loadCachedMemberProfile();
+        setMemberProfile({
+          ...data,
+          profileImage: cached.profileImage ?? data.profileImage ?? null,
+        });
       } catch (error) {
         toast.error("회원 정보를 불러오지 못했습니다.");
       }
@@ -253,9 +259,15 @@ function UserInformation() {
   };
 
   const currentWeight = memberProfile?.weight ?? null;
+  // 진행률: 현재와 목표가 가까울수록 100%에 수렴 (작은값 / 큰값)
+  // → 목표가 현재보다 높든 낮든 일관된 의미가 됨
   const weightProgress =
     goals.weight && currentWeight
-      ? Math.min(100, Math.round((currentWeight / goals.weight) * 100))
+      ? Math.round(
+          (Math.min(currentWeight, goals.weight) /
+            Math.max(currentWeight, goals.weight)) *
+            100,
+        )
       : undefined;
   const weightSub = currentWeight ? `현재 체중 ${currentWeight}kg` : undefined;
 
