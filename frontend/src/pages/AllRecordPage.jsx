@@ -766,7 +766,9 @@ function AllRecordPage() {
                 </p>
 
                 <p className="mt-[8px] text-[11px] font-medium leading-none text-[#94A3B8]">
-                  식단 기록 대기 중
+                  {Object.values(mealRecords).some((slot) => slot != null)
+                    ? "최근 기록 있음"
+                    : "식단 기록 대기 중"}
                 </p>
               </div>
             </div>

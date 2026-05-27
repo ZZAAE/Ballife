@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Calendar } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import toast from "react-hot-toast";
 import bioValueRecordApi from "../api/bioValueRecordApi";
 import { useAuth } from "../contexts/AuthContext";
@@ -215,11 +215,11 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
   if (!isOpen) return null;
 
   return (
-    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
-      
-      <div onClick={(e) => e.stopPropagation()} className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm">
+
+      <div onClick={(e) => e.stopPropagation()} className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* 헤더 */}
-        <div  className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
+        <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
@@ -232,23 +232,13 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
               </p>
             </div>
 
-            <button onClick={onClose} style={{
-            background: "none", border: "none", cursor: "pointer", padding: 4,
-            color: "#bbb", fontSize: 20, lineHeight: 1,
-            }}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="닫기"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+            >
+              <X size={18} strokeWidth={2.2} />
             </button>
           </div>
 
@@ -361,21 +351,19 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
             </div>
           </div>
 
-          {/* 안내 카드 */}
+          {/* AI 조언 카드 */}
           <div className="pb-2 pt-6">
-            <div className="overflow-hidden rounded-[24px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
+            <div className="overflow-hidden rounded-[20px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
               <div className="flex items-start gap-3 px-4 py-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z" />
-                  </svg>
+                  <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
                 </div>
 
-                <div>
+                <div className="flex-1 space-y-1">
                   <p className="text-[13px] leading-relaxed text-[#475569]">
                     {bpInfo.comment}
                   </p>
-                  <p className="mt-1.5 text-[12px] text-[#94A3B8]">{bpInfo.tip}</p>
+                  <p className="text-[12px] text-[#94A3B8]">{bpInfo.tip}</p>
                 </div>
               </div>
             </div>
@@ -390,7 +378,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
                 type="button"
                 onClick={handleDelete}
                 disabled={submitting || deleting}
-                className="flex-1 rounded-[24px] border-2 border-[#FCA5A5] bg-white py-5 text-xl font-bold text-[#DC2626] transition-all hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {deleting ? "삭제 중..." : "삭제"}
               </button>
@@ -399,7 +387,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
               type="button"
               onClick={handleSubmit}
               disabled={submitting || deleting}
-              className="flex-1 rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              className={`${isEditMode ? "flex-1" : "w-full"} rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {submitting
                 ? "저장 중..."
