@@ -194,10 +194,10 @@ export default function MealPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-                  오늘의 식단 기록 확인
+                  식단 기록 확인
                 </h1>
                 <p className="mb-8 text-sm text-gray-500">
-                  지난 신체 변화를 분석한 결과입니다.
+                  지난 식단 기록을 분석한 결과입니다.
                 </p>
               </div>
 
