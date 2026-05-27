@@ -23,6 +23,8 @@ import {
   hydrateExerciseSessions,
   loadExerciseRecords,
 } from "../utils/exerciseRecords";
+import bioValueRecordApi from "../api/bioValueRecordApi";
+import { USER_KEY } from "../api/api";
 
 import {
   BloodPressureRecordItem,
@@ -218,30 +220,70 @@ function AllRecordPage() {
 
   const [modalType, setModalType] = useState(null);
 
-  // 더미데이터: 기록 컴포넌트 디자인 확인용
-  const [bloodPressureRecords] = useState([
-    {
-      recordDate: "2026-05-09",
-      recordTime: "08:30:00",
-      mealTiming: "아침",
-      systolicBp: 160,
-      diastolicBp: 96,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "12:11:00",
-      mealTiming: "점심",
-      systolicBp: 120,
-      diastolicBp: 80,
-    },
-    {
-      recordDate: "2026-05-09",
-      recordTime: "20:42:00",
-      mealTiming: "저녁",
-      systolicBp: 123,
-      diastolicBp: 88,
-    },
-  ]);
+  // 로그인 유저 id 추출 (context 우선, localStorage 폴백)
+  const { user } = useAuth();
+  const userId = (() => {
+    const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+    if (fromContext != null) return fromContext;
+    try {
+      const raw =
+        localStorage.getItem(USER_KEY) ||
+        localStorage.getItem("user") ||
+        localStorage.getItem("loginUser");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [bloodPressureRecords, setBloodPressureRecords] = useState([]);
+
+  // 선택 날짜에 해당하는 혈압 기록 API 조회 + 폴링
+  useEffect(() => {
+    if (!userId || !selectedDate) {
+      setBloodPressureRecords([]);
+      return;
+    }
+
+    const fetchBp = () => {
+      bioValueRecordApi
+        .getAllBioValueRecords(userId)
+        .then((res) => {
+          const list = Array.isArray(res.data) ? res.data : [];
+          const filtered = list
+            .filter(
+              (r) =>
+                r &&
+                r.systolicBP != null &&
+                typeof r.category === "string" &&
+                r.category.startsWith("BloodPressure") &&
+                String(r.recordDate).slice(0, 10) === selectedDate
+            )
+            .sort((a, b) =>
+              (a.recordTime || "").localeCompare(b.recordTime || "")
+            )
+            .map((r) => ({
+              recordDate: r.recordDate,
+              recordTime: r.recordTime,
+              mealTiming: r.category.includes("_")
+                ? r.category.split("_")[1]
+                : "",
+              systolicBp: r.systolicBP,
+              diastolicBp: r.diastolicBP,
+            }));
+          setBloodPressureRecords(filtered);
+        })
+        .catch((err) => console.error("혈압 기록 조회 실패:", err));
+    };
+
+    fetchBp();
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") fetchBp();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [userId, selectedDate]);
 
   const [bloodSugarRecords] = useState([
     {
@@ -371,8 +413,6 @@ function AllRecordPage() {
   };
 
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const userId = user?.userId ?? user?.id ?? 1;
 
   useEffect(() => {
     const syncExerciseRecords = () => {
