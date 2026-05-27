@@ -183,26 +183,20 @@ export default function BloodSugarRecord() {
                   <span className="text-4xl font-bold leading-none text-red-500">
                     {loading ? "…" : (latestMealAfter?.bloodSugar ?? "--")}
                   </span>
-                  <span className="pb-1 text-xl text-[#94A3B8]">/</span>
-                  <span className="text-4xl font-bold leading-none text-slate-400">
+                  <span className="pb-1 text-sm text-[#64748B]">mg/dL</span>
+                </div>
+                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">식전 / 식후</p>
+              </MetricCard>
+
+              <MetricCard>
+                <span className="text-xs font-medium text-[#64748B]">최근 공복 혈당</span>
+                <div className="mt-3 flex min-h-[44px] items-end gap-2">
+                  <span className="text-4xl font-bold leading-none text-green-500">
                     {loading ? "…" : (latestFasting?.bloodSugar ?? "--")}
                   </span>
                   <span className="pb-1 text-sm text-[#64748B]">mg/dL</span>
                 </div>
-                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">식전 / 식후 / 공복</p>
-              </MetricCard>
-
-              <MetricCard>
-                <span className="text-xs font-medium text-[#64748B]">총 기록 수</span>
-                <div className="mt-3 flex min-h-[44px] items-end gap-2">
-                  <span className="text-4xl font-bold leading-none text-rose-600">
-                    {loading ? "…" : filteredRecords.length}
-                  </span>
-                  <span className="pb-1 text-sm text-[#64748B]">건</span>
-                </div>
-                <p className="mt-auto py-1.5 text-xs font-semibold text-rose-600">
-                  {dataStart && dataEnd ? `${dataStart} ~ ${dataEnd}` : "기록 없음"}
-                </p>
+                <p className="mt-auto py-1.5 text-xs font-semibold text-green-500">공복</p>
               </MetricCard>
             </div>
 
