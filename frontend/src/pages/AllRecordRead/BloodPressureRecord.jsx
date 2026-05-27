@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import {
   Area,
@@ -84,9 +84,11 @@ export default function BloodPressureRecord() {
   const userId = resolveUserId(user);
 
   const [bpRecords, setBpRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchRecords = useCallback(() => {
     if (!userId) return;
+    setLoading(true);
     bioValueRecordApi
       .getAllBioValueRecords(userId)
       .then((res) => {
@@ -102,8 +104,37 @@ export default function BloodPressureRecord() {
       })
       .catch((err) => {
         console.error("혈압 기록 조회 실패:", err);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [userId]);
+
+  // 마운트 시 1회
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  // 탭 포커스 / 가시성 변화 / 뒤로가기 시 자동 재조회
+  useEffect(() => {
+    const handler = () => {
+      if (document.visibilityState === "visible") fetchRecords();
+    };
+    window.addEventListener("focus", handler);
+    window.addEventListener("pageshow", handler);
+    document.addEventListener("visibilitychange", handler);
+    return () => {
+      window.removeEventListener("focus", handler);
+      window.removeEventListener("pageshow", handler);
+      document.removeEventListener("visibilitychange", handler);
+    };
+  }, [fetchRecords]);
+
+  // 페이지가 보이는 동안 5초마다 폴링 (DB에 새로 저장된 기록 자동 반영)
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") fetchRecords();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [fetchRecords]);
 
   // 차트 데이터: 각 기록을 하나의 점으로 (date = MM-DD)
   const bpData = useMemo(() => {
@@ -117,48 +148,65 @@ export default function BloodPressureRecord() {
     }));
   }, [bpRecords]);
 
-  // 메트릭 계산: 평균/최고 수축기/최저 이완기 + 차트 범위
+  // 메트릭 계산: 오늘 당일에 기록한 혈압만 사용 (평균/최고/최저) + 차트 범위는 전체 기준
   const metrics = useMemo(() => {
-    if (bpRecords.length === 0) {
-      return {
-        avgSystolic: null,
-        avgDiastolic: null,
-        maxSystolicRecord: null,
-        minDiastolicRecord: null,
-        startDateLabel: "",
-        endDateLabel: "",
-      };
-    }
-    const sysSum = bpRecords.reduce((acc, r) => acc + (r.systolicBP || 0), 0);
-    const diaSum = bpRecords.reduce((acc, r) => acc + (r.diastolicBP || 0), 0);
-    const avgSystolic = Math.round(sysSum / bpRecords.length);
-    const avgDiastolic = Math.round(diaSum / bpRecords.length);
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(
+      now.getDate()
+    )}`;
 
-    const maxSystolicRecord = bpRecords.reduce(
-      (best, r) => (r.systolicBP > (best?.systolicBP ?? -Infinity) ? r : best),
-      null
-    );
-    const minDiastolicRecord = bpRecords.reduce(
-      (best, r) =>
-        r.diastolicBP < (best?.diastolicBP ?? Infinity) ? r : best,
-      null
-    );
-
-    const first = bpRecords[0];
-    const last = bpRecords[bpRecords.length - 1];
     const fmt = (dateStr) => {
       const d = new Date(dateStr);
       if (Number.isNaN(d.getTime())) return dateStr;
       return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}.${pad2(d.getDate())}`;
     };
 
+    const startDateLabel =
+      bpRecords.length > 0 ? fmt(bpRecords[0].recordDate) : "";
+    const endDateLabel =
+      bpRecords.length > 0 ? fmt(bpRecords[bpRecords.length - 1].recordDate) : "";
+
+    // 오늘 날짜와 동일한 기록만 추출 (recordDate 가 "YYYY-MM-DD" 형식)
+    const todayRecords = bpRecords.filter((r) => {
+      if (!r.recordDate) return false;
+      const dateStr = String(r.recordDate).slice(0, 10);
+      return dateStr === todayKey;
+    });
+
+    if (todayRecords.length === 0) {
+      return {
+        avgSystolic: null,
+        avgDiastolic: null,
+        maxSystolicRecord: null,
+        minDiastolicRecord: null,
+        startDateLabel,
+        endDateLabel,
+      };
+    }
+
+    const sysSum = todayRecords.reduce((acc, r) => acc + (r.systolicBP || 0), 0);
+    const diaSum = todayRecords.reduce((acc, r) => acc + (r.diastolicBP || 0), 0);
+    const avgSystolic = Math.round(sysSum / todayRecords.length);
+    const avgDiastolic = Math.round(diaSum / todayRecords.length);
+
+    const maxSystolicRecord = todayRecords.reduce(
+      (best, r) =>
+        r.systolicBP > (best?.systolicBP ?? -Infinity) ? r : best,
+      null
+    );
+    const minDiastolicRecord = todayRecords.reduce(
+      (best, r) =>
+        r.diastolicBP < (best?.diastolicBP ?? Infinity) ? r : best,
+      null
+    );
+
     return {
       avgSystolic,
       avgDiastolic,
       maxSystolicRecord,
       minDiastolicRecord,
-      startDateLabel: fmt(first.recordDate),
-      endDateLabel: fmt(last.recordDate),
+      startDateLabel,
+      endDateLabel,
     };
   }, [bpRecords]);
 
