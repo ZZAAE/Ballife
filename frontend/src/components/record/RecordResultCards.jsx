@@ -23,14 +23,17 @@ const exerciseTypeMap = {
   5: "스트레칭",
 };
 
-export function SimpleRecordItem({ leftText, centerText, value, unit }) {
-  return (
-    <div className="flex h-[36px] w-full items-center rounded-[6px] bg-[#F3F4F6] px-[14px] font-['Noto_Sans_KR'] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-      <span className="w-[70px] shrink-0 truncate text-[11px] font-[600] leading-none text-[#6B7C93] md:w-[88px]">
+export function SimpleRecordItem({ leftText, centerText, value, unit, onClick }) {
+  const baseClass =
+    "flex h-[36px] w-full items-center rounded-[6px] bg-[#F3F4F6] px-[14px] font-['Noto_Sans_KR'] shadow-[0_1px_3px_rgba(0,0,0,0.04)]";
+
+  const content = (
+    <>
+      <span className="w-[70px] shrink-0 truncate text-left text-[11px] font-[600] leading-none text-[#6B7C93] md:w-[88px]">
         {leftText}
       </span>
 
-      <span className="min-w-0 flex-1 truncate text-[11px] font-[600] leading-none text-[#6B7C93]">
+      <span className="min-w-0 flex-1 truncate text-left text-[11px] font-[600] leading-none text-[#6B7C93]">
         {centerText}
       </span>
 
@@ -42,28 +45,44 @@ export function SimpleRecordItem({ leftText, centerText, value, unit }) {
           {unit}
         </span>
       </div>
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${baseClass} cursor-pointer transition hover:bg-[#E5E7EB] active:scale-[0.99]`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={baseClass}>{content}</div>;
 }
 
-export function BloodPressureRecordItem({ record }) {
+export function BloodPressureRecordItem({ record, onClick }) {
   return (
     <SimpleRecordItem
       leftText={formatTime(record.recordTime)}
       centerText={record.mealTiming ?? "점심 식전"}
       value={`${record.systolicBp}/${record.diastolicBp}`}
       unit="mmHg"
+      onClick={onClick}
     />
   );
 }
 
-export function BloodSugarRecordItem({ record }) {
+export function BloodSugarRecordItem({ record, onClick }) {
   return (
     <SimpleRecordItem
       leftText={formatTime(record.recordTime)}
       centerText={record.mealTiming ?? "아침 식전"}
       value={record.bloodsugar}
       unit="mg / dL"
+      onClick={onClick}
     />
   );
 }

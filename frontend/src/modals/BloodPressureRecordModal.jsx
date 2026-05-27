@@ -1,16 +1,67 @@
-import React, { useMemo, useRef, useState } from "react";
-import { Calendar } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles, X } from "lucide-react";
+import toast from "react-hot-toast";
+import bioValueRecordApi from "../api/bioValueRecordApi";
+import { useAuth } from "../contexts/AuthContext";
+import { USER_KEY } from "../api/api";
+import { BIO_CATEGORY } from "../constants/bioCategory";
 
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
-function BloodPressureRecordModal({ isOpen, onClose }) {
+function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null }) {
+  const { user } = useAuth();
+  const userId = resolveUserId(user);
+
+  const isEditMode = Boolean(editingRecord?.recordId);
+
   const [activeTab, setActiveTab] = useState("아침");
   const [systolic, setSystolic] = useState("");
   const [diastolic, setDiastolic] = useState("");
-
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const dateInputRef = useRef(null);
 
   const tabs = ["아침", "점심", "저녁", "취침전"];
+
+  // 모달이 열릴 때 editingRecord에 맞춰 폼 초기화
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingRecord) {
+      const timing =
+        typeof editingRecord.category === "string" &&
+        editingRecord.category.includes("-")
+          ? editingRecord.category.split("-")[1]
+          : null;
+      setActiveTab(tabs.includes(timing) ? timing : "아침");
+      setSystolic(
+        editingRecord.systolicBp != null ? String(editingRecord.systolicBp) : ""
+      );
+      setDiastolic(
+        editingRecord.diastolicBp != null ? String(editingRecord.diastolicBp) : ""
+      );
+    } else {
+      setActiveTab("아침");
+      setSystolic("");
+      setDiastolic("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editingRecord]);
 
   const handleNumberChange = (setter) => (e) => {
     const onlyNumber = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
@@ -22,6 +73,88 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
       dateInputRef.current.showPicker();
     } else {
       dateInputRef.current?.focus();
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    const s = parseInt(systolic, 10);
+    const d = parseInt(diastolic, 10);
+    if (!s || !d || s <= 0 || d <= 0) {
+      toast.error("수축기와 이완기 혈압을 모두 입력해주세요.");
+      return;
+    }
+    if (s <= d) {
+      toast.error("수축기 혈압은 이완기 혈압보다 커야 합니다.");
+      return;
+    }
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const category = `${BIO_CATEGORY.BLOOD_PRESSURE}-${activeTab}`;
+
+    setSubmitting(true);
+    try {
+      if (isEditMode) {
+        // 기존 recordDate/recordTime 유지하고 값/카테고리만 수정
+        const payload = {
+          recordDate: editingRecord.recordDate,
+          recordTime:
+            typeof editingRecord.recordTime === "string" &&
+            editingRecord.recordTime.length === 5
+              ? `${editingRecord.recordTime}:00`
+              : editingRecord.recordTime,
+          category,
+          systolicBP: s,
+          diastolicBP: d,
+        };
+        const res = await bioValueRecordApi.updateBioValueRecord(
+          editingRecord.recordId,
+          payload
+        );
+        toast.success("혈압 기록이 수정되었습니다.");
+        onSaved?.(res.data);
+      } else {
+        const now = new Date();
+        const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const payload = {
+          recordDate,
+          recordTime,
+          category,
+          systolicBP: s,
+          diastolicBP: d,
+        };
+        const res = await bioValueRecordApi.createBioValueRecord(userId, payload);
+        toast.success("혈압이 기록되었습니다.");
+        onSaved?.(res.data);
+      }
+      setSystolic("");
+      setDiastolic("");
+      onClose?.();
+    } catch (err) {
+      console.error(isEditMode ? "혈압 기록 수정 실패:" : "혈압 기록 실패:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isEditMode) return;
+    if (!window.confirm("이 혈압 기록을 삭제하시겠어요?")) return;
+
+    setDeleting(true);
+    try {
+      await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
+      toast.success("혈압 기록이 삭제되었습니다.");
+      onSaved?.(null);
+      onClose?.();
+    } catch (err) {
+      console.error("혈압 기록 삭제 실패:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -82,38 +215,30 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-[2px]">
-      
-      <div onClick={(e) => e.stopPropagation()} className="relative flex w-full max-w-[672px] h-[785px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm">
+
+      <div onClick={(e) => e.stopPropagation()} className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* 헤더 */}
-        <div  className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
+        <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                혈압 기록하기
+                {isEditMode ? "혈압 기록 수정" : "혈압 기록하기"}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
-                오늘의 혈압 상태를 간단하게 확인하고 기록해보세요.
+                {isEditMode
+                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
+                  : "오늘의 혈압 상태를 간단하게 확인하고 기록해보세요."}
               </p>
             </div>
 
-            <button onClick={onClose} style={{
-            background: "none", border: "none", cursor: "pointer", padding: 4,
-            color: "#bbb", fontSize: 20, lineHeight: 1,
-            }}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="닫기"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+            >
+              <X size={18} strokeWidth={2.2} />
             </button>
           </div>
 
@@ -226,21 +351,19 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          {/* 안내 카드 */}
+          {/* AI 조언 카드 */}
           <div className="pb-2 pt-6">
-            <div className="overflow-hidden rounded-[24px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
+            <div className="overflow-hidden rounded-[20px] border border-[#DBEAFE] bg-gradient-to-r from-[#EFF6FF] to-[#F8FBFF]">
               <div className="flex items-start gap-3 px-4 py-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z" />
-                  </svg>
+                  <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
                 </div>
 
-                <div>
+                <div className="flex-1 space-y-1">
                   <p className="text-[13px] leading-relaxed text-[#475569]">
                     {bpInfo.comment}
                   </p>
-                  <p className="mt-1.5 text-[12px] text-[#94A3B8]">{bpInfo.tip}</p>
+                  <p className="text-[12px] text-[#94A3B8]">{bpInfo.tip}</p>
                 </div>
               </div>
             </div>
@@ -248,13 +371,31 @@ function BloodPressureRecordModal({ isOpen, onClose }) {
         </div>
 
         {/* 저장 버튼 */}
-        <div onClick={onClose} className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
-          <button
-            type="button"
-            className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98]"
-          >
-            기록 저장 및 확인
-          </button>
+        <div className="shrink-0 border-t border-[#F1F5F9] px-6 py-5">
+          <div className={isEditMode ? "flex gap-3" : ""}>
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={submitting || deleting}
+                className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {deleting ? "삭제 중..." : "삭제"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting || deleting}
+              className={`${isEditMode ? "flex-1" : "w-full"} rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed`}
+            >
+              {submitting
+                ? "저장 중..."
+                : isEditMode
+                ? "수정 저장"
+                : "기록 저장 및 확인"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

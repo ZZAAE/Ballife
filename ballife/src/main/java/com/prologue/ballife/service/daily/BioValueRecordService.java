@@ -142,40 +142,20 @@ public class BioValueRecordService {
 
         BioValueRecord record;
 
-        switch (category) {
-            case "BloodSugar":
-                record = bioValueRecordRepository.findLastBloodSugarRecordByUser(user)
-                                .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
-                record.setRecordDate(record.getRecordDate());
-                record.setRecordTime(record.getRecordTime());                        
-                record.setBloodSugar(record.getBloodSugar());
-                break;
-            case "BloodPressure":
-                record = bioValueRecordRepository.findLastSystolicBPRecordByUser(user)
-                            .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));       
-                record.setRecordDate(record.getRecordDate());
-                record.setRecordTime(record.getRecordTime());                        
-                record.setSystolicBP(record.getSystolicBP());
-                record.setDiastolicBP(record.getDiastolicBP());
-                break;
-            case "Weight":
-                record = bioValueRecordRepository.findLastWeightRecordByUser(user)
+        if (category.startsWith("BloodSugar")) {
+            record = bioValueRecordRepository.findLastBloodSugarRecordByUser(user)
                             .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
-        
-                record.setRecordDate(record.getRecordDate());
-                record.setRecordTime(record.getRecordTime());                        
-                record.setWeight(record.getWeight());
-                break;
-            case "WaterIntake":
-                record = bioValueRecordRepository.findLastWaterIntakeCupRecordByUser(user)
-                            .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
-                record.setRecordDate(record.getRecordDate());
-                record.setRecordTime(record.getRecordTime());                        
-                record.setWaterIntakeCup(record.getWaterIntakeCup());
-                break;
-            default:
-                record = null;
-                break;
+        } else if (category.startsWith("BloodPressure")) {
+            record = bioValueRecordRepository.findLastSystolicBPRecordByUser(user)
+                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
+        } else if (category.startsWith("Weight")) {
+            record = bioValueRecordRepository.findLastWeightRecordByUser(user)
+                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
+        } else if (category.startsWith("WaterIntake")) {
+            record = bioValueRecordRepository.findLastWaterIntakeCupRecordByUser(user)
+                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 기록", user));
+        } else {
+            record = null;
         }
 
         return BioValueRecordDto.BioResponse.from(record);
@@ -192,6 +172,7 @@ public class BioValueRecordService {
     }
 
     //생체 수치 정보 삭제
+    @Transactional
     public void deleteBioValueRecord(Long recordId){
         BioValueRecord record = bioValueRecordRepository.findById(recordId)
                        .orElseThrow(() -> new ResourceNotFoundException("생체 수치 정보", recordId));

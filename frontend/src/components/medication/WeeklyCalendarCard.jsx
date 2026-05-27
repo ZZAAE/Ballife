@@ -1,12 +1,94 @@
-import { Check, Circle, Moon, Sun, Triangle, X } from "lucide-react";
-import { weekData } from "./medicationData";
+import { Check, Circle, Moon, Pill, Sun, Triangle, X } from "lucide-react";
+import { getCurrentWeekData } from "./medicationData";
 
-export default function WeeklyCalendarCard() {
+const DEFAULT_DRUGS = ["혈압약", "당뇨약"];
+
+const getScheduleStatus = (drugs) => {
+  if (!drugs || drugs.length === 0) return null;
+  const takenCount = drugs.filter((d) => d.taken).length;
+  if (takenCount === 0) return null;
+  if (takenCount === drugs.length) return "done";
+  return "partial";
+};
+
+const STATUS_LABEL = {
+  done: "복용 완료",
+  partial: "부분 복용",
+  miss: "미복용",
+};
+
+// 시간 문자열(HH:MM)을 아침/점심/저녁 슬롯으로 매핑. 시간이 없으면 morning으로 기본
+const getTimeSlot = (timeStr) => {
+  if (!timeStr) return "morning";
+  const [hh] = timeStr.split(":");
+  const h = parseInt(hh, 10);
+  if (Number.isNaN(h)) return "morning";
+  if (h < 11) return "morning";
+  if (h < 17) return "lunch";
+  return "dinner";
+};
+
+const formatDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], todayKey }) {
+  const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
+
   const rows = [
     { key: "morning", label: "아침 (08:00)", icon: Sun },
     { key: "lunch", label: "점심 (13:00)", icon: Sun },
     { key: "dinner", label: "저녁 (21:00)", icon: Moon },
   ];
+
+  const todayStatusMap = todaySchedules
+    ? todaySchedules.reduce((acc, s) => {
+        acc[s.id] = getScheduleStatus(s.drugs);
+        return acc;
+      }, {})
+    : null;
+
+  const getCellStatus = (item, rowKey) => {
+    if (todayStatusMap && item.today) return todayStatusMap[rowKey];
+    return item[rowKey];
+  };
+
+  // 호버 시 표시할 약 목록: 오늘은 실제 체크 상태, 다른 날은 셀 상태로 추정
+  const getCellDrugs = (item, rowKey) => {
+    if (todaySchedules && item.today) {
+      const s = todaySchedules.find((sch) => sch.id === rowKey);
+      return s ? s.drugs.map((d) => ({ name: d.name, taken: d.taken })) : [];
+    }
+    const status = item[rowKey];
+    if (!status || status === "null") return [];
+    return DEFAULT_DRUGS.map((name) => ({
+      name,
+      taken: status === "done",
+    }));
+  };
+
+  // 각 셀의 실제 날짜를 today 기준 인덱스 오프셋으로 계산
+  const todayIndex = weekData.findIndex((it) => it.today);
+  const todayDate = todayKey ? new Date(todayKey + "T00:00:00") : null;
+
+  const getCellDateKey = (cellIndex) => {
+    if (todayIndex < 0 || !todayDate) return null;
+    const offset = cellIndex - todayIndex;
+    const d = new Date(todayDate);
+    d.setDate(d.getDate() + offset);
+    return formatDateKey(d);
+  };
+
+  const getCellPrn = (item, rowKey, cellIndex) => {
+    const cellDate = getCellDateKey(cellIndex);
+    if (!cellDate || prnRecords.length === 0) return [];
+    return prnRecords
+      .filter((r) => r.date === cellDate && getTimeSlot(r.time) === rowKey)
+      .map((r) => (r.dosage ? `${r.drugName} (${r.dosage})` : r.drugName));
+  };
 
   return (
     <div className="flex-1 min-w-0 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
@@ -54,11 +136,71 @@ export default function WeeklyCalendarCard() {
 
                 {/* 체크 도형들 */}
                 <div className="mb-4 grid grid-cols-7 items-start gap-1">
-                  {weekData.map((item, index) => (
-                    <div key={`${row.key}-${index}`} className="flex min-w-0 justify-center">
-                      <MedicationStatusIcon status={item[row.key]} />
-                    </div>
-                  ))}
+                  {weekData.map((item, index) => {
+                    const status = getCellStatus(item, row.key);
+                    const drugs = getCellDrugs(item, row.key);
+                    const prn = getCellPrn(item, row.key, index);
+                    const hasContent = drugs.length > 0 || prn.length > 0;
+
+                    return (
+                      <div
+                        key={`${row.key}-${index}`}
+                        className="group relative flex min-w-0 justify-center"
+                      >
+                        <MedicationStatusIcon status={status} />
+
+                        {hasContent && (
+                          <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-[180px] -translate-x-1/2 rounded-xl bg-[#0F172A] px-3 py-2.5 text-[12px] text-white shadow-xl group-hover:block">
+                            <p className="mb-1.5 text-[11px] font-bold text-gray-300">
+                              {item.day} {item.date}일 · {row.label.match(/^[^\(]+/)?.[0].trim()}
+                              {status && (
+                                <span className="ml-1 font-normal text-gray-400">
+                                  ({STATUS_LABEL[status] || ""})
+                                </span>
+                              )}
+                            </p>
+
+                            {drugs.length > 0 && (
+                              <ul className="space-y-1">
+                                {drugs.map((d, i) => (
+                                  <li key={i} className="flex items-center gap-1.5">
+                                    {d.taken ? (
+                                      <Check className="h-3 w-3 text-[#60A5FA]" strokeWidth={3} />
+                                    ) : (
+                                      <X className="h-3 w-3 text-[#F87171]" strokeWidth={3} />
+                                    )}
+                                    <span
+                                      className={d.taken ? "text-white" : "text-gray-400 line-through"}
+                                    >
+                                      {d.name}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
+                            {prn.length > 0 && (
+                              <>
+                                <div className="my-2 border-t border-gray-700" />
+                                <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-amber-300">
+                                  <Pill className="h-3 w-3" strokeWidth={2.4} /> 상비약
+                                </p>
+                                <ul className="space-y-1">
+                                  {prn.map((name, i) => (
+                                    <li key={i} className="text-white">
+                                      · {name}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </>
+                            )}
+
+                            <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0F172A]" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

@@ -1,5 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Camera, ArrowLeft, Plus, Brain, X } from "lucide-react";
+import { Camera, Plus, Brain, X, Clock } from "lucide-react";
+import toast from "react-hot-toast";
+import mealApi from "../api/mealApi";
+import { useAuth } from "../contexts/AuthContext";
+
+const MEAL_CATEGORY_LABEL = {
+  BREAKFAST: "아침 식사",
+  LUNCH: "점심 식사",
+  DINNER: "저녁 식사",
+  SNACK: "간식",
+};
 
 const STOPS = [0, 0.25, 0.5, 0.75, 1];
 const STOP_LABELS = ["0", "1/4 인분", "1/2 인분", "3/4 인분", "1인분 전체"];
@@ -45,93 +55,197 @@ const NUTRIENTS = [
   },
 ];
 
-const DUMMY_DATA = [
-  {
-    mealItemName: "연어 아보카도 포케 볼",
-    calories: 640,
-    carbs: 35,
-    protein: 42,
-    fat: 28,
-    sugar: 12,
-    sodium: 420,
-    cholesterol: 85,
-  },
-  {
-    mealItemName: "닭 가슴살 샐러드",
-    calories: 200,
-    carbs: 15,
-    protein: 42,
-    fat: 5,
-    sugar: 3,
-    sodium: 50,
-    cholesterol: 3,
-  },
-  {
-    mealItemName: "챱츄",
-    calories: 300,
-    carbs: 234,
-    protein: 42,
-    fat: 23,
-    sugar: 7,
-    sodium: 250,
-    cholesterol: 10,
-  },
-];
-
-const TARGET_VALUES = {
-  calories: 640,
-  carbs: 35,
-  protein: 42,
-  fat: 28,
-  sugar: 12,
-  sodium: 420,
-  cholesterol: 85,
-};
-
 export default function MealRegisterModal({
   isOpen = true,
   onClose = () => {},
+  category = "BREAKFAST",
+  selectedDate,
+  onSaved,
+  initialMealId = null,
+  initialMealTime = null,
+  initialMealPhoto = null,
+  initialChips = [],
 }) {
-  // ----- State -----
-  const [imageUrl, setImageUrl] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analyzed, setAnalyzed] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
+  const { user } = useAuth();
 
-  const [foodName, setFoodName] = useState("");
-  const [stopIndex, setStopIndex] = useState(4);
+  // ----- State -----
+  // 기존 Meal에 사진이 있었으면 그 사진으로 시작, 없으면 null
+  const [imageUrl, setImageUrl] = useState(initialMealPhoto);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // 기존 사진이 있으면 이미 "분석됨" 상태로 시작 (이미지 영역 표시용)
+  const [analyzed, setAnalyzed] = useState(!!initialMealPhoto);
+  const [dragOver, setDragOver] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [isDragging, setIsDragging] = useState(false);
 
-  const [baseValues, setBaseValues] = useState({
-    calories: null,
-    carbs: null,
-    protein: null,
-    fat: null,
-    sugar: null,
-    sodium: null,
-    cholesterol: null,
+  // 현재 입력 중인 음식 (form)
+  const makeEmptyFormData = () => ({
+    foodName: "",
+    baseValues: {
+      calories: null, carbs: null, protein: null, fat: null,
+      sugar: null, sodium: null, cholesterol: null,
+    },
+    displayValues: {
+      calories: "", carbs: "", protein: "", fat: "",
+      sugar: "", sodium: "", cholesterol: "",
+    },
+    stopIndex: 4,
   });
 
-  const [displayValues, setDisplayValues] = useState({
-    calories: "",
-    carbs: "",
-    protein: "",
-    fat: "",
-    sugar: "",
-    sodium: "",
-    cholesterol: "",
-  });
+  const [formData, setFormData] = useState(makeEmptyFormData);
+  // 저장된 음식 chip 목록 (전체 영양소 데이터 보관 — 수정 모드용)
+  const [chips, setChips] = useState(() =>
+    initialChips.map((c) => ({
+      mealItemId: c.mealItemId,
+      foodName: c.foodName,
+      calorie: c.calorie ?? 0,
+      carbohydrate: c.carbohydrate ?? 0,
+      sugar: c.sugar ?? 0,
+      sodium: c.sodium ?? 0,
+      cholesterol: c.cholesterol ?? 0,
+      saturatedFat: c.saturatedFat ?? 0,
+      protein: c.protein ?? 0,
+    })),
+  );
+  // 수정 중인 chip의 mealItemId (null이면 신규 등록 모드)
+  const [editingChipId, setEditingChipId] = useState(null);
+  // 기존 Meal이 있으면 그 mealId 재사용, 없으면 첫 저장 시 새로 생성
+  const [savedMealId, setSavedMealId] = useState(initialMealId);
+  // 식사 시간: 기존 Meal 있으면 그 시간, 없으면 현재 시각
+  const [mealTime, setMealTime] = useState(
+    initialMealTime || new Date().toTimeString().slice(0, 5),
+  );
+  // bloodsugarModal과 동일한 시간 입력 UI 상태
+  const [timeEditing, setTimeEditing] = useState(false);
+  const [timeInput, setTimeInput] = useState("");
+  const timeInputRef = useRef(null);
 
-  const [chips, setChips] = useState([]);
-  const [detectionTagsVisible, setDetectionTagsVisible] = useState(false);
+  const startTimeEdit = () => {
+    setTimeInput(mealTime);
+    setTimeEditing(true);
+  };
 
+  const commitTimeEdit = async () => {
+    const raw = timeInput.trim();
+    let hours = -1;
+    let minutes = -1;
+
+    if (/^\d{1,2}:\d{1,2}$/.test(raw)) {
+      const [h, m] = raw.split(":").map(Number);
+      hours = h;
+      minutes = m;
+    } else if (/^\d{4}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 2));
+      minutes = parseInt(raw.slice(2));
+    } else if (/^\d{3}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 1));
+      minutes = parseInt(raw.slice(1));
+    } else if (/^\d{1,2}$/.test(raw)) {
+      hours = parseInt(raw);
+      minutes = 0;
+    }
+
+    setTimeEditing(false);
+
+    if (hours < 0 || hours >= 24 || minutes < 0 || minutes >= 60) return;
+
+    const formatted = `${String(hours).padStart(2, "0")}:${String(
+      minutes,
+    ).padStart(2, "0")}`;
+    if (formatted === mealTime) return;
+
+    setMealTime(formatted);
+
+    // 이미 저장된 Meal이면 백엔드 시간도 즉시 갱신
+    if (savedMealId && user?.id) {
+      try {
+        await mealApi.updateMeal(user.id, savedMealId, {
+          mealDate:
+            selectedDate || new Date().toISOString().split("T")[0],
+          mealTime: `${formatted}:00`,
+          mealCategory: category,
+          mealPhoto: imageUrl,
+        });
+        toast.success("시간이 변경되었습니다.");
+        onSaved?.();
+      } catch (err) {
+        console.error("시간 변경 실패:", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (timeEditing && timeInputRef.current) {
+      timeInputRef.current.focus();
+      timeInputRef.current.select();
+    }
+  }, [timeEditing]);
   const fileInputRef = useRef(null);
   const trackRef = useRef(null);
   const analysisTimerRef = useRef(null);
-  const animationFrameRef = useRef(null);
 
+  const stopIndex = formData.stopIndex;
   const portion = STOPS[stopIndex];
   const hasImage = !!imageUrl;
+
+  const updateForm = (updater) => setFormData((prev) => updater(prev));
+
+  const recomputeDisplayValues = (data, newStopIndex) => {
+    const p = STOPS[newStopIndex];
+    const newDisplay = { ...data.displayValues };
+    NUTRIENTS.forEach((n) => {
+      if (data.baseValues[n.key] != null) {
+        newDisplay[n.key] = formatValue(data.baseValues[n.key], p, n.integer);
+      }
+    });
+    return newDisplay;
+  };
+
+  const setStopIndex = (newIdx) => {
+    updateForm((d) => ({
+      ...d,
+      stopIndex: newIdx,
+      displayValues: recomputeDisplayValues(d, newIdx),
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData(makeEmptyFormData());
+    setEditingChipId(null);
+  };
+
+  // chip 클릭 → 그 음식 데이터를 form에 로드 (수정 모드 진입)
+  const onClickChip = (chip) => {
+    setEditingChipId(chip.mealItemId);
+    const numToStr = (v, isInt) => {
+      if (v == null) return "";
+      return isInt ? String(Math.round(v)) : String(Math.round(v * 10) / 10);
+    };
+    setFormData({
+      foodName: chip.foodName,
+      baseValues: {
+        calories: chip.calorie,
+        carbs: chip.carbohydrate,
+        protein: chip.protein,
+        fat: chip.saturatedFat,
+        sugar: chip.sugar,
+        sodium: chip.sodium,
+        cholesterol: chip.cholesterol,
+      },
+      displayValues: {
+        calories: numToStr(chip.calorie, true),
+        carbs: numToStr(chip.carbohydrate, false),
+        protein: numToStr(chip.protein, false),
+        fat: numToStr(chip.saturatedFat, false),
+        sugar: numToStr(chip.sugar, false),
+        sodium: numToStr(chip.sodium, true),
+        cholesterol: numToStr(chip.cholesterol, true),
+      },
+      stopIndex: 4,
+    });
+  };
 
   const formatValue = (baseVal, portionVal, integer) => {
     if (baseVal == null) return "";
@@ -139,69 +253,36 @@ export default function MealRegisterModal({
     return integer ? String(Math.round(v)) : String(Math.round(v * 10) / 10);
   };
 
-  useEffect(() => {
-    setDisplayValues((prev) => {
-      const next = { ...prev };
-      NUTRIENTS.forEach((n) => {
-        if (baseValues[n.key] != null) {
-          next[n.key] = formatValue(baseValues[n.key], portion, n.integer);
-        }
-      });
-      return next;
-    });
-  }, [portion, baseValues]);
-
   const handleFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setImageUrl(e.target.result);
+    reader.onload = async (e) => {
+      const dataUrl = e.target.result;
+      setImageUrl(dataUrl);
       setIsAnalyzing(true);
       setAnalyzed(false);
-      setDetectionTagsVisible(false);
+
+      // 이미 저장된 Meal이면 사진도 백엔드에 즉시 반영
+      if (savedMealId && user?.id) {
+        try {
+          await mealApi.updateMeal(user.id, savedMealId, {
+            mealDate:
+              selectedDate || new Date().toISOString().split("T")[0],
+            mealTime: `${mealTime}:00`,
+            mealCategory: category,
+            mealPhoto: dataUrl,
+          });
+          onSaved?.();
+        } catch (err) {
+          console.error("사진 업데이트 실패:", err);
+        }
+      }
 
       clearTimeout(analysisTimerRef.current);
       analysisTimerRef.current = setTimeout(() => {
         setIsAnalyzing(false);
         setAnalyzed(true);
-        setFoodName(DUMMY_DATA[0].mealItemName);
-        setChips(
-          DUMMY_DATA.map((item, index) => ({
-            id: index + 1,
-            label: item.mealItemName,
-            active: index === 0,
-          }))
-        );
-
-        const startTime = performance.now();
-        const duration = 900;
-
-        const animate = (now) => {
-          const t = Math.min(1, (now - startTime) / duration);
-          const eased = 1 - Math.pow(1 - t, 3);
-
-          setDisplayValues(() => {
-            const next = {};
-            NUTRIENTS.forEach((n) => {
-              const target = TARGET_VALUES[n.key];
-              const v = target * eased;
-              next[n.key] = n.integer
-                ? String(Math.round(v))
-                : String(Math.round(v * 10) / 10);
-            });
-            return next;
-          });
-
-          if (t < 1) {
-            animationFrameRef.current = requestAnimationFrame(animate);
-          } else {
-            setBaseValues({ ...TARGET_VALUES });
-          }
-        };
-        animationFrameRef.current = requestAnimationFrame(animate);
-
-        setTimeout(() => setDetectionTagsVisible(true), 150);
       }, 1800);
     };
     reader.readAsDataURL(file);
@@ -281,34 +362,155 @@ export default function MealRegisterModal({
       window.removeEventListener("touchmove", onMove);
       window.removeEventListener("touchend", onUp);
     };
+    // setStopIndex는 ref 기반이라 항상 최신 active chip을 사용 — deps 추가 불필요
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging, getNearestStopFromX]);
 
   const onNutrientChange = (key, value) => {
     const clean = value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
-    setDisplayValues((prev) => ({ ...prev, [key]: clean }));
+    updateForm((d) => {
+      const p = STOPS[d.stopIndex];
+      const newDisplay = { ...d.displayValues, [key]: clean };
+      const newBase = { ...d.baseValues };
+      if (p > 0 && clean !== "" && !isNaN(parseFloat(clean))) {
+        newBase[key] = parseFloat(clean) / p;
+      } else if (clean === "") {
+        newBase[key] = null;
+      }
+      return { ...d, displayValues: newDisplay, baseValues: newBase };
+    });
+  };
 
-    if (portion > 0 && clean !== "" && !isNaN(parseFloat(clean))) {
-      const newBase = parseFloat(clean) / portion;
-      setBaseValues((prev) => ({ ...prev, [key]: newBase }));
-    } else if (clean === "") {
-      setBaseValues((prev) => ({ ...prev, [key]: null }));
+  // 저장된 chip 삭제 (백엔드 MealItem도 삭제)
+  const removeChip = async (chip) => {
+    if (!user?.id || !chip.mealItemId) return;
+    try {
+      await mealApi.deleteMealItem(user.id, chip.mealItemId);
+      setChips((prev) =>
+        prev.filter((c) => c.mealItemId !== chip.mealItemId),
+      );
+      // 수정 중이던 chip을 삭제한 경우 폼도 초기화
+      if (chip.mealItemId === editingChipId) {
+        resetForm();
+      }
+      onSaved?.();
+    } catch (err) {
+      console.error("음식 삭제 실패:", err);
     }
-  };
-
-  const onClickChip = () => {
-    
-  };
-
-  const removeChip = (id) => {
-    setChips((prev) => prev.filter((c) => c.id !== id));
   };
 
   useEffect(() => {
     return () => {
       clearTimeout(analysisTimerRef.current);
-      cancelAnimationFrame(animationFrameRef.current);
     };
   }, []);
+
+  const toNumber = (v, isInt = false) => {
+    if (v === "" || v == null) return 0;
+    const n = parseFloat(v);
+    if (Number.isNaN(n)) return 0;
+    return isInt ? Math.round(n) : n;
+  };
+
+  const handleDelete = async () => {
+    if (!user?.id || !savedMealId || isDeleting) return;
+    if (!window.confirm("이 식단 기록을 삭제하시겠어요?\n사진과 등록된 음식이 모두 삭제됩니다.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await mealApi.deleteMeal(user.id, savedMealId);
+      toast.success("식단이 삭제되었습니다.");
+      onSaved?.();
+      onClose?.();
+    } catch (err) {
+      console.error("식단 삭제 실패:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user?.id) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    // 새 음식 입력이 없을 때: chip이나 기존 Meal이 있으면 "저장됨" 안내,
+    // 아무것도 없으면 입력 요청
+    if (!formData.foodName.trim()) {
+      if (chips.length > 0 || savedMealId) {
+        toast.success("저장되었습니다.");
+      } else {
+        toast.error("음식 이름을 입력해주세요.");
+      }
+      return;
+    }
+    if (!savedMealId && !mealTime) {
+      toast.error("식사 시간을 입력해주세요.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        foodName: formData.foodName.trim(),
+        calorie: toNumber(formData.displayValues.calories, true),
+        carbohydrate: toNumber(formData.displayValues.carbs),
+        sugar: toNumber(formData.displayValues.sugar),
+        sodium: toNumber(formData.displayValues.sodium),
+        cholesterol: toNumber(formData.displayValues.cholesterol),
+        saturatedFat: toNumber(formData.displayValues.fat),
+        protein: toNumber(formData.displayValues.protein),
+      };
+
+      if (editingChipId != null) {
+        // 수정 모드: 기존 MealItem 업데이트
+        await mealApi.updateMealItem(user.id, editingChipId, payload);
+        setChips((prev) =>
+          prev.map((c) =>
+            c.mealItemId === editingChipId
+              ? { ...c, ...payload, mealItemId: c.mealItemId }
+              : c,
+          ),
+        );
+        toast.success("수정되었습니다.");
+        resetForm();
+        onSaved?.();
+      } else {
+        // 신규 등록 모드: 필요 시 Meal 먼저 생성
+        let mealId = savedMealId;
+        if (!mealId) {
+          const dateStr =
+            selectedDate || new Date().toISOString().split("T")[0];
+          const timeStr = `${mealTime}:00`;
+          const mealRes = await mealApi.createMeal(user.id, {
+            mealDate: dateStr,
+            mealTime: timeStr,
+            mealCategory: category,
+            mealPhoto: imageUrl,
+          });
+          mealId = mealRes.data?.mealId;
+          if (!mealId) throw new Error("mealId not returned");
+          setSavedMealId(mealId);
+        }
+
+        const itemRes = await mealApi.createMealItem(user.id, mealId, payload);
+        const mealItemId = itemRes.data?.mealItemId;
+        setChips((prev) => [
+          ...prev,
+          { mealItemId, ...payload },
+        ]);
+
+        toast.success("저장되었습니다.");
+        onSaved?.();
+      }
+    } catch (err) {
+      console.error("식단 저장 실패:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     isOpen && (
@@ -373,44 +575,125 @@ export default function MealRegisterModal({
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* 닫기 버튼 (우측 상단) */}
+          <button
+            onClick={onClose}
+            style={{
+              position: "absolute",
+              top: 18,
+              right: 22,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 4,
+              color: "#bbb",
+              lineHeight: 1,
+              zIndex: 10,
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
           {/* Header */}
           <div>
-            <h1
-              className="font-bold mb-1.5"
-              style={{ fontSize: "28px", letterSpacing: "-0.025em" }}
-            >
-              식단 등록
-            </h1>
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <h1
+                className="font-bold"
+                style={{ fontSize: "28px", letterSpacing: "-0.025em" }}
+              >
+                식단 등록
+              </h1>
+              <span
+                className="inline-flex items-center rounded-full text-[12.5px] font-semibold"
+                style={{
+                  background: "#eef2ff",
+                  color: "#4338ca",
+                  padding: "4px 12px",
+                }}
+              >
+                {MEAL_CATEGORY_LABEL[category] || "식사"}
+              </span>
+            </div>
             <p className="text-sm font-normal" style={{ color: "#6b7280" }}>
               AI가 분석한 식사 내용입니다. 상세 영양 성분을 확인해 주세요.
             </p>
 
-            {analyzed && chips.length > 0 && (
+            {/* 식사 시간 입력 (bloodsugarModal과 동일 스타일) */}
+            <div className="mt-[14px] flex items-center gap-2.5 flex-wrap">
+              {timeEditing ? (
+                <input
+                  ref={timeInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  value={timeInput}
+                  onChange={(e) => setTimeInput(e.target.value)}
+                  onBlur={commitTimeEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitTimeEdit();
+                    }
+                    if (e.key === "Escape") setTimeEditing(false);
+                  }}
+                  placeholder="HH:MM"
+                  className="rounded-[16px] bg-white px-4 py-2.5 text-[13px] font-semibold text-[#1E293B] border-2 border-[#2563EB] shadow-sm outline-none w-[130px] tracking-wider"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={startTimeEdit}
+                  className="flex items-center gap-2 rounded-[16px] bg-[#F1F5F9] px-4 py-2.5 text-[13px] font-semibold text-[#64748B] border border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC] transition-colors"
+                >
+                  <Clock className="h-4 w-4 text-[#2563EB]" />
+                  {mealTime}
+                </button>
+              )}
+            </div>
+
+            {(chips.length > 0 || savedMealId != null) && (
               <div className="flex gap-2 mt-[12px] items-center flex-wrap min-h-9 mr-chips-fade-in">
-                {chips.map((c) => (
-                  <div
-                    key={c.id}
-                    className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-medium"
-                    onClick={() => onClickChip() }
-                    style={{
-                      padding: "7px 14px",
-                      background: c.active ? "#eef2ff" : "#ffffff",
-                      border: c.active
-                        ? "1px solid #c7d2fe"
-                        : "1px solid #e5e7eb",
-                      color: c.active ? "#1e3a8a" : "#1a1f2e",
-                    }}
-                  >
-                    <span>{c.label}</span>
-                    <span
-                      className="cursor-pointer p-0.5 flex items-center"
-                      style={{ color: "#adb5bd" }}
-                      onClick={() => removeChip(c.id)}
+                {chips.map((c) => {
+                  const isEditing = c.mealItemId === editingChipId;
+                  return (
+                    <div
+                      key={c.mealItemId}
+                      onClick={() => onClickChip(c)}
+                      className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-medium cursor-pointer transition-all"
+                      style={{
+                        padding: "7px 14px",
+                        background: isEditing ? "#fef3c7" : "#eef2ff",
+                        border: isEditing
+                          ? "1px solid #fbbf24"
+                          : "1px solid #c7d2fe",
+                        color: isEditing ? "#78350f" : "#1e3a8a",
+                      }}
                     >
-                      <X size={14} />
-                    </span>
-                  </div>
-                ))}
+                      <span>{c.foodName}</span>
+                      <span
+                        className="cursor-pointer p-0.5 flex items-center"
+                        style={{ color: isEditing ? "#a16207" : "#adb5bd" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeChip(c);
+                        }}
+                      >
+                        <X size={14} />
+                      </span>
+                    </div>
+                  );
+                })}
                 <div
                   className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-medium cursor-pointer"
                   style={{
@@ -419,6 +702,7 @@ export default function MealRegisterModal({
                     border: "1px dashed #c7d2fe",
                     color: "#4f46e5",
                   }}
+                  onClick={resetForm}
                 >
                   <Plus size={13} />
                   <span>음식 추가</span>
@@ -502,64 +786,6 @@ export default function MealRegisterModal({
                         className="w-full h-full object-cover block"
                       />
 
-                      {analyzed && (
-                        <span
-                          className="absolute text-[11px] font-semibold rounded-full z-[4]"
-                          style={{
-                            top: "12px",
-                            right: "12px",
-                            background: "rgba(209, 250, 229, 0.95)",
-                            color: "#047857",
-                            padding: "4px 10px",
-                            backdropFilter: "blur(4px)",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-                          }}
-                        >
-                          정확도 94%
-                        </span>
-                      )}
-
-                      {analyzed && (
-                        <>
-                          <div
-                            className="absolute text-white font-semibold rounded-md"
-                            style={{
-                              top: "18px",
-                              left: "18px",
-                              background: "#2563eb",
-                              fontSize: "11.5px",
-                              padding: "5px 10px",
-                              boxShadow: "0 2px 8px rgba(37,99,235,0.4)",
-                              opacity: detectionTagsVisible ? 1 : 0,
-                              transform: detectionTagsVisible
-                                ? "translateY(0)"
-                                : "translateY(-4px)",
-                              transition: "all 0.4s ease 0ms",
-                            }}
-                          >
-                            닭가슴살 120g
-                          </div>
-                          <div
-                            className="absolute text-white font-semibold rounded-md"
-                            style={{
-                              top: "56px",
-                              left: "18px",
-                              background: "#1d4ed8",
-                              fontSize: "11.5px",
-                              padding: "5px 10px",
-                              boxShadow: "0 2px 8px rgba(37,99,235,0.4)",
-                              opacity: detectionTagsVisible ? 1 : 0,
-                              transform: detectionTagsVisible
-                                ? "translateY(0)"
-                                : "translateY(-4px)",
-                              transition: "all 0.4s ease 180ms",
-                            }}
-                          >
-                            아보카도 1/2
-                          </div>
-                        </>
-                      )}
-
                       <div
                         className="absolute inset-0 flex flex-col items-center justify-center z-[5] transition-opacity duration-200"
                         style={{
@@ -599,17 +825,11 @@ export default function MealRegisterModal({
                         }}
                       >
                         <div
-                          className="flex items-center gap-1.5 text-[13px] font-semibold mb-1.5"
+                          className="flex items-center gap-1.5 text-[13px] font-semibold"
                           style={{ color: "#4f46e5" }}
                         >
                           <Brain size={14} strokeWidth={2.5} />
                           <span>AI 비전 분석 완료</span>
-                        </div>
-                        <div
-                          className="text-xs leading-normal"
-                          style={{ color: "#6b7280" }}
-                        >
-                          감지됨: 닭가슴살, 케일 샐러드, 방울토마토, 아보카도.
                         </div>
                       </div>
                     )}
@@ -635,8 +855,11 @@ export default function MealRegisterModal({
                 </div>
                 <input
                   type="text"
-                  value={foodName}
-                  onChange={(e) => setFoodName(e.target.value)}
+                  maxLength={20}
+                  value={formData.foodName}
+                  onChange={(e) =>
+                    updateForm((d) => ({ ...d, foodName: e.target.value }))
+                  }
                   className="mr-input w-full text-sm font-medium outline-none transition-all"
                   style={{
                     padding: "14px 18px",
@@ -800,7 +1023,7 @@ export default function MealRegisterModal({
                           <input
                             type="text"
                             inputMode="decimal"
-                            value={displayValues[n.key]}
+                            value={formData.displayValues[n.key]}
                             onChange={(e) =>
                               onNutrientChange(n.key, e.target.value)
                             }
@@ -859,7 +1082,7 @@ export default function MealRegisterModal({
                         <input
                           type="text"
                           inputMode="decimal"
-                          value={displayValues[n.key]}
+                          value={formData.displayValues[n.key]}
                           onChange={(e) =>
                             onNutrientChange(n.key, e.target.value)
                           }
@@ -893,32 +1116,34 @@ export default function MealRegisterModal({
 
               {/* Footer buttons */}
               <div className="flex justify-end gap-2.5 mt-4">
+                {savedMealId != null && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isSaving || isDeleting}
+                    className="inline-flex items-center justify-center rounded-full text-[13.5px] font-semibold cursor-pointer transition-all hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      padding: "14px 28px",
+                      background: "#ffffff",
+                      color: "#DC2626",
+                      border: "1.5px solid #FCA5A5",
+                      fontFamily: "inherit",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isDeleting) e.currentTarget.style.background = "#FEF2F2";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isDeleting) e.currentTarget.style.background = "#ffffff";
+                    }}
+                  >
+                    {isDeleting ? "삭제 중..." : "식단 삭제"}
+                  </button>
+                )}
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-full text-[13.5px] font-semibold cursor-pointer transition-all"
-                  style={{
-                    padding: "14px 28px",
-                    background: "white",
-                    border: "1.5px solid #e5e7eb",
-                    color: "#1a1f2e",
-                    fontFamily: "inherit",
-                  }}
-                  onClick={onClose}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#f8f9fa";
-                    e.currentTarget.style.borderColor = "#d1d5db";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "white";
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }}
-                >
-                  <ArrowLeft size={14} strokeWidth={2.5} />
-                  이전으로
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-full text-[13.5px] font-semibold text-white cursor-pointer transition-all hover:-translate-y-px"
+                  onClick={handleSave}
+                  disabled={isSaving || isDeleting}
+                  className="inline-flex items-center justify-center rounded-full text-[13.5px] font-semibold text-white cursor-pointer transition-all hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
                     padding: "14px 36px",
                     background: "#1a1f2e",
@@ -927,14 +1152,18 @@ export default function MealRegisterModal({
                     minWidth: "200px",
                     fontFamily: "inherit",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#0f1320")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "#1a1f2e")
-                  }
+                  onMouseEnter={(e) => {
+                    if (!isSaving) e.currentTarget.style.background = "#0f1320";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSaving) e.currentTarget.style.background = "#1a1f2e";
+                  }}
                 >
-                  식단 저장 및 확인
+                  {isSaving
+                    ? "저장 중..."
+                    : editingChipId != null
+                      ? "수정 완료"
+                      : "식단 저장 및 확인"}
                 </button>
               </div>
             </div>

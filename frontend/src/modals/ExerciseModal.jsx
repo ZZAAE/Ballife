@@ -173,9 +173,6 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
         }),
       );
 
-      window.dispatchEvent(
-        new CustomEvent("exercise-records-updated", { detail: { userId } }),
-      );
       onSaved?.();
       toast.success("운동 기록이 저장되었습니다.");
       onClose();
@@ -196,58 +193,66 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-2xl animate-in fade-in zoom-in duration-200 xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]"
+        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]"
       >
         {/* 고정 상단 영역 */}
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           {/* 헤더 */}
-          <div className="relative px-8 pb-4 pt-8">
-            <button
-              onClick={onClose}
-              className="absolute right-6 top-6 text-gray-400 hover:text-gray-600"
-            >
-              <X size={24} />
-            </button>
+          <div className="px-6 pb-5 pt-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
+                  {isEditMode ? "운동 기록 수정" : "운동 기록하기"}
+                </h2>
+                <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
+                  {isEditMode
+                    ? "선택한 운동 기록을 수정합니다."
+                    : "오늘의 노력을 정밀하게 기록하세요."}
+                </p>
+              </div>
 
-            <h2 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? "운동 기록 수정" : "운동 기록하기"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {isEditMode
-                ? "선택한 운동 기록을 수정합니다."
-                : "오늘의 노력을 정밀하게 기록하세요."}
-            </p>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="닫기"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+              >
+                <X size={18} strokeWidth={2.2} />
+              </button>
+            </div>
           </div>
 
           {/* 탭 */}
-          <div className="flex border-b border-gray-100 px-8">
-            <button
-              onClick={() => !isEditMode && setActiveTab("anaerobic")}
-              disabled={isEditMode && activeTab !== "anaerobic"}
-              className={`flex-1 py-4 text-sm font-semibold transition-all ${
-                activeTab === "anaerobic"
-                  ? "border-b-2 border-blue-600 bg-blue-50/30 text-blue-600"
-                  : "text-gray-400 hover:bg-gray-50"
-              } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
-            >
-              무산소 (Anaerobic)
-            </button>
+          <div className="border-b border-[#F1F5F9] px-6 pb-4">
+            <div className="grid grid-cols-2 rounded-2xl bg-[#F1F5F9] p-1.5">
+              <button
+                onClick={() => !isEditMode && setActiveTab("anaerobic")}
+                disabled={isEditMode && activeTab !== "anaerobic"}
+                className={`rounded-xl px-2 py-2.5 text-[13px] font-semibold transition-all ${
+                  activeTab === "anaerobic"
+                    ? "bg-white text-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.12)]"
+                    : "text-[#64748B]"
+                } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
+              >
+                무산소
+              </button>
 
-            <button
-              onClick={() => !isEditMode && setActiveTab("aerobic")}
-              disabled={isEditMode && activeTab !== "aerobic"}
-              className={`flex-1 py-4 text-sm font-semibold transition-all ${
-                activeTab === "aerobic"
-                  ? "border-b-2 border-blue-600 bg-blue-50/30 text-blue-600"
-                  : "text-gray-400 hover:bg-gray-50"
-              } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
-            >
-              유산소 (Aerobic)
-            </button>
+              <button
+                onClick={() => !isEditMode && setActiveTab("aerobic")}
+                disabled={isEditMode && activeTab !== "aerobic"}
+                className={`rounded-xl px-2 py-2.5 text-[13px] font-semibold transition-all ${
+                  activeTab === "aerobic"
+                    ? "bg-white text-[#2563EB] shadow-[0_4px_12px_rgba(37,99,235,0.12)]"
+                    : "text-[#64748B]"
+                } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
+              >
+                유산소
+              </button>
+            </div>
           </div>
         </div>
 
@@ -501,7 +506,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting || isSaving}
-                className="w-[140px] rounded-[24px] border border-red-200 bg-white py-5 text-base font-bold text-red-500 shadow-sm transition-all hover:bg-red-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isDeleting ? "삭제 중..." : "삭제"}
               </button>
@@ -509,7 +514,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSaving || isDeleting || currentRows.length === 0}
-                className="flex-1 rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                className="flex-1 rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSaving ? "저장 중..." : "수정 완료"}
               </button>
@@ -519,7 +524,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
               type="button"
               onClick={handleSubmit}
               disabled={isSaving || currentRows.length === 0}
-              className="w-full rounded-[24px] bg-[#1a1a2e] py-5 text-xl font-bold text-white shadow-xl transition-all hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className="w-full rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving
                 ? "저장 중..."
