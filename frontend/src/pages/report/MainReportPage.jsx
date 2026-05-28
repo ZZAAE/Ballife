@@ -13,6 +13,7 @@ import {
   Target,
 } from "lucide-react";
 import logo from "../../assets/icons/ballifeLogo.svg";
+import { useAuth } from "../../contexts/AuthContext";
 
 const HERO_BADGES = [
   "식단·운동 기록",
@@ -29,8 +30,7 @@ const FEATURES = [
       "식단, 운동, 수분 섭취, 체중, 혈압, 혈당, 복약까지 하루의 모든 건강 기록을 한 화면에서 입력하고 관리합니다.",
     tags: ["식단", "운동", "수분", "혈압/혈당"],
     accent: "#3B82F6",
-    bg: "#EFF6FF",
-    to: "/record",
+    bg: "#EFF6FF"
   },
   {
     icon: BarChart3,
@@ -39,8 +39,7 @@ const FEATURES = [
       "기간별 통계와 시각화된 그래프로 변화의 흐름을 한눈에 확인하고, 주간 종합 리포트를 받아볼 수 있습니다.",
     tags: ["일/주/월 통계", "추이 그래프", "종합 리포트"],
     accent: "#10B981",
-    bg: "#ECFDF5",
-    to: "/allrecord",
+    bg: "#ECFDF5"
   },
   {
     icon: Target,
@@ -49,8 +48,7 @@ const FEATURES = [
       "목표 체중·음수량·섭취/소모 칼로리를 설정하고 하루 생활 루틴(기상·식사·취침)에 맞춰 알림을 받아보세요.",
     tags: ["목표 지표", "루틴 알림", "달성률"],
     accent: "#F97316",
-    bg: "#FFF7ED",
-    to: "/user/information",
+    bg: "#FFF7ED"
   },
   {
     icon: PillBottle,
@@ -59,8 +57,7 @@ const FEATURES = [
       "처방전 사진 한 장이면 복용 중인 약을 자동으로 등록하고, 시간대별 복약 알림으로 빠짐없이 챙길 수 있습니다.",
     tags: ["처방전 OCR", "복약 알림", "복약 이력"],
     accent: "#8B5CF6",
-    bg: "#F5F3FF",
-    to: "/user/information",
+    bg: "#F5F3FF"
   },
   {
     icon: Stethoscope,
@@ -69,8 +66,7 @@ const FEATURES = [
       "고혈압·당뇨·고지혈증·비만·통풍·골다공증 등 주요 만성질환에 대한 신뢰성 있는 의학 정보와 관리법을 제공합니다.",
     tags: ["WHO·KDCA 기반", "6대 질환", "관리법"],
     accent: "#EF4444",
-    bg: "#FEF2F2",
-    to: "/report/diabetes",
+    bg: "#FEF2F2"
   },
   {
     icon: MessageCircle,
@@ -79,8 +75,7 @@ const FEATURES = [
       "같은 고민을 가진 사람들과 경험을 나누고, 카테고리별 게시판에서 질문·노하우·일상을 자유롭게 공유하세요.",
     tags: ["카테고리 게시판", "질문/응답", "추천/조회"],
     accent: "#0EA5E9",
-    bg: "#F0F9FF",
-    to: "/posts",
+    bg: "#F0F9FF"
   },
 ];
 
@@ -108,9 +103,9 @@ const HOW_IT_WORKS = [
 function FeatureCard({ icon, title, description, tags, accent, bg, to }) {
   const Icon = icon;
   return (
-    <Link
+    <div
       to={to}
-      className="group bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6 hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 transition-all"
+      className="group bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-6"
     >
       <div className="flex items-start justify-between mb-5">
         <div
@@ -119,7 +114,6 @@ function FeatureCard({ icon, title, description, tags, accent, bg, to }) {
         >
           <Icon className="w-6 h-6" />
         </div>
-        <ArrowRight className="w-4 h-4 text-[#CBD5E1] group-hover:text-[#0F172A] group-hover:translate-x-0.5 transition" />
       </div>
       <h3 className="text-[17px] font-bold text-[#0F172A] mb-2">{title}</h3>
       <p className="text-[13px] text-[#64748B] leading-relaxed mb-4">
@@ -135,11 +129,14 @@ function FeatureCard({ icon, title, description, tags, accent, bg, to }) {
           </span>
         ))}
       </div>
-    </Link>
+    </div>
   );
 }
 
 export default function MainReportPage() {
+  const { isAuthenticated } = useAuth();
+  const startPath = isAuthenticated ? "/" : "/login";
+
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-sans">
       {/* ───────── 히어로 ───────── */}
@@ -175,7 +172,7 @@ export default function MainReportPage() {
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  to="/login"
+                  to={startPath}
                   className="inline-flex items-center gap-2 h-12 px-7 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
                 >
                   지금 바로 시작하기
@@ -382,7 +379,7 @@ export default function MainReportPage() {
               건강한 라이프스타일을 시작해보세요.
             </p>
             <Link
-              to="/login"
+              to={startPath}
               className="mt-7 inline-flex items-center gap-2 h-12 px-8 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
             >
               지금 바로 시작하기
