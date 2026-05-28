@@ -19,12 +19,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 })
 @EnableMongoRepositories(basePackages = {
         "com.prologue.ballife.repository.exerciseMongo",
-<<<<<<< HEAD
         "com.prologue.ballife.repository.newsMongo", // NewsCard = MongoDB (카드뉴스)
         "com.prologue.ballife.repository.medicineMongo" // Medicine = MongoDB (의약품 캐시)
-=======
-        "com.prologue.ballife.repository.newsMongo" // NewsCard = MongoDB (카드뉴스)
->>>>>>> origin/sjs0528-최신
         //"com.prologue.ballife.repository.exercise" // ExerciseType, UserExerciseDetail = MongoDB
 })
 public class DatabaseConfig {
