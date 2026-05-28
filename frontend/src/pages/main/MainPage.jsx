@@ -8,7 +8,6 @@ import userConfigApi from "../../api/userConfigApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
-import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
 import ChartSection from "../../components/mainpage/chart.jsx";

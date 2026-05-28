@@ -52,8 +52,9 @@ public class User {
     @Column(name = "USE_POINT_COUNT")
     private Long usePointCount;
 
-    @Column(name = "MEDAL")
-    private Long medal;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEDAL_ID")
+    private Medal medal;
 
     @Column(name = "DISEASE_INDEX", unique = false, nullable = true, length = 300)
     private String diseaseIndex;
