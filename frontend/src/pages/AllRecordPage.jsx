@@ -864,6 +864,7 @@ function AllRecordPage() {
         isOpen={modalType === "blood"}
         onClose={closeModal}
         editingRecord={editingBs}
+        recordDate={selectedDate}
       />
 
       <MealRegisterModal
