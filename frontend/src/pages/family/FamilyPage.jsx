@@ -66,6 +66,16 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
       : !card.me && !card.consent?.shareBloodPressure
         ? "비공개"
         : "기록 없음";
+  const exerciseText = (() => {
+    if (card.exercise?.exerciseName) {
+      const kcal = card.exercise.burnedCalorie;
+      return kcal != null
+        ? `${card.exercise.exerciseName} · ${kcal} kcal`
+        : card.exercise.exerciseName;
+    }
+    if (!card.me && !card.consent?.shareExercise) return "비공개";
+    return "기록 없음";
+  })();
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -132,6 +142,20 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
             }`}
           >
             {bloodPressureText}
+          </p>
+        </div>
+        <div className="col-span-2 rounded-xl bg-[#F8FAFC] px-4 py-3">
+          <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
+            <Dumbbell size={12} /> 운동 현황
+          </div>
+          <p
+            className={`text-[15px] font-bold ${
+              card.exercise?.exerciseName
+                ? "text-[#0F172A]"
+                : "text-[#94A3B8]"
+            }`}
+          >
+            {exerciseText}
           </p>
         </div>
       </div>
@@ -454,10 +478,8 @@ export default function FamilyPage() {
               <ConsentRow
                 icon={Dumbbell}
                 label="운동 현황"
-                value={false}
-                onChange={() => {}}
-                disabled
-                badge="준비 중"
+                value={!!consent.shareExercise}
+                onChange={(v) => handleConsent("shareExercise", v)}
               />
             </div>
           </div>

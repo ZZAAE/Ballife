@@ -78,6 +78,17 @@ public class FamilyDto {
         private LocalDate recordDate;
     }
 
+    // 최신 운동 (동의 없으면 null)
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LatestExercise {
+        private String exerciseName;   // 운동명 (예: 러닝)
+        private Integer burnedCalorie; // 소모 칼로리 (kcal)
+        private LocalDate recordDate;
+    }
+
     // 가족 구성원 카드 (목록용)
     @Data
     @Builder
@@ -91,6 +102,7 @@ public class FamilyDto {
         private ConsentResponse consent;
         private LatestBloodSugar bloodSugar;       // 동의/데이터 없으면 null
         private LatestBloodPressure bloodPressure; // 동의/데이터 없으면 null
+        private LatestExercise exercise;           // 동의/데이터 없으면 null
     }
 
     // 특정 구성원 건강 상세
