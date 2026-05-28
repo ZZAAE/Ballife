@@ -65,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/post/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/posts/**/view").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/{postId}/view").permitAll()
                         // 나머지 인증이 필요한 주소는 이 밑에
 
                         // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라 그럼)
