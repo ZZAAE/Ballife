@@ -28,7 +28,6 @@ import HypertensionReportPage from "./pages/report/HypertensionReportPage";
 import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
 import ObesityReportPage from "./pages/report/ObesityReportPage";
 import Header from "./components/Header";
-import HealthIndicatorMenu from "./components/HealthMenu";
 import HealthCalenderPage from "./pages/main/HealthCalenderPage";
 import AllRecordPage from "./pages/AllRecordPage";
 import UserInformation from "./pages/user/UserInformation";
@@ -43,28 +42,6 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-
-  const hideHealthMenu =
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/disease" ||
-    location.pathname === "/boards" ||
-    location.pathname === "/posts/create" ||
-    location.pathname === "/intro/web" ||
-    location.pathname === "/intro/osteoporosis" ||
-    location.pathname === "/intro/diabetes" ||
-    location.pathname === "/intro/gout" ||
-    location.pathname === "/intro/hypertension" ||
-    location.pathname === "/intro/hyperlipidemia" ||
-    location.pathname === "/intro/dyslipidemia" ||
-    location.pathname === "/intro/obesity" ||
-    location.pathname === "/AllRecordPage" ||
-    location.pathname === "/allRecord" ||
-    location.pathname === "/" ||
-    location.pathname === "/member" ||
-    location.pathname.startsWith("/member/") ||
-    location.pathname.startsWith("/check/") ||
-    location.pathname.startsWith("/posts/");
 
   const hideChatbot =
     location.pathname === "/login" ||
@@ -157,7 +134,6 @@ function App() {
               <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
-          {!hideHealthMenu && <HealthIndicatorMenu />}
           {!hideChatbot && <ChatBot />}
         </div>
       </main>
