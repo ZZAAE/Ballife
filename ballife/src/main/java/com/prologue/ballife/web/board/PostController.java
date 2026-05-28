@@ -94,8 +94,8 @@ public class PostController {
         return ResponseEntity.ok(postService.updatePost(postId, userId, request));
     }
 
-    // 게시글 삭제 - 소프트 )
-    @Operation(summary = "게시글 삭제(소프트)")
+    // 게시글 삭제 (하드 삭제 — DB에서 실제로 제거)
+    @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,

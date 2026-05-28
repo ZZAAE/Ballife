@@ -3,6 +3,7 @@ package com.prologue.ballife.repository.board;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,9 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     @Query("select cl.comment.commentId from CommentLike cl "
             + "where cl.user.userId = :userId and cl.comment.commentId in :commentIds")
     List<Long> findLikedCommentIds(@Param("userId") Long userId, @Param("commentIds") List<Long> commentIds);
+
+    // 게시글 하드 삭제 시 사용 — 해당 글의 모든 댓글에 달린 추천 일괄 삭제
+    @Modifying
+    @Query("DELETE FROM CommentLike cl WHERE cl.comment.postId.postId = :postId")
+    void deleteAllByPostId(@Param("postId") Long postId);
 }

@@ -91,14 +91,14 @@ function BoardListPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">커뮤니티</h1>
-        <p className="mt-2 text-sm text-[#64748B]">
-          건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
-        </p>
-      </div>
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8">
+            <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
+              커뮤니티
+            </h1>
+            <p className="mb-8 text-sm text-gray-500">
+              건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
+            </p>
 
       {/* 검색창 */}
       <div className="mb-6 flex items-center gap-3">
@@ -125,7 +125,13 @@ function BoardListPage() {
         <select
           value={category}
           onChange={(e) => handleCategoryChange(e.target.value)}
-          className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-[#94A3B8]"
+          className="appearance-none rounded-[10px] border border-[#E5E7EB] bg-white bg-no-repeat pl-3 pr-8 py-2 text-[#0F172A] outline-none focus:border-[#94A3B8]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")",
+            backgroundPosition: "right 7px center",
+            backgroundSize: "16px 16px",
+          }}
         >
           <option value="ALL">전체</option>
           <option value="GENERAL">자유</option>

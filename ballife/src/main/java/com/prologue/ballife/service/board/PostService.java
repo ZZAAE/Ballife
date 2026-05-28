@@ -15,6 +15,8 @@ import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.board.PostLike;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
+import com.prologue.ballife.repository.board.CommentLikeRepository;
+import com.prologue.ballife.repository.board.CommentRepository;
 import com.prologue.ballife.repository.board.PostLikeRepository;
 import com.prologue.ballife.repository.board.PostRepository;
 import com.prologue.ballife.repository.user.UserRepository;
@@ -31,6 +33,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     // 게시글작성,수정,삭제 | 전체게시글조회,카테고리별조회
 
     // 게시글 작성
@@ -121,7 +125,7 @@ public class PostService {
     }
 
 
-    // 게시글 삭제
+    // 게시글 삭제 (하드 삭제 — DB에서 실제로 제거, 자식 데이터 함께 삭제)
     @Transactional
     public void deletePost(Long postId, Long userId) {
     Post post = postRepository.findById(postId)
@@ -130,7 +134,11 @@ public class PostService {
         throw new org.springframework.web.server.ResponseStatusException(
                 org.springframework.http.HttpStatus.FORBIDDEN, "본인 글만 삭제할 수 있습니다.");
     }
-    post.softDelete();
+    // FK 제약 순서대로 자식 데이터 일괄 삭제 → 마지막에 게시글 제거
+    commentLikeRepository.deleteAllByPostId(postId);
+    commentRepository.deleteAllByPostId(postId);
+    postLikeRepository.deleteAllByPostId(postId);
+    postRepository.delete(post);
     }
 
     // ═══════════════════════════════════════════════════════════
