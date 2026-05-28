@@ -3,7 +3,14 @@ import { Clock, Sparkles, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import bioValueRecordApi from "../api/bioValueRecordApi";
+import userApi from "../api/userApi";
+import userConfigApi from "../api/userConfigApi";
 import { BIO_CATEGORY } from "../constants/bioCategory";
+import {
+  loadCachedMemberProfile,
+  parseDiseaseIndex,
+  persistMemberProfile,
+} from "../utils/userProfile";
 
 const MEALS = [
   { id: "공복", label: "공복", hasTiming: false },
@@ -15,8 +22,97 @@ const MEALS = [
 
 const TIMINGS = ["식전", "식후"];
 
-const getStatusInfo = (value) => {
-  if (value <= 69)
+// 루틴(/member)에 저장된 식사 시간 기준 자동 선택용.
+// getMealTimes 응답 키 → 모달 식사 탭 라벨.
+const MEAL_TIME_FIELDS = [
+  { key: "breakfastTime", meal: "아침" },
+  { key: "lunchTime", meal: "점심" },
+  { key: "dinnerTime", meal: "저녁" },
+];
+
+// "HH:mm" / "HH:mm:ss" → 자정 기준 분(0~1439). 파싱 실패 시 null.
+const timeStringToMinutes = (timeStr) => {
+  if (!timeStr || typeof timeStr !== "string") return null;
+  const [h, m] = timeStr.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+};
+
+// 식사 시간 ±60분 안이면 해당 끼니의 식전(-1시간~T)/식후(T~+1시간)를 반환.
+// 여러 끼니 창이 겹칠 땐 현재 시각과 가장 가까운 끼니를 선택.
+// 어느 창에도 들지 않으면 null — 호출부에서 기본값(공복/식전)을 유지한다.
+const resolveAutoMealTiming = (mealTimes, now) => {
+  if (!mealTimes) return null;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let best = null;
+  for (const { key, meal } of MEAL_TIME_FIELDS) {
+    const mealMin = timeStringToMinutes(mealTimes[key]);
+    if (mealMin == null) continue;
+    const diff = nowMin - mealMin; // 음수=식전, 양수=식후
+    if (diff < -60 || diff > 60) continue;
+    const timing = diff < 0 ? "식전" : "식후";
+    const dist = Math.abs(diff);
+    if (!best || dist < best.dist) best = { meal, timing, dist };
+  }
+  return best ? { meal: best.meal, timing: best.timing } : null;
+};
+
+// 저혈당은 임상 표준에 따라 모든 유형에서 70mg/dL 미만으로 통일
+const HYPO_CUT = 70;
+
+// 당뇨 유형 · 측정 시점별 혈당 기준 (mg/dL)
+//   warn   : 정상 → 경고 경계 (이 값부터 경고)
+//   danger : 경고 → 위험 경계 (이 값부터 위험)
+// 저혈당(<70)과 정상 시작값 사이 구간은 정상으로 포함하므로 정상 하한은 항상 70.
+const BLOOD_SUGAR_RANGES = {
+  NONE: {
+    공복: { warn: 100, danger: 126 },
+    식전: { warn: 100, danger: 140 },
+    식후: { warn: 140, danger: 180 },
+    취침전: { warn: 121, danger: 140 },
+  },
+  type1: {
+    공복: { warn: 131, danger: 181 },
+    식전: { warn: 131, danger: 181 },
+    식후: { warn: 181, danger: 251 },
+    취침전: { warn: 151, danger: 201 },
+  },
+  type2: {
+    공복: { warn: 131, danger: 181 },
+    식전: { warn: 131, danger: 181 },
+    식후: { warn: 181, danger: 251 },
+    취침전: { warn: 141, danger: 201 },
+  },
+  GESTATIONAL: {
+    공복: { warn: 96, danger: 106 },
+    식전: { warn: 96, danger: 106 },
+    식후: { warn: 121, danger: 141 },
+    취침전: { warn: 121, danger: 141 },
+  },
+};
+
+const DIABETES_LABEL = {
+  NONE: "당뇨 없음",
+  type1: "1형 당뇨",
+  type2: "2형 당뇨",
+  GESTATIONAL: "임신성 당뇨",
+};
+
+// 식사 탭/식전·식후 토글을 기준표의 행(공복/식전/식후/취침전)으로 매핑
+const resolveBsContext = (meal, timing) => {
+  if (meal === "공복") return "공복";
+  if (meal === "취침전") return "취침전";
+  return timing === "식후" ? "식후" : "식전";
+};
+
+const getRange = (diabetesType, meal, timing) => {
+  const byType = BLOOD_SUGAR_RANGES[diabetesType] || BLOOD_SUGAR_RANGES.NONE;
+  return byType[resolveBsContext(meal, timing)];
+};
+
+const getStatusInfo = (value, range) => {
+  const { warn, danger } = range;
+  if (value < HYPO_CUT)
     return {
       statusText: "저혈당",
       label: "저혈당 상태입니다",
@@ -24,34 +120,26 @@ const getStatusInfo = (value) => {
       color: "#60A5FA",
       badge: "bg-[#EFF6FF] text-[#2563EB]",
     };
-  if (value <= 99)
+  if (value < warn)
     return {
       statusText: "정상",
-      label: "이상적인 공복 혈당입니다",
+      label: "이상적인 혈당입니다",
       description: "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요.",
       color: "#22C55E",
       badge: "bg-[#ECFDF3] text-[#16A34A]",
     };
-  if (value <= 125)
-    return {
-      statusText: "주의",
-      label: "혈당 관리가 필요합니다",
-      description: "혈당이 다소 높습니다. 식단과 운동을 통한 관리가 필요합니다.",
-      color: "#FACC15",
-      badge: "bg-[#FEFCE8] text-[#CA8A04]",
-    };
-  if (value <= 180)
+  if (value < danger)
     return {
       statusText: "경고",
-      label: "높은 혈당입니다",
-      description: "혈당이 높습니다. 의사 상담을 고려하시고 충분한 수분 섭취를 권장합니다.",
+      label: "혈당 관리가 필요합니다",
+      description: "혈당이 높습니다. 식단과 운동을 통한 관리가 필요합니다.",
       color: "#FB923C",
       badge: "bg-[#FFF7ED] text-[#EA580C]",
     };
   return {
     statusText: "위험",
     label: "매우 높은 혈당입니다",
-    description: "매우 높은 혈당입니다. 즉시 의료진과 상담하시기 바랍니다.",
+    description: "위험 수준의 혈당입니다. 의료진과 상담하시기 바랍니다.",
     color: "#F87171",
     badge: "bg-[#FEF2F2] text-[#DC2626]",
   };
@@ -90,6 +178,7 @@ export default function BloodSugarModal({
   onClose = () => {},
   onSaved,
   editingRecord = null,
+  diabetesType: diabetesTypeProp = null,
 }) {
   const { user } = useAuth();
   const isEditMode = Boolean(editingRecord?.recordId);
@@ -102,6 +191,9 @@ export default function BloodSugarModal({
 
   const [activeMeal, setActiveMeal] = useState("공복");
   const [activeTiming, setActiveTiming] = useState("식전");
+
+  // 보유 질환 정보(당뇨 유형)에 따라 기준표를 다르게 적용
+  const [diabetesType, setDiabetesType] = useState(diabetesTypeProp || "NONE");
 
   const [recordsByDate, setRecordsByDate] = useState({});
 
@@ -157,7 +249,32 @@ export default function BloodSugarModal({
     ? "00.0"
     : currentVal.toFixed(1);
   const statusVal = isFocused ? parseFloat(inputValue) || 0 : currentVal;
-  const status = getStatusInfo(statusVal);
+
+  // 당뇨 유형 + 현재 측정 시점(공복/식전/식후/취침전)에 맞는 기준
+  const currentRange = getRange(diabetesType, activeMeal, activeTiming);
+  const bsContext = resolveBsContext(activeMeal, activeTiming);
+  const status = getStatusInfo(statusVal, currentRange);
+
+  // 슬라이더의 4개 색상 구간 (0~maxVal 스케일)
+  const zones = [
+    { key: "저혈당", color: "#60A5FA", start: 0, end: HYPO_CUT },
+    { key: "정상", color: "#22C55E", start: HYPO_CUT, end: currentRange.warn },
+    { key: "경고", color: "#FB923C", start: currentRange.warn, end: currentRange.danger },
+    { key: "위험", color: "#F87171", start: currentRange.danger, end: maxVal },
+  ].map((zone) => ({
+    ...zone,
+    width: Math.max(0, ((zone.end - zone.start) / maxVal) * 100),
+    left: (zone.start / maxVal) * 100,
+  }));
+
+  // 안내 박스에 표시할 기준표 행
+  // 저혈당(<70)과 정상 시작값 사이 구간은 정상으로 포함해 70부터 표시
+  const guideRows = [
+    { label: "저혈당", text: `< ${HYPO_CUT}mg/dL` },
+    { label: "정상", text: `${HYPO_CUT} ~ ${currentRange.warn - 1}mg/dL` },
+    { label: "경고", text: `${currentRange.warn} ~ ${currentRange.danger - 1}mg/dL` },
+    { label: "위험", text: `≥ ${currentRange.danger}mg/dL` },
+  ];
 
   const updateFromX = useCallback(
     (clientX) => {
@@ -337,6 +454,43 @@ export default function BloodSugarModal({
     }
   }, [timeEditing]);
 
+  // 모달이 열릴 때 보유 질환 정보에서 당뇨 유형을 읽어 기준표를 결정.
+  // diseaseIndex는 회원가입 때 입력받아 서버에만 저장되고 로그인 응답에는 없어서,
+  // 질환 편집 페이지를 거치지 않은 사용자의 캐시에는 비어 있을 수 있다.
+  // 따라서 캐시 값으로 우선 표시한 뒤 서버에서 최신 질환 정보를 조회해 보정한다.
+  useEffect(() => {
+    if (!isOpen) return;
+    if (diabetesTypeProp) {
+      setDiabetesType(diabetesTypeProp);
+      return;
+    }
+
+    // 1) 캐시 값으로 우선 표시 (깜빡임 방지)
+    const cached = parseDiseaseIndex(loadCachedMemberProfile().diseaseIndex);
+    setDiabetesType(cached.diabetes || "NONE");
+
+    // 2) 서버에서 회원가입 때 입력한 실제 당뇨 여부를 조회해 보정하고 캐시도 동기화
+    const userId = user?.userId ?? user?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+    userApi
+      .getMember(userId)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const parsed = parseDiseaseIndex(data.diseaseIndex);
+        setDiabetesType(parsed.diabetes || "NONE");
+        persistMemberProfile(data);
+      })
+      .catch(() => {
+        // 조회 실패 시 위에서 적용한 캐시 값을 그대로 유지
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, diabetesTypeProp, user]);
+
   useEffect(() => {
     setIsFocused(false);
     setTimeEditing(false);
@@ -391,6 +545,34 @@ export default function BloodSugarModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, editingRecord]);
 
+  // 새 기록 모달이 열릴 때, 루틴(/member)에 저장된 식사 시간 ±1시간 안이면
+  // 끼니 탭과 식전/식후를 자동으로 선택해 둔다. (식전: T-1h~T, 식후: T~T+1h)
+  // editingRecord가 있을 땐 위 init effect가 기존 기록값을 그대로 복원하므로 건너뛴다.
+  // 모달 오픈 시 1회만 적용하고, 이후 사용자가 직접 바꾼 값은 덮어쓰지 않는다.
+  useEffect(() => {
+    if (!isOpen || editingRecord) return;
+    const userId = user?.userId ?? user?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+    userConfigApi
+      .getMealTimes(userId)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const auto = resolveAutoMealTiming(data, new Date());
+        if (!auto) return;
+        setActiveMeal(auto.meal);
+        setActiveTiming(auto.timing);
+      })
+      .catch(() => {
+        // 조회 실패 시 기본값(공복/식전)을 그대로 유지
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, editingRecord, user]);
+
   if (!isOpen) return null;
 
   return (
@@ -421,24 +603,20 @@ export default function BloodSugarModal({
             </button>
           </div>
 
-          {/* 안내 박스 */}
+          {/* 안내 박스 — 당뇨 유형 · 측정 시점별 기준 */}
           <div className="mt-5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
-            <div className="grid grid-flow-col grid-rows-3 grid-cols-2 gap-x-6 gap-y-1.5">
-              <p className="text-[13px] leading-relaxed text-[#64748B]">
-                저혈당: 0 ~ 69mg/dL
-              </p>
-              <p className="text-[13px] leading-relaxed text-[#64748B]">
-                정상: 70 ~ 99mg/dL
-              </p>
-              <p className="text-[13px] leading-relaxed text-[#64748B]">
-                주의: 100 ~ 125mg/dL
-              </p>
-              <p className="text-[13px] leading-relaxed text-[#64748B]">
-                경고: 126 ~ 180mg/dL
-              </p>
-              <p className="text-[13px] leading-relaxed text-[#64748B]">
-                위험: 181 ~ 300mg/dL
-              </p>
+            <p className="mb-2 text-[12px] font-bold text-[#475569]">
+              {DIABETES_LABEL[diabetesType] ?? "당뇨 없음"} · {bsContext} 기준
+            </p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+              {guideRows.map((row) => (
+                <p
+                  key={row.label}
+                  className="text-[13px] leading-relaxed text-[#64748B]"
+                >
+                  {row.label}: {row.text}
+                </p>
+              ))}
             </div>
           </div>
         </div>
@@ -559,11 +737,13 @@ export default function BloodSugarModal({
             {/* 슬라이더 */}
             <div className="relative h-[12px] w-full overflow-visible rounded-full mb-3">
               <div className="flex h-full overflow-hidden rounded-full">
-                <div className="h-full bg-[#60A5FA]" style={{ width: "23%" }} />
-                <div className="h-full bg-[#22C55E]" style={{ width: "10%" }} />
-                <div className="h-full bg-[#FACC15]" style={{ width: "8.67%" }} />
-                <div className="h-full bg-[#FB923C]" style={{ width: "18.33%" }} />
-                <div className="h-full bg-[#F87171]" style={{ width: "40%" }} />
+                {zones.map((zone) => (
+                  <div
+                    key={zone.key}
+                    className="h-full"
+                    style={{ width: `${zone.width}%`, backgroundColor: zone.color }}
+                  />
+                ))}
               </div>
 
               <div
@@ -586,11 +766,15 @@ export default function BloodSugarModal({
             </div>
 
             <div className="relative h-[16px] text-[11px] font-medium text-[#94A3B8]">
-              <span className="absolute -translate-x-1/2" style={{ left: "0%" }}>저혈당</span>
-              <span className="absolute -translate-x-1/2" style={{ left: "23%" }}>정상</span>
-              <span className="absolute -translate-x-1/2" style={{ left: "33%" }}>주의</span>
-              <span className="absolute -translate-x-1/2" style={{ left: "41.67%" }}>경고</span>
-              <span className="absolute -translate-x-1/2" style={{ left: "60%" }}>위험</span>
+              {zones.map((zone) => (
+                <span
+                  key={zone.key}
+                  className="absolute -translate-x-1/2"
+                  style={{ left: `${zone.left}%` }}
+                >
+                  {zone.key}
+                </span>
+              ))}
             </div>
           </div>
 
