@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import boardApi from "../../api/boardApi";
+import { useAuth } from "../../contexts/AuthContext";
 
 const PAGE_SIZE = 10;
 
 function BoardListPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [posts, setPosts] = useState([]);
@@ -238,14 +242,22 @@ function BoardListPage() {
         ))}
       </div>
 
-      {/* 글쓰기 버튼 */}
+      {/* 글쓰기 버튼 — 로그인한 경우에만 작성 가능 */}
       <div className="mt-6 flex justify-end">
-        <Link
-          to="/posts/create"
+        <button
+          type="button"
+          onClick={() => {
+            if (!user?.userId) {
+              toast.error("로그인이 필요합니다.");
+              navigate("/login");
+              return;
+            }
+            navigate("/posts/create");
+          }}
           className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
           글쓰기
-        </Link>
+        </button>
       </div>
           </div>
         </main>

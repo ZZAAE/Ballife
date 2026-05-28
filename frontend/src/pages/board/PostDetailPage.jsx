@@ -6,6 +6,84 @@ import postApi from "../../api/boardApi";
 import commentApi from "../../api/commentApi";
 import { useAuth } from "../../contexts/AuthContext";
 
+function CommentBlock({
+  comment,
+  user,
+  formatDate,
+  onUpVote,
+  onDelete,
+  onReplyStart,
+  showReplyButton = false,
+  isReply = false,
+}) {
+  return (
+    <div
+      className={`rounded-md border border-[#eceff3] px-4 py-4 ${
+        isReply ? "bg-white" : "bg-[#f9fafb]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div
+            className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold ${
+              isReply
+                ? "bg-[#dde7f5] text-[#3b5b8e]"
+                : "bg-[#ffe2d7] text-[#9b5b43]"
+            }`}
+          >
+            {comment.author?.[0] || (isReply ? "답" : "댓")}
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-gray-800">
+              {comment.author}
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-gray-600">
+              {comment.content}
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onUpVote(comment.id)}
+                className={`rounded-md border px-3 py-1 text-[11px] font-semibold transition ${
+                  comment.liked
+                    ? "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+                    : "border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {comment.liked ? "♥" : "♡"} 추천 {comment.upVote ?? 0}
+              </button>
+              {showReplyButton && (
+                <button
+                  type="button"
+                  onClick={onReplyStart}
+                  className="rounded-md border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                >
+                  답글
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <span className="text-[11px] text-gray-400">
+            {formatDate(comment.createdAt)}
+          </span>
+          {user?.userId === comment.userId && (
+            <button
+              type="button"
+              onClick={() => onDelete(comment.id)}
+              className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
+            >
+              삭제
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function normalizeContentHtml(content) {
   if (!content) {
     return "";
@@ -25,7 +103,10 @@ export default function PostDetailPage() {
   const [commentDraft, setCommentDraft] = useState("");
   const [commentState, setCommentState] = useState([]);
   const [upVote, setUpVote] = useState(null);
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [replyTo, setReplyTo] = useState(null); // 답글을 다는 부모 댓글 id
+  const [replyDraft, setReplyDraft] = useState("");
 
   const categories = [
     { value: "", label: "게시판을 선택" },
@@ -46,6 +127,7 @@ export default function PostDetailPage() {
     content: raw.content,
     createdAt: raw.createdAt,
     upVote: raw.upVote ?? 0,
+    liked: raw.liked ?? false,
     parentComment: raw.parentComment ?? null,
     level: raw.level ?? 1,
   });
@@ -69,6 +151,8 @@ export default function PostDetailPage() {
         const response = await postApi.getPost(postId);
         if (!isMounted) return;
         setPost(response.data);
+        setUpVote(response.data.upVote ?? 0);
+        setLiked(!!response.data.liked);
         // 상세 페이지 진입 시 조회수 +1 (실패해도 화면은 그대로)
         postApi.upViewCount(postId).catch((err) =>
           console.warn("[PostDetailPage] upViewCount failed:", err),
@@ -88,6 +172,19 @@ export default function PostDetailPage() {
       isMounted = false;
     };
   }, [navigate, postId, fetchComments]);
+
+  // 로그인 상태 변경 시 데이터 초기화/다시 로드
+  useEffect(() => {
+    if (!user) {
+      setPost(null);
+      setCommentState([]);
+      setUpVote(null);
+      setLiked(false);
+      setReplyTo(null);
+      setReplyDraft("");
+      setLoading(true);
+    }
+  }, [user?.userId]);
 
   if (loading) return <div className="p-8 text-center">로딩 중...</div>;
   if (!post) return null;
@@ -136,22 +233,76 @@ export default function PostDetailPage() {
   };
 
   const handleCommentUpVote = async (commentId) => {
+    if (!user?.userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
     try {
-      await commentApi.upVote(commentId);
+      const { data } = await commentApi.upVote(commentId);
       setCommentState((currentComments) =>
         currentComments.map((comment) =>
           comment.id === commentId
-            ? { ...comment, upVote: (comment.upVote ?? 0) + 1 }
+            ? { ...comment, upVote: data.upVote, liked: data.liked }
             : comment,
         ),
       );
-      toast.success("댓글을 추천했습니다.");
+      toast.success(
+        data.liked ? "댓글을 추천했습니다." : "추천을 취소했습니다.",
+      );
     } catch (error) {
       toast.error(
         error.response?.data?.message || "댓글 추천에 실패했습니다.",
       );
     }
   };
+
+  const handleReplyStart = (parentCommentId) => {
+    setReplyTo(parentCommentId);
+    setReplyDraft("");
+  };
+
+  const handleReplyCancel = () => {
+    setReplyTo(null);
+    setReplyDraft("");
+  };
+
+  const handleReplySubmit = async (parentCommentId) => {
+    if (!replyDraft.trim()) {
+      toast.error("답글 내용을 입력해주세요.");
+      return;
+    }
+    if (!user?.userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    try {
+      await commentApi.createComment(user.userId, postId, {
+        content: replyDraft.trim(),
+        parentComment: parentCommentId,
+        level: 2,
+      });
+      setReplyTo(null);
+      setReplyDraft("");
+      await fetchComments();
+      toast.success("답글이 등록되었습니다.");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.errors?.[0]?.defaultMessage ||
+          "답글 등록에 실패했습니다.",
+      );
+    }
+  };
+
+  // 평평한 댓글 배열 → 부모/자식 트리로 정리
+  const rootComments = comments.filter((c) => !c.parentComment);
+  const repliesByParent = comments.reduce((acc, c) => {
+    if (c.parentComment) {
+      if (!acc[c.parentComment]) acc[c.parentComment] = [];
+      acc[c.parentComment].push(c);
+    }
+    return acc;
+  }, {});
 
   const handleCommentDelete = async (commentId) => {
     if (!user?.userId) {
@@ -252,12 +403,17 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 onClick={async () => {
+                  if (!user?.userId) {
+                    toast.error("로그인이 필요합니다.");
+                    return;
+                  }
                   try {
-                    await postApi.upVote(postId);
-                    setUpVote(
-                      (currentValue) => (currentValue ?? post.upVote ?? 0) + 1,
+                    const { data } = await postApi.upVote(postId);
+                    setUpVote(data.upVote);
+                    setLiked(data.liked);
+                    toast.success(
+                      data.liked ? "추천되었습니다." : "추천을 취소했습니다.",
                     );
-                    toast.success("추천되었습니다.");
                   } catch (error) {
                     toast.error(
                       error.response?.data?.message ||
@@ -265,9 +421,13 @@ export default function PostDetailPage() {
                     );
                   }
                 }}
-                className="rounded-md border border-[#d9dde3] bg-[#f8fafc] px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-[#f1f5f9]"
+                className={`rounded-md border px-5 py-2 text-sm font-semibold transition ${
+                  liked
+                    ? "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+                    : "border-[#d9dde3] bg-[#f8fafc] text-gray-600 hover:bg-[#f1f5f9]"
+                }`}
               >
-                추천 {displayedUpVote}
+                {liked ? "♥" : "♡"} 추천 {displayedUpVote}
               </button>
 
               {user?.userId === post.userId && (
@@ -336,52 +496,75 @@ export default function PostDetailPage() {
             </div>
 
             <div className="mt-4 space-y-3">
-              {comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="rounded-md border border-[#eceff3] bg-[#f9fafb] px-4 py-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ffe2d7] text-[11px] font-semibold text-[#9b5b43]">
-                        {comment.author?.[0] || "댓"}
-                      </div>
-                      <div>
-                        <p className="text-[13px] font-semibold text-gray-800">
-                          {comment.author}
-                        </p>
-                        <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-gray-600">
-                          {comment.content}
-                        </p>
-                        <div className="mt-3 flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleCommentUpVote(comment.id)}
-                            className="rounded-md border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
-                          >
-                            추천 {comment.upVote ?? 0}
-                          </button>
+              {rootComments.map((comment) => {
+                const replies = repliesByParent[comment.id] || [];
+                return (
+                  <div key={comment.id}>
+                    <CommentBlock
+                      comment={comment}
+                      user={user}
+                      formatDate={formatDate}
+                      onUpVote={handleCommentUpVote}
+                      onDelete={handleCommentDelete}
+                      onReplyStart={() => handleReplyStart(comment.id)}
+                      showReplyButton
+                    />
+
+                    {/* 답글 입력 폼 */}
+                    {replyTo === comment.id && (
+                      <div className="ml-8 mt-2 rounded-md border border-[#d9dde3] bg-white">
+                        <div className="px-4 py-3">
+                          <textarea
+                            value={replyDraft}
+                            onChange={(e) => setReplyDraft(e.target.value)}
+                            placeholder="답글을 입력해 주세요."
+                            className="h-[64px] w-full resize-none border-0 p-0 text-[13px] leading-6 text-gray-700 outline-none placeholder:text-gray-300"
+                            maxLength={200}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between border-t border-[#eceff3] px-4 py-2">
+                          <span className="text-[11px] text-gray-300">
+                            {replyDraft.length} / 200
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleReplyCancel}
+                              className="rounded border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                            >
+                              취소
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleReplySubmit(comment.id)}
+                              className="rounded bg-gray-500 px-3 py-1 text-[11px] font-semibold text-white hover:bg-gray-600"
+                            >
+                              등록
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      <span className="text-[11px] text-gray-400">
-                        {formatDate(comment.createdAt)}
-                      </span>
-                      {user?.userId === comment.userId && (
-                        <button
-                          type="button"
-                          onClick={() => handleCommentDelete(comment.id)}
-                          className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
-                        >
-                          삭제
-                        </button>
-                      )}
-                    </div>
+                    {/* 자식 답글 목록 */}
+                    {replies.length > 0 && (
+                      <div className="ml-8 mt-2 space-y-2">
+                        {replies.map((reply) => (
+                          <CommentBlock
+                            key={reply.id}
+                            comment={reply}
+                            user={user}
+                            formatDate={formatDate}
+                            onUpVote={handleCommentUpVote}
+                            onDelete={handleCommentDelete}
+                            isReply
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

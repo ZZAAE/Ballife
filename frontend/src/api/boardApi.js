@@ -40,7 +40,7 @@ const postApi = {
         return api.post(`/posts/${postId}/view`);
     },
 
-    // 추천
+    // 추천 토글 (계정당 1개, 재요청 시 취소) → { liked, upVote } 반환
     upVote : (postId) => {
         return api.post(`/posts/${postId}/upvote`);
     }

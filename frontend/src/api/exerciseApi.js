@@ -67,3 +67,8 @@ export function getExercisesInRange(userId, startDate, endDate) {
     `/users/${userId}/exercises/detailed?start=${startDate}&end=${endDate}`,
   );
 }
+
+// 모든 운동 종류 조회 (MET 값 포함)
+export function getExerciseTypes() {
+  return request(`/exercise-types`);
+}

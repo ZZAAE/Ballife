@@ -1,5 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import mealApi from "../../api/mealApi";
+import bioValueRecordApi from "../../api/bioValueRecordApi";
+import userConfigApi from "../../api/userConfigApi";
+import { getExercisesInRange } from "../../api/exerciseApi";
+import { BIO_CATEGORY } from "../../constants/bioCategory";
 import { useAuth } from "../../contexts/AuthContext";
 
 const MEAL_CATEGORY_LABEL = {
@@ -9,6 +13,59 @@ const MEAL_CATEGORY_LABEL = {
   SNACK: "간식",
 };
 const MEAL_CATEGORY_ORDER = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
+
+const ML_PER_CUP = 200;
+const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
+
+const pad2 = (n) => String(n).padStart(2, "0");
+const toDateStr = (d) =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const shiftDate = (dateStr, days) => {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return toDateStr(d);
+};
+const avg = (arr) =>
+  arr.length ? Math.round(arr.reduce((s, x) => s + x, 0) / arr.length) : null;
+
+// "BloodSugar-아침식전" 류 카테고리에서 meal/timing 추출
+const parseBsCategory = (category) => {
+  if (typeof category !== "string" || !category.includes("-"))
+    return { meal: "공복", timing: "식전" };
+  const suffix = category.split("-")[1];
+  if (suffix === "공복") return { meal: "공복", timing: "식전" };
+  if (suffix === "취침전") return { meal: "취침전", timing: "식전" };
+  for (const m of ["아침", "점심", "저녁"]) {
+    if (suffix.startsWith(m)) {
+      const t = suffix.slice(m.length) === "식후" ? "식후" : "식전";
+      return { meal: m, timing: t };
+    }
+  }
+  return { meal: "공복", timing: "식전" };
+};
+
+// "BloodPressure-아침" 류 카테고리에서 timing 추출
+const parseBpTiming = (category) =>
+  typeof category === "string" && category.includes("-")
+    ? category.split("-")[1]
+    : "기타";
+
+const BS_ORDER = ["아침", "점심", "저녁", "취침전", "공복"];
+const BP_ORDER = ["아침", "점심", "저녁", "취침전", "기타"];
+
+const readMedicationSchedules = (dateStr) => {
+  try {
+    const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateStr);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const formatNumber = (n) =>
+  n == null ? "—" : Number(n).toLocaleString();
 
 const mapItemToCardFormat = (item) => ({
   name: item.foodName,
@@ -65,27 +122,18 @@ import {
   AreaChart,
   Area,
   ResponsiveContainer,
-  Cell,
   LabelList,
 } from "recharts";
 import {
   Droplets,
-  Activity,
   Scale,
   Utensils,
-  Pill,
   Dumbbell,
-  Heart,
-  Menu,
-  ChevronRight,
   Check,
   TrendingDown,
-  Bot,
-  Clock,
   Sun,
   Coffee,
   Moon,
-  Apple,
   TrendingUp,
 } from "lucide-react";
 
@@ -95,24 +143,39 @@ import MealRegisterModal from "../../modals/MealRegisterModal";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
 import MealDetailModal from "../../modals/MealDetailModal";
 
-const bloodSugarData = [
-  { time: "아침", fasting: 95, postMeal: 120 },
-  { time: "점심", fasting: 88, postMeal: 135 },
-  { time: "저녁", fasting: 100, postMeal: 147 },
-];
-
-const bloodPressureData = [
-  { time: "아침", systolic: 185, diastolic: 130 },
-  { time: "점심", systolic: 195, diastolic: 140 },
-  { time: "저녁", systolic: 190, diastolic: 135 },
-];
-
 const MacroBadge = ({ label, value, unit = "g" }) => (
   <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-400 bg-slate-50 rounded px-1.5 py-0.5">
     <span className="text-slate-500 font-medium">{label}</span> {value}
     {unit}
   </span>
 );
+
+// 혈압 차트 호버 시 상세값 툴팁
+const BloodPressureTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-[0_4px_12px_rgba(15,23,42,0.08)]">
+      <p className="mb-2 text-[12px] font-bold text-slate-900">{label}</p>
+      <div className="space-y-1">
+        {payload.map((p) => (
+          <div key={p.dataKey} className="flex items-center gap-2 text-[12px]">
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: p.color }}
+            />
+            <span className="text-slate-500">{p.name}</span>
+            <span className="ml-auto font-bold text-slate-900">
+              {p.value}
+              <span className="ml-0.5 text-[10px] font-medium text-slate-400">
+                mmHg
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function RecordSummary() {
   const { user } = useAuth();
@@ -129,6 +192,177 @@ export default function RecordSummary() {
 
   // 식단 데이터 fetch (MealPage와 동일 로직)
   const [meals, setMeals] = useState([]);
+
+  // 요약 카드 / 차트 / 복약 실제 데이터
+  const [summary, setSummary] = useState({
+    intakeKcal: null,
+    targetIntakeKcal: null,
+    exerciseMin: null,
+    burnedKcal: null,
+    weightKg: null,
+    weightDelta: null,
+    waterMl: null,
+    targetWaterMl: null,
+  });
+  const [bloodSugarData, setBloodSugarData] = useState([]);
+  const [bloodPressureData, setBloodPressureData] = useState([]);
+  const [medSchedules, setMedSchedules] = useState([]);
+
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) {
+      setSummary({
+        intakeKcal: null,
+        targetIntakeKcal: null,
+        exerciseMin: null,
+        burnedKcal: null,
+        weightKg: null,
+        weightDelta: null,
+        waterMl: null,
+        targetWaterMl: null,
+      });
+      setBloodSugarData([]);
+      setBloodPressureData([]);
+      setMedSchedules([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const date = selectedDate;
+    const weekAgo = shiftDate(date, -7);
+    const rangeStart = shiftDate(date, -14);
+
+    Promise.allSettled([
+      mealApi.getDayTotalNutrient(userId, date),
+      getExercisesInRange(userId, date, date),
+      bioValueRecordApi.searchByDateBetween(
+        userId,
+        BIO_CATEGORY.WEIGHT,
+        rangeStart,
+        date,
+      ),
+      bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.WATER_INTAKE, date),
+      bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.BLOOD_SUGAR, date),
+      bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.BLOOD_PRESSURE, date),
+      userConfigApi.getUserConfig(userId),
+    ]).then(
+      ([mealRes, exRes, wtRes, waterRes, bsRes, bpRes, cfgRes]) => {
+        if (cancelled) return;
+
+        // 식단 섭취 칼로리
+        const intakeKcal =
+          mealRes.status === "fulfilled" && Array.isArray(mealRes.value?.data)
+            ? Number(mealRes.value.data[0]) || 0
+            : 0;
+
+        // 운동 활동시간 / 소모 칼로리
+        let exerciseMin = 0;
+        let burnedKcal = 0;
+        if (exRes.status === "fulfilled" && Array.isArray(exRes.value)) {
+          exRes.value.forEach((e) => {
+            exerciseMin += Number(e.exerciseMin) || 0;
+            burnedKcal += Number(e.burnedCalorie) || 0;
+          });
+        }
+
+        // 체중 (선택일 기준 최신 + 지난주 대비)
+        let weightKg = null;
+        let weightDelta = null;
+        if (wtRes.status === "fulfilled" && Array.isArray(wtRes.value?.data)) {
+          const list = wtRes.value.data
+            .filter((r) => r.weight != null)
+            .sort((a, b) => (a.recordDate < b.recordDate ? -1 : 1));
+          const latestOnOrBefore = (limit) =>
+            [...list].reverse().find((r) => r.recordDate <= limit) || null;
+          const cur = latestOnOrBefore(date);
+          const prev = latestOnOrBefore(weekAgo);
+          if (cur) weightKg = Number(cur.weight);
+          if (cur && prev)
+            weightDelta = +(Number(cur.weight) - Number(prev.weight)).toFixed(1);
+        }
+
+        // 수분 (컵 → ml)
+        let waterMl = 0;
+        if (
+          waterRes.status === "fulfilled" &&
+          Array.isArray(waterRes.value?.data)
+        ) {
+          const cups = waterRes.value.data.reduce(
+            (s, r) => s + (r.waterIntakeCup || 0),
+            0,
+          );
+          waterMl = cups * ML_PER_CUP;
+        }
+
+        // 목표치 (user_config)
+        let targetIntakeKcal = null;
+        let targetWaterMl = null;
+        if (cfgRes.status === "fulfilled" && cfgRes.value?.data) {
+          const cfg = cfgRes.value.data;
+          targetIntakeKcal = cfg.targetDailyCaloriesIntake ?? null;
+          targetWaterMl =
+            cfg.targetDailyWaterIntake != null
+              ? cfg.targetDailyWaterIntake * ML_PER_CUP
+              : null;
+        }
+
+        setSummary({
+          intakeKcal,
+          targetIntakeKcal,
+          exerciseMin,
+          burnedKcal,
+          weightKg,
+          weightDelta,
+          waterMl,
+          targetWaterMl,
+        });
+
+        // 혈당 차트 (끼니별 식전/식후 평균)
+        const bsMap = {};
+        if (bsRes.status === "fulfilled" && Array.isArray(bsRes.value?.data)) {
+          bsRes.value.data.forEach((r) => {
+            if (r.bloodSugar == null) return;
+            const { meal, timing } = parseBsCategory(r.category);
+            if (!bsMap[meal]) bsMap[meal] = { fasting: [], postMeal: [] };
+            if (timing === "식후") bsMap[meal].postMeal.push(Number(r.bloodSugar));
+            else bsMap[meal].fasting.push(Number(r.bloodSugar));
+          });
+        }
+        setBloodSugarData(
+          BS_ORDER.filter((m) => bsMap[m]).map((m) => ({
+            time: m,
+            fasting: avg(bsMap[m].fasting),
+            postMeal: avg(bsMap[m].postMeal),
+          })),
+        );
+
+        // 혈압 차트 (시간대별 수축기/이완기 평균)
+        const bpMap = {};
+        if (bpRes.status === "fulfilled" && Array.isArray(bpRes.value?.data)) {
+          bpRes.value.data.forEach((r) => {
+            if (r.systolicBP == null || r.diastolicBP == null) return;
+            const timing = parseBpTiming(r.category);
+            if (!bpMap[timing]) bpMap[timing] = { sys: [], dia: [] };
+            bpMap[timing].sys.push(Number(r.systolicBP));
+            bpMap[timing].dia.push(Number(r.diastolicBP));
+          });
+        }
+        setBloodPressureData(
+          BP_ORDER.filter((t) => bpMap[t]).map((t) => ({
+            time: t,
+            systolic: avg(bpMap[t].sys),
+            diastolic: avg(bpMap[t].dia),
+          })),
+        );
+      },
+    );
+
+    setMedSchedules(readMedicationSchedules(date));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, selectedDate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -187,6 +421,60 @@ export default function RecordSummary() {
     }
   };
 
+  // ── 요약 카드 표시값 ──
+  const intakeRemaining =
+    summary.targetIntakeKcal != null && summary.intakeKcal != null
+      ? summary.targetIntakeKcal - summary.intakeKcal
+      : null;
+  const mealUnit =
+    summary.targetIntakeKcal != null
+      ? `/ ${formatNumber(summary.targetIntakeKcal)} kcal`
+      : "kcal";
+  const mealBottom =
+    intakeRemaining != null
+      ? intakeRemaining >= 0
+        ? `남은 섭취 칼로리 ${formatNumber(intakeRemaining)}kcal`
+        : `목표 초과 ${formatNumber(Math.abs(intakeRemaining))}kcal`
+      : "목표 미설정";
+
+  const exerciseBottom =
+    summary.burnedKcal != null
+      ? `총 소모칼로리 ${formatNumber(Math.round(summary.burnedKcal))} kcal`
+      : "기록 없음";
+
+  const weightInc = summary.weightDelta != null && summary.weightDelta > 0;
+  const weightDec = summary.weightDelta != null && summary.weightDelta < 0;
+  const weightBottom =
+    summary.weightDelta != null
+      ? `지난주 대비 ${summary.weightDelta > 0 ? "+" : ""}${summary.weightDelta}kg`
+      : "지난주 기록 없음";
+  const weightBottomColor = weightInc
+    ? "text-rose-600"
+    : weightDec
+      ? "text-emerald-600"
+      : "text-slate-400";
+
+  const waterL = summary.waterMl != null ? +(summary.waterMl / 1000).toFixed(1) : null;
+  const targetWaterL =
+    summary.targetWaterMl != null ? +(summary.targetWaterMl / 1000).toFixed(1) : null;
+  const waterRemainingL =
+    targetWaterL != null && waterL != null
+      ? Math.max(0, +(targetWaterL - waterL).toFixed(1))
+      : null;
+  const waterUnit = targetWaterL != null ? `/ ${targetWaterL} L` : "L";
+  const waterBottom =
+    waterRemainingL != null
+      ? waterRemainingL === 0
+        ? "목표량 달성"
+        : `남은 수분 섭취량 ${waterRemainingL}L`
+      : "목표 미설정";
+
+  const medDateLabel = (() => {
+    const d = new Date(selectedDate);
+    if (Number.isNaN(d.getTime())) return selectedDate;
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+  })();
+
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-noto-sans max-w-[1920px] mx-auto">
       <div className="flex pt-[55px]">
@@ -232,9 +520,11 @@ export default function RecordSummary() {
               colorBackgorund="bg-red-50"
               labelName="식단"
               description="오늘의 섭취 kcal"
-              record="1,450"
-              unit="/ 2,100 kcal"
-              bottomLabel="남은 섭취 칼로리 650kcal"
+              record={formatNumber(
+                summary.intakeKcal != null ? Math.round(summary.intakeKcal) : null,
+              )}
+              unit={mealUnit}
+              bottomLabel={mealBottom}
               bottomeLabelColor="text-red-600"
             />
 
@@ -245,10 +535,9 @@ export default function RecordSummary() {
               colorBackgorund="bg-orange-50"
               labelName="운동"
               description="오늘의 활동 시간"
-              record="45"
+              record={summary.exerciseMin != null ? formatNumber(summary.exerciseMin) : "—"}
               unit="분"
-              bottomLabel="총 소모칼로리 500 kcal"
-              //BottomIcon = {TrendingUp}
+              bottomLabel={exerciseBottom}
               bottomeLabelColor="text-orange-600"
             />
 
@@ -259,11 +548,11 @@ export default function RecordSummary() {
               colorBackgorund="bg-yellow-50"
               labelName="체중"
               description="현재 체중 및 추세"
-              record="72.4"
+              record={summary.weightKg != null ? summary.weightKg : "—"}
               unit="kg"
-              bottomLabel="지난주 대비 -0.8kg"
-              BottomIcon={TrendingDown}
-              bottomeLabelColor="text-emerald-600"
+              bottomLabel={weightBottom}
+              BottomIcon={weightInc ? TrendingUp : weightDec ? TrendingDown : undefined}
+              bottomeLabelColor={weightBottomColor}
             />
 
             {/* 수분 Card */}
@@ -273,9 +562,9 @@ export default function RecordSummary() {
               colorBackgorund="bg-sky-50"
               labelName="수분"
               description="오늘의 수분 섭취량"
-              record="1.6"
-              unit="/ 2.5 L"
-              bottomLabel="남은 수분 섭취량 0.9L"
+              record={waterL != null ? waterL : "—"}
+              unit={waterUnit}
+              bottomLabel={waterBottom}
               bottomeLabelColor="text-sky-600"
             />
           </div>
@@ -298,6 +587,11 @@ export default function RecordSummary() {
                   </span>
                 </div>
               </div>
+              {bloodSugarData.length === 0 ? (
+                <div className="flex h-[240px] items-center justify-center text-sm text-slate-400">
+                  이 날의 혈당 기록이 없습니다.
+                </div>
+              ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={bloodSugarData} barCategoryGap="30%" barGap={4}>
                   <CartesianGrid
@@ -362,6 +656,7 @@ export default function RecordSummary() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              )}
             </div>
 
             {/* 혈압 Chart */}
@@ -381,6 +676,11 @@ export default function RecordSummary() {
                   </span>
                 </div>
               </div>
+              {bloodPressureData.length === 0 ? (
+                <div className="flex h-[240px] items-center justify-center text-sm text-slate-400">
+                  이 날의 혈압 기록이 없습니다.
+                </div>
+              ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={bloodPressureData}>
                   <CartesianGrid
@@ -401,22 +701,30 @@ export default function RecordSummary() {
                     tick={{ fontSize: 11, fill: "#94a3b8" }}
                     ticks={[0, 100, 200, 300]}
                   />
+                  <Tooltip content={<BloodPressureTooltip />} />
                   <Area
                     type="monotone"
                     dataKey="systolic"
+                    name="수축기"
                     stroke="#f87171"
                     fill="#fee2e2"
                     strokeWidth={2}
+                    dot={{ r: 4, fill: "#fff", stroke: "#f87171", strokeWidth: 2 }}
+                    activeDot={{ r: 6 }}
                   />
                   <Area
                     type="monotone"
                     dataKey="diastolic"
+                    name="이완기"
                     stroke="#818cf8"
                     fill="#e0e7ff"
                     strokeWidth={2}
+                    dot={{ r: 4, fill: "#fff", stroke: "#818cf8", strokeWidth: 2 }}
+                    activeDot={{ r: 6 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
           </div>
           {/* 복용 일정 */}
@@ -427,57 +735,77 @@ export default function RecordSummary() {
                   오늘의 복용 일정
                 </h3>
                 <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-3 py-1">
-                  2025년 5월 22일
+                  {medDateLabel}
                 </span>
               </div>
-              <button className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                알림 설정 변경 <ChevronRight size={14} />
-              </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              {/* 아침약 */}
-              <div className="border border-gray-100 rounded-xl p-4">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
-                  <Sun size={13} /> 아침 (08:00)
-                </div>
-                <p className="font-semibold text-sm text-gray-900 mb-0.5">
-                  아침약
-                </p>
-                <p className="text-xs text-gray-400 mb-3">식후 30분 복용</p>
-                <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                  <Check size={14} /> 복용 완료
-                </div>
+            {medSchedules.length === 0 ? (
+              <p className="py-8 text-center text-sm text-gray-400">
+                해당 날짜의 복용 일정이 없습니다.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {medSchedules.map((schedule) => {
+                  const drugs = schedule.drugs || [];
+                  const takenCount = drugs.filter((d) => d.taken).length;
+                  const status =
+                    drugs.length > 0 && takenCount === drugs.length
+                      ? "all"
+                      : takenCount > 0
+                        ? "partial"
+                        : "none";
+                  const ScheduleIcon =
+                    schedule.id === "lunch"
+                      ? Coffee
+                      : schedule.id === "dinner"
+                        ? Moon
+                        : Sun;
+                  return (
+                    <div
+                      key={schedule.id}
+                      className={`rounded-xl p-4 ${
+                        status === "none"
+                          ? "border-2 border-gray-900"
+                          : "border border-gray-100"
+                      }`}
+                    >
+                      <div
+                        className={`flex items-center gap-1.5 text-xs mb-3 ${
+                          status === "none"
+                            ? "text-gray-900 font-bold"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        <ScheduleIcon size={13} /> {schedule.label}
+                        {schedule.time ? ` (${schedule.time})` : ""}
+                      </div>
+                      <p className="font-semibold text-sm text-gray-900 mb-0.5">
+                        {schedule.name}
+                      </p>
+                      <p className="text-xs text-gray-400 mb-3">
+                        {drugs.length > 0
+                          ? drugs.map((d) => d.name).join(", ")
+                          : schedule.note}
+                      </p>
+                      {status === "all" ? (
+                        <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                          <Check size={14} /> 복용 완료
+                        </div>
+                      ) : status === "partial" ? (
+                        <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+                          부분 복용 ({takenCount}/{drugs.length})
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-xs text-gray-400 font-medium">
+                          미복용
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* 점심약 */}
-              <div className="border border-gray-100 rounded-xl p-4">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
-                  <Coffee size={13} /> 점심 (13:00)
-                </div>
-                <p className="font-semibold text-sm text-gray-900 mb-0.5">
-                  점심약
-                </p>
-                <p className="text-xs text-gray-400 mb-3">식사 중 복용</p>
-                <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                  <Check size={14} /> 복용 완료
-                </div>
-              </div>
-
-              {/* 저녁약 */}
-              <div className="border-2 border-gray-900 rounded-xl p-4">
-                <div className="flex items-center gap-1.5 text-xs text-gray-900 font-bold mb-3">
-                  <Moon size={13} /> 저녁 (19:00)
-                </div>
-                <p className="font-semibold text-sm text-gray-900 mb-0.5">
-                  저녁약
-                </p>
-                <p className="text-xs text-gray-400 mb-3">식후 30분 복용</p>
-                <button className="w-full bg-gray-900 text-white text-xs font-medium py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
-                  복용 확인
-                </button>
-              </div>
-            </div>
+            )}
           </div>
           {meals.length === 0 ? (
             <div className="mb-9 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-white py-16 px-6">
@@ -511,7 +839,7 @@ export default function RecordSummary() {
               </p>
             </div>
           ) : (
-            <div className="flex gap-4 mb-9 flex-wrap">
+            <div className="grid grid-cols-1 gap-4 mb-9 sm:grid-cols-2 lg:grid-cols-4">
               {meals.map((meal) => (
                 <MealRecordCard
                   key={meal.id}
@@ -520,7 +848,7 @@ export default function RecordSummary() {
                   items={meal.items}
                   image={meal.image}
                   onClick={() => setSelectedMeal(meal)}
-                  className="w-[300px] shrink-0 cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
+                  className="w-full cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
                 />
               ))}
             </div>

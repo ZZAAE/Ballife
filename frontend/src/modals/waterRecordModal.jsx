@@ -33,6 +33,7 @@ const WaterRecordModal = ({
   onSave,
   currentAmount = 1400, // 먹은 물 양
   targetAmount = 2000, // 목표치
+  recordDate, // 부모가 지정한 기록 날짜 (없으면 오늘)
 }) => {
   const clipPathId = useId();
   const { user } = useAuth();
@@ -93,20 +94,21 @@ const WaterRecordModal = ({
   const handleSave = async () => {
     if (!userId) return;
     const now = new Date();
-    const today = getTodayStr();
+    const targetDate = recordDate || getTodayStr(); // 부모가 날짜 안 주면 오늘
     const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     const payload = {
-      recordDate: today,
+      recordDate: targetDate,
       recordTime,
       category: BIO_CATEGORY.WATER_INTAKE,
       waterIntakeCup: parsedCurrentCups,
     };
 
     try {
-      // 오늘 기록이 있으면 UPDATE, 없으면 CREATE
-      let existingId = todayRecordId;
+      // 선택한 날짜에 기록이 있으면 UPDATE, 없으면 CREATE
+      // (부모가 오늘 날짜를 줬을 때만 todayRecordId 캐시 사용)
+      let existingId = (recordDate && recordDate !== getTodayStr()) ? null : todayRecordId;
       if (!existingId) {
-        const check = await bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.WATER_INTAKE, today);
+        const check = await bioValueRecordApi.searchByDate(userId, BIO_CATEGORY.WATER_INTAKE, targetDate);
         const list = check.data ?? [];
         if (list.length > 0) existingId = list[0].recordId;
       }

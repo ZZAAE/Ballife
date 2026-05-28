@@ -170,17 +170,16 @@ export default function MealPage() {
     );
   const totalCal = sumKey("kcal");
   const targetCal = 2100;
-  const burned = 0;
   const remaining = Math.max(targetCal - totalCal, 0);
   const achievement = targetCal > 0 ? Math.round((totalCal / targetCal) * 100) : 0;
 
   const nutritionSummary = [
-    { label: "탄수화물",    current: Math.round(sumKey("carb")),    target: NUTRITION_TARGETS.carb,    unit: "g",  over: sumKey("carb")    > NUTRITION_TARGETS.carb },
-    { label: "단백질",      current: Math.round(sumKey("protein")), target: NUTRITION_TARGETS.protein, unit: "g",  over: sumKey("protein") > NUTRITION_TARGETS.protein },
-    { label: "지방",        current: Math.round(sumKey("fat")),     target: NUTRITION_TARGETS.fat,     unit: "g",  over: sumKey("fat")     > NUTRITION_TARGETS.fat },
-    { label: "당류",        current: Math.round(sumKey("sugar")),   target: NUTRITION_TARGETS.sugar,   unit: "g",  over: sumKey("sugar")   > NUTRITION_TARGETS.sugar },
-    { label: "나트륨",      current: Math.round(sumKey("na")),      target: NUTRITION_TARGETS.na,      unit: "mg", over: sumKey("na")      > NUTRITION_TARGETS.na },
-    { label: "콜레스테롤",  current: Math.round(sumKey("chol")),    target: NUTRITION_TARGETS.chol,    unit: "mg", over: sumKey("chol")    > NUTRITION_TARGETS.chol },
+    { label: "탄수화물",    current: Math.round(sumKey("carb")),    target: NUTRITION_TARGETS.carb,    unit: "g",  over: sumKey("carb")    > NUTRITION_TARGETS.carb,    barClass: "bg-slate-400" },
+    { label: "단백질",      current: Math.round(sumKey("protein")), target: NUTRITION_TARGETS.protein, unit: "g",  over: sumKey("protein") > NUTRITION_TARGETS.protein, barClass: "bg-cyan-500" },
+    { label: "지방",        current: Math.round(sumKey("fat")),     target: NUTRITION_TARGETS.fat,     unit: "g",  over: sumKey("fat")     > NUTRITION_TARGETS.fat,     barClass: "bg-orange-400" },
+    { label: "당류",        current: Math.round(sumKey("sugar")),   target: NUTRITION_TARGETS.sugar,   unit: "g",  over: sumKey("sugar")   > NUTRITION_TARGETS.sugar,   barClass: "bg-pink-400" },
+    { label: "나트륨",      current: Math.round(sumKey("na")),      target: NUTRITION_TARGETS.na,      unit: "mg", over: sumKey("na")      > NUTRITION_TARGETS.na,      barClass: "bg-yellow-500" },
+    { label: "콜레스테롤",  current: Math.round(sumKey("chol")),    target: NUTRITION_TARGETS.chol,    unit: "mg", over: sumKey("chol")    > NUTRITION_TARGETS.chol,    barClass: "bg-indigo-400" },
   ];
 
   return (
@@ -241,7 +240,6 @@ export default function MealPage() {
               <div className="flex gap-6 text-center">
                 {[
                   { label: "잔여",   value: remaining,         color: "#171c1f" },
-                  { label: "소모",   value: burned,            color: "#171c1f" },
                   { label: "달성률", value: `${achievement}%`, color: "#004bca" },
                 ].map((s) => (
                   <div key={s.label}>
@@ -255,25 +253,17 @@ export default function MealPage() {
             </div>
 
             {/* 점수 카드 */}
-            <div className="bg-white rounded-2xl p-7 flex-[1_1_320px] flex gap-7 items-center min-w-0 flex-wrap">
-              <div className="relative w-40 h-40 shrink-0">
-                <DonutChart value={85} max={100} size={160} strokeWidth={10} color="#10B981" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[11px] font-medium text-[#45474c]">오늘의 식단 점수</span>
-                  <span className="text-[40px] font-semibold text-[#040d1b]">85</span>
-                  <span className="text-[13px] font-medium text-emerald-500">훌륭한 균형</span>
+            <div className="bg-white rounded-2xl p-6 flex-[1_1_320px] flex gap-7 items-stretch min-w-0 flex-wrap">
+              <div className="flex flex-col items-start shrink-0">
+                <div className="relative w-40 h-40">
+                  <DonutChart value={85} max={100} size={160} strokeWidth={10} color="#10B981" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[11px] font-medium text-[#45474c]">오늘의 식단 점수</span>
+                    <span className="text-[40px] font-semibold text-[#040d1b]">85</span>
+                    <span className="text-[13px] font-medium text-emerald-500">훌륭한 균형</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-[1_1_280px] min-w-0">
-                <h3 className="text-lg font-medium text-[#040d1b] mt-0 mb-2.5">
-                  영양 성분이 아주 조화롭습니다.
-                </h3>
-                <p className="text-[13px] font-medium text-[#45474c] leading-relaxed mt-0 mb-3.5">
-                  현재까지 섭취한 영양소 비율이 권장 가이드라인에 매우 근접해
-                  있습니다. 특히 단백질과 지방의 비율이 안정적이며, 남은 하루
-                  동안 식이섬유 보충에만 신경 쓰시면 완벽한 하루가 될 것 같습니다.
-                </p>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap mt-auto pt-4">
                   {["#단백질_충분", "#저당_식단"].map((tag) => (
                     <span
                       key={tag}
@@ -284,6 +274,16 @@ export default function MealPage() {
                   ))}
                 </div>
               </div>
+              <div className="flex flex-[1_1_280px] min-w-0 flex-col justify-center">
+                <h3 className="text-lg font-medium text-[#040d1b] mt-0 mb-2.5">
+                  영양 성분이 아주 조화롭습니다.
+                </h3>
+                <p className="text-[13px] font-medium text-[#45474c] leading-relaxed mt-0 mb-0">
+                  현재까지 섭취한 영양소 비율이 권장 가이드라인에 매우 근접해
+                  있습니다. 특히 단백질과 지방의 비율이 안정적이며, 남은 하루
+                  동안 식이섬유 보충에만 신경 쓰시면 완벽한 하루가 될 것 같습니다.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -292,7 +292,7 @@ export default function MealPage() {
             오늘의 식단 기록 확인
           </h2>
           {meals.length > 0 ? (
-            <div className="flex gap-4 mb-9 flex-wrap">
+            <div className="grid grid-cols-1 gap-4 mb-9 sm:grid-cols-2 lg:grid-cols-4">
               {meals.map((meal) => (
                 <MealRecordCard
                   key={meal.id}
@@ -301,7 +301,7 @@ export default function MealPage() {
                   items={meal.items}
                   image={meal.image}
                   onClick={() => setSelectedMeal(meal)}
-                  className="w-[300px] shrink-0 cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
+                  className="w-full cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
                 />
               ))}
             </div>

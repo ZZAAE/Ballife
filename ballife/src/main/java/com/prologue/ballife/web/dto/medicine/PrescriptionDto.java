@@ -31,7 +31,9 @@ public class PrescriptionDto {
         @NotBlank(message = "복용 간격을 최소 하나 이상 선택해주세요")
         private String intakeIntervals;
 
-        
+        private String dosage;
+
+
     };
 
     @Data
@@ -53,7 +55,9 @@ public class PrescriptionDto {
         @NotBlank(message = "복용 간격을 최소 하나 이상 선택해주세요")
         private String intakeIntervals;
 
-        
+        private String dosage;
+
+
     };
 
     @Data
@@ -66,6 +70,7 @@ public class PrescriptionDto {
         private LocalDate prescriptionDate;
         private String memo;
         private String intakeIntervals;
+        private String dosage;
 
         public static PrescriptionResponse from(Prescription pr){
             return PrescriptionResponse.builder()
@@ -74,6 +79,7 @@ public class PrescriptionDto {
                                     .prescriptionDate(pr.getPrescriptionDate())
                                     .memo(pr.getMemo())
                                     .intakeIntervals(pr.getIntakeIntervals())
+                                    .dosage(pr.getDosage())
                                     .build();
         }
     }

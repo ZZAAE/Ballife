@@ -1,10 +1,13 @@
 import PrescriptionRegisterModal from "../../modals/PrescriptionRegisterModal";
 import RoutineModal from "../../modals/RoutineModal";
 import TargetModal from "../../modals/TargetModal";
+import SubscriptionModal from "../../modals/SubscriptionModal";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Crown } from "lucide-react";
 import userApi from "../../api/userApi";
+import subscriptionApi from "../../api/subscriptionApi";
 import userConfigApi from "../../api/userConfigApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
@@ -101,6 +104,8 @@ function UserInformation() {
   const [isPreResisterModalOpen, SetPreResisterModalOpen] = useState(false);
   const [isRoutineModalOpen, setRoutineModalOpen] = useState(false);
   const [isTargetModalOpen, setTargetModalOpen] = useState(false);
+  const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [subscription, setSubscription] = useState(null);
   const [memberProfile, setMemberProfile] = useState(() =>
     loadCachedMemberProfile(),
   );
@@ -183,11 +188,21 @@ function UserInformation() {
       }
     };
 
+    const fetchSubscription = async () => {
+      try {
+        const { data } = await subscriptionApi.getMySubscription();
+        setSubscription(data);
+      } catch (error) {
+        // 미구독/오류 시 무시
+      }
+    };
+
     fetchMember();
     fetchUserConfig();
     fetchTodayBurnedCalorie();
     fetchTodayWater();
     fetchTodayIntakeCalorie();
+    fetchSubscription();
     const syncDraftProfile = (event) => {
       setMemberProfile((prev) => ({ ...prev, ...(event.detail || {}) }));
     };
@@ -341,6 +356,58 @@ function UserInformation() {
     return data;
   };
 
+  const handleSubscribe = async (plan) => {
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      throw new Error("missing userId");
+    }
+    const { data } = await subscriptionApi.activate(plan);
+    setSubscription(data);
+    toast.success("구독이 활성화되었습니다.");
+    return data;
+  };
+
+  const handleCancelSubscription = async () => {
+    const { data } = await subscriptionApi.cancel();
+    setSubscription(data);
+    toast.success("구독을 해지했습니다.");
+    return data;
+  };
+
+  const subPlan = subscription?.plan ?? "NONE";
+  const subBadge =
+    subPlan === "FAMILY"
+      ? { label: "가족 플랜", cls: "bg-[#0f1c33] text-white" }
+      : subPlan === "INDIVIDUAL"
+        ? { label: "개인 플랜", cls: "bg-[#EFF6FF] text-[#3B82F6]" }
+        : { label: "무료", cls: "bg-[#F1F5F9] text-[#64748B]" };
+  const subExpiry = subscription?.expiresAt
+    ? new Date(subscription.expiresAt).toLocaleDateString()
+    : null;
+
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+        <div className="flex pt-[55px]">
+          <main className="min-w-0 flex-1">
+            <div className="mx-auto box-border max-w-[1280px] px-6 py-20 text-center">
+              <p className="text-base text-[#64748B]">
+                로그인이 필요한 페이지입니다.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="mt-4 rounded-lg bg-[#0f1c33] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+              >
+                로그인 하러 가기
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
@@ -393,6 +460,72 @@ function UserInformation() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr]">
               {/* 좌측 패널 */}
               <div className="flex flex-col gap-5 pr-8">
+                {/* 구독 카드 */}
+                <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0f1c33] text-white">
+                        <Crown size={16} />
+                      </div>
+                      <h3 className="text-[15px] font-bold tracking-tight text-[#0F172A]">
+                        구독
+                      </h3>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${subBadge.cls}`}
+                    >
+                      {subBadge.label}
+                    </span>
+                  </div>
+
+                  {subscription?.active ? (
+                    <p className="text-[13px] text-[#64748B]">
+                      {subscription.planName} 이용 중
+                      {subExpiry && ` · ${subExpiry}까지`}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-[#64748B]">
+                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해 보세요.
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {subscription?.reportAccess && (
+                      <button
+                        type="button"
+                        onClick={() => navigate("/report/health")}
+                        className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        건강 리포트
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/member/family")}
+                      className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                      가족 관리
+                    </button>
+                    {subPlan === "NONE" ? (
+                      <button
+                        type="button"
+                        onClick={() => setSubscriptionModalOpen(true)}
+                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                      >
+                        구독하기
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setSubscriptionModalOpen(true)}
+                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                      >
+                        구독 관리
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* 회원 정보 카드 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
@@ -678,6 +811,14 @@ function UserInformation() {
             calorieIn: goals.calorieIn ?? "",
             calorieOut: goals.calorieOut ?? "",
           }}
+        />
+
+        <SubscriptionModal
+          open={isSubscriptionModalOpen}
+          onClose={() => setSubscriptionModalOpen(false)}
+          onSubmit={handleSubscribe}
+          onCancel={handleCancelSubscription}
+          currentPlan={subPlan}
         />
       </div>
     </div>
