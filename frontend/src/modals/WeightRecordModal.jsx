@@ -28,7 +28,7 @@ const resolveUserId = (user) => {
   }
 };
 
-const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
+const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -106,11 +106,12 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
     const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
     const payload = {
-      recordDate,
+      recordDate: targetDate,
       recordTime,
       category: WEIGHT_CATEGORY,
       weight: weightValue,
@@ -118,13 +119,13 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
     setSubmitting(true);
     try {
-      // 1. 오늘 같은 카테고리 기록이 이미 있는지 조회 (체중은 하루 1개만 유지)
-      const todayRes = await bioValueRecordApi.searchByDate(
+      // 1. 선택한 날짜에 같은 카테고리 기록이 이미 있는지 조회 (하루 1개만 유지)
+      const dayRes = await bioValueRecordApi.searchByDate(
         userId,
         WEIGHT_CATEGORY,
-        recordDate,
+        targetDate,
       );
-      const existing = Array.isArray(todayRes.data) ? todayRes.data[0] : null;
+      const existing = Array.isArray(dayRes.data) ? dayRes.data[0] : null;
 
       let res;
       if (existing?.recordId != null) {
@@ -133,11 +134,11 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
           existing.recordId,
           payload,
         );
-        toast.success("오늘의 체중 기록이 수정되었습니다.");
+        toast.success(`${targetDate} 체중 기록이 수정되었습니다.`);
       } else {
         // 2-b. 없으면 insert
         res = await bioValueRecordApi.createBioValueRecord(userId, payload);
-        toast.success("체중이 기록되었습니다.");
+        toast.success(`${targetDate} 체중이 기록되었습니다.`);
       }
 
       // 3. 회원정보의 현재 체중(member.weight)도 동기화 — UserInformation 페이지의 "현재 체중" 갱신용

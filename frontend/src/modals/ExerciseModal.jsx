@@ -19,7 +19,7 @@ import {
 
 let nextId = 1;
 
-function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
+function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("anaerobic");
   const [anaerobicRows, setAnaerobicRows] = useState([]);
@@ -162,9 +162,12 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
         return;
       }
 
+      // 선택한 날짜가 있으면 그 날짜로, 없으면 현재 시각
+      const baseDate = recordDate ? new Date(`${recordDate}T${new Date().toTimeString().slice(0, 8)}`) : new Date();
+
       await Promise.all(
         currentRows.map(async (row, index) => {
-          const recordedAt = new Date();
+          const recordedAt = new Date(baseDate);
           recordedAt.setSeconds(recordedAt.getSeconds() + index);
           await createExercise(
             userId,
