@@ -11,6 +11,7 @@ import subscriptionApi from "../../api/subscriptionApi";
 import userConfigApi from "../../api/userConfigApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
+import medicineApi from "../../api/medicineApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 
@@ -113,6 +114,7 @@ function UserInformation() {
   const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
   const [todayWaterCup, setTodayWaterCup] = useState(0);
   const [todayIntakeCalorie, setTodayIntakeCalorie] = useState(0);
+  const [prescriptions, setPrescriptions] = useState([]);
 
   useEffect(() => {
     if (!userId) {
@@ -197,12 +199,22 @@ function UserInformation() {
       }
     };
 
+    const fetchPrescriptions = async () => {
+      try {
+        const { data } = await medicineApi.getPrescriptions(userId);
+        setPrescriptions(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setPrescriptions([]);
+      }
+    };
+
     fetchMember();
     fetchUserConfig();
     fetchTodayBurnedCalorie();
     fetchTodayWater();
     fetchTodayIntakeCalorie();
     fetchSubscription();
+    fetchPrescriptions();
     const syncDraftProfile = (event) => {
       setMemberProfile((prev) => ({ ...prev, ...(event.detail || {}) }));
     };
@@ -729,16 +741,79 @@ function UserInformation() {
                       <h3 className="text-sm font-bold text-gray-800">
                         💊 약 등록
                       </h3>
-                      <button className="text-xs text-blue-500 hover:underline">
+                      <button
+                        className="text-xs text-blue-500 hover:underline"
+                        onClick={() => navigate("/medication")}
+                      >
                         편집
                       </button>
                     </div>
-                    <div className="flex flex-1 items-center justify-center rounded-xl bg-gray-100 py-6">
-                      <div className="text-center text-gray-400">
-                        <div className="mb-1 text-3xl">💊</div>
-                        <p className="text-xs">처방전 이미지</p>
-                        <p className="text-[10px] mt-0.5 text-gray-300">RX</p>
-                      </div>
+                    <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl bg-gray-50 p-3 max-h-[260px]">
+                      {prescriptions.length === 0 ? (
+                        <div className="flex flex-1 items-center justify-center py-6">
+                          <div className="text-center text-gray-400">
+                            <div className="mb-1 text-3xl">💊</div>
+                            <p className="text-xs">등록된 약이 없습니다</p>
+                          </div>
+                        </div>
+                      ) : (
+                        prescriptions.map((p) =>
+                          p.itemSeq || p.chart || p.storageMethod ? (
+                            <div
+                              key={p.prescriptionId}
+                              className="rounded-xl bg-[#EAF2FF] p-3 text-xs"
+                            >
+                              {p.itemName && (
+                                <p className="mb-2 text-[13px] font-semibold text-gray-800">
+                                  💊 {p.itemName}
+                                </p>
+                              )}
+                              <dl className="grid grid-cols-[72px_1fr] gap-y-1.5">
+                                <dt className="text-gray-500">품목기준코드</dt>
+                                <dd className="text-gray-800 break-all">
+                                  {p.itemSeq || "-"}
+                                </dd>
+
+                                <dt className="text-gray-500">성상</dt>
+                                <dd className="text-gray-800">
+                                  {p.chart || "-"}
+                                </dd>
+
+                                <dt className="text-gray-500">저장방법</dt>
+                                <dd className="text-gray-800">
+                                  {p.storageMethod || "-"}
+                                </dd>
+                              </dl>
+                            </div>
+                          ) : (
+                            <div
+                              key={p.prescriptionId}
+                              className="rounded-lg border border-gray-100 bg-white p-3"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="truncate text-xs font-semibold text-gray-800">
+                                  💊 {p.prescriptionName}
+                                </span>
+                                {p.dosage && (
+                                  <span className="shrink-0 text-[11px] font-medium text-blue-500">
+                                    {p.dosage}
+                                  </span>
+                                )}
+                              </div>
+                              {p.intakeIntervals && (
+                                <p className="mt-1 text-[11px] text-gray-500">
+                                  {p.intakeIntervals}
+                                </p>
+                              )}
+                              {p.memo && (
+                                <p className="mt-2 whitespace-pre-line rounded-md bg-[#EAF3FF] p-2 text-[11px] leading-[1.6] text-gray-700">
+                                  📝 {p.memo}
+                                </p>
+                              )}
+                            </div>
+                          )
+                        )
+                      )}
                     </div>
                     <button
                       className="mt-3 h-9 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
@@ -791,6 +866,22 @@ function UserInformation() {
         <MedicineSearchTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
+          onSaved={(med) => {
+            if (!med) return;
+            const newItem = {
+              prescriptionId: `local-${med.itemSeq ?? Date.now()}`,
+              itemSeq: med.itemSeq ?? null,
+              itemName: med.itemName ?? null,
+              chart: med.chart ?? null,
+              storageMethod: med.storageMethod ?? null,
+            };
+            setPrescriptions((prev) => {
+              if (prev.some((p) => p.prescriptionId === newItem.prescriptionId)) {
+                return prev;
+              }
+              return [newItem, ...prev];
+            });
+          }}
         />
 
 

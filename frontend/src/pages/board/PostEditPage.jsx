@@ -19,7 +19,7 @@ function formatEditorContent(content) {
 function PostEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, authLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [bootLoading, setBootLoading] = useState(true);
   const [saving, setSaving] = useState(null);
   const [formData, setFormData] = useState({
