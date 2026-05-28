@@ -71,4 +71,11 @@ public class Comment {
     public void upvoteComment() {
         this.upVote++;
     }
+
+    // 추천 취소 시 감소 (0 미만으로 내려가지 않도록 보호)
+    public void decreaseUpVote() {
+        if (this.upVote != null && this.upVote > 0) {
+            this.upVote--;
+        }
+    }
 }

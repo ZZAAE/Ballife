@@ -56,15 +56,26 @@ export default function WeightRecord() {
     ]).then(([latestRes, targetRes, memberRes]) => {
       if (cancelled) return;
 
+      // 최신 체중 기록값
+      let recordWeight = null;
       if (latestRes.status === "fulfilled") {
         const content = latestRes.value?.data?.content ?? [];
-        if (content[0]?.weight != null) setLatestWeight(Number(content[0].weight));
+        if (content[0]?.weight != null) recordWeight = Number(content[0].weight);
       }
+
+      // 회원정보(프로필) 몸무게 / 키
+      let profileWeight = null;
+      if (memberRes.status === "fulfilled" && memberRes.value?.data) {
+        const member = memberRes.value.data;
+        if (member.height != null) setHeightCm(Number(member.height));
+        if (member.weight != null) profileWeight = Number(member.weight);
+      }
+
+      // 현재 체중: 회원정보 몸무게를 우선, 없으면 최신 체중 기록 (메인 페이지와 일관)
+      setLatestWeight(profileWeight ?? recordWeight);
+
       if (targetRes.status === "fulfilled" && targetRes.value?.data != null) {
         setTargetWeight(Number(targetRes.value.data));
-      }
-      if (memberRes.status === "fulfilled" && memberRes.value?.data?.height != null) {
-        setHeightCm(Number(memberRes.value.data.height));
       }
     });
 

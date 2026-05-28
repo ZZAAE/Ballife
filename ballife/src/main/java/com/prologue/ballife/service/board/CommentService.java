@@ -1,6 +1,9 @@
 package com.prologue.ballife.service.board;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -9,9 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.prologue.ballife.domain.board.Comment;
+import com.prologue.ballife.domain.board.CommentLike;
 import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
+import com.prologue.ballife.repository.board.CommentLikeRepository;
 import com.prologue.ballife.repository.board.CommentRepository;
 import com.prologue.ballife.repository.board.PostRepository;
 import com.prologue.ballife.repository.user.UserRepository;
@@ -28,6 +33,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 댓글 작성
     @Transactional
@@ -51,12 +57,26 @@ public class CommentService {
     }
 
     // 게시글별 댓글 목록 조회
-    public List<CommentDto.CommentResponse> getCommentsByPost(Long postId) {
+    // currentUserId 가 있으면 각 댓글에 대한 해당 사용자의 추천 여부(liked)를 함께 내려준다.
+    public List<CommentDto.CommentResponse> getCommentsByPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
 
-        return commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(post).stream()
-                .map(CommentDto.CommentResponse::from)
+        List<Comment> comments = commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(post);
+
+        // 사용자가 추천한 댓글 ID 집합을 1회 쿼리로 조회 (N+1 방지)
+        final Set<Long> likedIds;
+        if (currentUserId != null && !comments.isEmpty()) {
+            List<Long> commentIds = comments.stream()
+                    .map(Comment::getCommentId)
+                    .collect(Collectors.toList());
+            likedIds = new HashSet<>(commentLikeRepository.findLikedCommentIds(currentUserId, commentIds));
+        } else {
+            likedIds = Collections.emptySet();
+        }
+
+        return comments.stream()
+                .map(c -> CommentDto.CommentResponse.from(c, likedIds.contains(c.getCommentId())))
                 .collect(Collectors.toList());
     }
 
@@ -101,13 +121,35 @@ public class CommentService {
         comment.softDelete();
     }
 
-    // 댓글 추천
+    // ═══════════════════════════════════════════════════════════
+    // 댓글(대댓글 포함) 추천 토글 (계정당 1개)
+    //  - 아직 추천하지 않았으면: 추천 기록 추가 + upVote +1
+    //  - 이미 추천했으면(같은 계정 재클릭): 추천 기록 삭제 + upVote -1
+    // ═══════════════════════════════════════════════════════════
     @Transactional
-    public CommentDto.CommentResponse upVoteComment(Long commentId) {
+    public CommentDto.UpVoteResponse toggleUpvote(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
 
-        comment.upvoteComment();
-        return CommentDto.CommentResponse.from(commentRepository.save(comment));
+        boolean alreadyLiked = commentLikeRepository.existsByComment_CommentIdAndUser_UserId(commentId, userId);
+        boolean liked;
+        if (alreadyLiked) {
+            // 같은 계정이 다시 누르면 추천 취소
+            commentLikeRepository.deleteByComment_CommentIdAndUser_UserId(commentId, userId);
+            comment.decreaseUpVote();
+            liked = false;
+        } else {
+            // 처음 누르면 추천 추가
+            commentLikeRepository.save(CommentLike.builder().comment(comment).user(user).build());
+            comment.upvoteComment();
+            liked = true;
+        }
+
+        return CommentDto.UpVoteResponse.builder()
+                .liked(liked)
+                .upVote(comment.getUpVote())
+                .build();
     }
 }

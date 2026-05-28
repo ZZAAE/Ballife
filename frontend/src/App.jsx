@@ -34,6 +34,8 @@ import AllRecordPage from "./pages/AllRecordPage";
 import UserInformation from "./pages/user/UserInformation";
 import Calendar from "./components/mainpage/calendar";
 import PetPage from "./pages/PetPage";
+import FamilyPage from "./pages/family/FamilyPage";
+import HealthReportPage from "./pages/report/HealthReportPage";
 
 function App() {
   const location = useLocation();
@@ -129,6 +131,8 @@ function App() {
                 element={<DiseaseEditPage />}
               />
               <Route path="/member/pet" element={<PetPage />} />
+              <Route path="/member/family" element={<FamilyPage />} />
+              <Route path="/report/health" element={<HealthReportPage />} />
               <Route path="/user/information" element={<UserInformation />} />
 
               <Route path="/allRecord" element={<AllRecordPage />} />
