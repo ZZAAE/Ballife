@@ -8,7 +8,6 @@ import userConfigApi from "../../api/userConfigApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
-import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
 import ChartSection from "../../components/mainpage/chart.jsx";
@@ -19,8 +18,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine,
-  ReferenceDot,
   ResponsiveContainer,
 } from "recharts";
 import { Unity, useUnityContext } from "react-unity-webgl";
@@ -337,60 +334,58 @@ const MainPage = () => {
   const chartConfig = useMemo(() => {
     return {
       bloodPressure: {
+        accent: "#ED5934",
         data: bloodPressureChartData,
         legends: [
-          { label: "수축기", color: "#2563eb" },
-          { label: "이완기", color: "#06b6d4" },
-          { label: "목표", color: "#94A3B8", dashed: true },
+          { label: "수축기", color: "#ED5934" },
+          { label: "이완기", color: "#F59874" },
         ],
         unit: "mmHg",
         areas: [
           {
             key: "systolic",
             name: "수축기",
-            stroke: "#2563eb",
+            stroke: "#ED5934",
             gradientId: "systolicGrad",
           },
           {
             key: "diastolic",
             name: "이완기",
-            stroke: "#06b6d4",
+            stroke: "#F59874",
             gradientId: "diastolicGrad",
           },
         ],
         references: bpReferences,
       },
       bloodSugar: {
+        accent: "#D40000",
         data: bloodSugarChartData,
         legends: [
-          { label: "혈당", color: "#16a34a" },
-          { label: "목표", color: "#94A3B8", dashed: true },
+          { label: "혈당", color: "#D40000" },
         ],
         unit: "mg/dL",
         areas: [
           {
             key: "glucose",
             name: "혈당",
-            stroke: "#16a34a",
+            stroke: "#D40000",
             gradientId: "glucoseGrad",
           },
         ],
         references: bloodSugarReferences,
       },
       weight: {
+        accent: "#434335",
         data: weightChartData,
         legends: [
-          { label: "체중", color: "#f97316" },
-          ...(targetWeight != null
-            ? [{ label: "목표", color: "#94A3B8", dashed: true }]
-            : []),
+          { label: "체중", color: "#434335" },
         ],
         unit: "kg",
         areas: [
           {
             key: "weight",
             name: "체중",
-            stroke: "#f97316",
+            stroke: "#434335",
             gradientId: "weightGrad",
           },
         ],
@@ -404,7 +399,6 @@ const MainPage = () => {
     bpReferences,
     bloodSugarReferences,
     weightReferences,
-    targetWeight,
   ]);
 
   const activeChart = chartConfig[selectedChartType];
@@ -659,80 +653,53 @@ const MainPage = () => {
                 legends={activeChart.legends}
                 areas={activeChart.areas}
                 unit={activeChart.unit}
+                accentColor={activeChart.accent}
+                primaryAreaKey={activeChart.areas[0]?.key}
+                primaryAreaName={activeChart.areas[0]?.name}
                 selectedType={selectedChartType}
                 onTypeChange={setSelectedChartType}
                 chartTypes={[
-                  { value: "bloodSugar", label: "혈당" },
-                  { value: "bloodPressure", label: "혈압" },
-                  { value: "weight", label: "체중" },
+                  { value: "bloodSugar", label: "혈당", color: "#D40000" },
+                  { value: "bloodPressure", label: "혈압", color: "#ED5934" },
+                  { value: "weight", label: "체중", color: "#434335" },
                 ]}
               >
                 {(filteredData) => {
-                  // 데이터+기준선 기준 Y축 동적 도메인 (위/아래 빈 공간 최소화)
+                  // 데이터 기준 Y축 동적 도메인 (위/아래 여백 최소화)
                   const allValues = [];
                   activeChart.areas.forEach((a) => {
                     filteredData.forEach((d) => {
                       if (d[a.key] != null) allValues.push(d[a.key]);
                     });
                   });
-                  activeChart.references?.forEach((r) => allValues.push(r.value));
                   const dataMin = allValues.length ? Math.min(...allValues) : 0;
                   const dataMax = allValues.length ? Math.max(...allValues) : 100;
                   const range = dataMax - dataMin || 1;
-                  const pad = Math.max(range * 0.18, 3);
+                  const pad = Math.max(range * 0.15, 3);
                   const yDomain = [
                     Math.floor(dataMin - pad),
                     Math.ceil(dataMax + pad),
                   ];
 
-                  // 각 데이터 키별 min/max 점 위치 계산
-                  const extremes = activeChart.areas.flatMap((a) => {
-                    let maxRow, minRow;
-                    filteredData.forEach((d) => {
-                      const v = d[a.key];
-                      if (v == null) return;
-                      if (!maxRow || v > maxRow[a.key]) maxRow = d;
-                      if (!minRow || v < minRow[a.key]) minRow = d;
-                    });
-                    const result = [];
-                    if (maxRow)
-                      result.push({
-                        type: "max",
-                        areaKey: a.key,
-                        stroke: a.stroke,
-                        date: maxRow.date,
-                        value: maxRow[a.key],
-                      });
-                    if (minRow && minRow !== maxRow)
-                      result.push({
-                        type: "min",
-                        areaKey: a.key,
-                        stroke: a.stroke,
-                        date: minRow.date,
-                        value: minRow[a.key],
-                      });
-                    return result;
-                  });
-
                   return (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={filteredData} margin={{ top: 40, right: 16, left: 0, bottom: 28 }}>
+                    <AreaChart data={filteredData} margin={{ top: 16, right: 16, left: 0, bottom: 16 }}>
                       <defs>
                         <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2563eb" stopOpacity={0.18} />
-                          <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#ED5934" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#ED5934" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.16} />
-                          <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#F59874" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#F59874" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#16a34a" stopOpacity={0.2} />
-                          <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#D40000" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#D40000" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.2} />
-                          <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#434335" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#434335" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="4 6" stroke="#EEF2F7" vertical={false} />
@@ -755,49 +722,6 @@ const MainPage = () => {
                         cursor={{ stroke: "#CBD5E1", strokeWidth: 1, strokeDasharray: "4 4" }}
                       />
 
-                      {/* 목표 기준선 (점선 위에 흰 배지로 라벨) */}
-                      {activeChart.references?.map((ref) => {
-                        const labelText = ref.label;
-                        const pillWidth = labelText.length * 9 + 18;
-                        return (
-                          <ReferenceLine
-                            key={`${ref.label}-${ref.value}`}
-                            y={ref.value}
-                            stroke="#CBD5E1"
-                            strokeDasharray="6 6"
-                            strokeWidth={1.5}
-                            label={(props) => {
-                              const { viewBox } = props;
-                              const cx = viewBox.x + viewBox.width - pillWidth - 6;
-                              const cy = viewBox.y - 14;
-                              return (
-                                <g>
-                                  <rect
-                                    x={cx}
-                                    y={cy - 12}
-                                    width={pillWidth}
-                                    height={24}
-                                    rx={12}
-                                    fill="#F1F5F9"
-                                  />
-                                  <text
-                                    x={cx + pillWidth / 2}
-                                    y={cy + 5}
-                                    textAnchor="middle"
-                                    fontSize={13}
-                                    fontWeight={800}
-                                    fill="#475569"
-                                  >
-                                    {labelText}
-                                  </text>
-                                </g>
-                              );
-                            }}
-                            ifOverflow="extendDomain"
-                          />
-                        );
-                      })}
-
                       {activeChart.areas.map((area) => (
                         <Area
                           key={area.key}
@@ -805,61 +729,12 @@ const MainPage = () => {
                           dataKey={area.key}
                           name={area.name}
                           stroke={area.stroke}
-                          strokeWidth={2.5}
+                          strokeWidth={3}
                           fill={`url(#${area.gradientId})`}
                           dot={{ r: 3, fill: "#fff", stroke: area.stroke, strokeWidth: 2 }}
-                          activeDot={{ r: 6, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
+                          activeDot={{ r: 7, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
                         />
                       ))}
-
-                      {/* Max/Min 강조 점 */}
-                      {extremes.map((e) => {
-                        const isMax = e.type === "max";
-                        const bg = isMax ? "#FEE2E2" : "#DCFCE7";
-                        const fg = isMax ? "#DC2626" : "#16A34A";
-                        const valueStr = String(e.value);
-                        const pillWidth = valueStr.length * 10 + 18;
-                        return (
-                          <ReferenceDot
-                            key={`${e.areaKey}-${e.type}`}
-                            x={e.date}
-                            y={e.value}
-                            r={8}
-                            fill={e.stroke}
-                            stroke="#fff"
-                            strokeWidth={3}
-                            ifOverflow="extendDomain"
-                            label={(props) => {
-                              const { viewBox } = props;
-                              const cx = viewBox.cx ?? viewBox.x;
-                              const cy = viewBox.cy ?? viewBox.y;
-                              const labelY = isMax ? cy - 24 : cy + 24;
-                              return (
-                                <g>
-                                  <rect
-                                    x={cx - pillWidth / 2}
-                                    y={labelY - 13}
-                                    width={pillWidth}
-                                    height={26}
-                                    rx={13}
-                                    fill={bg}
-                                  />
-                                  <text
-                                    x={cx}
-                                    y={labelY + 5}
-                                    textAnchor="middle"
-                                    fontSize={15}
-                                    fontWeight={800}
-                                    fill={fg}
-                                  >
-                                    {e.value}
-                                  </text>
-                                </g>
-                              );
-                            }}
-                          />
-                        );
-                      })}
                     </AreaChart>
                   </ResponsiveContainer>
                   );

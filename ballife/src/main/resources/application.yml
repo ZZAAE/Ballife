@@ -51,7 +51,7 @@ springdoc:
 mfds:
   api:
     base-url: https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
-    service-key: ${MFDS_SERVICE_KEY}  # 환경변수로 주입 (절대 코드에 하드코딩 X)
+    service-key: ${MFDS_SERVICE_KEY:}  # 환경변수로 주입 (절대 코드에 하드코딩 X). 미설정 시 빈 값으로 컨텍스트 로드 가능.
 
     #단계별로 스페이스 2칸
     #탭 사용 금지
