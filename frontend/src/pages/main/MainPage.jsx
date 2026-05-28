@@ -205,6 +205,37 @@ const MainPage = () => {
     };
   }, []);
 
+  // 체중/회원정보가 다른 페이지에서 갱신되면 헤더의 몸무게·BMI 즉시 반영
+  useEffect(() => {
+    const onProfileUpdated = (e) => {
+      const next = e?.detail;
+      if (!next) return;
+      setMemberProfile((prev) => ({ ...(prev ?? {}), ...next }));
+    };
+    window.addEventListener("member-profile-updated", onProfileUpdated);
+    return () => {
+      window.removeEventListener("member-profile-updated", onProfileUpdated);
+    };
+  }, []);
+
+  // 같은 페이지에 머무는 동안 체중 기록 모달 저장 시 체중 차트/카드도 즉시 반영
+  useEffect(() => {
+    if (!userId) return undefined;
+    const refreshWeight = () => {
+      bioValueRecordApi
+        .getPageByCategory(userId, "Weight", 0, 90)
+        .then((res) => {
+          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
+          setWeightRecords(list);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("member-profile-updated", refreshWeight);
+    return () => {
+      window.removeEventListener("member-profile-updated", refreshWeight);
+    };
+  }, [userId]);
+
   useEffect(() => {
     let cancelled = false;
     setNewsLoading(true);
