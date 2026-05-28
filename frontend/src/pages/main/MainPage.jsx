@@ -8,7 +8,6 @@ import userConfigApi from "../../api/userConfigApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
-import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
 import ChartSection from "../../components/mainpage/chart.jsx";
@@ -511,7 +510,7 @@ const MainPage = () => {
     ],
   );
 
-  // BMI 계산은 (오늘 기록 없을 수도 있어서) 가장 최근 체중 기록을 사용
+  // 회원정보 몸무게가 없을 때만 보조적으로 가장 최근 체중 기록을 사용
   const latestWeightValue = useMemo(() => {
     const rec = weightRecords.find((r) => r?.weight != null);
     return rec ? Number(rec.weight) : null;
@@ -531,7 +530,7 @@ const MainPage = () => {
   const age = computeAgeFromBirth(memberProfile?.birthDate);
   const gender = memberProfile?.gender ?? null;
   const heightCm = memberProfile?.height ?? null;
-  const profileWeightKg = latestWeightValue ?? memberProfile?.weight ?? null;
+  const profileWeightKg = memberProfile?.weight ?? latestWeightValue ?? null;
   const bmiValue =
     profileWeightKg != null && heightCm
       ? Number((profileWeightKg / ((heightCm / 100) * (heightCm / 100))).toFixed(1))

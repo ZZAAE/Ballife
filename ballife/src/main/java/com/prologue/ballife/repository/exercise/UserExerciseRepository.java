@@ -8,12 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserExerciseRepository extends JpaRepository<UserExercise, Long> {
 
         // 유저 조회 (삭제되지 않은 것만)
         List<UserExercise> findByUser_UserIdAndIsDeletedFalse(Long userId);
+
+        // 가장 최근 운동 1건 (날짜 → 시간 내림차순, 시간 null 은 가장 늦은 것으로 취급되지 않도록 nullable 허용)
+        Optional<UserExercise> findFirstByUser_UserIdAndIsDeletedFalseOrderByExerciseDateDescExerciseTimeDesc(Long userId);
 
         // 특정 날짜 조회 (삭제되지 않은 것만)
         List<UserExercise> findByUser_UserIdAndExerciseDateAndIsDeletedFalse(Long userId, LocalDate exerciseDate);

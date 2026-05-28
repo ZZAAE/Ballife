@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.prologue.ballife.domain.exercise.UserExercise;
 import com.prologue.ballife.domain.subscription.FamilyGroup;
 import com.prologue.ballife.domain.subscription.FamilyMember;
 import com.prologue.ballife.domain.subscription.FamilyRole;
@@ -17,6 +18,8 @@ import com.prologue.ballife.domain.subscription.SubscriptionStatus;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.daily.BioValueRecordRepository;
+import com.prologue.ballife.repository.exercise.UserExerciseRepository;
+import com.prologue.ballife.repository.exerciseMongo.ExerciseTypeRepository;
 import com.prologue.ballife.repository.subscription.FamilyGroupRepository;
 import com.prologue.ballife.repository.subscription.FamilyMemberRepository;
 import com.prologue.ballife.repository.subscription.UserSubscriptionRepository;
@@ -27,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * 가족 그룹 생성/합류/탈퇴, 항목별 동의, 그리고 동의 기반 가족 건강 데이터 조회.
- * 혈당/혈압만 실제 연동(BioValueRecord), 복약/운동은 플래그만 보관(미연동).
+ * 혈당/혈압/운동은 실제 연동(BioValueRecord, UserExercise), 복약은 플래그만 보관(미연동).
  */
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,8 @@ public class FamilyService {
     private final UserSubscriptionRepository userSubscriptionRepository;
     private final UserRepository userRepository;
     private final BioValueRecordRepository bioValueRecordRepository;
+    private final UserExerciseRepository userExerciseRepository;
+    private final ExerciseTypeRepository exerciseTypeRepository;
 
     // 혼동되는 문자(0,O,1,I) 제외한 base32 유사 알파벳
     private static final String CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -233,6 +238,7 @@ public class FamilyService {
 
             FamilyDto.LatestBloodSugar bs = null;
             FamilyDto.LatestBloodPressure bp = null;
+            FamilyDto.LatestExercise ex = null;
             // 본인 데이터는 항상, 타인 데이터는 그룹 활성 + 동의 시에만
             if (groupActive || isSelf) {
                 if (isSelf || Boolean.TRUE.equals(m.getShareBloodSugar())) {
@@ -240,6 +246,9 @@ public class FamilyService {
                 }
                 if (isSelf || Boolean.TRUE.equals(m.getShareBloodPressure())) {
                     bp = latestBloodPressure(m.getUser());
+                }
+                if (isSelf || Boolean.TRUE.equals(m.getShareExercise())) {
+                    ex = latestExercise(memberUserId);
                 }
             }
 
@@ -251,6 +260,7 @@ public class FamilyService {
                     .consent(FamilyDto.ConsentResponse.from(m))
                     .bloodSugar(bs)
                     .bloodPressure(bp)
+                    .exercise(ex)
                     .build());
         }
         return cards;
@@ -273,6 +283,25 @@ public class FamilyService {
                         .recordDate(r.getRecordDate())
                         .build())
                 .orElse(null);
+    }
+
+    private FamilyDto.LatestExercise latestExercise(Long userId) {
+        return userExerciseRepository
+                .findFirstByUser_UserIdAndIsDeletedFalseOrderByExerciseDateDescExerciseTimeDesc(userId)
+                .map(this::toLatestExercise)
+                .orElse(null);
+    }
+
+    private FamilyDto.LatestExercise toLatestExercise(UserExercise e) {
+        String name = e.getExerciseTypeId() == null ? null
+                : exerciseTypeRepository.findById(e.getExerciseTypeId())
+                        .map(t -> t.getExerciseName())
+                        .orElse(null);
+        return FamilyDto.LatestExercise.builder()
+                .exerciseName(name)
+                .burnedCalorie(e.getBurnedCalorie())
+                .recordDate(e.getExerciseDate())
+                .build();
     }
 
     // 조회자가 활성 그룹에 속해 있어야 함 (오너 구독 만료 시 차단)

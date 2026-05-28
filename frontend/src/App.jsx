@@ -28,7 +28,6 @@ import HypertensionReportPage from "./pages/report/HypertensionReportPage";
 import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
 import ObesityReportPage from "./pages/report/ObesityReportPage";
 import Header from "./components/Header";
-import HealthIndicatorMenu from "./components/HealthMenu";
 import HealthCalenderPage from "./pages/main/HealthCalenderPage";
 import AllRecordPage from "./pages/AllRecordPage";
 import UserInformation from "./pages/user/UserInformation";
