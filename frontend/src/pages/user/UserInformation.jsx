@@ -579,6 +579,24 @@ function UserInformation() {
                         {profile.disease}
                       </dd>
                     </div>
+                    <div className="flex gap-8">
+                      <div>
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          보유 포인트
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {memberProfile?.point != null ? Number(memberProfile.point).toLocaleString() : "0"} P
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          누적 포인트
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {memberProfile?.usePointCount != null ? Number(memberProfile.usePointCount).toLocaleString() : "0"} P
+                        </dd>
+                      </div>
+                    </div>
                   </dl>
 
                   {/* 정상 혈당 */}
