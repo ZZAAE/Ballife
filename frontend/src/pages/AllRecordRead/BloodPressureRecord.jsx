@@ -81,6 +81,17 @@ export default function BloodPressureRecord() {
   const [bpRecords, setBpRecords] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // 차트 날짜 필터 (혈당 페이지와 동일한 기준: 기본 최근 7일, 적용 버튼으로 반영)
+  const [pendingStart, setPendingStart] = useState(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]);
+  const [pendingEnd, setPendingEnd] = useState(() => new Date().toISOString().split("T")[0]);
+  const [filterStart, setFilterStart] = useState(pendingStart);
+  const [filterEnd, setFilterEnd] = useState(pendingEnd);
+
+  const handleApply = () => {
+    setFilterStart(pendingStart);
+    setFilterEnd(pendingEnd);
+  };
+
   const fetchRecords = useCallback(() => {
     if (!userId) return;
     setLoading(true);
@@ -133,15 +144,17 @@ export default function BloodPressureRecord() {
 
   // 차트 데이터: 각 기록을 하나의 점으로 (date = MM-DD)
   const bpData = useMemo(() => {
-    if (bpRecords.length === 0) {
-      return [];
-    }
-    return bpRecords.map((r) => ({
-      date: formatDateLabel(r.recordDate),
-      systolic: r.systolicBP,
-      diastolic: r.diastolicBP,
-    }));
-  }, [bpRecords]);
+    return bpRecords
+      .filter((r) => {
+        const d = String(r.recordDate ?? "").slice(0, 10);
+        return d >= filterStart && d <= filterEnd;
+      })
+      .map((r) => ({
+        date: formatDateLabel(r.recordDate),
+        systolic: r.systolicBP,
+        diastolic: r.diastolicBP,
+      }));
+  }, [bpRecords, filterStart, filterEnd]);
 
   // 메트릭 계산: 오늘 당일에 기록한 혈압만 사용 (평균/최고/최저) + 차트 범위는 전체 기준
   const metrics = useMemo(() => {
@@ -304,10 +317,18 @@ export default function BloodPressureRecord() {
 
               <ChartSection
                 title="혈압 변화 추이"
-                startDate={metrics.startDateLabel}
-                endDate={metrics.endDateLabel}
+                startDate={pendingStart}
+                endDate={pendingEnd}
+                onStartDateChange={setPendingStart}
+                onEndDateChange={setPendingEnd}
+                onApply={handleApply}
                 chartClassName="h-[calc(100vh-500px)] min-h-[280px] xl:col-span-2"
               >
+                {bpData.length === 0 ? (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                    해당 기간에 혈압 기록이 없습니다.
+                  </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={bpData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <Legend
@@ -364,6 +385,7 @@ export default function BloodPressureRecord() {
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+                )}
               </ChartSection>
             </div>
           </div>

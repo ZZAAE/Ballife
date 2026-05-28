@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Calendar as CalendarIcon, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 const DEFAULT_DAYS = 7;
 const fmt = (d) => d.toISOString().split("T")[0];
@@ -108,7 +108,6 @@ export default function ChartSection({
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] text-slate-600">
-            <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
             <input
               type="date"
               value={startInput}

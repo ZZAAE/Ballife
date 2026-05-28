@@ -4,9 +4,11 @@ export const DISEASE_FIELDS = [
     label: "고지혈증 보유 여부",
     summary: "고지혈증",
     options: [
-      { value: "NONE", label: "해당 없음" },
-      { value: "type1", label: "1형" },
-      { value: "type2", label: "2형" },
+      { value: 'NONE', label: '해당 없음' },
+      { value: 'type1', label: '고콜레스테롤혈증' },
+      { value: 'type2', label: '고LDL콜레스테롤혈증' },
+			{ value: 'type3', label: '고중성지방혈증' },
+      { value: 'type4', label: '저HDL콜레스테롤혈증' }
     ],
   },
   {
@@ -14,9 +16,10 @@ export const DISEASE_FIELDS = [
     label: "고혈압 보유 여부",
     summary: "고혈압",
     options: [
-      { value: "NONE", label: "해당 없음" },
-      { value: "mild", label: "경증" },
-      { value: "severe", label: "중증" },
+      { value: 'NONE', label: '해당 없음' },
+      { value: 'type1', label: '고혈압 전단계' },
+      { value: 'type2', label: '1기' },
+			{ value: 'type3', label: '2기' },
     ],
   },
   {
@@ -34,10 +37,10 @@ export const DISEASE_FIELDS = [
     label: "당뇨 보유 여부",
     summary: "당뇨",
     options: [
-      { value: "NONE", label: "해당 없음" },
-      { value: "type1", label: "1형" },
-      { value: "type2", label: "2형" },
-      { value: "GESTATIONAL", label: "임신성" },
+      { value: 'NONE', label: '해당 없음' },
+      { value: 'type1', label: '1형' },
+      { value: 'type2', label: '2형' },
+      { value: 'GESTATIONAL', label: '임신성' }
     ],
   },
   {
@@ -45,11 +48,11 @@ export const DISEASE_FIELDS = [
     label: "통풍 보유 여부",
     summary: "통풍",
     options: [
-      { value: "NONE", label: "해당 없음" },
-      { value: "ASYMPTOMATIC", label: "고요산혈증" },
-      { value: "ACUTE", label: "급성" },
-      { value: "INTERMITTENT", label: "간헐기" },
-      { value: "CHRONIC", label: "만성" },
+      { value: 'NONE', label: '해당 없음' },
+      { value: 'ASYMPTOMATIC', label: '고요산혈증' },
+      { value: 'ACUTE', label: '급성' },
+      { value: 'INTERMITTENT', label: '간헐기' },
+      { value: 'CHRONIC', label: '만성' },
     ],
   },
 ];

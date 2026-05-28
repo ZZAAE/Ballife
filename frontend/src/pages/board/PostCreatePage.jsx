@@ -52,6 +52,14 @@ function PostCreatePage() {
   const [formData, setFormData] = useState(() => readDraft());
   const hasSavedDraft = hasDraftContent(formData);
 
+  // 비로그인 사용자는 작성 페이지 진입 차단
+  useEffect(() => {
+    if (!user?.userId) {
+      toast.error("로그인이 필요합니다.");
+      navigate("/login", { replace: true });
+    }
+  }, [user?.userId, navigate]);
+
   const categories = [
     { value: "", label: "게시판 선택" },
     { value: "GENERAL", label: "자유게시판" },
