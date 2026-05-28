@@ -131,12 +131,19 @@ public class UserDto {
         private String gender;
         private Double weight;
         private Double height;
+        private Long point;
+        private Long usePointCount;
         private String diseaseIndex;
         private User.UserCategory category;
 
+        // 메달 정보 (미착용 시 null)
+        private Long medalId;
+        private String medalName;
+        private String medalIcon;
+
         // 엔티티 → DTO 변환 메서드
         public static UserResponse from(User user) {
-            return UserResponse.builder()
+            UserResponse.UserResponseBuilder builder = UserResponse.builder()
                     .userId(user.getUserId())
                     .username(user.getUsername())
                     .nickname(user.getNickname())
@@ -144,10 +151,19 @@ public class UserDto {
                     .gender(user.getGender())
                     .weight(user.getWeight())
                     .height(user.getHeight())
+                    .point(user.getPoint())
+                    .usePointCount(user.getUsePointCount())
                     .diseaseIndex(user.getDiseaseIndex())
                     .email(user.getEmail())
-                    .category(user.getUserCategory())
-                    .build();
+                    .category(user.getUserCategory());
+
+            if (user.getMedal() != null) {
+                builder.medalId(user.getMedal().getMedalId())
+                       .medalName(user.getMedal().getMedalName())
+                       .medalIcon(user.getMedal().getMedalIcon());
+            }
+
+            return builder.build();
         }
     }
 
