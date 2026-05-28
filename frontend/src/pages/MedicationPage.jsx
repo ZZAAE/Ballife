@@ -249,13 +249,18 @@ export default function MedicationPage() {
   );
 
   // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
+  // 삭제된 약은 localStorage 에서도 제외 → RecordSummary 의 복용 상태 오판 방지
   useEffect(() => {
     if (scheduleDate !== todayKey) return;
+    const filtered = todaySchedules.map((s) => ({
+      ...s,
+      drugs: s.drugs.filter((d) => activeDrugIds.has(d.id)),
+    }));
     localStorage.setItem(
       SCHEDULE_STORAGE_PREFIX + scheduleDate,
-      JSON.stringify(todaySchedules)
+      JSON.stringify(filtered)
     );
-  }, [todaySchedules, scheduleDate, todayKey]);
+  }, [todaySchedules, scheduleDate, todayKey, prescriptionGroups]);
 
   // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
   const handleScheduleDateChange = (newDate) => {
