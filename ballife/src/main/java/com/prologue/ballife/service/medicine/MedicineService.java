@@ -37,6 +37,7 @@ public class MedicineService {
                 .prescriptionDate(request.getPrescriptionDate())
                 .memo(request.getMemo())
                 .intakeIntervals(request.getIntakeIntervals())
+                .dosage(request.getDosage())
                 .build();
 
         Prescription savedPrescription = prescriptionRepository.save(prescription);
@@ -90,6 +91,7 @@ public class MedicineService {
         res.setPrescriptionDate(request.getPrescriptionDate());
         res.setMemo(request.getMemo());
         res.setIntakeIntervals(request.getIntakeIntervals());
+        res.setDosage(request.getDosage());
 
         return PrescriptionDto.PrescriptionResponse.from(res);
     }

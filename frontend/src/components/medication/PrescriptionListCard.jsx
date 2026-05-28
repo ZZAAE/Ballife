@@ -5,13 +5,13 @@ const defaultPrescriptions = [
     id: 1,
     groupName: "혈압약",
     dosage: "5정",
-    intakeTime: "2026-05-15 18:30",
+    scheduleLabel: "아침 · 점심 · 저녁",
   },
   {
     id: 2,
     groupName: "당뇨약",
     dosage: "3정",
-    intakeTime: "2026-05-15 18:30",
+    scheduleLabel: "아침 · 점심 · 저녁",
   },
 ];
 
@@ -34,12 +34,17 @@ export default function PrescriptionListCard({
             복용량
           </div>
           <div className="pr-10 text-[14px] font-semibold text-gray-600 text-right">
-            복용시간
+            복용일정
           </div>
         </div>
       </div>
 
       <div className="py-2">
+        {prescriptions.length === 0 && (
+          <div className="py-10 text-center text-[15px] text-gray-400">
+            처방된 약이 없습니다.
+          </div>
+        )}
         {prescriptions.map((item, index) => (
           <button
             key={item.id}
@@ -63,7 +68,7 @@ export default function PrescriptionListCard({
             </div>
 
             <div className="pr-10 pl-4 text-right text-[15px] font-semibold text-gray-900">
-              {item.intakeTime}
+              {item.scheduleLabel ?? "-"}
             </div>
           </button>
         ))}

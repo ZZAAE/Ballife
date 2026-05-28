@@ -33,6 +33,8 @@ public class PrescriptionAndMedicineDto {
         @NotBlank(message = "복용 간격을 최소 하나 이상 선택해주세요")
         private String intakeIntervals;
 
+        private String dosage;
+
         private List<UserMedicineDto.CreateRequest> medicines;
 
     };
@@ -48,6 +50,7 @@ public class PrescriptionAndMedicineDto {
         private LocalDate prescriptionDate;
         private String memo;
         private String intakeIntervals;
+        private String dosage;
         private List<UserMedicineDto.UserMedicineResponse> medicines;
 
         public static PrescriptionAndMedicineResponse from(Prescription prescription,
@@ -58,6 +61,7 @@ public class PrescriptionAndMedicineDto {
                     .prescriptionDate(prescription.getPrescriptionDate())
                     .memo(prescription.getMemo())
                     .intakeIntervals(prescription.getIntakeIntervals())
+                    .dosage(prescription.getDosage())
                     .medicines(
                             userMedicines == null ? List.of()
                                     : userMedicines.stream()
