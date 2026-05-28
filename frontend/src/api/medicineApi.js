@@ -18,6 +18,10 @@ const medicineApi = {
   getUserMedicine: (prescriptionId) => {
     return api.post(`/${prescriptionId}`);
   },
+
+  search: (itemName) => {
+    return api.get('/medicines/search', {params: {itemName}});
+  }
 };
 
 export default medicineApi;
