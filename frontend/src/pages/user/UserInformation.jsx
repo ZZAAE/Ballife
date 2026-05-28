@@ -650,15 +650,15 @@ function UserInformation() {
           </div>
         </main>
 
-        {/* <PrescriptionRegisterModal
+        <PrescriptionRegisterModal
           open={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
-        /> */}
+        />
 
-        <MedicineSearchTestModal
+        {/* <MedicineSearchTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
-        />
+        /> */}
 
 
         <RoutineModal
