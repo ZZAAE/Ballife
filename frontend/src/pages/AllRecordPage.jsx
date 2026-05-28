@@ -601,8 +601,17 @@ function AllRecordPage() {
                 type="date"
                 ref={dateInputRef}
                 value={selectedDate}
+                max={new Date().toISOString().split("T")[0]}
                 className="absolute opacity-0 pointer-events-none"
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  const today = new Date().toISOString().split("T")[0];
+                  // 미래 날짜 차단 (브라우저 max 무시한 입력 대비)
+                  if (e.target.value > today) {
+                    setSelectedDate(today);
+                  } else {
+                    setSelectedDate(e.target.value);
+                  }
+                }}
               />
 
               <button
@@ -848,6 +857,7 @@ function AllRecordPage() {
         isOpen={modalType === "bp"}
         onClose={closeModal}
         editingRecord={editingBp}
+        recordDate={selectedDate}
       />
 
       <BloodsugarModal
@@ -873,14 +883,23 @@ function AllRecordPage() {
         initialChips={editingMeal?.rawItems ?? []}
       />
 
-      <WaterRecordModal isOpen={modalType === "water"} onClose={closeModal} />
+      <WaterRecordModal
+        isOpen={modalType === "water"}
+        onClose={closeModal}
+        recordDate={selectedDate}
+      />
 
-      <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
+      <WeightRecordModal
+        isOpen={modalType === "weight"}
+        onClose={closeModal}
+        recordDate={selectedDate}
+      />
 
       <ExerciseModal
         isOpen={modalType === "exercise"}
         onClose={closeModal}
         onSaved={fetchExercisesForDate}
+        recordDate={selectedDate}
       />
 
       <ExerciseModal

@@ -22,7 +22,7 @@ const resolveUserId = (user) => {
   }
 };
 
-function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null }) {
+function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null, recordDate }) {
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -118,10 +118,11 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
         onSaved?.(res.data);
       } else {
         const now = new Date();
-        const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
         const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
         const payload = {
-          recordDate,
+          recordDate: targetDate,
           recordTime,
           category,
           systolicBP: s,
