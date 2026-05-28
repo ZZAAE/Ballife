@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +45,13 @@ public class PrescriptionController {
     public ResponseEntity<List<UserMedicineDto.UserMedicineResponse>> getUserMedicine(
         @PathVariable Long prescriptionId) {
             return ResponseEntity.ok(medicineService.getUserMedicine(prescriptionId));
+    }
+
+    @Operation(summary = "사용자 처방전 목록 조회", description = "사용자의 처방전(복용량 포함) 목록을 조회합니다.")
+    @GetMapping("/prescriptions/user/{userId}")
+    public ResponseEntity<List<PrescriptionDto.PrescriptionResponse>> getPrescriptions(
+        @PathVariable Long userId) {
+            return ResponseEntity.ok(medicineService.getPrescription(userId));
     }
 
     

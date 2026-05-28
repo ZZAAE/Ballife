@@ -48,6 +48,9 @@ public class Prescription {
     @Column(name = "INTAKEINTERVALS")
     private String intakeIntervals;
 
+    @Column(name = "DOSAGE", length = 30)
+    private String dosage;
+
     @Column(name = "IS_DELETED")
     private boolean isDeleted;
 

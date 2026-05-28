@@ -44,5 +44,27 @@ export function getCurrentWeekData(today = new Date()) {
   });
 }
 
+// 특정 날짜의 데모 복용 상태(요일 기반)를 반환. 미래 날짜는 기록 없음으로 처리.
+// 주간 달력(getCurrentWeekData)과 동일한 STATUS_BY_DAY 를 사용하므로 카드와 달력이 일치한다.
+export function getDayStatus(date, today = new Date()) {
+  const d =
+    typeof date === "string" ? new Date(date + "T00:00:00") : new Date(date);
+  if (Number.isNaN(d.getTime())) {
+    return { morning: null, lunch: null, dinner: null };
+  }
+  const todayMid = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  const dMid = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  if (dMid > todayMid) {
+    return { morning: null, lunch: null, dinner: null };
+  }
+  // JS getDay(): 일=0 → DAY_LABELS 인덱스(월=0)로 변환
+  const label = DAY_LABELS[(d.getDay() + 6) % 7];
+  return STATUS_BY_DAY[label] || { morning: null, lunch: null, dinner: null };
+}
+
 // 기존 코드 호환용 (정적 import도 가능)
 export const weekData = getCurrentWeekData();
