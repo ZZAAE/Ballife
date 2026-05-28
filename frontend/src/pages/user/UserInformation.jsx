@@ -2,6 +2,8 @@ import PrescriptionRegisterModal from "../../modals/PrescriptionRegisterModal";
 import RoutineModal from "../../modals/RoutineModal";
 import TargetModal from "../../modals/TargetModal";
 import SubscriptionModal from "../../modals/SubscriptionModal";
+import UserMedalModal from "../../modals/UserMedalModal";
+import medalApi from "../../api/medalApi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -106,6 +108,7 @@ function UserInformation() {
   const [isRoutineModalOpen, setRoutineModalOpen] = useState(false);
   const [isTargetModalOpen, setTargetModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [isMedalModalOpen, setMedalModalOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const [memberProfile, setMemberProfile] = useState(() =>
     loadCachedMemberProfile(),
@@ -457,6 +460,16 @@ function UserInformation() {
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
                     보유 질환 수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try { await medalApi.checkMedals(); } catch (_) {}
+                      setMedalModalOpen(true);
+                    }}
+                    className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                  >
+                    🏅 메달
                   </button>
                   <button
                     type="button"
@@ -910,6 +923,11 @@ function UserInformation() {
           onSubmit={handleSubscribe}
           onCancel={handleCancelSubscription}
           currentPlan={subPlan}
+        />
+
+        <UserMedalModal
+          open={isMedalModalOpen}
+          onClose={() => setMedalModalOpen(false)}
         />
       </div>
     </div>
