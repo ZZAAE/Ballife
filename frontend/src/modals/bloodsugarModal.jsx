@@ -179,13 +179,14 @@ export default function BloodSugarModal({
   onSaved,
   editingRecord = null,
   diabetesType: diabetesTypeProp = null,
+  recordDate, // 부모가 지정한 기록 날짜 (없으면 오늘)
 }) {
   const { user } = useAuth();
   const isEditMode = Boolean(editingRecord?.recordId);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    recordDate || new Date().toISOString().split("T")[0]
   );
   const dateInputRef = useRef(null);
 
@@ -537,7 +538,7 @@ export default function BloodSugarModal({
         },
       });
     } else {
-      setSelectedDate(new Date().toISOString().split("T")[0]);
+      setSelectedDate(recordDate || new Date().toISOString().split("T")[0]);
       setActiveMeal("공복");
       setActiveTiming("식전");
       setRecordsByDate({});
