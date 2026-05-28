@@ -7,8 +7,33 @@ import PrescriptionListCard from "../components/medication/PrescriptionListCard"
 import SavedRecordsCard from "../components/medication/SavedRecordsCard";
 import TodayScheduleCard from "../components/medication/TodayScheduleCard";
 import WeeklyCalendarCard from "../components/medication/WeeklyCalendarCard";
+import { getDayStatus } from "../components/medication/medicationData";
+import {
+  loadPrescriptionGroups,
+  savePrescriptionGroups,
+} from "../components/medication/prescriptionData";
 import PrescriptionDetailModal from "../modals/PrescriptionDetailModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
+import medicineApi from "../api/medicineApi";
+import { USER_KEY } from "../api/api";
+import { useAuth } from "../contexts/AuthContext";
+
+// 로그인 사용자 ID 해석 (다른 페이지와 동일 방식)
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
 const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
 const SAVED_RECORDS_KEY = "savedMedicationRecords";
@@ -56,6 +81,51 @@ const INITIAL_TODAY_SCHEDULES = [
   },
 ];
 
+// 기본 일정의 깊은 복제본 (모든 약 미복용)
+const cloneInitialSchedules = () =>
+  INITIAL_TODAY_SCHEDULES.map((s) => ({
+    ...s,
+    drugs: s.drugs.map((d) => ({ ...d })),
+  }));
+
+// 슬롯 상태(done/partial/miss/null)를 drugs 의 taken 상태로 변환
+// done = 전부 복용, partial = 일부만 복용, 그 외 = 미복용
+const buildSchedulesFromStatus = (statusMap) =>
+  INITIAL_TODAY_SCHEDULES.map((s) => {
+    const status = statusMap?.[s.id];
+    return {
+      ...s,
+      drugs: s.drugs.map((d, idx) => ({
+        ...d,
+        taken:
+          status === "done" ? true : status === "partial" ? idx === 0 : false,
+      })),
+    };
+  });
+
+// 선택한 날짜의 복용 일정 로드.
+// - 오늘: 사용자가 실제 체크한 내용(localStorage)을 사용 (없으면 기본 일정)
+// - 그 외 날짜: 주간 달력과 동일한 요일 기반 데모 데이터를 사용해 화면이 일치하도록 함
+const loadSchedulesForDate = (dateKey, todayKey) => {
+  if (dateKey === todayKey) {
+    try {
+      const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const isValid =
+          Array.isArray(parsed) &&
+          parsed.length === INITIAL_TODAY_SCHEDULES.length &&
+          parsed.every((s) => Array.isArray(s.drugs));
+        if (isValid) return parsed;
+      }
+    } catch {
+      // 무시하고 기본 일정 사용
+    }
+    return cloneInitialSchedules();
+  }
+  return buildSchedulesFromStatus(getDayStatus(dateKey));
+};
+
 export default function MedicationPage() {
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -102,32 +172,132 @@ export default function MedicationPage() {
   const [isBloodPressureModalOpen, setIsBloodPressureModalOpen] =
     useState(false);
 
-  const todayKey = formatDateKey(new Date());
-
-  const [todaySchedules, setTodaySchedules] = useState(() => {
-    try {
-      const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + todayKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // 저장된 데이터가 새 구조(drugs 배열 포함)인지 검증
-        const isValid =
-          Array.isArray(parsed) &&
-          parsed.length === INITIAL_TODAY_SCHEDULES.length &&
-          parsed.every((s) => Array.isArray(s.drugs));
-        if (isValid) return parsed;
-      }
-    } catch {
-      // 무시
-    }
-    return INITIAL_TODAY_SCHEDULES;
-  });
+  // 처방 그룹 = 약 페이지 전체의 단일 데이터 소스 (목록·일정·이행률·달력 모두 연결)
+  const [prescriptionGroups, setPrescriptionGroups] = useState(() =>
+    loadPrescriptionGroups()
+  );
 
   useEffect(() => {
+    savePrescriptionGroups(prescriptionGroups);
+  }, [prescriptionGroups]);
+
+  // 백엔드 처방전의 복용량(dosage)을 그룹명 기준으로 매핑해 표시값에 덮어쓴다
+  const { user } = useAuth();
+  const userId = resolveUserId(user);
+  const [backendDosageByName, setBackendDosageByName] = useState({});
+
+  useEffect(() => {
+    if (userId == null) return;
+    medicineApi
+      .getPrescriptions(userId)
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        const map = {};
+        list.forEach((p) => {
+          if (p.prescriptionName && p.dosage != null) {
+            map[p.prescriptionName] = p.dosage;
+          }
+        });
+        setBackendDosageByName(map);
+      })
+      .catch(() => {
+        // 백엔드 미연결/데이터 없음 → 기본(localStorage) 복용량 사용
+      });
+  }, [userId]);
+
+  // 약이 1개 이상 남은 그룹만 활성 (빈 그룹은 페이지 전체에서 제외)
+  const activeGroups = prescriptionGroups.filter(
+    (g) => g.medicines.length > 0
+  );
+  const activeDrugIds = new Set(activeGroups.map((g) => g.drugId));
+
+  // 처방 모달이 보는 그룹은 항상 최신 상태(삭제/수정 즉시 반영)
+  const selectedGroupLive =
+    prescriptionGroups.find((g) => g.id === selectedGroup?.id) ?? null;
+
+  const handleDeleteMedicine = (groupId, medicineId) => {
+    setPrescriptionGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? { ...g, medicines: g.medicines.filter((m) => m.id !== medicineId) }
+          : g
+      )
+    );
+  };
+
+  const handleUpdateMedicine = (groupId, medicineId, patch) => {
+    setPrescriptionGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              medicines: g.medicines.map((m) =>
+                m.id === medicineId ? { ...m, ...patch } : m
+              ),
+            }
+          : g
+      )
+    );
+  };
+
+  const todayKey = formatDateKey(new Date());
+
+  // 복용 일정 카드에서 조회/수정 중인 날짜 (기본 오늘, 헤더에서 변경 가능)
+  const [scheduleDate, setScheduleDate] = useState(todayKey);
+  const [todaySchedules, setTodaySchedules] = useState(() =>
+    loadSchedulesForDate(todayKey, todayKey)
+  );
+
+  // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
+  useEffect(() => {
+    if (scheduleDate !== todayKey) return;
     localStorage.setItem(
-      SCHEDULE_STORAGE_PREFIX + todayKey,
+      SCHEDULE_STORAGE_PREFIX + scheduleDate,
       JSON.stringify(todaySchedules)
     );
-  }, [todaySchedules, todayKey]);
+  }, [todaySchedules, scheduleDate, todayKey]);
+
+  // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
+  const handleScheduleDateChange = (newDate) => {
+    if (!newDate) return;
+    setScheduleDate(newDate);
+    setTodaySchedules(loadSchedulesForDate(newDate, todayKey));
+  };
+
+  // 주간 달력은 항상 실제 오늘 기준 데이터를 사용
+  const weekTodaySchedules =
+    scheduleDate === todayKey
+      ? todaySchedules
+      : loadSchedulesForDate(todayKey, todayKey);
+
+  // 활성 그룹의 약만 일정에 노출 (오늘부터 적용 — 과거 기록은 그 당시 약을 그대로 보존)
+  const filterToActiveDrugs = (schedules) =>
+    schedules.map((s) => ({
+      ...s,
+      drugs: s.drugs.filter((d) => activeDrugIds.has(d.id)),
+    }));
+
+  // 과거 날짜를 보고 있을 때는 그 시점의 기록을 유지(필터 미적용)
+  const isPastSchedule = scheduleDate < todayKey;
+  const displaySchedules = isPastSchedule
+    ? todaySchedules
+    : filterToActiveDrugs(todaySchedules);
+
+  // 주간 달력의 "오늘" 셀은 항상 실제 오늘 기준이라 활성 필터 적용
+  const weekDisplaySchedules = filterToActiveDrugs(weekTodaySchedules);
+
+  // 처방 목록에 표시할 "복용일정" = 그 그룹의 약이 포함된 일정 슬롯(아침·점심·저녁)
+  // 복용량은 백엔드 값이 있으면 그것을 우선 사용(없으면 기본값)
+  const prescriptionsForList = activeGroups.map((g) => {
+    const slots = displaySchedules
+      .filter((slot) => slot.drugs.some((d) => d.id === g.drugId))
+      .map((slot) => slot.label);
+    return {
+      ...g,
+      dosage: backendDosageByName[g.groupName] ?? g.dosage,
+      scheduleLabel: slots.length > 0 ? slots.join(" · ") : "-",
+    };
+  });
 
   const handleToggleDrug = (scheduleId, drugId) => {
     setTodaySchedules((prev) =>
@@ -145,13 +315,21 @@ export default function MedicationPage() {
   };
 
   const handleToggleAllDrugs = (scheduleId) => {
+    // 오늘/미래는 활성 그룹 기준, 과거는 그 당시 보이는 모든 약 기준으로 토글
+    const isActiveOnly = scheduleDate >= todayKey;
     setTodaySchedules((prev) =>
       prev.map((s) => {
         if (s.id !== scheduleId) return s;
-        const allTaken = s.drugs.every((d) => d.taken);
+        const target = isActiveOnly
+          ? s.drugs.filter((d) => activeDrugIds.has(d.id))
+          : s.drugs;
+        const allTaken = target.length > 0 && target.every((d) => d.taken);
         return {
           ...s,
-          drugs: s.drugs.map((d) => ({ ...d, taken: !allTaken })),
+          drugs: s.drugs.map((d) => {
+            const inTarget = !isActiveOnly || activeDrugIds.has(d.id);
+            return inTarget ? { ...d, taken: !allTaken } : d;
+          }),
         };
       })
     );
@@ -185,7 +363,7 @@ export default function MedicationPage() {
         <section className="grid grid-cols-1 2xl:grid-cols-[390px_minmax(0,1fr)] gap-8">
           {/* 왼쪽 영역 */}
           <div className="w-full min-w-0 flex flex-col gap-8">
-            <MedicationProgressCard />
+            <MedicationProgressCard schedules={displaySchedules} />
 
             <MedicationRecordCard
               drugName={drugName}
@@ -209,14 +387,18 @@ export default function MedicationPage() {
           {/* 오른쪽 영역 */}
           <div className="w-full min-w-0 flex flex-col gap-8">
             <TodayScheduleCard
-              schedules={todaySchedules}
+              schedules={displaySchedules}
+              scheduleDate={scheduleDate}
+              todayKey={todayKey}
+              onDateChange={handleScheduleDateChange}
               onToggleDrug={handleToggleDrug}
               onToggleAllDrugs={handleToggleAllDrugs}
             />
             <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
               <MemoCard />
               <WeeklyCalendarCard
-                todaySchedules={todaySchedules}
+                todaySchedules={weekDisplaySchedules}
+                drugNames={prescriptionGroups.map((g) => g.groupName)}
                 prnRecords={savedRecords}
                 todayKey={todayKey}
               />
@@ -226,7 +408,10 @@ export default function MedicationPage() {
 
         {/* 처방 약 목록 */}
         <section className="mt-6">
-          <PrescriptionListCard onSelectGroup={openPrescriptionModal} />
+          <PrescriptionListCard
+            prescriptions={prescriptionsForList}
+            onSelectGroup={openPrescriptionModal}
+          />
         </section>
       </div>
 
@@ -236,9 +421,12 @@ export default function MedicationPage() {
       />
 
       <PrescriptionDetailModal
+        key={selectedGroup?.id ?? "none"}
         open={isPrescriptionModalOpen}
-        group={selectedGroup}
+        group={selectedGroupLive}
         onClose={closePrescriptionModal}
+        onDeleteMedicine={handleDeleteMedicine}
+        onUpdateMedicine={handleUpdateMedicine}
       />
     </div>
   );

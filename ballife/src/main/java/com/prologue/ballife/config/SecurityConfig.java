@@ -55,16 +55,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/medicines").permitAll() //임시코드
                         .requestMatchers("/api/auth/**").permitAll() // 회원가입 토큰없이 접근 가능
                         .requestMatchers("/api/mock/**").permitAll() // 임시 mock API 확인용
                         .requestMatchers(HttpMethod.PUT, "/api/users/disease/**").permitAll() // 회원가입시 질병 정보 업데이트 토큰 없이
                                                                                               // 접근 가능
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll() // 프론트 서버 생존 폴링 (JWT 불필요)
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll() // 카드뉴스 (공개 데이터, JWT 불필요)
-                        // 게시판: 조회는 비로그인 허용, 작성/수정/삭제/추천은 로그인 필요
-                        .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/posts/*/view").permitAll() // 조회수 증가는 비로그인도 허용
-                        .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                         // 나머지 인증이 필요한 주소는 이 밑에
 
                                                 // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도

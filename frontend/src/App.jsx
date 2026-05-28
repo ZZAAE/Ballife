@@ -1,6 +1,6 @@
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatBot from "./modals/Chatbot";
 import SignUpPage from "./pages/user/SignUpPage";
 import LoginPage from "./pages/user/LoginPage";
@@ -39,6 +39,11 @@ import HealthReportPage from "./pages/report/HealthReportPage";
 
 function App() {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const hideHealthMenu =
     location.pathname === "/login" ||
     location.pathname === "/signup" ||

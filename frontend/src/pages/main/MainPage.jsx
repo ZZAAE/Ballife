@@ -96,30 +96,41 @@ const MainPage = () => {
     const today = formatToday();
 
     const tasks = [
+      // 전체 기록 1회 조회 후 카테고리 prefix로 분류 (category가 "BloodSugar-아침식전" 등
+      // 접미사를 가져 exact-match 페이지 조회로는 누락되므로 startsWith 방식 사용)
       bioValueRecordApi
-        .getPageByCategory(userId, "BloodSugar", 0, 90)
+        .getAllBioValueRecords(userId)
         .then((res) => {
           if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setBloodSugarRecords(list);
-        })
-        .catch(() => {}),
+          const list = Array.isArray(res?.data) ? res.data : [];
+          const byDateDesc = (a, b) => {
+            const ka = `${a.recordDate || ""} ${a.recordTime || ""}`;
+            const kb = `${b.recordDate || ""} ${b.recordTime || ""}`;
+            return kb.localeCompare(ka);
+          };
+          const startsWith = (r, prefix) =>
+            typeof r.category === "string" && r.category.startsWith(prefix);
 
-      bioValueRecordApi
-        .getPageByCategory(userId, "BloodPressure", 0, 90)
-        .then((res) => {
-          if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setBloodPressureRecords(list);
-        })
-        .catch(() => {}),
-
-      bioValueRecordApi
-        .getPageByCategory(userId, "Weight", 0, 90)
-        .then((res) => {
-          if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setWeightRecords(list);
+          setBloodSugarRecords(
+            list
+              .filter((r) => startsWith(r, "BloodSugar") && r.bloodSugar != null)
+              .sort(byDateDesc),
+          );
+          setBloodPressureRecords(
+            list
+              .filter(
+                (r) =>
+                  startsWith(r, "BloodPressure") &&
+                  r.systolicBP != null &&
+                  r.diastolicBP != null,
+              )
+              .sort(byDateDesc),
+          );
+          setWeightRecords(
+            list
+              .filter((r) => startsWith(r, "Weight") && r.weight != null)
+              .sort(byDateDesc),
+          );
         })
         .catch(() => {}),
 
@@ -157,19 +168,16 @@ const MainPage = () => {
         })
         .catch(() => {}),
 
+      // 목표값은 회원정보 페이지와 동일하게 user-config 단일 조회로 가져옴
       userConfigApi
-        .getTargetDailyWaterIntake(userId)
+        .getUserConfig(userId)
         .then((res) => {
           if (cancelled) return;
-          if (res?.data != null) setTargetWaterCups(Number(res.data));
-        })
-        .catch(() => {}),
-
-      userConfigApi
-        .getTargetWeight(userId)
-        .then((res) => {
-          if (cancelled) return;
-          if (res?.data != null) setTargetWeight(Number(res.data));
+          const cfg = res?.data;
+          if (!cfg) return;
+          if (cfg.targetDailyWaterIntake != null)
+            setTargetWaterCups(Number(cfg.targetDailyWaterIntake));
+          if (cfg.targetWeight != null) setTargetWeight(Number(cfg.targetWeight));
         })
         .catch(() => {}),
 
@@ -261,6 +269,7 @@ const MainPage = () => {
     dataUrl: "/Unity/Build.data",
     frameworkUrl: "/Unity/Build.framework.js",
     codeUrl: "/Unity/Build.wasm",
+    streamingAssetsUrl: "/Unity/StreamingAssets",
   });
   const loadingPercent = Math.round(loadingProgression * 100);
 
@@ -431,39 +440,54 @@ const MainPage = () => {
 
   const activeChart = chartConfig[selectedChartType];
 
-  const latestBloodSugar = useMemo(() => {
-    const rec = bloodSugarRecords[0];
-    if (!rec || rec.bloodSugar == null) return null;
+  const todayStr = formatToday();
+
+  const todayBloodSugar = useMemo(() => {
+    const rec = bloodSugarRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.bloodSugar != null,
+    );
+    if (!rec) return null;
     return {
       value: Number(rec.bloodSugar),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [bloodSugarRecords]);
+  }, [bloodSugarRecords, todayStr]);
 
-  const latestBloodPressure = useMemo(() => {
-    const rec = bloodPressureRecords[0];
-    if (!rec || rec.systolicBP == null || rec.diastolicBP == null) return null;
+  const todayBloodPressure = useMemo(() => {
+    const rec = bloodPressureRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.systolicBP != null &&
+        r.diastolicBP != null,
+    );
+    if (!rec) return null;
     return {
       systolic: Number(rec.systolicBP),
       diastolic: Number(rec.diastolicBP),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [bloodPressureRecords]);
+  }, [bloodPressureRecords, todayStr]);
 
-  const latestWeight = useMemo(() => {
-    const rec = weightRecords[0];
-    if (!rec || rec.weight == null) return null;
+  const todayWeight = useMemo(() => {
+    const rec = weightRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.weight != null,
+    );
+    if (!rec) return null;
     return {
       value: Number(rec.weight),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [weightRecords]);
+  }, [weightRecords, todayStr]);
 
   const cardData = useMemo(
     () => ({
-      bloodSugar: latestBloodSugar,
-      bloodPressure: latestBloodPressure,
-      weight: latestWeight,
+      bloodSugar: todayBloodSugar,
+      bloodPressure: todayBloodPressure,
+      weight: todayWeight,
       todayMealKcal,
       todayBurnedKcal,
       water: { cups: todayWaterCups, targetCups: targetWaterCups },
@@ -475,9 +499,9 @@ const MainPage = () => {
       },
     }),
     [
-      latestBloodSugar,
-      latestBloodPressure,
-      latestWeight,
+      todayBloodSugar,
+      todayBloodPressure,
+      todayWeight,
       todayMealKcal,
       todayBurnedKcal,
       todayWaterCups,
@@ -486,6 +510,12 @@ const MainPage = () => {
       memberProfile,
     ],
   );
+
+  // BMI 계산은 (오늘 기록 없을 수도 있어서) 가장 최근 체중 기록을 사용
+  const latestWeightValue = useMemo(() => {
+    const rec = weightRecords.find((r) => r?.weight != null);
+    return rec ? Number(rec.weight) : null;
+  }, [weightRecords]);
 
   const computeAgeFromBirth = (birthDate) => {
     if (!birthDate) return null;
@@ -501,7 +531,7 @@ const MainPage = () => {
   const age = computeAgeFromBirth(memberProfile?.birthDate);
   const gender = memberProfile?.gender ?? null;
   const heightCm = memberProfile?.height ?? null;
-  const profileWeightKg = memberProfile?.weight ?? latestWeight?.value ?? null;
+  const profileWeightKg = latestWeightValue ?? memberProfile?.weight ?? null;
   const bmiValue =
     profileWeightKg != null && heightCm
       ? Number((profileWeightKg / ((heightCm / 100) * (heightCm / 100))).toFixed(1))

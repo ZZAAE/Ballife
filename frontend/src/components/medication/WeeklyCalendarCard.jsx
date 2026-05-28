@@ -35,7 +35,12 @@ const formatDateKey = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], todayKey }) {
+export default function WeeklyCalendarCard({
+  todaySchedules,
+  prnRecords = [],
+  todayKey,
+  drugNames = DEFAULT_DRUGS,
+}) {
   const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
 
   const rows = [
@@ -64,7 +69,7 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
     }
     const status = item[rowKey];
     if (!status || status === "null") return [];
-    return DEFAULT_DRUGS.map((name) => ({
+    return drugNames.map((name) => ({
       name,
       taken: status === "done",
     }));
@@ -120,8 +125,8 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
         <div className="space-y-5">
           {rows.map((row) => {
             const RowIcon = row.icon;
-            const labelText = row.label.match(/^[^\(]+/)?.[0].trim();
-            const timeText = row.label.match(/\([^\)]+\)/)?.[0];
+            const labelText = row.label.match(/^[^(]+/)?.[0].trim();
+            const timeText = row.label.match(/\([^)]+\)/)?.[0];
 
             return (
               <div key={row.key}>
@@ -152,7 +157,7 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
                         {hasContent && (
                           <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-[180px] -translate-x-1/2 rounded-xl bg-[#0F172A] px-3 py-2.5 text-[12px] text-white shadow-xl group-hover:block">
                             <p className="mb-1.5 text-[11px] font-bold text-gray-300">
-                              {item.day} {item.date}일 · {row.label.match(/^[^\(]+/)?.[0].trim()}
+                              {item.day} {item.date}일 · {row.label.match(/^[^(]+/)?.[0].trim()}
                               {status && (
                                 <span className="ml-1 font-normal text-gray-400">
                                   ({STATUS_LABEL[status] || ""})

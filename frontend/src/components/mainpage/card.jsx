@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Pill } from "lucide-react";
 import MealIcon from "../../assets/MainPageIcon/Meal.svg";
 import ExerciseIcon from "../../assets/MainPageIcon/Ex.svg";
 import WaterIcon from "../../assets/MainPageIcon/Water.svg";
@@ -221,7 +222,7 @@ const Card = ({ data = {} }) => {
                         <Link to={`/check/${card.link}`} key={idx}>
                             <div className={`${card.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 min-h-[140px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
                                 <div>
-                                    <p className={`text-xs ${card.overcolor || "text-slate-400"} mb-1`}>{card.type}</p>
+                                    <p className={`text-sm font-bold ${card.overcolor || "text-slate-400"} mb-1`}>{card.type}</p>
                                     <p className="text-xl font-bold">{card.value}</p>
                                     <p className={`text-xs mt-1 ${card.undercolor || "text-slate-400"}`}>{card.label}</p>
                                 </div>
@@ -236,7 +237,7 @@ const Card = ({ data = {} }) => {
                         <Link to={`/check/${card.link}`} key={idx}>
                             <div className={`${card.color} ${card.textColor || "text-slate-900"} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex items-center justify-between gap-4 min-h-[140px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
                                 <div>
-                                    <p className={`text-xs ${card.overcolor || "text-slate-400"} mb-1`}>{card.type}</p>
+                                    <p className={`text-sm font-bold ${card.overcolor || "text-slate-400"} mb-1`}>{card.type}</p>
                                     <p className={`text-lg font-bold ${card.labelColor || "text-black"}`}>{card.value}</p>
                                     <p className={`text-xs mt-1 ${card.undercolor || "text-slate-400"}`}>{card.label}</p>
                                 </div>
@@ -252,7 +253,7 @@ const Card = ({ data = {} }) => {
                     <div className={`${medicineCard.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <p className={`text-xs ${medicineCard.overcolor || "text-slate-400"} mb-1`}>{medicineCard.type}</p>
+                                <p className={`text-sm font-bold ${medicineCard.overcolor || "text-slate-400"} mb-1`}>{medicineCard.type}</p>
                                 <p className="text-xl font-bold">{medicineCard.value}</p>
                                 <p className={`text-xs mt-1 ${medicineCard.undercolor || "text-slate-400"}`}>{medicineCard.label}</p>
                             </div>
@@ -270,9 +271,10 @@ const Card = ({ data = {} }) => {
                                             {group.items.map((item) => (
                                                 <div
                                                     key={item}
-                                                    className="rounded-xl bg-white/80 px-4 py-3 text-sm font-medium text-slate-700"
+                                                    className="flex items-center gap-2.5 rounded-xl bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-white hover:shadow-sm"
                                                 >
-                                                    {item}
+                                                    <Pill className="h-4 w-4 shrink-0 text-slate-500" />
+                                                    <span className="truncate">{item}</span>
                                                 </div>
                                             ))}
                                         </div>
