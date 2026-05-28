@@ -11,6 +11,7 @@ const fmt = (d) => d.toISOString().split("T")[0];
  */
 export default function ChartSection({
   title,
+  subtitle,
   legends = [],
   data = [],
   chartTypes = [],
@@ -57,9 +58,16 @@ export default function ChartSection({
 
       {/* Row 1: 제목 + 차트 타입 탭 */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[20px] font-extrabold tracking-tight text-slate-900 sm:text-[22px]">
-          {title}
-        </h2>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 className="text-[20px] font-extrabold tracking-tight text-slate-900 sm:text-[22px]">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-[12px] font-medium text-slate-400">
+              {subtitle}
+            </p>
+          )}
+        </div>
 
         {chartTypes.length > 0 && (
           <div className="inline-flex rounded-full bg-slate-100 p-1">

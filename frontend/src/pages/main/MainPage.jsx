@@ -680,6 +680,7 @@ const MainPage = () => {
 
               <ChartSection
                 title="주간 건강 추이"
+                subtitle="일자별 평균 수치 추이"
                 data={activeChart.data}
                 legends={activeChart.legends}
                 areas={activeChart.areas}
