@@ -6,11 +6,14 @@ import {
   createExercise,
   deleteExercise,
   updateExercise,
-  getExerciseTypes,
 } from "../api/exerciseApi";
 import {
   CARDIO_OPTIONS,
   STRENGTH_OPTIONS,
+  STAIR_INTENSITY_HINT,
+  aerobicMet,
+  anaerobicMetByVolume,
+  anaerobicVolume,
   buildCreatePayload,
   createAerobicRow,
   createAnaerobicRow,
@@ -27,21 +30,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   const [aerobicRows, setAerobicRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [exerciseTypes, setExerciseTypes] = useState([]);
   const isEditMode = !!editingRecord;
-
-  useEffect(() => {
-    const loadExerciseTypes = async () => {
-      try {
-        const types = await getExerciseTypes();
-        setExerciseTypes(types);
-      } catch (error) {
-        console.error("운동 종류 로드 실패:", error);
-      }
-    };
-
-    loadExerciseTypes();
-  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -50,6 +39,8 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
     if (editingRecord) {
       const { kind, row } = recordToRow(editingRecord, nextId++);
+      // 모달이 열릴 때 편집 대상 기록으로 폼을 초기화하는 의도된 동기화
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(kind);
       if (kind === "aerobic") {
         setAerobicRows([row]);
@@ -136,45 +127,25 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
     }
 
     const totalCalories = rows.reduce((sum, row) => {
-      const exerciseName = activeTab === "anaerobic"
-        ? STRENGTH_OPTIONS.find((opt) => opt.value === row.exerciseTypeId)?.label
-        : CARDIO_OPTIONS.find((opt) => opt.value === row.exerciseTypeId)?.label;
+      // 무산소: 볼륨(중량×횟수×세트)으로 MET 결정 / 유산소: 운동 종류×강도 MET
+      const met =
+        activeTab === "anaerobic"
+          ? anaerobicMetByVolume(anaerobicVolume(row))
+          : aerobicMet(row.exerciseTypeId, row.intensity);
 
-      const exerciseType = exerciseTypes.find(
-        (type) => type.exerciseName === exerciseName
-      );
-
-      if (!exerciseType) {
-        console.warn("운동 종류를 찾을 수 없음:", exerciseName, "운동 타입 리스트:", exerciseTypes);
+      if (!met || met <= 0) {
         return sum;
       }
 
-      if (!exerciseType.met || exerciseType.met <= 0) {
-        console.warn("MET 값이 없음:", exerciseName, exerciseType.met);
-        return sum;
-      }
-
-      let hours = 0;
+      // 저장값과 동일하게: buildCreatePayload 가 보내는 exerciseMin(올림 분)으로 시간 계산
       const durationSec = parseDurationToSeconds(row.durationText);
-
-      if (durationSec > 0) {
-        hours = durationSec / 3600.0;
-      } else if (activeTab === "anaerobic") {
-        const sets = Number(row.exerciseSet) || 0;
-        const reps = Number(row.exerciseReps) || 0;
-        if (sets > 0 && reps > 0) {
-          hours = (sets * reps * 3) / 3600.0;
-        }
-      }
-
-      if (hours <= 0) {
-        console.warn("시간이 0 이상이어야 함:", hours);
+      if (durationSec <= 0) {
         return sum;
       }
+      const exerciseMin = Math.max(1, Math.ceil(durationSec / 60));
+      const hours = exerciseMin / 60.0;
 
-      const calories = Math.round(exerciseType.met * userWeight * hours);
-      console.log(`${exerciseName}: ${exerciseType.met} × ${userWeight} × ${hours.toFixed(4)} = ${calories} kcal`);
-      return sum + calories;
+      return sum + Math.round(met * userWeight * hours);
     }, 0);
 
     return totalCalories;
@@ -554,6 +525,12 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                         </button>
                       )}
                     </div>
+                    {activeTab === "aerobic" &&
+                      row.exerciseTypeId === "stair" && (
+                        <p className="mt-2 text-[11px] leading-relaxed text-gray-400">
+                          {STAIR_INTENSITY_HINT}
+                        </p>
+                      )}
                   </div>
                 ))}
               </div>
