@@ -13,11 +13,30 @@ import subscriptionApi from "../../api/subscriptionApi";
 import userConfigApi from "../../api/userConfigApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
-import medicineApi from "../../api/medicineApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 
 const ML_PER_CUP = 200;
+
+const getSavedMedicineStorageKey = (userId) =>
+  userId ? `savedMedicineInfo.${userId}` : null;
+
+const loadSavedMedicines = (userId) => {
+  const storageKey = getSavedMedicineStorageKey(userId);
+  if (!storageKey) {
+    return [];
+  }
+
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    return parsed ? [parsed] : [];
+  } catch {
+    return [];
+  }
+};
 
 const formatTodayDate = () => {
   const d = new Date();
@@ -99,7 +118,6 @@ function MetricCard({
   );
 }
 
-
 function UserInformation() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -110,14 +128,48 @@ function UserInformation() {
   const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [isMedalModalOpen, setMedalModalOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
-  const [memberProfile, setMemberProfile] = useState(() =>
-    loadCachedMemberProfile(),
-  );
+  const [memberProfile, setMemberProfile] = useState(null);
   const [userConfig, setUserConfig] = useState(null);
   const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
   const [todayWaterCup, setTodayWaterCup] = useState(0);
   const [todayIntakeCalorie, setTodayIntakeCalorie] = useState(0);
-  const [prescriptions, setPrescriptions] = useState([]);
+  const [, setSavedMedicinesVersion] = useState(0);
+  const [trackedUserId, setTrackedUserId] = useState(userId);
+
+  // 계정이 바뀌는 순간(렌더 중) 이전 사용자의 잔여 정보를 즉시 비운다.
+  if (trackedUserId !== userId) {
+    setTrackedUserId(userId);
+    setMemberProfile(null);
+    setUserConfig(null);
+    setSubscription(null);
+    setTodayBurnedCalorie(null);
+    setTodayWaterCup(0);
+    setTodayIntakeCalorie(0);
+  }
+
+  const savedMedicines = loadSavedMedicines(userId);
+
+  const handleMedicineSaved = (medicine) => {
+    if (!medicine) return;
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
+    const storageKey = getSavedMedicineStorageKey(userId);
+    const prev = loadSavedMedicines(userId);
+    const exists = prev.some(
+      (m) => m.itemSeq && medicine.itemSeq && m.itemSeq === medicine.itemSeq,
+    );
+    const next = exists ? prev : [...prev, medicine];
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // 저장 실패는 무시
+    }
+    setSavedMedicinesVersion((prevVersion) => prevVersion + 1);
+    return next;
+  };
 
   useEffect(() => {
     if (!userId) {
@@ -202,22 +254,12 @@ function UserInformation() {
       }
     };
 
-    const fetchPrescriptions = async () => {
-      try {
-        const { data } = await medicineApi.getPrescriptions(userId);
-        setPrescriptions(Array.isArray(data) ? data : []);
-      } catch (error) {
-        setPrescriptions([]);
-      }
-    };
-
     fetchMember();
     fetchUserConfig();
     fetchTodayBurnedCalorie();
     fetchTodayWater();
     fetchTodayIntakeCalorie();
     fetchSubscription();
-    fetchPrescriptions();
     const syncDraftProfile = (event) => {
       setMemberProfile((prev) => ({ ...prev, ...(event.detail || {}) }));
     };
@@ -464,7 +506,9 @@ function UserInformation() {
                   <button
                     type="button"
                     onClick={async () => {
-                      try { await medalApi.checkMedals(); } catch (_) {}
+                      try {
+                        await medalApi.checkMedals();
+                      } catch (_) {}
                       setMedalModalOpen(true);
                     }}
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
@@ -510,7 +554,8 @@ function UserInformation() {
                     </p>
                   ) : (
                     <p className="text-[13px] text-[#64748B]">
-                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해 보세요.
+                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해
+                      보세요.
                     </p>
                   )}
 
@@ -611,7 +656,9 @@ function UserInformation() {
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">식사 1시간</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          식사 1시간
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal1h)}
                           {normalBloodSugar.afterMeal1h != null && (
@@ -622,7 +669,9 @@ function UserInformation() {
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">식사 2시간</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          식사 2시간
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal2h)}
                           {normalBloodSugar.afterMeal2h != null && (
@@ -761,75 +810,47 @@ function UserInformation() {
                         편집
                       </button>
                     </div>
-                    <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl bg-gray-50 p-3 max-h-[260px]">
-                      {prescriptions.length === 0 ? (
-                        <div className="flex flex-1 items-center justify-center py-6">
-                          <div className="text-center text-gray-400">
-                            <div className="mb-1 text-3xl">💊</div>
-                            <p className="text-xs">등록된 약이 없습니다</p>
-                          </div>
+                    <div
+                      className={`flex flex-1 rounded-2xl bg-gray-100 p-6 min-h-[260px] overflow-y-auto ${
+                        savedMedicines.length > 0
+                          ? "items-start justify-start"
+                          : "items-center justify-center"
+                      }`}
+                    >
+                      {savedMedicines.length > 0 ? (
+                        <div className="flex w-full flex-col gap-4">
+                          {savedMedicines.map((m, idx) => (
+                            <dl
+                              key={m.itemSeq ?? idx}
+                              className={`grid w-full grid-cols-[88px_1fr] gap-y-2 text-[13px] content-start ${
+                                idx !== 0 ? "border-t border-gray-200 pt-4" : ""
+                              }`}
+                            >
+                              <dt className="text-gray-500">품목기준코드</dt>
+                              <dd className="text-gray-800 break-all">
+                                {m.itemSeq || "-"}
+                              </dd>
+                              <dt className="text-gray-500">성상</dt>
+                              <dd className="text-gray-800 break-words">
+                                {m.chart || "-"}
+                              </dd>
+                              <dt className="text-gray-500">저장방법</dt>
+                              <dd className="text-gray-800 break-words">
+                                {m.storageMethod || "-"}
+                              </dd>
+                            </dl>
+                          ))}
                         </div>
                       ) : (
-                        prescriptions.map((p) =>
-                          p.itemSeq || p.chart || p.storageMethod ? (
-                            <div
-                              key={p.prescriptionId}
-                              className="rounded-xl bg-[#EAF2FF] p-3 text-xs"
-                            >
-                              {p.itemName && (
-                                <p className="mb-2 text-[13px] font-semibold text-gray-800">
-                                  💊 {p.itemName}
-                                </p>
-                              )}
-                              <dl className="grid grid-cols-[72px_1fr] gap-y-1.5">
-                                <dt className="text-gray-500">품목기준코드</dt>
-                                <dd className="text-gray-800 break-all">
-                                  {p.itemSeq || "-"}
-                                </dd>
-
-                                <dt className="text-gray-500">성상</dt>
-                                <dd className="text-gray-800">
-                                  {p.chart || "-"}
-                                </dd>
-
-                                <dt className="text-gray-500">저장방법</dt>
-                                <dd className="text-gray-800">
-                                  {p.storageMethod || "-"}
-                                </dd>
-                              </dl>
-                            </div>
-                          ) : (
-                            <div
-                              key={p.prescriptionId}
-                              className="rounded-lg border border-gray-100 bg-white p-3"
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="truncate text-xs font-semibold text-gray-800">
-                                  💊 {p.prescriptionName}
-                                </span>
-                                {p.dosage && (
-                                  <span className="shrink-0 text-[11px] font-medium text-blue-500">
-                                    {p.dosage}
-                                  </span>
-                                )}
-                              </div>
-                              {p.intakeIntervals && (
-                                <p className="mt-1 text-[11px] text-gray-500">
-                                  {p.intakeIntervals}
-                                </p>
-                              )}
-                              {p.memo && (
-                                <p className="mt-2 whitespace-pre-line rounded-md bg-[#EAF3FF] p-2 text-[11px] leading-[1.6] text-gray-700">
-                                  📝 {p.memo}
-                                </p>
-                              )}
-                            </div>
-                          )
-                        )
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-5xl">💊</div>
+                          <p className="text-xs text-gray-400">저장된 이미지</p>
+                          <p className="text-[10px] text-gray-300">예시</p>
+                        </div>
                       )}
                     </div>
                     <button
-                      className="mt-3 h-9 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                      className="mt-3 h-11 w-full rounded-xl bg-[#0f1c33] text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       onClick={() => SetPreResisterModalOpen(true)}
                     >
                       사진 업로드
@@ -879,24 +900,8 @@ function UserInformation() {
         <MedicineSearchTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
-          onSaved={(med) => {
-            if (!med) return;
-            const newItem = {
-              prescriptionId: `local-${med.itemSeq ?? Date.now()}`,
-              itemSeq: med.itemSeq ?? null,
-              itemName: med.itemName ?? null,
-              chart: med.chart ?? null,
-              storageMethod: med.storageMethod ?? null,
-            };
-            setPrescriptions((prev) => {
-              if (prev.some((p) => p.prescriptionId === newItem.prescriptionId)) {
-                return prev;
-              }
-              return [newItem, ...prev];
-            });
-          }}
+          onSaved={handleMedicineSaved}
         />
-
 
         <RoutineModal
           open={isRoutineModalOpen}
