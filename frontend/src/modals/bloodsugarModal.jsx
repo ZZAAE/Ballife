@@ -6,11 +6,28 @@ import bioValueRecordApi from "../api/bioValueRecordApi";
 import userApi from "../api/userApi";
 import userConfigApi from "../api/userConfigApi";
 import { BIO_CATEGORY } from "../constants/bioCategory";
+import { USER_KEY } from "../api/api";
 import {
   loadCachedMemberProfile,
   parseDiseaseIndex,
   persistMemberProfile,
 } from "../utils/userProfile";
+
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
 const MEALS = [
   { id: "공복", label: "공복", hasTiming: false },
@@ -343,14 +360,14 @@ export default function BloodSugarModal({
 
     if (isSaving) return;
 
-    if (currentVal <= 0) {
-      toast.error("혈당 수치를 입력해주세요");
+    const userId = resolveUserId(user);
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
       return;
     }
 
-    const userId = user?.userId ?? user?.id;
-    if (!userId) {
-      toast.error("로그인이 필요합니다");
+    if (currentVal <= 0) {
+      toast.error("혈당 수치를 입력해주세요");
       return;
     }
 
@@ -471,7 +488,7 @@ export default function BloodSugarModal({
     setDiabetesType(cached.diabetes || "NONE");
 
     // 2) 서버에서 회원가입 때 입력한 실제 당뇨 여부를 조회해 보정하고 캐시도 동기화
-    const userId = user?.userId ?? user?.id;
+    const userId = resolveUserId(user);
     if (!userId) return;
 
     let cancelled = false;
@@ -552,7 +569,7 @@ export default function BloodSugarModal({
   // 모달 오픈 시 1회만 적용하고, 이후 사용자가 직접 바꾼 값은 덮어쓰지 않는다.
   useEffect(() => {
     if (!isOpen || editingRecord) return;
-    const userId = user?.userId ?? user?.id;
+    const userId = resolveUserId(user);
     if (!userId) return;
 
     let cancelled = false;
