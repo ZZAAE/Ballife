@@ -113,6 +113,7 @@ public class UserExerciseService {
                             .exerciseReps(detail != null ? detail.getExerciseReps() : null)
                             .exerciseWeight(detail != null ? detail.getExerciseWeight() : null)
                             .exerciseHard(detail != null ? detail.getExerciseHard() : null)
+                            .distanceKm(detail != null ? detail.getDistanceKm() : null)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -166,6 +167,7 @@ public class UserExerciseService {
                         .exerciseReps(request.getExerciseReps())
                         .exerciseWeight(request.getExerciseWeight())
                         .exerciseHard(request.getExerciseHard())
+                        .distanceKm(request.getDistanceKm())
                         .build());
 
         return UserExerciseDto.Response.from(saved, exerciseType);
@@ -187,6 +189,7 @@ public class UserExerciseService {
                         .exerciseReps(request.getExerciseReps())
                         .exerciseWeight(request.getExerciseWeight())
                         .exerciseHard(request.getExerciseHard())
+                        .distanceKm(request.getDistanceKm())
                         .build());
 
         // 칼로리는 클라이언트가 직접 지정했으면 그 값을, 아니면 서버에서 재계산
