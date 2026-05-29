@@ -118,7 +118,11 @@ export default function BallChatbot() {
       const response = await fetch("http://localhost:8001/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, userId: user.id }),
+      body: JSON.stringify({
+        message: text,
+        userId: user.id,
+        token: localStorage.getItem("accessToken"),
+      }),
     });
     const data = await response.json();
     const reply = data.reply || "응답을 받지 못했어요.";
