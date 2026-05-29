@@ -1,5 +1,35 @@
 import { useState, useRef, useEffect } from "react";
 
+/* ---------- Avatars ---------- */
+const BotAvatar = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="#2D6BFF" />
+    <text
+      x="12"
+      y="16"
+      fontSize="11"
+      fontWeight="700"
+      fill="#fff"
+      textAnchor="middle"
+      fontFamily="Noto Sans KR, sans-serif"
+    >
+      B
+    </text>
+  </svg>
+);
+
+const UserAvatar = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="9" r="3.5" stroke="#4A5363" strokeWidth="1.6" />
+    <path
+      d="M5 19 C5 15.5 8 13.5 12 13.5 C16 13.5 19 15.5 19 19"
+      stroke="#4A5363"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 export default function BallChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content, time}
@@ -9,6 +39,7 @@ export default function BallChatbot() {
   const chatBodyRef = useRef(null);
   const textareaRef = useRef(null);
   const inputRef = useRef(null);
+  const isComposing = useRef(false);
 
   /* ---------- Auto-scroll to bottom on new message ---------- */
   useEffect(() => {
@@ -30,13 +61,12 @@ export default function BallChatbot() {
     function onKey(e) {
       if (e.key === "Escape" && isOpen) setIsOpen(false);
     }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
   /* ---------- Auto-resize textarea ---------- */
-  function handleInputChange(e) {
-    setInput(e.target.value);
+  function resizeTextarea() {
     const ta = textareaRef.current;
     if (ta) {
       ta.style.height = "auto";
@@ -44,8 +74,22 @@ export default function BallChatbot() {
     }
   }
 
+  function handleInputChange(e) {
+    setInput(e.target.value);
+    resizeTextarea();
+  }
+
+  function handleCompositionStart() {
+    isComposing.current = true;
+  }
+
+  function handleCompositionEnd(e) {
+    isComposing.current = false;
+    setInput(e.target.value);
+  }
+
   function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !isComposing.current) {
       e.preventDefault();
       send();
     }
@@ -56,7 +100,7 @@ export default function BallChatbot() {
     return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
 
-  /* ---------- Send to Claude API ---------- */
+  /* ---------- 챗봇에 보내기 ---------- */
   async function send() {
     const text = input.trim();
     if (!text || isWaiting) return;
@@ -69,24 +113,13 @@ export default function BallChatbot() {
     setIsWaiting(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system:
-            "당신은 Bal.life의 친근한 건강 AI 비서 'Ball'입니다. 사용자의 건강 관련 질문(혈당, 영양, 운동, 수면, 생활습관 등)에 한국어로 친절하고 명확하게 답변하세요. 답변은 핵심을 짚어 2~5문장 정도로 간결하게 작성하세요. 의학적 진단이 필요한 사안에는 전문의 상담을 권유하세요. 이모지는 사용하지 마세요. 혈당/혈압 등의 '정상 기준'을 묻는 질문에는 정상 범위만 알려주고, 전단계·고혈압 1단계·2단계·당뇨 의심 등 비정상 구간은 사용자가 명시적으로 묻기 전까지는 언급하지 마세요. 표 형태가 아닌 자연스러운 문장으로 답하세요.",
-          messages: updated.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-      const data = await response.json();
-      const reply =
-        (data.content || [])
-          .filter((b) => b.type === "text")
-          .map((b) => b.text)
-          .join("\n")
-          .trim() || "응답을 받지 못했어요. 다시 시도해 주세요.";
+      const response = await fetch("http://localhost:8001/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await response.json();
+    const reply = data.reply || "응답을 받지 못했어요.";
 
       setMessages((prev) => [
         ...prev,
@@ -107,36 +140,6 @@ export default function BallChatbot() {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }
-
-  /* ---------- Avatars ---------- */
-  const BotAvatar = ({ size = 20 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="10" fill="#2D6BFF" />
-      <text
-        x="12"
-        y="16"
-        fontSize="11"
-        fontWeight="700"
-        fill="#fff"
-        textAnchor="middle"
-        fontFamily="Noto Sans KR, sans-serif"
-      >
-        B
-      </text>
-    </svg>
-  );
-
-  const UserAvatar = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="9" r="3.5" stroke="#4A5363" strokeWidth="1.6" />
-      <path
-        d="M5 19 C5 15.5 8 13.5 12 13.5 C16 13.5 19 15.5 19 19"
-        stroke="#4A5363"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 
   return (
     <>
@@ -579,6 +582,8 @@ export default function BallChatbot() {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
+                  onCompositionStart={handleCompositionStart}
+                  onCompositionEnd={handleCompositionEnd}
                 />
                 <button
                   className="ball-icon-btn ball-send-btn"

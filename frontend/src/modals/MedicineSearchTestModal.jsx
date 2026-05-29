@@ -2,7 +2,7 @@
 import { useState } from "react";
 import medicineApi from "../api/medicineApi";
 
-export default function MedicineSearchTestModal({ isOpen, onClose }) {
+export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
   const [keyword, setKeyword] = useState("");
   const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,7 @@ export default function MedicineSearchTestModal({ isOpen, onClose }) {
     try {
       const { data } = await medicineApi.search(keyword.trim());
       setMedicine(data);
+      onSaved?.(data);
     } catch (e) {
       setError(
         e.response?.status === 404

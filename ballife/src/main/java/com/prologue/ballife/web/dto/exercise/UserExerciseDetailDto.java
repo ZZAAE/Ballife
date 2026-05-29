@@ -29,6 +29,9 @@ public class UserExerciseDetailDto {
 
         @Size(max = 10, message = "운동 강도는 최대 10자까지 허용됩니다.")
         private String exerciseHard;
+
+        // 유산소: 이동 거리 (km)
+        private Double distanceKm;
     }
 
     // 사용자 운동 상세 기록 수정 요청 DTO
@@ -45,6 +48,9 @@ public class UserExerciseDetailDto {
 
         @Size(max = 10, message = "운동 강도는 최대 10자까지 허용됩니다.")
         private String exerciseHard;
+
+        // 유산소: 이동 거리 (km)
+        private Double distanceKm;
     }
 
     // 사용자 운동 상세 기록 응답 DTO
@@ -63,6 +69,7 @@ public class UserExerciseDetailDto {
         private Integer exerciseReps;
         private Integer exerciseWeight;
         private String exerciseHard;
+        private Double distanceKm;
 
         public static Response from(UserExerciseDetail detail) {
             return Response.builder()
@@ -73,6 +80,7 @@ public class UserExerciseDetailDto {
                     .exerciseReps(detail.getExerciseReps())
                     .exerciseWeight(detail.getExerciseWeight())
                     .exerciseHard(detail.getExerciseHard())
+                    .distanceKm(detail.getDistanceKm())
                     .build();
         }
     }

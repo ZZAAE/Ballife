@@ -40,6 +40,9 @@ public class UserExerciseDto {
 
         // 운동 강도 (선택)
         private String exerciseHard;
+
+        // 유산소: 이동 거리 (km)
+        private Double distanceKm;
     }
 
     // 사용자 운동 기록 수정 요청 DTO
@@ -63,6 +66,9 @@ public class UserExerciseDto {
         private Integer exerciseReps;
         private Integer exerciseWeight;
         private String exerciseHard;
+
+        // 유산소: 이동 거리 (km)
+        private Double distanceKm;
 
         // 클라이언트가 직접 칼로리를 지정하고 싶을 때만 사용 (보통은 서버 계산)
         private Integer burnedCalorie;
@@ -89,6 +95,7 @@ public class UserExerciseDto {
         private Integer exerciseReps;
         private Integer exerciseWeight;
         private String exerciseHard;
+        private Double distanceKm;
     }
 
     // 사용자 운동 기록 응답 DTO
