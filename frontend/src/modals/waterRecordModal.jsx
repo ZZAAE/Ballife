@@ -1,11 +1,29 @@
 import { useId, useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { BIO_CATEGORY } from '../constants/bioCategory';
 import bioValueRecordApi from '../api/bioValueRecordApi';
 import userConfigApi from '../api/userConfigApi';
+import { USER_KEY } from '../api/api';
 
 const DEFAULT_TARGET_CUPS = 10;
+
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem('user') ||
+      localStorage.getItem('loginUser');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
 
 // 데이터베이스에서 기존에 사용자가 저장한 최신 물먹은양, 목표 수분섭취량 가져와서 
@@ -41,7 +59,7 @@ const WaterRecordModal = ({
   const [todayRecordId, setTodayRecordId] = useState(null);
   const [targetCups, setTargetCups] = useState(DEFAULT_TARGET_CUPS);
 
-  const userId = user?.userId ?? user?.id;
+  const userId = resolveUserId(user);
 
   const pad = (n) => String(n).padStart(2, '0');
   const getTodayStr = () => {
@@ -92,7 +110,10 @@ const WaterRecordModal = ({
   const feedbackMessage = getProgressMessage(progress);
 
   const handleSave = async () => {
-    if (!userId) return;
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
     const now = new Date();
     const targetDate = recordDate || getTodayStr(); // 부모가 날짜 안 주면 오늘
     const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;

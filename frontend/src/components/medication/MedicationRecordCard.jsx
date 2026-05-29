@@ -24,7 +24,7 @@ export default function MedicationRecordCard({
 
   const handleSelectMedicine = (medicine) => {
     setDrugName(medicine.name);
-    setDosage(medicine.dosage);
+    // 복용량은 자동으로 채우지 않고 사용자가 직접 입력하도록 둔다
     setIsSearchModalOpen(false);
   };
 
@@ -64,7 +64,8 @@ export default function MedicationRecordCard({
               type="text"
               value={dosage}
               onChange={(e) => setDosage(e.target.value)}
-              className="w-full h-[40px] sm:h-[42px] bg-[#2A2F3F] rounded-lg px-4 text-[12px] sm:text-[13px] text-white outline-none"
+              placeholder="예: 1정, 5ml"
+              className="w-full h-[40px] sm:h-[42px] bg-[#2A2F3F] rounded-lg px-4 text-[12px] sm:text-[13px] text-white placeholder-gray-500 outline-none"
             />
           </div>
         </div>

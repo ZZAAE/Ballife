@@ -2,9 +2,21 @@ import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import api from "../../api/api";
+import uploadApi from "../../api/uploadApi";
 import { isRichTextEmpty, normalizeEditorValue } from "./richTextEditorUtils";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+// 서버가 반환하는 상대 URL("/uploads/...")을 화면/저장에 쓸 절대 URL로 변환.
+// base64 를 본문에 인라인하면 요청 본문이 수 MB로 커져 등록이 실패하므로,
+// 이미지는 서버에 업로드하고 본문에는 URL 만 삽입한다.
+function toAbsoluteUploadUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url) || url.startsWith("data:")) return url;
+  const base = (api.defaults.baseURL || "").replace(/\/api\/?$/, "");
+  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+}
 const FONT_OPTIONS = [
   "sans",
   "malgun-gothic",
@@ -206,7 +218,7 @@ export default function RichTextEditor({
       input.type = "file";
       input.accept = "image/*";
 
-      input.onchange = () => {
+      input.onchange = async () => {
         const file = input.files?.[0];
 
         if (!file) {
@@ -223,22 +235,23 @@ export default function RichTextEditor({
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result !== "string") {
-            return;
-          }
-
-          const range = quill.getSelection(true) ?? {
-            index: quill.getLength(),
-            length: 0,
-          };
-
-          quill.insertEmbed(range.index, "image", reader.result, "user");
-          quill.setSelection(range.index + 1, 0, "user");
+        const range = quill.getSelection(true) ?? {
+          index: quill.getLength(),
+          length: 0,
         };
 
-        reader.readAsDataURL(file);
+        const uploadToast = toast.loading("이미지 업로드 중...");
+        try {
+          const { url } = await uploadApi.uploadImage(file, "board");
+          const imageUrl = toAbsoluteUploadUrl(url);
+
+          quill.insertEmbed(range.index, "image", imageUrl, "user");
+          quill.setSelection(range.index + 1, 0, "user");
+          toast.success("이미지를 첨부했습니다.", { id: uploadToast });
+        } catch (error) {
+          console.error("이미지 업로드 실패:", error);
+          toast.error("이미지 업로드에 실패했습니다.", { id: uploadToast });
+        }
       };
 
       input.click();

@@ -78,7 +78,12 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
     Optional<BioValueRecord> findLastWaterIntakeCupRecordByUser(@Param("user") User user);
 
     //카테고리별로 Page로 불러옴
-    Page<BioValueRecord> findByUserAndCategory(User user, String category, Pageable pageable);
+    // category prefix 매칭 (예: "BloodPressure" 로 "BloodPressure-아침"까지, "BloodSugar" 로 "BloodSugar-공복"까지 매칭)
+    @Query("SELECT b FROM BioValueRecord b "
+           + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%')")
+    Page<BioValueRecord> findByUserAndCategory(@Param("user") User user,
+                                               @Param("category") String category,
+                                               Pageable pageable);
 
     //카테고리별로 Page로 불러옴
     Page<BioValueRecord> findByUserAndCategoryIn(User user, List<String> category, Pageable pageable);
