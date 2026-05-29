@@ -129,6 +129,7 @@ export function buildCreatePayload(kind, row, recordedAt) {
       ...base,
       exerciseMin,
       exerciseHard: row.intensity,
+      distanceKm: row.distanceKm !== "" ? Number(row.distanceKm) : null,
     };
   }
 
@@ -197,7 +198,6 @@ export function hydrateExerciseSessions(records) {
 }
 
 // 백엔드 DetailedResponse → 프론트 session 객체로 변환
-// distanceKm 는 백엔드에 저장되지 않으므로 null
 export function dbExerciseToRecord(dto) {
   const meta = EXERCISE_META_BY_LABEL[dto.exerciseName] || null;
   const isCardio = dto.exerciseCategory === "유산소";
@@ -226,7 +226,7 @@ export function dbExerciseToRecord(dto) {
     dateIso,
     durationSec,
     calories: dto.burnedCalorie ?? 0,
-    distanceKm: null,
+    distanceKm: isCardio ? (dto.distanceKm ?? null) : null,
     sets: isCardio ? null : (dto.exerciseSet ?? null),
     reps: isCardio ? null : (dto.exerciseReps ?? null),
     weightKg: isCardio ? null : (dto.exerciseWeight ?? null),

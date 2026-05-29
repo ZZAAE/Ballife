@@ -113,6 +113,8 @@ export const AuthProvider = ({ children }) => {
       if (!key) continue;
       if (
         key.startsWith("ballife.exerciseRecords.") ||
+        key === "savedMedicineInfo" ||
+        key.startsWith("savedMedicineInfo.") ||
         key === "savedMedicationRecords" ||
         key.startsWith("medicationSchedules_")
       ) {
