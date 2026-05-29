@@ -18,15 +18,15 @@ public class NaverOcrService {
 
     Map<String, Object> requestBody = null;
 
-    public void sendOcrRequest(String contentType, String img){
-        return webClient.post()
-                        .uri(baseUrl)
-                        .header("Content-Type", "application/json")
-                        .header("X-OCR-SECRET", secretKey)
-                        .bodyValue(requestBody)
-                        .retrieve()
-                        .bodyToMono(null)
-                        .block();
-    }
+    // public void sendOcrRequest(String contentType, String img){
+    //     return webClient.post()
+    //                     .uri(baseUrl)
+    //                     .header("Content-Type", "application/json")
+    //                     .header("X-OCR-SECRET", secretKey)
+    //                     .bodyValue(requestBody)
+    //                     .retrieve()
+    //                     .bodyToMono(null)
+    //                     .block();
+    // }
     
 }
