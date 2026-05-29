@@ -11,7 +11,12 @@ load_dotenv()
 app = FastAPI()
 
 # React 개발서버(포트 5173)에서 오는 요청 허용
+
 # cd ai-service
+# 환경 설정이 안되어 있으면
+# pip install virtualenv
+# virtualenv .venv
+# ===============
 # .venv\Scripts\activate
 # pip install -r requirements.txt
 # uvicorn app.main:app --reload --port 8001 로 실행

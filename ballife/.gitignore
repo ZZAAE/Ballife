@@ -37,4 +37,5 @@ out/
 .vscode/
 
 ### 인증키있는 yml 파일 ###
+*.yml
 application-local.yml
