@@ -62,6 +62,7 @@ public class SecurityConfig {
                                                                                               // 접근 가능
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll() // 프론트 서버 생존 폴링 (JWT 불필요)
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll() // 카드뉴스 (공개 데이터, JWT 불필요)
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // 업로드된 이미지 정적 서빙 (공개)
                         .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/post/**").permitAll()

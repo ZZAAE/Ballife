@@ -146,6 +146,10 @@ const EDITOR_PICKER_STYLE = `
   .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
     content: '32';
   }
+
+  .ql-container.ql-snow .ql-editor.ql-blank:focus::before {
+    content: '';
+  }
 `;
 
 const TOOLBAR_OPTIONS = [

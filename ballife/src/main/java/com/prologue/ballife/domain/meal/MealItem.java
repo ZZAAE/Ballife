@@ -20,6 +20,12 @@ public class MealItem {
     @Column(name = "Food_Name", nullable = false, length = 20)
     private String foodName;
 
+    @Column(name = "Meal_Photo", length = 500)
+    private String mealPhoto; // 음식 사진 URL (예: /uploads/meal/2026/05/29/uuid.jpg)
+
+    @Column(name = "Grams")
+    private Integer grams; // 실제 섭취량 (g) — 기준 100g 대비 사용자가 조정
+
     @Column(name = "Calorie")
     private Integer calorie;
 

@@ -50,7 +50,6 @@ function PostCreatePage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(() => readDraft());
-  const hasSavedDraft = hasDraftContent(formData);
 
   // 비로그인 사용자는 작성 페이지 진입 차단
   useEffect(() => {
@@ -86,11 +85,6 @@ function PostCreatePage() {
 
   const clearDraft = () => {
     localStorage.removeItem(DRAFT_STORAGE_KEY);
-  };
-
-  const handleDraftSave = () => {
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
-    toast.success("임시저장되었습니다.");
   };
 
   useEffect(() => {
@@ -142,16 +136,16 @@ function PostCreatePage() {
   };
 
   return (
-    <section className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl px-1 py-2 sm:px-2 lg:px-4">
-        <div className="mb-8 border-b border-[#eef2f7] pb-5">
-          <h1 className="text-[28px] font-bold tracking-[-0.03em] text-gray-900">
-            자유게시판 글쓰기
-          </h1>
-          <p className="mt-2 text-[15px] leading-7 text-gray-500">
-            건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8">
+        <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
+          게시판 글쓰기
+        </h1>
+        <p className="mb-8 text-sm text-gray-500">
+          건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-7">
           <div className="space-y-6">
@@ -167,7 +161,13 @@ function PostCreatePage() {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
+                className="h-12 w-full appearance-none rounded-xl border border-[#d8dee8] bg-white bg-no-repeat pl-4 pr-10 text-[15px] text-gray-700 outline-none transition focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")",
+                  backgroundPosition: "right 16px center",
+                  backgroundSize: "18px 18px",
+                }}
               >
                 {categories.map((category) => (
                   <option key={category.value} value={category.value}>
@@ -208,49 +208,35 @@ function PostCreatePage() {
                 onChange={handleContentChange}
                 placeholder="내용을 입력하세요..."
               />
-              <p className="mt-3 text-sm text-gray-400">
-                툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4 border-t border-[#eef2f7] pt-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm text-gray-500 lg:whitespace-nowrap">
-                {hasSavedDraft
-                  ? "작성 중인 내용이 브라우저에 자동 임시저장됩니다."
-                  : "임시저장된 글이 없습니다."}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 lg:mr-6">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate(-1)}
-                className="min-w-[112px] rounded-xl bg-[#e05252] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c93f3f]"
-              >
-                나가기
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleDraftSave}
-                className="min-w-[112px] rounded-xl border border-[#d8dee8] bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                임시저장
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="min-w-[112px] rounded-xl bg-[#4f7cff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d68e8]"
-              >
-                {loading ? "등록 중..." : "등록"}
-              </Button>
+              <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
+                <p className="mb-3 text-sm text-gray-400 lg:ml-6">
+                  툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => navigate(-1)}
+                    className="rounded-[10px] border border-gray-200 !bg-white px-5 py-2.5 text-sm font-semibold !text-gray-700 shadow-sm transition hover:!bg-gray-50"
+                  >
+                    나가기
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="rounded-[10px] !bg-[#0F172A] px-6 py-2.5 text-sm font-semibold text-white transition hover:!bg-[#1E293B]"
+                  >
+                    {loading ? "등록 중..." : "등록"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </form>
+          </div>
+        </main>
       </div>
-    </section>
+    </div>
   );
 }
 

@@ -35,7 +35,16 @@ function CommentBlock({
           </div>
           <div>
             <p className="text-[13px] font-semibold text-gray-800">
-              {comment.author}
+              <span className="inline-flex items-center gap-1">
+                {comment.medalIcon && (
+                  <img
+                    src={comment.medalIcon}
+                    alt=""
+                    className="inline-block h-[1em] w-[1em] object-contain"
+                  />
+                )}
+                {comment.author}
+              </span>
             </p>
             <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-gray-600">
               {comment.content}
@@ -124,6 +133,7 @@ export default function PostDetailPage() {
     id: raw.id,
     author: raw.userNickname ?? "익명",
     userId: raw.userId,
+    medalIcon: raw.userMedalIcon ?? null,
     content: raw.content,
     createdAt: raw.createdAt,
     upVote: raw.upVote ?? 0,
@@ -322,11 +332,13 @@ export default function PostDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f2f4] px-4 py-10 sm:px-6 lg:px-8">
-      <main className="mx-auto max-w-[1280px]">
-        <div className="mb-5 flex items-start justify-between gap-4">
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-6 py-8">
+        <div className="mb-5 flex items-end justify-between gap-4">
           <div>
-            <p className="text-[15px] font-semibold text-gray-700">
+            <p className="text-[28px] font-semibold text-gray-700">
               <Link to="/boards" className="hover:text-blue-600">
                 커뮤니티
               </Link>
@@ -341,7 +353,7 @@ export default function PostDetailPage() {
                   ?.label?.replace("게시판", "")}
               </Link>
             </p>
-            <p className="mt-1 text-[11px] text-gray-500">
+            <p className="mt-1 text-[15px] text-gray-500">
               건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
             </p>
           </div>
@@ -349,24 +361,38 @@ export default function PostDetailPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-md border border-gray-200 bg-white px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+              onClick={() => navigate(`/posts/${post.postId ?? post.id}/edit`)}
+              className="rounded-[10px] border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
             >
               수정
             </button>
-            <Link to="/boards">
+            {user?.userId === post.userId && (
               <button
                 type="button"
-                className="rounded-md border border-gray-200 bg-white px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+                onClick={async () => {
+                  if (!window.confirm("이 글을 삭제할까요?")) return;
+                  try {
+                    await postApi.deletePost(user.userId, post.postId ?? post.id);
+                    toast.success("게시글이 삭제되었습니다.");
+                    navigate("/boards");
+                  } catch (error) {
+                    toast.error(
+                      error.response?.data?.message ||
+                        "게시글 삭제에 실패했습니다.",
+                    );
+                  }
+                }}
+                className="rounded-[10px] border border-[#efc7c7] bg-[#fff6f6] px-5 py-2.5 text-sm font-semibold text-[#c24141] shadow-sm transition hover:bg-[#feecec]"
               >
-                나가기
+                삭제
               </button>
-            </Link>
+            )}
           </div>
         </div>
 
         <article className="overflow-hidden rounded-md border border-[#d9dde3] bg-white shadow-sm">
           <div className="px-7 py-6 sm:px-8 sm:py-7">
-            <h1 className="text-[26px] font-bold tracking-[-0.2px] text-gray-900 sm:text-[30px]">
+            <h1 className="text-[20px] font-bold tracking-[-0.2px] text-gray-900 sm:text-[22px]">
               {post.title}
             </h1>
 
@@ -376,7 +402,14 @@ export default function PostDetailPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-gray-400">
-                <span className="font-medium text-gray-600">
+                <span className="inline-flex items-center gap-1 font-medium text-gray-600">
+                  {post.userMedalIcon && (
+                    <img
+                      src={post.userMedalIcon}
+                      alt=""
+                      className="inline-block h-[1em] w-[1em] object-contain"
+                    />
+                  )}
                   {post.userNickname}
                 </span>
                 {post.createdAt && <span>{formatDate(post.createdAt)}</span>}
@@ -421,36 +454,14 @@ export default function PostDetailPage() {
                     );
                   }
                 }}
-                className={`rounded-md border px-5 py-2 text-sm font-semibold transition ${
+                className={`rounded-[10px] border px-4 py-2 text-sm font-semibold transition ${
                   liked
-                    ? "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+                    ? "border-[#e05252] bg-[#e05252] text-white hover:bg-[#c93f3f]"
                     : "border-[#d9dde3] bg-[#f8fafc] text-gray-600 hover:bg-[#f1f5f9]"
                 }`}
               >
                 {liked ? "♥" : "♡"} 추천 {displayedUpVote}
               </button>
-
-              {user?.userId === post.userId && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!window.confirm("이 글을 삭제할까요?")) return;
-                    try {
-                      await postApi.deletePost(user.userId, post.postId ?? post.id);
-                      toast.success("게시글이 삭제되었습니다.");
-                      navigate("/boards");
-                    } catch (error) {
-                      toast.error(
-                        error.response?.data?.message ||
-                          "게시글 삭제에 실패했습니다.",
-                      );
-                    }
-                  }}
-                  className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-5 py-2 text-sm font-semibold text-[#c24141] hover:bg-[#feecec]"
-                >
-                  삭제
-                </button>
-              )}
             </div>
           </div>
         </article>
@@ -537,7 +548,7 @@ export default function PostDetailPage() {
                             <button
                               type="button"
                               onClick={() => handleReplySubmit(comment.id)}
-                              className="rounded bg-gray-500 px-3 py-1 text-[11px] font-semibold text-white hover:bg-gray-600"
+                              className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
                             >
                               등록
                             </button>
@@ -568,7 +579,20 @@ export default function PostDetailPage() {
             </div>
           </div>
         </section>
-      </main>
+
+        <div className="mt-3 flex justify-end">
+          <Link to="/boards">
+            <button
+              type="button"
+              className="rounded-[10px] border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+            >
+              나가기
+            </button>
+          </Link>
+        </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

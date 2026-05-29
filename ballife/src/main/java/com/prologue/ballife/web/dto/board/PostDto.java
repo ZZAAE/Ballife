@@ -40,6 +40,7 @@ public class PostDto {
         private CATEGORY category;
         private Long userId;
         private String userNickname;
+        private String userMedalIcon;
         private String imageUrl;
         private String title;
         private String content;
@@ -63,6 +64,7 @@ public class PostDto {
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
                         .userNickname(userNickname)
+                        .userMedalIcon(post.getUserId().getMedal() != null ? post.getUserId().getMedal().getMedalIcon() : null)
                         .imageUrl(post.getImageUrl())
                         .title(post.getTitle())
                         .content(post.getContent())
@@ -94,6 +96,7 @@ public class PostDto {
         private CATEGORY category;
         private Long userId;
         private String userNickname;
+        private String userMedalIcon;
         private String title;
         private Integer upVote;
         private Integer viewCount;
@@ -109,6 +112,7 @@ public class PostDto {
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
                         .userNickname(userNickname)
+                        .userMedalIcon(post.getUserId().getMedal() != null ? post.getUserId().getMedal().getMedalIcon() : null)
                         .upVote(post.getUpVote())
                         .title(post.getTitle())
                         .viewCount(post.getViewCount())

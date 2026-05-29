@@ -1,6 +1,5 @@
 package com.prologue.ballife.service.user;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,20 +68,11 @@ public class UserService {
         // 오라클에 INSERT INTO
         User savedUser = userRepository.save(user);
 
-        // 4. 회원 가입 시 기본 UserConfig 함께 생성 (목표 지표/루틴 조회 API의 NPE/500 방지)
-        UserConfig defaultConfig = UserConfig.builder()
+        // 4. 회원 가입 시 빈 UserConfig 행만 생성 — 목표/루틴은 사용자가 직접 선택하도록 모두 null
+        UserConfig emptyConfig = UserConfig.builder()
                 .user(savedUser)
-                .targetWeight(savedUser.getWeight())     // 기본: 가입 시 입력한 체중
-                .targetDailyCaloriesBurned(300)          // 기본 소모 칼로리 목표
-                .targetDailyCaloriesIntake(2000)         // 기본 섭취 칼로리 목표
-                .targetDailyWaterIntake(8)               // 기본 물 8잔
-                .wakeupTime(LocalTime.of(7, 0))
-                .breakfastTime(LocalTime.of(8, 0))
-                .lunchTime(LocalTime.of(12, 30))
-                .dinnerTime(LocalTime.of(18, 30))
-                .bedTime(LocalTime.of(23, 30))
                 .build();
-        userConfigRepository.save(defaultConfig);
+        userConfigRepository.save(emptyConfig);
 
         // Entity-> DTO에 넣기 위해서 변환 후 반환
         return UserDto.UserResponse.from(savedUser);

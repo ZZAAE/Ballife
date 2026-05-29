@@ -2,6 +2,8 @@ import PrescriptionRegisterModal from "../../modals/PrescriptionRegisterModal";
 import RoutineModal from "../../modals/RoutineModal";
 import TargetModal from "../../modals/TargetModal";
 import SubscriptionModal from "../../modals/SubscriptionModal";
+import UserMedalModal from "../../modals/UserMedalModal";
+import medalApi from "../../api/medalApi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -15,6 +17,26 @@ import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 
 const ML_PER_CUP = 200;
+
+const getSavedMedicineStorageKey = (userId) =>
+  userId ? `savedMedicineInfo.${userId}` : null;
+
+const loadSavedMedicines = (userId) => {
+  const storageKey = getSavedMedicineStorageKey(userId);
+  if (!storageKey) {
+    return [];
+  }
+
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    return parsed ? [parsed] : [];
+  } catch {
+    return [];
+  }
+};
 
 const formatTodayDate = () => {
   const d = new Date();
@@ -96,7 +118,6 @@ function MetricCard({
   );
 }
 
-
 function UserInformation() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -105,14 +126,50 @@ function UserInformation() {
   const [isRoutineModalOpen, setRoutineModalOpen] = useState(false);
   const [isTargetModalOpen, setTargetModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [isMedalModalOpen, setMedalModalOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
-  const [memberProfile, setMemberProfile] = useState(() =>
-    loadCachedMemberProfile(),
-  );
+  const [memberProfile, setMemberProfile] = useState(null);
   const [userConfig, setUserConfig] = useState(null);
   const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
   const [todayWaterCup, setTodayWaterCup] = useState(0);
   const [todayIntakeCalorie, setTodayIntakeCalorie] = useState(0);
+  const [, setSavedMedicinesVersion] = useState(0);
+  const [trackedUserId, setTrackedUserId] = useState(userId);
+
+  // 계정이 바뀌는 순간(렌더 중) 이전 사용자의 잔여 정보를 즉시 비운다.
+  if (trackedUserId !== userId) {
+    setTrackedUserId(userId);
+    setMemberProfile(null);
+    setUserConfig(null);
+    setSubscription(null);
+    setTodayBurnedCalorie(null);
+    setTodayWaterCup(0);
+    setTodayIntakeCalorie(0);
+  }
+
+  const savedMedicines = loadSavedMedicines(userId);
+
+  const handleMedicineSaved = (medicine) => {
+    if (!medicine) return;
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
+    const storageKey = getSavedMedicineStorageKey(userId);
+    const prev = loadSavedMedicines(userId);
+    const exists = prev.some(
+      (m) => m.itemSeq && medicine.itemSeq && m.itemSeq === medicine.itemSeq,
+    );
+    const next = exists ? prev : [...prev, medicine];
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // 저장 실패는 무시
+    }
+    setSavedMedicinesVersion((prevVersion) => prevVersion + 1);
+    return next;
+  };
 
   useEffect(() => {
     if (!userId) {
@@ -448,6 +505,18 @@ function UserInformation() {
                   </button>
                   <button
                     type="button"
+                    onClick={async () => {
+                      try {
+                        await medalApi.checkMedals();
+                      } catch (_) {}
+                      setMedalModalOpen(true);
+                    }}
+                    className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                  >
+                    🏅 메달
+                  </button>
+                  <button
+                    type="button"
                     onClick={logout}
                     className="flex items-center gap-1 rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
                   >
@@ -485,7 +554,8 @@ function UserInformation() {
                     </p>
                   ) : (
                     <p className="text-[13px] text-[#64748B]">
-                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해 보세요.
+                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해
+                      보세요.
                     </p>
                   )}
 
@@ -566,6 +636,24 @@ function UserInformation() {
                         {profile.disease}
                       </dd>
                     </div>
+                    <div className="flex gap-8">
+                      <div>
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          보유 포인트
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {memberProfile?.point != null ? Number(memberProfile.point).toLocaleString() : "0"} P
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
+                          누적 포인트
+                        </dt>
+                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
+                          {memberProfile?.usePointCount != null ? Number(memberProfile.usePointCount).toLocaleString() : "0"} P
+                        </dd>
+                      </div>
+                    </div>
                   </dl>
 
                   {/* 정상 혈당 */}
@@ -586,7 +674,9 @@ function UserInformation() {
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">식사 1시간</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          식사 1시간
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal1h)}
                           {normalBloodSugar.afterMeal1h != null && (
@@ -597,7 +687,9 @@ function UserInformation() {
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">식사 2시간</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          식사 2시간
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal2h)}
                           {normalBloodSugar.afterMeal2h != null && (
@@ -729,19 +821,54 @@ function UserInformation() {
                       <h3 className="text-sm font-bold text-gray-800">
                         💊 약 등록
                       </h3>
-                      <button className="text-xs text-blue-500 hover:underline">
+                      <button
+                        className="text-xs text-blue-500 hover:underline"
+                        onClick={() => navigate("/medication")}
+                      >
                         편집
                       </button>
                     </div>
-                    <div className="flex flex-1 items-center justify-center rounded-xl bg-gray-100 py-6">
-                      <div className="text-center text-gray-400">
-                        <div className="mb-1 text-3xl">💊</div>
-                        <p className="text-xs">처방전 이미지</p>
-                        <p className="text-[10px] mt-0.5 text-gray-300">RX</p>
-                      </div>
+                    <div
+                      className={`flex flex-1 rounded-2xl bg-gray-100 p-6 min-h-[260px] overflow-y-auto ${
+                        savedMedicines.length > 0
+                          ? "items-start justify-start"
+                          : "items-center justify-center"
+                      }`}
+                    >
+                      {savedMedicines.length > 0 ? (
+                        <div className="flex w-full flex-col gap-4">
+                          {savedMedicines.map((m, idx) => (
+                            <dl
+                              key={m.itemSeq ?? idx}
+                              className={`grid w-full grid-cols-[88px_1fr] gap-y-2 text-[13px] content-start ${
+                                idx !== 0 ? "border-t border-gray-200 pt-4" : ""
+                              }`}
+                            >
+                              <dt className="text-gray-500">품목기준코드</dt>
+                              <dd className="text-gray-800 break-all">
+                                {m.itemSeq || "-"}
+                              </dd>
+                              <dt className="text-gray-500">성상</dt>
+                              <dd className="text-gray-800 break-words">
+                                {m.chart || "-"}
+                              </dd>
+                              <dt className="text-gray-500">저장방법</dt>
+                              <dd className="text-gray-800 break-words">
+                                {m.storageMethod || "-"}
+                              </dd>
+                            </dl>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-5xl">💊</div>
+                          <p className="text-xs text-gray-400">저장된 이미지</p>
+                          <p className="text-[10px] text-gray-300">예시</p>
+                        </div>
+                      )}
                     </div>
                     <button
-                      className="mt-3 h-9 w-full rounded-xl bg-[#0f1c33] text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                      className="mt-3 h-11 w-full rounded-xl bg-[#0f1c33] text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       onClick={() => SetPreResisterModalOpen(true)}
                     >
                       사진 업로드
@@ -791,8 +918,8 @@ function UserInformation() {
         <MedicineSearchTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
+          onSaved={handleMedicineSaved}
         />
-
 
         <RoutineModal
           open={isRoutineModalOpen}
@@ -819,6 +946,11 @@ function UserInformation() {
           onSubmit={handleSubscribe}
           onCancel={handleCancelSubscription}
           currentPlan={subPlan}
+        />
+
+        <UserMedalModal
+          open={isMedalModalOpen}
+          onClose={() => setMedalModalOpen(false)}
         />
       </div>
     </div>
