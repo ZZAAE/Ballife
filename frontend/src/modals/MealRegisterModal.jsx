@@ -3,6 +3,7 @@ import { Camera, Plus, Brain, X, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import mealApi from "../api/mealApi";
 import mealAnalysisApi from "../api/mealAnalysisApi";
+import uploadApi from "../api/uploadApi";
 import { resizeImageFile } from "../utils/imageResize";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -82,6 +83,7 @@ export default function MealRegisterModal({
   // baseValues = 100g 기준 영양소, displayValues = 실제 grams 기준 환산값
   const makeEmptyFormData = () => ({
     foodName: "",
+    mealPhoto: null,
     baseValues: {
       calories: null, carbs: null, protein: null, fat: null,
       sugar: null, sodium: null, cholesterol: null,
@@ -99,6 +101,7 @@ export default function MealRegisterModal({
     initialChips.map((c) => ({
       mealItemId: c.mealItemId,
       foodName: c.foodName,
+      mealPhoto: c.mealPhoto ?? null,
       grams: c.grams ?? 100,
       calorie: c.calorie ?? 0,
       carbohydrate: c.carbohydrate ?? 0,
@@ -211,15 +214,27 @@ export default function MealRegisterModal({
     }));
   };
 
+  // "음식 추가" — 폼·이미지 영역 완전히 비우기 (chips 배열은 유지)
+  // chips에 사진 URL이 보존되어 있으므로 chip 클릭 시 원래 사진으로 복원됨
   const resetForm = () => {
     setFormData(makeEmptyFormData());
     setEditingChipId(null);
+    setImageUrl(null);
+    setAnalyzed(false);
   };
 
-  // chip 클릭 → 그 음식 데이터를 form에 로드 (수정 모드 진입)
+  // chip 클릭 → 그 음식 데이터를 form에 로드 + 사진 미리보기 복원
   // pending chip(mealItemId=null)도 그대로 두고 tempId로 식별
   const onClickChip = (chip) => {
     setEditingChipId(chip.mealItemId ?? chip.tempId ?? null);
+    // chip이 자기 사진 URL을 갖고 있으면 미리보기 영역도 그 사진으로 전환
+    if (chip.mealPhoto) {
+      setImageUrl(chip.mealPhoto);
+      setAnalyzed(true);
+    } else {
+      setImageUrl(null);
+      setAnalyzed(false);
+    }
     const numToStr = (v, isInt) => {
       if (v == null) return "";
       return isInt ? String(Math.round(v)) : String(Math.round(v * 10) / 10);
@@ -248,6 +263,7 @@ export default function MealRegisterModal({
         cholesterol: numToStr(chip.cholesterol, true),
       },
       grams: chipGrams,
+      mealPhoto: chip.mealPhoto ?? null,
     });
   };
 
@@ -275,15 +291,24 @@ export default function MealRegisterModal({
       setIsAnalyzing(true);
       setAnalyzed(false);
 
-      // 이미 저장된 Meal이면 사진도 백엔드에 즉시 반영
-      if (savedMealId && user?.id) {
+      // 1) 서버에 업로드 → URL 받기 (실패해도 분석은 진행)
+      let uploadedUrl = null;
+      try {
+        const result = await uploadApi.uploadImage(file, "meal");
+        uploadedUrl = result?.url ?? null;
+      } catch (err) {
+        console.error("사진 업로드 실패:", err);
+      }
+
+      // 2) 이미 저장된 Meal이면 사진 URL도 백엔드에 즉시 반영 (현재 Meal 단위 사진은 그대로 유지)
+      if (savedMealId && user?.id && uploadedUrl) {
         try {
           await mealApi.updateMeal(user.id, savedMealId, {
             mealDate:
               selectedDate || new Date().toISOString().split("T")[0],
             mealTime: `${mealTime}:00`,
             mealCategory: category,
-            mealPhoto: dataUrl,
+            mealPhoto: uploadedUrl,
           });
           onSaved?.();
         } catch (err) {
@@ -291,13 +316,11 @@ export default function MealRegisterModal({
         }
       }
 
-      // AI 분석 호출 (OpenAI Vision + 식약처 영양정보)
+      // 3) AI 분석 호출 (OpenAI Vision + 식약처 영양정보)
       try {
         const res = await mealAnalysisApi.analyze(file);
         const foods = Array.isArray(res?.data?.foods) ? res.data.foods : [];
         const recognizedFoods = foods.filter((f) => f.nutritionFound);
-        console.log("[AI 분석] 전체 인식:", foods.length, "건 / 영양정보 매칭:", recognizedFoods.length, "건");
-        console.log("[AI 분석] foods:", foods);
 
         if (recognizedFoods.length === 0) {
           if (foods.length > 0) {
@@ -313,28 +336,43 @@ export default function MealRegisterModal({
             });
           }
         } else {
-          // AI 인식 음식을 로컬 chips에만 추가 (mealItemId=null = 미저장)
-          // DB 저장은 사용자가 "저장" 버튼을 눌러야 일괄 처리
-          // tempId: pending chip을 클릭하면 form으로 불러올 때 식별용
+          // 정책: **한 사진 = 한 음식**. 여러 개 인식돼도 메인 1개만 chip 생성.
+          //  - 이 사진은 그 음식의 고유 사진이 됨 (음식별로 다른 사진을 갖게 하기 위함)
+          //  - 다른 음식 추가하려면 "음식 추가" → 그 음식 사진을 새로 업로드
+          const mainFood = recognizedFoods[0];
           const tsBase = Date.now();
-          // Vision은 항상 grams=100 으로 반환 → 영양값도 100g 기준
-          const newChips = recognizedFoods.map((food, idx) => ({
+          const newChip = {
             mealItemId: null,
-            tempId: `pending-${tsBase}-${idx}`,
-            foodName: food.name,
-            grams: food.grams ? Math.round(food.grams) : 100,
-            calorie: Math.round(food.calories ?? 0),
-            carbohydrate: food.carbs ?? 0,
-            sugar: food.sugar ?? 0,
-            sodium: food.sodium ?? 0,
-            cholesterol: food.cholesterol ?? 0,
-            saturatedFat: food.saturatedFat ?? 0,
-            protein: food.protein ?? 0,
-          }));
-          setChips((prev) => [...prev, ...newChips]);
-          toast.success(
-            `AI 분석: ${recognizedFoods.length}개 음식 인식됨. 확인 후 저장 버튼을 눌러주세요.`,
-          );
+            tempId: `pending-${tsBase}-0`,
+            foodName: mainFood.name,
+            mealPhoto: uploadedUrl, // 이 음식 전용 사진
+            grams: mainFood.grams ? Math.round(mainFood.grams) : 100,
+            calorie: Math.round(mainFood.calories ?? 0),
+            carbohydrate: mainFood.carbs ?? 0,
+            sugar: mainFood.sugar ?? 0,
+            sodium: mainFood.sodium ?? 0,
+            cholesterol: mainFood.cholesterol ?? 0,
+            saturatedFat: mainFood.saturatedFat ?? 0,
+            protein: mainFood.protein ?? 0,
+          };
+          setChips((prev) => [...prev, newChip]);
+          // 영양 성분을 form에 즉시 표시 (사용자가 chip을 따로 안 눌러도 보이게)
+          onClickChip(newChip);
+
+          if (recognizedFoods.length > 1) {
+            const others = recognizedFoods
+              .slice(1)
+              .map((f) => f.name)
+              .join(", ");
+            toast.success(
+              `'${mainFood.name}' 추가됨. (${others}는 '음식 추가' 후 각자 사진을 따로 올려주세요)`,
+              { duration: 6000 },
+            );
+          } else {
+            toast.success(
+              `'${mainFood.name}' 인식됨. 확인 후 저장 버튼을 눌러주세요.`,
+            );
+          }
         }
       } catch (err) {
         console.error("AI 분석 실패:", err);
@@ -352,6 +390,7 @@ export default function MealRegisterModal({
     if (file) handleFile(file);
     e.target.value = "";
   };
+
 
   const onSelectFileClick = (e) => {
     e.stopPropagation();
@@ -525,6 +564,7 @@ export default function MealRegisterModal({
     try {
       const payload = {
         foodName: formData.foodName.trim(),
+        mealPhoto: formData.mealPhoto ?? null,
         grams: Math.round(formData.grams ?? 100),
         calorie: toNumber(formData.displayValues.calories, true),
         carbohydrate: toNumber(formData.displayValues.carbs),
