@@ -35,7 +35,16 @@ function CommentBlock({
           </div>
           <div>
             <p className="text-[13px] font-semibold text-gray-800">
-              {comment.author}
+              <span className="inline-flex items-center gap-1">
+                {comment.medalIcon && (
+                  <img
+                    src={comment.medalIcon}
+                    alt=""
+                    className="inline-block h-[1em] w-[1em] object-contain"
+                  />
+                )}
+                {comment.author}
+              </span>
             </p>
             <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-gray-600">
               {comment.content}
@@ -124,6 +133,7 @@ export default function PostDetailPage() {
     id: raw.id,
     author: raw.userNickname ?? "익명",
     userId: raw.userId,
+    medalIcon: raw.userMedalIcon ?? null,
     content: raw.content,
     createdAt: raw.createdAt,
     upVote: raw.upVote ?? 0,
@@ -392,7 +402,14 @@ export default function PostDetailPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-gray-400">
-                <span className="font-medium text-gray-600">
+                <span className="inline-flex items-center gap-1 font-medium text-gray-600">
+                  {post.userMedalIcon && (
+                    <img
+                      src={post.userMedalIcon}
+                      alt=""
+                      className="inline-block h-[1em] w-[1em] object-contain"
+                    />
+                  )}
                   {post.userNickname}
                 </span>
                 {post.createdAt && <span>{formatDate(post.createdAt)}</span>}

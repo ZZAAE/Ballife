@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/project_ballife?serverTimezone=Asia/Seoul
@@ -26,8 +30,9 @@ spring:
 
 openai:
   api-key: ${OPENAI_API_KEY:default}
-  model: gpt-3.5-turbo # 모델버젼
+  model: gpt-4o-mini # 모델버젼
   max-tokens: 1000 #응답 길이
+  vision-detail: low
 
 server:
   error:
@@ -52,6 +57,13 @@ mfds:
   api:
     base-url: https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
     service-key: ${MFDS_SERVICE_KEY:}  # 환경변수로 주입 (절대 코드에 하드코딩 X). 미설정 시 빈 값으로 컨텍스트 로드 가능.
+
+# 식약처 식품영양성분DB v2 (data.go.kr) — 음식 사진 분석 → 영양정보 조회
+foodsafety:
+  api:
+    base-url: https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02
+    operation: getFoodNtrCpntDbInq02  # v02 표준 작업명
+    service-key: ${FOOD_SAFETY_KEY:}  # data.go.kr 발급 인증키 (디코딩 키 권장)
 
     #단계별로 스페이스 2칸
     #탭 사용 금지

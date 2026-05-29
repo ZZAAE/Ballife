@@ -30,6 +30,9 @@ public class MealItemDto {
         @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
         private String foodName;
 
+        @Min(value = 0, message = "그램은 0 이상이어야 합니다")
+        private Integer grams;
+
         @NotNull(message = "칼로리를 입력해주세요")
         @Min(value = 0, message = "칼로리는 0 이상이어야 합니다")
         private Integer calorie;
@@ -84,6 +87,9 @@ public class MealItemDto {
         @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
         private String foodName;
 
+        @Min(value = 0, message = "그램은 0 이상이어야 합니다")
+        private Integer grams;
+
         @NotNull(message = "칼로리를 입력해주세요")
         @Min(value = 0, message = "칼로리는 0 이상이어야 합니다")
         private Integer calorie;
@@ -131,10 +137,11 @@ public class MealItemDto {
     @AllArgsConstructor
     public static class MealItemResponse{
 
-        // 음식 식별자, 음식 이름, 칼로리, 탄수화물, 당, 나트륨, 콜레스테롤, 포화지방, 단백질
+        // 음식 식별자, 음식 이름, 그램, 칼로리, 탄수화물, 당, 나트륨, 콜레스테롤, 포화지방, 단백질
         private Long mealItemId;
         private Long mealId;
         private String foodName;
+        private Integer grams;
         private Integer calorie;
         private Double carbohydrate;
         private Double sugar;
@@ -149,6 +156,7 @@ public class MealItemDto {
                     .mealItemId(mealItem.getMealItemId())
                     .mealId(mealItem.getMeal() != null ? mealItem.getMeal().getMealId() : null)
                     .foodName(mealItem.getFoodName())
+                    .grams(mealItem.getGrams())
                     .calorie(mealItem.getCalorie())
                     .carbohydrate(mealItem.getCarbohydrate())
                     .sugar(mealItem.getSugar())

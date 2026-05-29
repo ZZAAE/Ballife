@@ -36,6 +36,7 @@ public class CommentDto {
         private Long userId;
         private Long postId;
         private String userNickname;
+        private String userMedalIcon;
         private String imageUrl;
         private String content;
         private Long parentComment;
@@ -59,6 +60,7 @@ public class CommentDto {
                     .userId(comment.getUserId().getUserId())
                     .postId(comment.getPostId() != null ? comment.getPostId().getPostId() : null)
                     .userNickname(userNickname)
+                    .userMedalIcon(comment.getUserId().getMedal() != null ? comment.getUserId().getMedal().getMedalIcon() : null)
                     .imageUrl(comment.getImageUrl())
                     .content(comment.getContent())
                     .parentComment(comment.getParentComment())

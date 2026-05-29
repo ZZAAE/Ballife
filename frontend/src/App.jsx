@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import { useEffect, useState } from "react";
 import ChatBot from "./modals/Chatbot";
@@ -36,6 +36,17 @@ import PetPage from "./pages/PetPage";
 import FamilyPage from "./pages/family/FamilyPage";
 import HealthReportPage from "./pages/report/HealthReportPage";
 
+/**
+ * 루트(`/`) 진입 처리
+ * - 미로그인: 인트로 페이지(/intro/web)로 리다이렉트
+ * - 로그인 상태: 메인 대시보드(MainPage) 렌더
+ */
+function RootRoute() {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null; // 인증 복원 중에는 빈 화면
+  return isAuthenticated ? <MainPage /> : <Navigate to="/intro/web" replace />;
+}
+
 function App() {
   const location = useLocation();
 
@@ -67,7 +78,7 @@ function App() {
         <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
             <Routes>
-              <Route path="/" element={<MainPage />} />
+              <Route path="/" element={<RootRoute />} />
               <Route path="/calender" element={<HealthCalenderPage />} />
 
               <Route path="/signup" element={<SignUpPage />} />

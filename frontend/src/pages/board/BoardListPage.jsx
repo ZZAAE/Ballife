@@ -209,7 +209,18 @@ function BoardListPage() {
                       {post.title}
                     </Link>
                   </td>
-                  <td className="truncate px-4 py-3 text-center text-[#64748B]">{post.userNickname}</td>
+                  <td className="truncate px-4 py-3 text-center text-[#64748B]">
+                    <span className="inline-flex items-center justify-center gap-1">
+                      {post.userMedalIcon && (
+                        <img
+                          src={post.userMedalIcon}
+                          alt=""
+                          className="inline-block h-[1em] w-[1em] object-contain"
+                        />
+                      )}
+                      {post.userNickname}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.viewCount}</td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.upVote ?? 0}</td>
                   <td className="px-4 py-3 text-center text-[#94A3B8]">
