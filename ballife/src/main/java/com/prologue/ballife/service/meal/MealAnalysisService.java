@@ -33,8 +33,17 @@ public class MealAnalysisService {
             throw new IllegalArgumentException("이미지 파일이 비어 있습니다.");
         }
 
+        log.info("======================== [식단 사진 분석 시작] ========================");
+        log.info("파일명: {} / 크기: {} bytes / 타입: {}",
+                file.getOriginalFilename(), file.getSize(), file.getContentType());
+
         String dataUrl = toDataUrl(file);
         List<VisionService.RecognizedFood> recognized = visionService.analyze(dataUrl);
+
+        log.info("[Vision] 인식된 음식 수: {}", recognized.size());
+        for (VisionService.RecognizedFood r : recognized) {
+            log.info("  - 음식명: {} / 추정 그램: {}g", r.getName(), r.getGrams());
+        }
 
         List<MealAnalysisDto.FoodItem> items = new ArrayList<>();
         List<String> unrecognized = new ArrayList<>();
@@ -44,6 +53,7 @@ public class MealAnalysisService {
         for (VisionService.RecognizedFood r : recognized) {
             Optional<FoodNutrition> nut = nutritionService.lookup(r.getName());
             if (nut.isEmpty()) {
+                log.warn("[영양정보 없음] '{}' → DB에서 매칭되는 영양성분을 찾지 못함", r.getName());
                 unrecognized.add(r.getName());
                 items.add(MealAnalysisDto.FoodItem.builder()
                         .name(r.getName())
@@ -90,6 +100,18 @@ public class MealAnalysisService {
                     .sugar(round1(sugar))
                     .nutritionFound(true)
                     .build());
+
+            log.info("---------------- [음식 등록] ----------------");
+            log.info("음식명     : {} ({}g 기준)", r.getName(), r.getGrams());
+            log.info("칼로리     : {} kcal", round1(kcal));
+            log.info("탄수화물   : {} g", round1(carb));
+            log.info("단백질     : {} g", round1(prot));
+            log.info("지방       : {} g", round1(fat));
+            log.info("식이섬유   : {} g", round1(fiber));
+            log.info("나트륨     : {} mg", round1(sodium));
+            log.info("콜레스테롤 : {} mg", round1(chol));
+            log.info("포화지방   : {} g", round1(satFat));
+            log.info("당류       : {} g", round1(sugar));
         }
 
         MealAnalysisDto.Totals totals = MealAnalysisDto.Totals.builder()
@@ -103,6 +125,21 @@ public class MealAnalysisService {
                 .saturatedFat(round1(totalSatFat))
                 .sugar(round1(totalSugar))
                 .build();
+
+        log.info("================ [합계 (전체 음식 합산)] ================");
+        log.info("총 칼로리   : {} kcal", totals.getCalories());
+        log.info("총 탄수화물 : {} g", totals.getCarbs());
+        log.info("총 단백질   : {} g", totals.getProtein());
+        log.info("총 지방     : {} g", totals.getFat());
+        log.info("총 식이섬유 : {} g", totals.getFiber());
+        log.info("총 나트륨   : {} mg", totals.getSodium());
+        log.info("총 콜레스테롤: {} mg", totals.getCholesterol());
+        log.info("총 포화지방 : {} g", totals.getSaturatedFat());
+        log.info("총 당류     : {} g", totals.getSugar());
+        if (!unrecognized.isEmpty()) {
+            log.warn("[영양정보 미발견 음식]: {}", unrecognized);
+        }
+        log.info("======================== [식단 사진 분석 종료] ========================");
 
         return MealAnalysisDto.Response.builder()
                 .foods(items)
