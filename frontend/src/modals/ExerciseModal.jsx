@@ -23,6 +23,20 @@ import {
 
 let nextId = 1;
 
+const pad2 = (n) => String(n).padStart(2, "0");
+const nowHHmm = () => {
+  const d = new Date();
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+const isoToHHmm = (iso) => {
+  const m = String(iso || "").match(/T(\d{2}):(\d{2})/);
+  return m ? `${m[1]}:${m[2]}` : nowHHmm();
+};
+const todayDateStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+};
+
 function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("anaerobic");
@@ -30,6 +44,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   const [aerobicRows, setAerobicRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [exerciseTime, setExerciseTime] = useState("");
   const isEditMode = !!editingRecord;
 
   useEffect(() => {
@@ -42,6 +57,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
       // 모달이 열릴 때 편집 대상 기록으로 폼을 초기화하는 의도된 동기화
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(kind);
+      setExerciseTime(isoToHHmm(editingRecord.dateIso));
       if (kind === "aerobic") {
         setAerobicRows([row]);
         setAnaerobicRows([createAnaerobicRow(nextId++)]);
@@ -53,6 +69,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
     }
 
     setActiveTab("anaerobic");
+    setExerciseTime(nowHHmm());
     setAnaerobicRows([createAnaerobicRow(nextId++)]);
     setAerobicRows([createAerobicRow(nextId++)]);
   }, [isOpen, editingRecord]);
@@ -185,9 +202,13 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
     try {
       if (isEditMode) {
         const row = currentRows[0];
-        const recordedAt = editingRecord.dateIso
-          ? new Date(editingRecord.dateIso)
-          : new Date();
+        // 기존 기록의 날짜는 유지하고, 사용자가 입력한 운동 시각을 반영
+        const datePart = editingRecord.dateIso
+          ? String(editingRecord.dateIso).slice(0, 10)
+          : todayDateStr();
+        const recordedAt = new Date(
+          `${datePart}T${exerciseTime || nowHHmm()}:00`,
+        );
         const payload = buildCreatePayload(activeTab, row, recordedAt);
         await updateExercise(
           userId,
@@ -203,8 +224,9 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
         return;
       }
 
-      // 선택한 날짜가 있으면 그 날짜로, 없으면 현재 시각
-      const baseDate = recordDate ? new Date(`${recordDate}T${new Date().toTimeString().slice(0, 8)}`) : new Date();
+      // 선택한 날짜(없으면 오늘) + 사용자가 입력한 운동 시각
+      const datePart = recordDate || todayDateStr();
+      const baseDate = new Date(`${datePart}T${exerciseTime || nowHHmm()}:00`);
 
       await Promise.all(
         currentRows.map(async (row, index) => {
@@ -320,6 +342,24 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                   </span>
                 </p>
               </div>
+            </div>
+
+            {/* 운동 시각 */}
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-4">
+              <div>
+                <label className="text-xs font-medium text-gray-500">
+                  운동 시각
+                </label>
+                <p className="mt-0.5 text-[11px] text-gray-400">
+                  실제 운동한 시각을 입력하세요.
+                </p>
+              </div>
+              <input
+                type="time"
+                value={exerciseTime}
+                onChange={(event) => setExerciseTime(event.target.value)}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800"
+              />
             </div>
 
             {/* 세트별 상세 기록 */}
