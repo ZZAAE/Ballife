@@ -65,5 +65,14 @@ foodsafety:
     operation: getFoodNtrCpntDbInq02  # v02 표준 작업명
     service-key: ${FOOD_SAFETY_KEY:}  # data.go.kr 발급 인증키 (디코딩 키 권장)
 
+# 음식 사진 등 업로드 파일 로컬 저장 경로
+# - 운영 시 S3/CDN으로 교체 예정
+# - 한글/공백 포함 경로는 forward slash + 따옴표 사용
+storage:
+  type: local
+  local:
+    base-path: "C:/Users/dlaud/OneDrive/바탕 화면/프로젝트_임시저장_이미지"
+    url-prefix: /uploads
+
     #단계별로 스페이스 2칸
     #탭 사용 금지

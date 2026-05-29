@@ -76,6 +76,7 @@ const mapItemToCardFormat = (item) => ({
   sugar: item.sugar ?? 0,
   chol: item.cholesterol ?? 0,
   na: item.sodium ?? 0,
+  image: item.mealPhoto ?? null, // 음식별 고유 사진
 });
 
 // MealDetailModal용 데이터 변환 (MealPage와 동일)
@@ -96,7 +97,7 @@ function buildMealData(meal) {
         cholesterol: item.chol,
         sodium: item.na,
       },
-      image: meal.image,
+      image: item.image || meal.image, // 음식 고유 사진 우선, 없으면 Meal 사진 fallback
     })),
     totalNutrition: {
       carbs: sum("carb"),
