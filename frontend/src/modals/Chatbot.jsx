@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 /* ---------- Avatars ---------- */
 const BotAvatar = ({ size = 20 }) => (
@@ -31,6 +32,7 @@ const UserAvatar = () => (
 );
 
 export default function BallChatbot() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content, time}
   const [input, setInput] = useState("");
@@ -116,7 +118,7 @@ export default function BallChatbot() {
       const response = await fetch("http://localhost:8001/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: text, userId: user.id }),
     });
     const data = await response.json();
     const reply = data.reply || "응답을 받지 못했어요.";
