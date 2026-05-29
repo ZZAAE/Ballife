@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import ExerciseModal from "../modals/ExerciseModal";
 import { useAuth } from "../contexts/AuthContext";
 import { getExercisesInRange } from "../api/exerciseApi";
@@ -268,7 +267,6 @@ function DaySection({ date, sessions, onSelectSession }) {
 /* ---------- 메인 페이지 ---------- */
 function ExercisePage({ isModalOpen, onCloseModal }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
   // 보고 있는 주의 기준 날짜 (주 이동용)
   const [viewDate, setViewDate] = useState(() => {
     const d = new Date();
@@ -382,27 +380,6 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
     setViewDate(next);
     setFilterDay(null); // 주를 옮기면 필터 해제
   };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="min-h-screen bg-gray-50 pt-[55px] text-gray-900">
-          <div className="mx-auto w-full max-w-[1100px] px-4 py-20 text-center">
-            <p className="text-base text-[#64748B]">
-              로그인이 필요한 페이지입니다.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              className="mt-4 rounded-lg bg-[#0f1c33] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
-            >
-              로그인 하러 가기
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

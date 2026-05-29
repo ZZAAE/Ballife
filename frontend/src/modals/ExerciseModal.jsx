@@ -20,6 +20,23 @@ import {
   parseDurationToSeconds,
   recordToRow,
 } from "../utils/exerciseRecords";
+import { USER_KEY } from "../api/api";
+
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
 let nextId = 1;
 
@@ -154,7 +171,11 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   const handleDelete = async () => {
     if (!isEditMode || !editingRecord) return;
     if (!window.confirm("이 운동 기록을 삭제할까요?")) return;
-    const userId = user?.userId ?? user?.id ?? 1;
+    const userId = resolveUserId(user);
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
     const targetId = editingRecord.serverId ?? editingRecord.id;
     setIsDeleting(true);
     try {
@@ -173,13 +194,18 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   };
 
   const handleSubmit = async () => {
+    const userId = resolveUserId(user);
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
     const validationMessage = validateRows();
     if (validationMessage) {
       toast.error(validationMessage);
       return;
     }
 
-    const userId = user?.userId ?? user?.id ?? 1;
     setIsSaving(true);
 
     try {
