@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Plus, Trash2, X } from "lucide-react";
+import { Clock, Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   createExercise,
@@ -45,6 +45,9 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [exerciseTime, setExerciseTime] = useState("");
+  const [timeEditing, setTimeEditing] = useState(false);
+  const [timeInput, setTimeInput] = useState("");
+  const timeInputRef = useRef(null);
   const isEditMode = !!editingRecord;
 
   useEffect(() => {
@@ -73,6 +76,47 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
     setAnaerobicRows([createAnaerobicRow(nextId++)]);
     setAerobicRows([createAerobicRow(nextId++)]);
   }, [isOpen, editingRecord]);
+
+  const startTimeEdit = () => {
+    setTimeInput(exerciseTime || nowHHmm());
+    setTimeEditing(true);
+  };
+
+  const commitTimeEdit = () => {
+    const raw = timeInput.trim();
+    let hours = -1;
+    let minutes = -1;
+
+    if (/^\d{1,2}:\d{1,2}$/.test(raw)) {
+      const [h, m] = raw.split(":").map(Number);
+      hours = h;
+      minutes = m;
+    } else if (/^\d{4}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 2));
+      minutes = parseInt(raw.slice(2));
+    } else if (/^\d{3}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 1));
+      minutes = parseInt(raw.slice(1));
+    } else if (/^\d{1,2}$/.test(raw)) {
+      hours = parseInt(raw);
+      minutes = 0;
+    }
+
+    if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+      const formatted = `${String(hours).padStart(2, "0")}:${String(
+        minutes,
+      ).padStart(2, "0")}`;
+      setExerciseTime(formatted);
+    }
+    setTimeEditing(false);
+  };
+
+  useEffect(() => {
+    if (timeEditing && timeInputRef.current) {
+      timeInputRef.current.focus();
+      timeInputRef.current.select();
+    }
+  }, [timeEditing]);
 
   const currentRows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
 
@@ -345,21 +389,35 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
             </div>
 
             {/* 운동 시각 */}
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-4">
-              <div>
-                <label className="text-xs font-medium text-gray-500">
-                  운동 시각
-                </label>
-                <p className="mt-0.5 text-[11px] text-gray-400">
-                  실제 운동한 시각을 입력하세요.
-                </p>
-              </div>
-              <input
-                type="time"
-                value={exerciseTime}
-                onChange={(event) => setExerciseTime(event.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800"
-              />
+            <div className="flex gap-3 items-center">
+              {timeEditing ? (
+                <input
+                  ref={timeInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  value={timeInput}
+                  onChange={(e) => setTimeInput(e.target.value)}
+                  onBlur={commitTimeEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitTimeEdit();
+                    }
+                    if (e.key === "Escape") setTimeEditing(false);
+                  }}
+                  placeholder="HH:MM"
+                  className="rounded-[16px] bg-white px-4 py-2.5 text-[13px] font-semibold text-[#1E293B] border-2 border-[#2563EB] shadow-sm outline-none w-[130px] tracking-wider"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={startTimeEdit}
+                  className="flex items-center gap-2 rounded-[16px] bg-[#F1F5F9] px-4 py-2.5 text-[13px] font-semibold text-[#64748B] border border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC] transition-colors"
+                >
+                  <Clock className="h-4 w-4 text-[#2563EB]" />
+                  {exerciseTime}
+                </button>
+              )}
             </div>
 
             {/* 세트별 상세 기록 */}
