@@ -30,4 +30,6 @@ public class UserExerciseDetail {
     private Integer exerciseWeight;
     // 운동 강도
     private String exerciseHard;
+    // 유산소: 이동 거리 (km, 소수점 허용)
+    private Double distanceKm;
 }
