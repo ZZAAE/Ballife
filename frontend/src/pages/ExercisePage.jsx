@@ -96,7 +96,7 @@ function WeekSelector({
         <button
           onClick={() => onMoveWeek(-1)}
           className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
-          aria-label="이전 주"
+          aria-label="저번 주"
         >
           {"<"}
         </button>
@@ -223,7 +223,9 @@ function SessionRow({ session, onClick }) {
             ? session.distanceKm != null
               ? `${session.distanceKm.toFixed(2)} km`
               : "—"
-            : `${session.sets} Sets · ${session.reps}회`}
+            : session.sets != null && session.reps != null
+              ? `${session.sets} Sets · ${session.reps}회`
+              : "—"}
         </div>
       </div>
       <div className="text-right">
