@@ -140,6 +140,7 @@ function analyzeDailyNutrition(sums, targets) {
   const issues = [];   // { key, label, kind: "low" | "high", severity, penalty }
   let weightSum = 0;
   let penaltySum = 0;
+  let maxPenalty = 0;  // 가장 심각한 단일 영양소 감점
 
   NUTRIENT_DEFS.forEach((def) => {
     const target = targets[def.key];
@@ -168,14 +169,24 @@ function analyzeDailyNutrition(sums, targets) {
 
     weightSum += def.weight;
     penaltySum += penalty * def.weight;
+    if (penalty > maxPenalty) maxPenalty = penalty;
 
     if (penalty >= 12) {
       issues.push({ key: def.key, label: def.label, kind, severity: penalty });
     }
   });
 
-  const score = hasData && weightSum > 0
-    ? Math.max(0, Math.round(100 - penaltySum / weightSum))
+  // 가중평균 감점만 쓰면 단일 영양소 과다 섭취가 다른 정상 영양소에 희석되어
+  // 점수가 거의 안 떨어진다. 따라서 가장 심각한 단일 영양소(maxPenalty)가 클수록
+  // 점수의 "상한"을 강제로 낮춘다 → 한 가지만 크게 어긋나도 좋은 점수가 불가능.
+  const avgPenalty = weightSum > 0 ? penaltySum / weightSum : 0;
+  let cap = 100;
+  if (maxPenalty >= 90) cap = 35;        // 권장량 1.5배↑ 등 심각한 과다/부족
+  else if (maxPenalty >= 70) cap = 50;
+  else if (maxPenalty >= 50) cap = 65;
+  else if (maxPenalty >= 30) cap = 80;
+  const score = hasData
+    ? Math.max(0, Math.round(Math.min(100 - avgPenalty, cap)))
     : 0;
 
   // 심각한 순으로 정렬
