@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { FileText, Lock, Droplet, HeartPulse, Scale } from "lucide-react";
@@ -20,6 +21,13 @@ const contentOf = (res) =>
 
 const avg = (nums) =>
   nums.length ? Math.round(nums.reduce((s, n) => s + n, 0) / nums.length) : null;
+
+const CHART_TABS = [
+  { key: "bloodSugar", label: "혈당" },
+  { key: "bloodPressure", label: "혈압" },
+  { key: "weight", label: "체중" },
+  { key: "bmi", label: "BMI" },
+];
 
 function SummaryCard({ icon: Icon, accent, bg, label, value, unit, sub }) {
   return (
@@ -57,6 +65,7 @@ export default function HealthReportPage() {
   const [bloodPressure, setBloodPressure] = useState([]);
   const [weight, setWeight] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [chartTab, setChartTab] = useState("bloodSugar");
 
   useEffect(() => {
     if (!userId) return;
@@ -118,6 +127,76 @@ export default function HealthReportPage() {
       }))
       .reverse();
   }, [bloodSugar]);
+
+  // 최근 14건 혈압 추이 (오래된→최신)
+  const bpTrend = useMemo(() => {
+    return bloodPressure
+      .filter((r) => r.systolicBP != null && r.diastolicBP != null)
+      .slice(0, 14)
+      .map((r) => ({
+        date: String(r.recordDate || "").slice(5),
+        systolic: Number(r.systolicBP),
+        diastolic: Number(r.diastolicBP),
+      }))
+      .reverse();
+  }, [bloodPressure]);
+
+  // 최근 14건 체중 추이 (오래된→최신)
+  const weightTrend = useMemo(() => {
+    return weight
+      .filter((r) => r.weight != null)
+      .slice(0, 14)
+      .map((r) => ({
+        date: String(r.recordDate || "").slice(5),
+        value: Number(r.weight),
+      }))
+      .reverse();
+  }, [weight]);
+
+  // 최근 14건 BMI 추이 (체중 기록 + 프로필 키 기준, 오래된→최신)
+  const bmiTrend = useMemo(() => {
+    if (!heightCm) return [];
+    const h = heightCm / 100;
+    return weight
+      .filter((r) => r.weight != null)
+      .slice(0, 14)
+      .map((r) => ({
+        date: String(r.recordDate || "").slice(5),
+        value: Number((Number(r.weight) / (h * h)).toFixed(1)),
+      }))
+      .reverse();
+  }, [weight, heightCm]);
+
+  const chartViews = {
+    bloodSugar: {
+      title: "최근 혈당 추이",
+      data: sugarTrend,
+      empty: "혈당 기록이 없습니다.",
+      lines: [{ key: "value", name: "혈당", color: "#16a34a" }],
+    },
+    bloodPressure: {
+      title: "최근 혈압 추이",
+      data: bpTrend,
+      empty: "혈압 기록이 없습니다.",
+      lines: [
+        { key: "systolic", name: "수축기", color: "#ED5934" },
+        { key: "diastolic", name: "이완기", color: "#F59874" },
+      ],
+    },
+    weight: {
+      title: "최근 체중 추이",
+      data: weightTrend,
+      empty: "체중 기록이 없습니다.",
+      lines: [{ key: "value", name: "체중", color: "#3B82F6" }],
+    },
+    bmi: {
+      title: "최근 BMI 추이",
+      data: bmiTrend,
+      empty: heightCm ? "체중 기록이 없습니다." : "키 정보가 필요합니다.",
+      lines: [{ key: "value", name: "BMI", color: "#0f1c33" }],
+    },
+  };
+  const activeView = chartViews[chartTab] ?? chartViews.bloodSugar;
 
   const Shell = ({ children }) => (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
@@ -229,15 +308,33 @@ export default function HealthReportPage() {
       </div>
 
       <div className="mt-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-[15px] font-bold">최근 혈당 추이</h3>
-        {sugarTrend.length === 0 ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-[15px] font-bold">{activeView.title}</h3>
+          <div className="inline-flex rounded-full bg-[#F1F5F9] p-1">
+            {CHART_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setChartTab(t.key)}
+                className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
+                  chartTab === t.key
+                    ? "bg-white text-[#0F172A] shadow-sm"
+                    : "text-[#64748B] hover:text-[#0F172A]"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {activeView.data.length === 0 ? (
           <p className="py-10 text-center text-sm text-[#94A3B8]">
-            혈당 기록이 없습니다.
+            {activeView.empty}
           </p>
         ) : (
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={sugarTrend}>
+              <LineChart data={activeView.data}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="#f0f0f0"
@@ -262,15 +359,21 @@ export default function HealthReportPage() {
                     border: "1px solid #e5e7eb",
                   }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  name="혈당"
-                  stroke="#16a34a"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: "#16a34a", stroke: "#fff", strokeWidth: 2 }}
-                  activeDot={{ r: 6 }}
-                />
+                {activeView.lines.length > 1 && (
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                )}
+                {activeView.lines.map((ln) => (
+                  <Line
+                    key={ln.key}
+                    type="monotone"
+                    dataKey={ln.key}
+                    name={ln.name}
+                    stroke={ln.color}
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: ln.color, stroke: "#fff", strokeWidth: 2 }}
+                    activeDot={{ r: 6 }}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
