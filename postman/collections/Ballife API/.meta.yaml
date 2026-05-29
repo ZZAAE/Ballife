@@ -1,0 +1,17 @@
+name: Ballife API
+description: |-
+  Health management REST API collection for the Ballife project.
+  Backend: Spring Boot + JPA + MySQL on http://localhost:8080.
+
+  The system manages userId, gender, birthDate/age, height, weight,
+  diseaseIndex (e.g. hypertension:type2,diabetes:type1), blood pressure,
+  blood sugar, meal, exercise, and medication records.
+
+  Java code performs numeric analysis; OpenAI generates natural language
+  reports and chatbot answers. The AI never diagnoses diseases — diseaseIndex
+  is context-only.
+
+  ## Auth
+  Set the `token` environment variable to a valid JWT Bearer token.
+  For local dev you may whitelist these paths in Spring Security config.
+version: '1.0.0'

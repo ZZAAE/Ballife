@@ -71,7 +71,7 @@ foodsafety:
 storage:
   type: local
   local:
-    base-path: "C:\\Users\\junsu\\OneDrive\\Desktop\\사진"
+    base-path: "C:/Users/soldesk/Desktop/프로젝트_임시"
     url-prefix: /uploads
 
     #단계별로 스페이스 2칸
