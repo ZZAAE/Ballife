@@ -15,6 +15,7 @@ app = FastAPI()
 # .venv\Scripts\activate
 # pip install -r requirements.txt
 # uvicorn app.main:app --reload --port 8001 로 실행
+# deactivate
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
