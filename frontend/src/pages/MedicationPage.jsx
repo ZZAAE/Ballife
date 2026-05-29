@@ -45,6 +45,14 @@ const formatDateKey = (date) => {
   return `${y}-${m}-${d}`;
 };
 
+// 현재 시각을 "HH:MM" 형식으로 반환 (time input 기본값)
+const formatTimeNow = () => {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+};
+
 const INITIAL_TODAY_SCHEDULES = [
   {
     id: "morning",
@@ -129,7 +137,7 @@ const loadSchedulesForDate = (dateKey, todayKey) => {
 export default function MedicationPage() {
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(() => formatTimeNow());
   const [date, setDate] = useState(() => formatDateKey(new Date()));
 
   const [savedRecords, setSavedRecords] = useState(() => {
@@ -155,12 +163,13 @@ export default function MedicationPage() {
       drugName: drugName.trim(),
       dosage: dosage.trim(),
       date,
-      time,
+      // 시간을 비웠으면 저장 시점의 현재 시각으로 기록
+      time: time || formatTimeNow(),
     };
     setSavedRecords((prev) => [newRecord, ...prev]);
     setDrugName("");
     setDosage("");
-    setTime("");
+    setTime(formatTimeNow());
   };
 
   const handleDeleteRecord = (id) => {
