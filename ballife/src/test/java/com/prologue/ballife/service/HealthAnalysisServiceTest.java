@@ -1,0 +1,462 @@
+package com.prologue.ballife.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.prologue.ballife.analyzer.BloodPressureAnalyzer;
+import com.prologue.ballife.analyzer.BloodSugarAnalyzer;
+import com.prologue.ballife.analyzer.BmiAnalyzer;
+import com.prologue.ballife.analyzer.DiseaseProfileAnalyzer;
+import com.prologue.ballife.analyzer.MedicationAnalyzer;
+import com.prologue.ballife.domain.daily.BioValueRecord;
+import com.prologue.ballife.domain.medicine.Prescription;
+import com.prologue.ballife.domain.user.User;
+import com.prologue.ballife.exception.ResourceNotFoundException;
+import com.prologue.ballife.repository.daily.BioValueRecordRepository;
+import com.prologue.ballife.repository.medicine.PrescriptionRepository;
+import com.prologue.ballife.repository.medicine.UserMedicineRecordRepository;
+import com.prologue.ballife.repository.user.UserRepository;
+import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
+
+/**
+ * HealthAnalysisService 단위 테스트.
+ *
+ * 전략:
+ *  - Repository 4개는 Mock(@Mock) — DB 의존 제거
+ *  - Analyzer 5개는 실제 객체 주입 — 이미 1·2순위 단위 테스트로 검증된 순수 컴포넌트라서
+ *    mock하면 status/label 결과까지 stub해야 하고 Service의 데이터 분류·전달 로직이
+ *    검증되지 않음. 실제 객체로 두면 입력만 조작해도 분류 + 라벨까지 End-to-End 검증 가능.
+ *
+ * 시나리오는 인계 문서 §9의 7개를 그대로 따른다.
+ * intakeIntervals 케이스가 4 sub-case로 펼쳐져 총 11개 테스트.
+ */
+@ExtendWith(MockitoExtension.class)
+class HealthAnalysisServiceTest {
+
+    @Mock UserRepository userRepository;
+    @Mock BioValueRecordRepository bioValueRecordRepository;
+    @Mock PrescriptionRepository prescriptionRepository;
+    @Mock UserMedicineRecordRepository userMedicineRecordRepository;
+
+    HealthAnalysisService service;
+
+    @BeforeEach
+    void setUp() {
+        // Analyzer 5개는 실제 @Component 객체로 주입 (mock 아님)
+        service = new HealthAnalysisService(
+                userRepository,
+                bioValueRecordRepository,
+                prescriptionRepository,
+                userMedicineRecordRepository,
+                new BloodPressureAnalyzer(),
+                new BloodSugarAnalyzer(),
+                new BmiAnalyzer(),
+                new MedicationAnalyzer(),
+                new DiseaseProfileAnalyzer()
+        );
+    }
+
+    // ============================================================
+    //  헬퍼 — 엔티티 생성 및 Repository stub
+    // ============================================================
+    private User stubUser(Long userId, Double heightCm, Double weightKg, String diseaseIndex) {
+        User u = User.builder()
+                .userId(userId)
+                .height(heightCm)
+                .weight(weightKg)
+                .diseaseIndex(diseaseIndex)
+                .build();
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(u));
+        return u;
+    }
+
+    private BioValueRecord bpRecord(int systolic, int diastolic) {
+        return BioValueRecord.builder()
+                .category("BloodPressure")
+                .systolicBP(systolic)
+                .diastolicBP(diastolic)
+                .recordDate(LocalDate.now())
+                .recordTime(LocalTime.NOON)
+                .build();
+    }
+
+    private BioValueRecord bsRecord(String suffix, int value) {
+        return BioValueRecord.builder()
+                .category("BloodSugar-" + suffix)
+                .bloodSugar(value)
+                .recordDate(LocalDate.now())
+                .recordTime(LocalTime.NOON)
+                .build();
+    }
+
+    private Prescription prescription(String intakeIntervals) {
+        return Prescription.builder()
+                .prescriptionName("test-약")
+                .intakeIntervals(intakeIntervals)
+                .isDeleted(false)
+                .build();
+    }
+
+    // ============================================================
+    //  A. 주간 분석 전체 시나리오
+    // ============================================================
+    @Nested
+    @DisplayName("주간 분석 전체 시나리오 (AnalyzeWeekly_OverallScenarios)")
+    class AnalyzeWeekly_OverallScenarios {
+
+        @Test
+        @DisplayName("시나리오 1: 모든 항목 NORMAL")
+        void allNormal_allFieldsHealthy() {
+            // given
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, "diabetes:type2"); // BMI = 22.49 → NORMAL
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(bpRecord(110, 70), bpRecord(115, 75))); // 평균 113/73 → G0
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(bsRecord("공복", 85), bsRecord("공복", 90))); // 평균 88 → NORMAL
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription("MORNING,DINNER,BEDTIME"))); // 3/day × 7 = 21
+
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(21L); // 21/21 = 100% → NORMAL
+
+            // when
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // then
+            assertThat(res.bloodPressure().status()).isEqualTo("NORMAL");
+            assertThat(res.bloodSugar().fastingStatus()).isEqualTo("NORMAL");
+            assertThat(res.bmi().status()).isEqualTo("NORMAL");
+            assertThat(res.medication().status()).isEqualTo("NORMAL");
+            assertThat(res.diseaseProfile().diseases()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("시나리오 2: 공복혈당만 RISK, 식전·식후·혈압·BMI·복약은 모두 NORMAL")
+        void onlyFastingBloodSugarRisk_otherFieldsNormal() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, "diabetes:type2");
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(bpRecord(110, 70), bpRecord(115, 75)));
+
+            // 공복=130(RISK), 식전=90(NORMAL), 식후=120(NORMAL) — 한 그룹만 RISK, 분리 검증 핵심
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bsRecord("공복",     130),
+                        bsRecord("아침식전",  90),
+                        bsRecord("아침식후", 120)
+                ));
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription("MORNING,DINNER,BEDTIME")));
+
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(21L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 공복혈당만 RISK
+            assertThat(res.bloodSugar().fastingValue()).isEqualTo(130);
+            assertThat(res.bloodSugar().fastingStatus()).isEqualTo("RISK");
+            assertThat(res.bloodSugar().fastingLabel()).isEqualTo("많이 높음 (126 이상)");
+
+            // 식전·식후 NORMAL — RISK가 다른 그룹으로 새지 않는지 검증
+            assertThat(res.bloodSugar().preMealValue()).isEqualTo(90);
+            assertThat(res.bloodSugar().preMealStatus()).isEqualTo("NORMAL");
+            assertThat(res.bloodSugar().postMealValue()).isEqualTo(120);
+            assertThat(res.bloodSugar().postMealStatus()).isEqualTo("NORMAL");
+
+            // 다른 항목 NORMAL 유지
+            assertThat(res.bloodPressure().status()).isEqualTo("NORMAL");
+            assertThat(res.bmi().status()).isEqualTo("NORMAL");
+            assertThat(res.medication().status()).isEqualTo("NORMAL");
+        }
+
+        @Test
+        @DisplayName("시나리오 3: 측정 0건 → 혈압·혈당·복약 내부 필드 null (BMI는 user 정보 기반이라 별개)")
+        void noRecordsAtAll_bpAndSugarAndMedFieldsNull() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, "diabetes:type2");
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), any(String.class),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of());
+
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 혈압 5필드 전부 null
+            assertThat(res.bloodPressure().avgSystolic()).isNull();
+            assertThat(res.bloodPressure().avgDiastolic()).isNull();
+            assertThat(res.bloodPressure().grade()).isNull();
+            assertThat(res.bloodPressure().status()).isNull();
+            assertThat(res.bloodPressure().label()).isNull();
+
+            // 혈당 9필드 전부 null
+            assertThat(res.bloodSugar().fastingValue()).isNull();
+            assertThat(res.bloodSugar().fastingStatus()).isNull();
+            assertThat(res.bloodSugar().fastingLabel()).isNull();
+            assertThat(res.bloodSugar().preMealValue()).isNull();
+            assertThat(res.bloodSugar().preMealStatus()).isNull();
+            assertThat(res.bloodSugar().preMealLabel()).isNull();
+            assertThat(res.bloodSugar().postMealValue()).isNull();
+            assertThat(res.bloodSugar().postMealStatus()).isNull();
+            assertThat(res.bloodSugar().postMealLabel()).isNull();
+
+            // 복약: 처방 없음 → scheduled=0 → adherenceRate/status/label null (analyzer 내부 분기)
+            assertThat(res.medication().scheduledCount()).isEqualTo(0);
+            assertThat(res.medication().takenCount()).isEqualTo(0);
+            assertThat(res.medication().adherenceRate()).isNull();
+            assertThat(res.medication().status()).isNull();
+            assertThat(res.medication().label()).isNull();
+
+            // BMI는 측정 기록이 아니라 user 엔티티의 키·몸무게 기반이라 측정 0건과 무관
+            assertThat(res.bmi().status()).isEqualTo("NORMAL");
+        }
+    }
+
+    // ============================================================
+    //  B. 혈당 카테고리 그룹 분리
+    // ============================================================
+    @Nested
+    @DisplayName("혈당 카테고리 그룹 분리 (BloodSugarGrouping)")
+    class BloodSugarGrouping {
+
+        @Test
+        @DisplayName("시나리오 4: 식전만 있고 공복 없음 → fastingValue=null, preMealValue=값")
+        void preMealOnly_fastingNull_preMealHasValue() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            // 혈압은 빈 리스트 명시 (strict stubbing: 같은 메서드 다른 카테고리 호출에 대한 의도 표명)
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+            // 혈당 카테고리에는 식전만 1건
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(bsRecord("아침식전", 90)));
+
+            // Prescription / 복약 카운트는 stub 안 함 → mock 기본값(빈 컬렉션, 0L) 반환
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // fasting 3필드 null
+            assertThat(res.bloodSugar().fastingValue()).isNull();
+            assertThat(res.bloodSugar().fastingStatus()).isNull();
+            assertThat(res.bloodSugar().fastingLabel()).isNull();
+
+            // preMeal 3필드 채워짐 (공복 기준 재사용)
+            assertThat(res.bloodSugar().preMealValue()).isEqualTo(90);
+            assertThat(res.bloodSugar().preMealStatus()).isEqualTo("NORMAL");
+            assertThat(res.bloodSugar().preMealLabel()).isEqualTo("정상 (70-99)");
+
+            // postMeal 3필드 null
+            assertThat(res.bloodSugar().postMealValue()).isNull();
+            assertThat(res.bloodSugar().postMealStatus()).isNull();
+            assertThat(res.bloodSugar().postMealLabel()).isNull();
+        }
+
+        @Test
+        @DisplayName("시나리오 5: 취침전만 1건 → 분석 제외, 9필드 모두 null")
+        void bedtimeOnly_allBloodSugarFieldsNull() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            // 혈압은 빈 리스트 명시 (strict stubbing 충돌 회피)
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(bsRecord("취침전", 130)));
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.bloodSugar().fastingValue()).isNull();
+            assertThat(res.bloodSugar().fastingStatus()).isNull();
+            assertThat(res.bloodSugar().fastingLabel()).isNull();
+            assertThat(res.bloodSugar().preMealValue()).isNull();
+            assertThat(res.bloodSugar().preMealStatus()).isNull();
+            assertThat(res.bloodSugar().preMealLabel()).isNull();
+            assertThat(res.bloodSugar().postMealValue()).isNull();
+            assertThat(res.bloodSugar().postMealStatus()).isNull();
+            assertThat(res.bloodSugar().postMealLabel()).isNull();
+        }
+    }
+
+    // ============================================================
+    //  C. intakeIntervals 파싱 케이스별
+    // ============================================================
+    @Nested
+    @DisplayName("intakeIntervals 파싱 케이스별 (MedicationIntakeIntervalsParsing)")
+    class MedicationIntakeIntervalsParsing {
+
+        @Test
+        @DisplayName("시나리오 6-a: intakeIntervals=null → scheduled=0, status/label null")
+        void intakeIntervalsNull_scheduled0() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription(null)));
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.medication().scheduledCount()).isEqualTo(0);
+            assertThat(res.medication().takenCount()).isEqualTo(0);
+            assertThat(res.medication().adherenceRate()).isNull();
+            assertThat(res.medication().status()).isNull();
+            assertThat(res.medication().label()).isNull();
+        }
+
+        @Test
+        @DisplayName("시나리오 6-b: \"MORNING,DINNER\" → 2/day × 7 = scheduled 14")
+        void upperCase_MORNING_DINNER_scheduled14() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription("MORNING,DINNER")));
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 14 scheduled, 0 taken → 0% → RISK
+            assertThat(res.medication().scheduledCount()).isEqualTo(14);
+            assertThat(res.medication().takenCount()).isEqualTo(0);
+            assertThat(res.medication().adherenceRate()).isEqualTo(0);
+            assertThat(res.medication().status()).isEqualTo("RISK");
+        }
+
+        @Test
+        @DisplayName("시나리오 6-c: \"morning, dinner\" 소문자+공백 → trim/대소문자 무관 → scheduled 14")
+        void lowerCase_morning_dinner_scheduled14() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription("morning, dinner")));
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.medication().scheduledCount()).isEqualTo(14);
+            assertThat(res.medication().takenCount()).isEqualTo(0);
+            assertThat(res.medication().adherenceRate()).isEqualTo(0);
+            assertThat(res.medication().status()).isEqualTo("RISK");
+        }
+
+        @Test
+        @DisplayName("시나리오 6-d: \"아침,저녁\" 한글 토큰 → 매칭 실패 → scheduled=0")
+        void korean_아침_저녁_scheduled0() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of(prescription("아침,저녁")));
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.medication().scheduledCount()).isEqualTo(0);
+            assertThat(res.medication().takenCount()).isEqualTo(0);
+            assertThat(res.medication().adherenceRate()).isNull();
+            assertThat(res.medication().status()).isNull();
+            assertThat(res.medication().label()).isNull();
+        }
+    }
+
+    // ============================================================
+    //  D. 보유 질환 다중
+    // ============================================================
+    @Nested
+    @DisplayName("보유 질환 다중 (DiseaseProfileMultiple)")
+    class DiseaseProfileMultiple {
+
+        @Test
+        @DisplayName("시나리오 7: 3개 질환(hypertension:type2,diabetes:type1,gout:CHRONIC) → 모두 포함")
+        void threeDiseases_allReturned() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0,
+                    "hypertension:type2,diabetes:type1,gout:CHRONIC");
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.diseaseProfile().diseases())
+                    .hasSize(3)
+                    .extracting(p -> p.diseaseKey())
+                    .containsExactly("hypertension", "diabetes", "gout");
+
+            assertThat(res.diseaseProfile().diseases())
+                    .extracting(p -> p.subtypeLabel())
+                    .containsExactly("1기", "1형", "만성");
+        }
+    }
+
+    // ============================================================
+    //  E. 회원 없음
+    // ============================================================
+    @Nested
+    @DisplayName("회원 없음 (UserNotFound)")
+    class UserNotFound {
+
+        @Test
+        @DisplayName("userId로 회원 없으면 ResourceNotFoundException, 메시지에 \"회원\" + userId 포함")
+        void unknownUserId_throwsResourceNotFound() {
+            when(userRepository.findByUserId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.analyzeWeekly(99L))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("회원")
+                    .hasMessageContaining("99");
+        }
+    }
+}

@@ -1,6 +1,7 @@
-# Ballife 백엔드 — Step 6 진행 중 인계 문서
+# Ballife 백엔드 — Step 6 완료 / Step 7 진입 전 인계 문서
 
-> 작성 시점: Step 6 (테스트 코드 작성) 1순위 완료, 2순위 시작 전.
+> 작성 시점: Step 6 (테스트 코드 작성) 1·2·3순위 모두 완료, Step 7(인증·권한 보강) 진입 전.
+> 누적 테스트 **112건 PASS**.
 > 이 문서를 새 Claude Code 세션의 첫 메시지로 던지면 컨벤션·결정사항·코드 위치까지 인수인계 가능.
 
 ---
@@ -46,13 +47,14 @@ Python ai-service의 입력 JSON 명세는 아직 미정 (Step 9에서 진행).
 
 ## 3. 환경 정보
 
-- **위치**: `C:\gabia\Ballife\Ballife`
-- **별도 프로젝트**: `C:\gabia\Ballife\ai-service` (Python, 팀원 영역)
+- **위치 (학원 노트북)**: `C:\gabia\Ballife\Ballife`
+- **위치 (집 노트북, 현재 작업 중)**: `C:\Users\hemmm\Desktop\Ballife\Ballife`
+- **별도 프로젝트**: `ai-service` (Python, 팀원 영역)
 - **언어**: Java 17 (`build.gradle` toolchain)
 - **프레임워크**: Spring Boot 3.5.12, Spring Data JPA, MySQL, Spring Security, JWT, Swagger
 - **DB**: MySQL `project_ballife` @ localhost:3306 (user=`ballife` / pw=`1234`), MongoDB(localhost:27017, Ballife)
 - **base 패키지**: `com.prologue.ballife`
-- **빌드/실행**:
+- **빌드/실행** (gradlew 위치: `ballife/` 디렉토리):
   - 컴파일+테스트: `gradlew test`
   - 서버 기동: `gradlew bootRun` (port 8080)
 - **테스트 의존성**: `spring-boot-starter-test` 1줄로 JUnit5 + Mockito + AssertJ 자동 포함. 추가 설치 필요 없음.
@@ -70,24 +72,28 @@ com.prologue.ballife/
 ├─ exception/        ResourceNotFoundException 등
 ├─ repository/       각 도메인 Repository
 ├─ security/         JWT 관련
-├─ service/          도메인 Service + HealthAnalysisService ★ 신규
-├─ standard/         ★ 상수 5개 (이전 세션 이전부터 존재)
-├─ analyzer/         ★ Analyzer 5개 + Result record 5개 (BloodSugar 이번에 확장됨)
+├─ service/          도메인 Service + HealthAnalysisService
+├─ standard/         상수 5개 (BloodSugar/BloodPressure/Bmi/Medication/DiseaseProfile)
+├─ analyzer/         Analyzer 5개 + Result record 5개 (BloodSugar는 식전 그룹 확장됨)
 ├─ util/
 └─ web/
    ├─ ...
-   └─ analysis/      ★ 신규
+   └─ analysis/
       ├─ HealthAnalysisController.java
       └─ dto/
          └─ HealthAnalysisResponse.java
 
 src/test/java/com/prologue/ballife/
-└─ standard/         ★ 1순위 테스트 5개 작성 완료
-   ├─ BloodSugarStandardTest.java        (16)
-   ├─ BmiStandardTest.java               (18)
-   ├─ BloodPressureStandardTest.java     (24)
-   ├─ MedicationStandardTest.java        (13)
-   └─ DiseaseProfileStandardTest.java    (19)
+├─ standard/                          ★ 1순위 — 5 클래스 / 90 tests
+│  ├─ BloodSugarStandardTest.java        (16)
+│  ├─ BmiStandardTest.java               (18)
+│  ├─ BloodPressureStandardTest.java     (24)
+│  ├─ MedicationStandardTest.java        (13)
+│  └─ DiseaseProfileStandardTest.java    (19)
+├─ analyzer/                          ★ 2순위 — 1 클래스 / 11 tests
+│  └─ BloodSugarAnalyzerTest.java        (11)
+└─ service/                           ★ 3순위 — 1 클래스 / 11 tests
+   └─ HealthAnalysisServiceTest.java     (11)
 ```
 
 ---
@@ -113,21 +119,35 @@ User 엔티티에 `height`, `weight`, `gender`, `diseaseIndex` 모두 존재 확
 - `GET /api/health-analysis/weekly/2` + `Authorization: Bearer <토큰>` → **200 OK**
 - 응답에 5개 항목 모두 의도대로 채워짐 확인 (식전 분류 살아있는 것 검증됨)
 
-### Step 6 — 테스트 코드 (1순위 완료)
-`gradlew test --tests "com.prologue.ballife.standard.*"` 실행 결과: **5개 클래스, 총 90개 테스트, 100% PASS**.
+### Step 6 — 테스트 코드 ✅ 완료 (3단계 모두 PASS)
 
-| 파일 | 테스트 수 | 검증 포인트 |
-|---|---|---|
-| BloodSugarStandardTest | 16 | 공복/식후 각 구간 경계값 + label + status |
-| BmiStandardTest | 18 | 계산 + 6구간 경계 + classifyFrom + 0/음수 예외 |
-| BloodPressureStandardTest | 24 | 수축기·이완기 등급 + GRADE_MAX 시나리오 + 이완기 1등급 안 나오는지 0~200 전수검사 + Grade.of 예외 |
-| MedicationStandardTest | 13 | 이행률 반올림 + 경계값(0/59/60/79/80/100) + scheduled=0 예외 |
-| DiseaseProfileStandardTest | 19 | null/공백/모르는 키/NONE 대소문자/모르는 subtype/연속 콤마 안전 처리 |
+| 순위 | 파일 | tests | 검증 포인트 |
+|---|---|---|---|
+| 1순위 | standard 5개 클래스 | 90 | 각 구간 경계값 + label + status, 예외 케이스 |
+| 2순위 | `analyzer/BloodSugarAnalyzerTest.java` | 11 | 공복/식전/식후 3그룹 분리, 식전이 classifyFasting 재사용, 평균 반올림, 사용 안 한 그룹 필드 null 검증 |
+| 3순위 | `service/HealthAnalysisServiceTest.java` | 11 | 인계 문서 §9 시나리오 7개 (4 sub-case 포함). Repository 4 mock + Analyzer 5 실제 객체. 카테고리 분류, intakeIntervals 파싱, ResourceNotFoundException 모두 검증 |
+| | | **합계 112** | **PASS 100%** |
+
+**Step 6 실행 명령**:
+```
+gradlew test --tests "com.prologue.ballife.standard.*"   → 90 PASS
+gradlew test --tests "com.prologue.ballife.analyzer.*"   → 11 PASS
+gradlew test --tests "com.prologue.ballife.service.*"    → 11 PASS
+gradlew test                                              → 112 PASS (전체)
+```
 
 ### 사전 사전 작업 (Step 6 진입 전, 사용자 동의 후 수정)
 혈당 분석을 **공복/식전/식후 3그룹**으로 만드는 (C)안 적용:
 - `analyzer/BloodSugarAnalysisResult.java` — 식전 필드 3개 추가 (`preMealValue/Status/Label`)
 - `analyzer/BloodSugarAnalyzer.java` — `analyze` 시그니처에 `List<Integer> preMealValues` 인자 추가, 식전 분류는 `classifyFasting` 재사용
+
+### 인계 문서 표현 정정 (3순위 진행 중 발견)
+이전 mid 인계 문서 §9에서 "**Repository 5개를 Mock**으로 두고" 라고 적었으나 실제 `HealthAnalysisService` 생성자 의존성은 **Repository 4 + Analyzer 5 (= 9개)**. 3순위에서는 Repository 4개만 mock으로 두고 Analyzer 5개는 실제 객체로 주입했다. 이유:
+- Analyzer 5개는 1·2순위 단위 테스트로 이미 검증된 순수 컴포넌트
+- Mock하면 status/label까지 stub해야 해서 Service의 데이터 분류·전달 로직이 검증되지 않음
+- 실제 객체로 두면 입력 데이터만 조작해서 분류 + 라벨까지 End-to-End 검증 가능
+
+→ 다음 세션에서 비슷한 Service 테스트 시에도 **"Repository는 mock, Analyzer는 실제 객체"** 패턴 유지.
 
 ---
 
@@ -143,6 +163,7 @@ User 엔티티에 `height`, `weight`, `gender`, `diseaseIndex` 모두 존재 확
 | **`BloodSugar-취침전`** | 분석에서 제외 (저녁식후 영향 남아있어 공복도 식후도 아님). 차트/타임라인엔 유지 | |
 | **인증** | **이번 단계에선 미적용**. 인증 보강은 Step 7 | 동작 검증 우선 |
 | **식단·운동** | Step 10에서 별도 추가 (REFERENCE_ONLY). 데이터 모델 확정 후 | |
+| **Service 테스트 mock 정책** | **Repository는 mock, Analyzer는 실제 객체** | Analyzer는 이미 단위 테스트 통과한 순수 컴포넌트. mock하면 검증 깊이 사라짐 |
 
 ---
 
@@ -162,6 +183,7 @@ User 엔티티에 `height`, `weight`, `gender`, `diseaseIndex` 모두 존재 확
 - 백엔드 어디에도 형식 검증/파싱 코드 없음. 프론트 `PrescriptionRegisterModal.jsx` 도 현재 `intakeIntervals` 필드를 payload에 안 보냄
 - 현 코드는 콤마 split + `TakenCategory` enum 이름 매칭 (case-insensitive)로 가정. 매칭 실패 시 토큰 무시, 0 반환
 - 프론트 또는 다른 시스템이 다른 형식(한글, JSON 배열 등) 전송하면 `scheduledCount=0` 으로 떨어짐 (안전하지만 분석이 빈값)
+- **Service 테스트 시나리오 6**에서 `null` / `"MORNING,DINNER"` / `"morning, dinner"` / `"아침,저녁"` 네 가지 케이스로 명시 검증됨
 
 ### 7-4. `BioValueRecord.category` prefix 매칭
 - `BioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween` 가 `LIKE 'BloodSugar%'` prefix로 잡음
@@ -171,9 +193,18 @@ User 엔티티에 `height`, `weight`, `gender`, `diseaseIndex` 모두 존재 확
 - 우리 `/api/health-analysis/**`는 `.anyRequest().authenticated()` 정책에 걸려 JWT 필수
 - Step 7에서 `@PreAuthorize`로 본인 데이터만 접근 가능하게 보강 예정
 
+### 7-6. Mockito strict stubbing 함정 (Step 6 3순위에서 발견)
+- 증상: `org.mockito.exceptions.misusing.PotentialStubbingProblem`
+- 발생 상황: `BioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween`를 `eq("BloodSugar")` 매처로만 stub 했는데, Service가 같은 메서드를 `"BloodPressure"` 카테고리로도 호출 → strict Mockito가 "stub 인자와 실제 호출 인자 불일치"로 폭발.
+- 잘못된 가정: "stub 안 한 호출은 default 반환"이 strict 모드에서 부분적으로만 맞음. **같은 메서드에 다른 인자로 stub이 존재하면 strict가 발동**한다.
+- 해결: 사용 안 하는 카테고리에도 빈 리스트(`List.of()`)를 명시적으로 stub 추가. 의도가 더 명확해지는 부수 효과.
+- **다음 세션 규칙**: Service 테스트에서 같은 Repository 메서드를 여러 카테고리/인자로 호출하면 **모든 호출 패턴에 stub을 명시**해라. 대안인 `@MockitoSettings(strictness = Strictness.LENIENT)` 전체 lenient는 함정을 가리니까 쓰지 마라.
+
 ---
 
 ## 8. 테스트 컨벤션 (이미 검증된 패턴 — 그대로 따라가기)
+
+### 8-1. 단위 테스트 (standard, analyzer 패키지)
 
 ```java
 package com.prologue.ballife.<영역>;   // 메인 패키지와 미러링
@@ -215,6 +246,38 @@ class <대상>Test {
 }
 ```
 
+### 8-2. Service 테스트 (Mockito 사용)
+
+```java
+@ExtendWith(MockitoExtension.class)
+class <Service>Test {
+
+    @Mock <Repo1> repo1;
+    // ... Repository만 @Mock. Analyzer는 실제 객체 주입.
+
+    HealthAnalysisService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new HealthAnalysisService(
+            repo1, repo2, repo3, repo4,
+            new BloodPressureAnalyzer(), new BloodSugarAnalyzer(), new BmiAnalyzer(),
+            new MedicationAnalyzer(), new DiseaseProfileAnalyzer()
+        );
+    }
+
+    // 엔티티 생성은 헬퍼 메서드로 (Lombok @Builder 활용)
+    private User stubUser(Long id, Double h, Double w, String disease) { ... }
+
+    @Test
+    void scenario_1() {
+        // when(repo.method(...)).thenReturn(...)로 stub
+        // ArgumentMatchers: any(User.class), eq("BloodSugar"), anyLong() ...
+        // assertThat(...) 어서션
+    }
+}
+```
+
 ### 패턴 룰
 - 파일 위치: 메인 패키지와 미러링 (예: `com.prologue.ballife.analyzer.BloodSugarAnalyzerTest`)
 - 클래스명: `대상명 + Test`
@@ -223,9 +286,10 @@ class <대상>Test {
 - 주석: 첫 케이스에만 `// given - when - then` (반복 케이스에선 생략 OK)
 - 어서션: AssertJ (`assertThat(...).isEqualTo(...)`, `.isEmpty()`, `.hasSize(n)`, `.extracting(::method)` 등)
 - 예외: `assertThatThrownBy(() -> ...).isInstanceOf(Exception.class).hasMessageContaining("...")`
-- Spring 컨텍스트 **사용 안 함** (`@SpringBootTest` 없이 순수 단위 테스트). 빠르게 실행됨
+- Spring 컨텍스트 **사용 안 함** (`@SpringBootTest` 없이 순수 단위 테스트 또는 Mockito 단독). 빠르게 실행됨
 - 라벨(label)/상태(status)까지 같이 검증 — LLM 출력 정확성이 여기 달려있음
 - 경계값 위주 (각 구간의 양 끝 + 극단값 1~2개)
+- **다른 그룹/필드 누출 방지**: 한 그룹만 입력한 시나리오에서는 **사용 안 한 그룹의 필드들이 null인지** 명시적 `isNull()` 어서션으로 박을 것 (Step 6 2순위 B·D 그룹 패턴)
 
 ### 실행 명령
 ```bash
@@ -245,35 +309,10 @@ gradlew test
 
 ## 9. 남은 작업
 
-### Step 6 — 테스트 코드 (계속)
-
-#### 2순위 (다음 차례) ← 여기서부터 시작
-`src/test/java/com/prologue/ballife/analyzer/BloodSugarAnalyzerTest.java`
-
-이번 세션에서 식전 그룹이 추가된 **회귀 방지 우선**. 시나리오:
-- 공복만 / 식전만 / 식후만 → 해당 필드만 채워지고 나머지는 null
-- 빈 리스트 / null → 모든 필드 null
-- 평균 계산 (홀/짝수 개수, 반올림)
-- 식전이 `BloodSugarStandard.classifyFasting` 기준으로 분류되는지 (공복과 같은 label 나옴)
-- 한 그룹에 여러 값 → 평균 후 분류
-
-예상 10~12개 테스트.
-
-#### 3순위
-`src/test/java/com/prologue/ballife/service/HealthAnalysisServiceTest.java` (Mockito 사용)
-
-5개 Repository를 Mock으로 두고:
-- 전체 NORMAL 시나리오
-- 한 항목만 RISK
-- 측정 0건 (각 필드 null로 반환되는지)
-- 식전만 있고 공복 없음 → `fastingValue=null, preMealValue=값`
-- `BloodSugar-취침전` 데이터 1건만 있음 → 모든 혈당 필드 null
-- `intakeIntervals` 케이스별 (`null` / `"MORNING,DINNER"` / `"morning, dinner"` / `"아침,저녁"`)
-- 보유 질환 다중 (3개 질환)
-
-### Step 7 — 인증·권한 보강
-- `SecurityConfig`에 `/api/health-analysis/**` 등록 (다른 사람 코드, **동의 받아야 함**)
+### Step 7 — 인증·권한 보강 ← 다음 세션의 첫 작업
+- `SecurityConfig`에 `/api/health-analysis/**` 등록 (**다른 사람 코드, 팀원 동의 받아야 함**)
 - `@PreAuthorize`로 본인 데이터만 접근 가능하게 (또는 PathVariable userId 대신 SecurityContext에서 가져오기 — 더 안전)
+- 작업 계획은 이번 세션 끝에 짜둠. 실제 코드 수정은 팀 합의 후 진행.
 
 ### Step 8 — 분석 기간 확장
 - Service: `analyze(userId, start, end)` 핵심 메서드로 일반화 (`analyzeWeekly`는 위 메서드 호출)
@@ -296,11 +335,11 @@ gradlew test
 
 | # | 규칙 |
 |---|---|
-| 5-1 | **진행 사항을 모두 한국어로 설명.** 파일 만들기 **전**에 무엇/어디/왜 설명, 만든 **후**에 핵심 로직 요약. 어려운 자바/Spring 문법(어노테이션, record, 제네릭)은 풀어서 설명 |
-| 5-2 | **추측 금지.** 엔티티 필드명, Repository 메서드 이름 등 실제 파일 열어 확인. 모르면 먼저 물어보기 |
-| 5-3 | **한 번에 한 단계씩.** 각 Step 끝나면 확인 받고 다음으로. 5개 파일 한 번에 우르르 금지 (단, 패턴이 검증된 후라면 같은 패턴의 여러 파일 동시 작성 OK — 이번에 1순위 5개를 그렇게 진행함) |
-| 5-4 | **기존 기능 로직 변경 금지.** 다른 사람의 controller/service/repository 함부로 수정 ❌. 수정 필요시 사용자 동의 받기. 이미 동의 받고 수정한 파일들(`BloodSugarAnalyzer`, `BloodSugarAnalysisResult`, `UserMedicineRecordRepository`, `SecurityConfig` 향후 예정)은 추가 수정 시에도 매번 동의 받기 |
-| 5-5 | **에러나 막힘 시 임의 우회 금지.** 에러 메시지 그대로 사용자에게 보여주고 같이 해결. 테스트 FAIL 나오면 어떤 케이스가 깨졌는지 그대로 보고 |
+| 10-1 | **진행 사항을 모두 한국어로 설명.** 파일 만들기 **전**에 무엇/어디/왜 설명, 만든 **후**에 핵심 로직 요약. 어려운 자바/Spring 문법(어노테이션, record, 제네릭)은 풀어서 설명 |
+| 10-2 | **추측 금지.** 엔티티 필드명, Repository 메서드 이름 등 실제 파일 열어 확인. 모르면 먼저 물어보기 |
+| 10-3 | **한 번에 한 단계씩.** 각 Step 끝나면 확인 받고 다음으로. 5개 파일 한 번에 우르르 금지 (단, 패턴이 검증된 후라면 같은 패턴의 여러 파일 동시 작성 OK — Step 6 1순위 5개를 그렇게 진행함) |
+| 10-4 | **기존 기능 로직 변경 금지.** 다른 사람의 controller/service/repository 함부로 수정 ❌. 수정 필요시 사용자 동의 받기. 이미 동의 받고 수정한 파일들(`BloodSugarAnalyzer`, `BloodSugarAnalysisResult`, `UserMedicineRecordRepository`, `SecurityConfig` Step 7 예정)은 추가 수정 시에도 매번 동의 받기 |
+| 10-5 | **에러나 막힘 시 임의 우회 금지.** 에러 메시지 그대로 사용자에게 보여주고 같이 해결. 테스트 FAIL 나오면 어떤 케이스가 깨졌는지 그대로 보고. Mockito 같은 함정은 **테스트 코드를 먼저 재검토** (Service 코드 수정 금지). |
 
 ---
 
@@ -309,11 +348,16 @@ gradlew test
 새 세션은 위 1~10을 다 읽고 다음 응답:
 
 1. "이전 진행 상황을 이해했다"는 짧은 확인 (1~2문장)
-2. 다음 작업 — **Step 6 2순위 `BloodSugarAnalyzerTest`** 진행 계획 간단 요약 (어떤 시나리오를 어떤 순서로 검증할지)
-3. 사용자 확인 대기
+2. 집 환경에서 `gradlew test` 실행해서 **112 PASS** 나오는지 검증 후 보고
+3. 다음 작업 — **Step 7 인증·권한 보강** 진행 계획 간단 요약. 단, `SecurityConfig`가 다른 사람 코드라서 **팀원 합의 + 사용자 동의 후에만** 실제 수정.
+4. 사용자 확인 대기
 
-코드부터 짜지 마라. 계획 동의 받은 다음 작성 → `gradlew test --tests "...BloodSugarAnalyzerTest"` 실행 → 결과(PASS 개수 / FAIL 케이스) 보고 순으로 진행.
+코드부터 짜지 마라. 계획 동의 받은 다음 작성 → `gradlew test` 실행 → 결과 보고 순으로 진행.
 
 ### 다음 세션의 첫 작업
-> **`BloodSugarAnalyzerTest` 작성 시작** — `src/test/java/com/prologue/ballife/analyzer/BloodSugarAnalyzerTest.java`
-> 위 8번 컨벤션 그대로 따라가기. 약 10~12개 테스트 예상.
+> **Step 7 — 인증·권한 보강 계획 수립 → 팀 합의 확인 → SecurityConfig 수정 → 테스트**
+> 1. `SecurityConfig.java` 현재 상태 읽기 (다른 팀원이 어떻게 짜뒀는지)
+> 2. `/api/health-analysis/**` 등록 방식 결정 (`hasRole`? `authenticated()`?)
+> 3. `@PreAuthorize("#userId == authentication.principal.userId")` 또는 PathVariable 제거 후 SecurityContext에서 userId 추출 — 두 안 비교
+> 4. 팀원 동의 + 사용자 동의 받은 후 수정
+> 5. Postman 검증 + Controller 테스트 추가 여부 결정
