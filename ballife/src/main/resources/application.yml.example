@@ -1,3 +1,21 @@
+# =============================================================================
+# Ballife — application.yml 템플릿
+# =============================================================================
+# 사용법:
+#   1) 이 파일을 같은 폴더에 application.yml 로 복사한다.
+#   2) <YOUR_...> 플레이스홀더를 본인 환경 값으로 채운다.
+#   3) application.yml 은 .gitignore 로 제외되어 있어서 커밋되지 않는다.
+#      따라서 환경별 값(로컬 경로, 비밀번호 등)이 다른 팀원에게 새어 들어가지 않는다.
+#
+# 채워야 할 항목:
+#   - storage.local.base-path : 본인 노트북의 이미지 임시 저장 폴더 경로
+#
+# 환경변수로 주입 가능한 항목 (선택):
+#   - OPENAI_API_KEY    : OpenAI API 키
+#   - MFDS_SERVICE_KEY  : 식약처 API 인증키
+#   - FOOD_SAFETY_KEY   : 식약처 식품영양성분DB v2 인증키
+# =============================================================================
+
 spring:
   servlet:
     multipart:
@@ -71,7 +89,7 @@ foodsafety:
 storage:
   type: local
   local:
-    base-path: "C:/Users/soldesk/Desktop/프로젝트_임시"
+    base-path: "<YOUR_LOCAL_TEMP_FOLDER>"  # 예: "C:/Users/<your-username>/Desktop/프로젝트_임시"
     url-prefix: /uploads
 
     #단계별로 스페이스 2칸
