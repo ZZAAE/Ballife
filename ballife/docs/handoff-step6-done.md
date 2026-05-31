@@ -355,9 +355,67 @@ gradlew test
 코드부터 짜지 마라. 계획 동의 받은 다음 작성 → `gradlew test` 실행 → 결과 보고 순으로 진행.
 
 ### 다음 세션의 첫 작업
-> **Step 7 — 인증·권한 보강 계획 수립 → 팀 합의 확인 → SecurityConfig 수정 → 테스트**
-> 1. `SecurityConfig.java` 현재 상태 읽기 (다른 팀원이 어떻게 짜뒀는지)
-> 2. `/api/health-analysis/**` 등록 방식 결정 (`hasRole`? `authenticated()`?)
-> 3. `@PreAuthorize("#userId == authentication.principal.userId")` 또는 PathVariable 제거 후 SecurityContext에서 userId 추출 — 두 안 비교
-> 4. 팀원 동의 + 사용자 동의 받은 후 수정
-> 5. Postman 검증 + Controller 테스트 추가 여부 결정
+> **Step 7 — 인증·권한 보강. 사전 조사·결정사항은 이미 §12에 박혀있음. 코드 작성부터 바로 시작 가능.**
+> 상세 작업 항목은 §12-3 참조.
+
+---
+
+## 12. Step 7 사전 조사 및 결정사항 (이전 세션 종료 직전 정리)
+
+> 다음 세션은 아래 결정사항을 그대로 가지고 코드 작성에 바로 진입할 수 있다.
+> §11 "시작 지시"의 1~2번(이해 확인 + `gradlew test` 112 PASS 검증)만 하고 §12-3 작업 항목으로 직행.
+
+### 12-1. 코드 사전 조사 결과 (이미 검증 완료)
+
+**(가) `SecurityConfig`는 수정 불필요** — `/api/health-analysis/**`가 명시 등록되어 있지 않지만 [SecurityConfig.java:73](../src/main/java/com/prologue/ballife/config/SecurityConfig.java#L73)의 `.anyRequest().authenticated()` 규칙에 자동으로 묶여서 **이미 JWT 필수 상태**. Step 5 Postman 검증 시 Bearer 토큰 줘야만 200 OK 나온 이유가 이것.
+→ **`SecurityConfig` 절대 손대지 마라. 팀원 합의 부담 0.**
+
+**(나) `CustomUserDetails`에 `userId` 필드 노출됨** — [CustomUserDetails.java:16](../src/main/java/com/prologue/ballife/security/CustomUserDetails.java#L16). `@Getter`로 `getUserId()` 자동 생성. `JwtAuthenticationFilter`가 SecurityContext의 principal에 `CustomUserDetails`를 박아넣음.
+→ Controller에서 `@AuthenticationPrincipal CustomUserDetails me` 한 줄로 `me.getUserId()` 바로 꺼낼 수 있음.
+
+### 12-2. 결정사항 (사용자 확정)
+
+| 항목 | 결정 | 비고 |
+|---|---|---|
+| **접근 방식** | **안 B**: PathVariable 제거 + `@AuthenticationPrincipal` | 입력 자체가 불가능한 게 검증보다 강한 보호. `@EnableMethodSecurity` 도입의 전역 부수효과도 회피 |
+| **URL 정책** | **병존**: `/weekly` 신규 + `/weekly/{userId}` 유지 (deprecated) | 프론트가 기존 URL 호출하는지 확인 안 하고 안전하게 가는 선택 |
+| **Deprecated 표시** | `@Deprecated` 어노테이션 + Swagger `@Operation(description=...)`에 "deprecated, /weekly 사용 권장" **둘 다** 명시 | 한쪽만 박으면 누락될 위험 |
+| **테스트 전략** | 우선 **옵션 (1) `@WebMvcTest` + `@WithMockUser`** 시도. 시간 부족하면 **옵션 (3) Postman 수동 검증**으로 폴백 | 실제 작업 시점에 한 번 더 결정. 옵션 (1) 채택 시 `HealthAnalysisService`는 `@MockBean`으로 mock (Service 로직 자체는 이미 3순위에서 검증됨) |
+| **변경 범위** | `HealthAnalysisController`만 (Step 4에서 내가 만든 본인 코드). 팀원 합의 불필요 | 프론트팀 URL 추가 알림은 사용자가 별도 처리 |
+| **하위 호환** | 기존 `/weekly/{userId}`는 deprecated 표시만 하고 동작은 그대로 유지. 본인 토큰으로 다른 userId 넣으면 일단 200 OK 나오는 상태도 유지 (병존 기간 단순화) | 향후 안 B로 완전 전환 시 기존 엔드포인트 제거 — Step 7 완료 후 별도 단계 |
+
+### 12-3. Step 7 작업 항목 (다음 세션 첫 작업)
+
+**1) Controller 수정** — [HealthAnalysisController.java](../src/main/java/com/prologue/ballife/web/analysis/HealthAnalysisController.java)
+- 신규 메서드 추가: `GET /api/health-analysis/weekly` — `@AuthenticationPrincipal CustomUserDetails me` 파라미터로 `me.getUserId()` 꺼내서 `service.analyzeWeekly(userId)` 호출
+- 기존 `GET /api/health-analysis/weekly/{userId}` — `@Deprecated` 어노테이션 + Swagger `@Operation(description=...)`에 "deprecated, /weekly 사용 권장" 추가. 동작/구현은 그대로 유지
+- Swagger `@Tag`, `@RequiredArgsConstructor` 그대로
+- 추가 import: `org.springframework.security.core.annotation.AuthenticationPrincipal`, `com.prologue.ballife.security.CustomUserDetails`
+
+**2) 테스트 작성 (옵션 1 선택 시)** — `src/test/java/com/prologue/ballife/web/analysis/HealthAnalysisControllerTest.java`
+- `@WebMvcTest(HealthAnalysisController.class)` 슬라이스 테스트
+- `MockMvc`로 HTTP 호출 시뮬레이션
+- `HealthAnalysisService`는 `@MockBean`으로 mock (Service 자체 로직은 3순위에서 검증됨)
+- 케이스 후보 (5개 정도):
+  - 신규 `/weekly` + `@WithMockUser(...principal=CustomUserDetails)` → 200 OK + `service.analyzeWeekly(me.userId)` 호출 검증
+  - 신규 `/weekly` 인증 없이 → 401 "로그인이 필요합니다." (JSON 메시지)
+  - 기존 `/weekly/{userId}` + `@WithMockUser` → 200 OK (하위 호환)
+  - 기존 `/weekly/{userId}` 인증 없이 → 401
+  - 신규 `/weekly`에서 principal의 userId가 정확히 service로 전달되는지 `ArgumentCaptor`로 검증
+- **주의**: `@WebMvcTest`는 SecurityConfig를 자동으로 로드함. JwtAuthenticationFilter도 같이 로드되니 `@WithMockUser`로 SecurityContext 직접 세팅하는 게 가장 깔끔. JWT 토큰 발급/검증은 이 테스트 범위 아님.
+
+**3) Postman 검증**
+- 신규 `/weekly` + Bearer 토큰 → 200 OK + 본인(token의 user) 데이터
+- 신규 `/weekly` 인증 없이 → 401
+- 기존 `/weekly/{userId}` + Bearer 토큰 → 200 OK (하위 호환 유지 검증)
+- 신규 응답 = 기존 응답(같은 userId) 동일 데이터 검증
+
+**4) 인계 문서 갱신 → `handoff-step7-done.md` (또는 일관성 위해 `handoff-step7-mid.md` → `handoff-step7-done.md` 흐름)**
+- Step 7 완료 표시
+- 컨벤션 §8-3 Controller 테스트 패턴 추가 (옵션 1 선택 시)
+- §12 → §13 (또는 §12 자체를 "완료"로 이동) — 정리 방식은 그때 결정
+- 다음 작업: Step 8 분석 기간 확장으로 갱신
+
+### 12-4. Step 7 완료 시점 누적 테스트 예상치
+- 옵션 (1) 채택: 112 + 5 = **117 PASS** 예상
+- 옵션 (3) 채택: 112 그대로 + Postman 수동 검증 결과 (자동화 X)
