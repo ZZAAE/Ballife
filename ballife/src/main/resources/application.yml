@@ -28,6 +28,12 @@ spring:
       secret: your-super-secret-key-that-is-at-least-64-bytes-long-for-hs512-to-work-correctly
       expiration: 86400000 #토큰 만료시간 (24시간 = 밀리초)
 
+# CORS 허용 Origin (프론트엔드 주소). 콤마로 구분.
+# 배포 시 환경변수로 실제 프론트 주소 주입: APP_CORS_ALLOWED_ORIGINS=https://your-frontend.com
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+
 openai:
   api-key: ${OPENAI_API_KEY:default}
   model: gpt-4o-mini # 모델버젼
@@ -50,20 +56,19 @@ springdoc:
     use-root-path: true
   api-docs:
     path: /v3/api-docs
-  show-actuator:
-    true
+  show-actuator: true
 
 mfds:
   api:
     base-url: https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
-    service-key: ${MFDS_SERVICE_KEY:}  # 환경변수로 주입 (절대 코드에 하드코딩 X). 미설정 시 빈 값으로 컨텍스트 로드 가능.
+    service-key: ${MFDS_SERVICE_KEY:} # 환경변수로 주입 (절대 코드에 하드코딩 X). 미설정 시 빈 값으로 컨텍스트 로드 가능.
 
 # 식약처 식품영양성분DB v2 (data.go.kr) — 음식 사진 분석 → 영양정보 조회
 foodsafety:
   api:
     base-url: https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02
-    operation: getFoodNtrCpntDbInq02  # v02 표준 작업명
-    service-key: ${FOOD_SAFETY_KEY:}  # data.go.kr 발급 인증키 (디코딩 키 권장)
+    operation: getFoodNtrCpntDbInq02 # v02 표준 작업명
+    service-key: ${FOOD_SAFETY_KEY:} # data.go.kr 발급 인증키 (디코딩 키 권장)
 
 # 음식 사진 등 업로드 파일 로컬 저장 경로
 # - 운영 시 S3/CDN으로 교체 예정
@@ -71,8 +76,10 @@ foodsafety:
 storage:
   type: local
   local:
-    base-path: "C:/Users/soldesk/Desktop/프로젝트_임시"
+    base-path: "C:/Users/junsu/OneDrive/Desktop/사진"
     url-prefix: /uploads
 
     #단계별로 스페이스 2칸
     #탭 사용 금지
+
+    

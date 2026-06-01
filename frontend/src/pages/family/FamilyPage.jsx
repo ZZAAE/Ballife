@@ -163,6 +163,36 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
   );
 }
 
+/* 페이지 공통 셸 — FamilyPage 밖(모듈 스코프)에 두어야 한다.
+   컴포넌트 안에 정의하면 렌더마다 새 함수가 되어 React 가 하위 트리를
+   통째로 언마운트/재마운트하고, 입력창 포커스가 매 글자마다 풀린다. */
+function Shell({ children }) {
+  return (
+    <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto box-border max-w-[1000px] px-6 py-8">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f1c33] text-white">
+                <Users size={20} />
+              </div>
+              <div>
+                <h1 className="text-[24px] font-extrabold tracking-tight">
+                  가족 건강 관리
+                </h1>
+                <p className="text-sm text-[#64748B]">
+                  동의 기반으로 가족의 혈당·혈압을 함께 확인하세요.
+                </p>
+              </div>
+            </div>
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 export default function FamilyPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -280,31 +310,6 @@ export default function FamilyPage() {
       () => toast.error("복사에 실패했습니다."),
     );
   };
-
-  const Shell = ({ children }) => (
-    <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
-      <div className="flex pt-[55px]">
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1000px] px-6 py-8">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f1c33] text-white">
-                <Users size={20} />
-              </div>
-              <div>
-                <h1 className="text-[24px] font-extrabold tracking-tight">
-                  가족 건강 관리
-                </h1>
-                <p className="text-sm text-[#64748B]">
-                  동의 기반으로 가족의 혈당·혈압을 함께 확인하세요.
-                </p>
-              </div>
-            </div>
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (

@@ -38,8 +38,4 @@ out/
 
 ### 인증키있는 yml 파일 ###
 application-local.yml
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/sjs0529-4
 *.yml

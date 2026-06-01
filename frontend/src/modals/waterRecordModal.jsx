@@ -154,7 +154,7 @@ const WaterRecordModal = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm px-4 py-6"
       onClick={(event) => event.target === event.currentTarget && onClose?.()}
     >
-      <div className="relative flex h-[785px] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
@@ -175,7 +175,7 @@ const WaterRecordModal = ({
         </div>
 
         {/* 본문 */}
-        <div className="flex flex-1 flex-col overflow-y-auto px-6 py-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-6">
           <div className="relative flex-1">
             <div className="absolute right-0 top-2 text-right">
               <div className="flex items-center justify-end gap-4 leading-none">
