@@ -1,13 +1,17 @@
 package com.prologue.ballife.service.ocr;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -25,11 +29,21 @@ public class NaverOcrService {
 
     private final WebClient webClient = WebClient.builder().build();
 
+    @Value("${NaverOcr.api.base-url}")
     private String baseUrl;
+    @Value("${NaverOcr.api.secret-key}")
     private String secretKey;
 
-    public List<String> getOcrStringList(String type, String name, String data){
-        JsonNode json = sendOcrRequest(type, name, data).orElseThrow(() -> new OcrResponseNotFoundException());
+    public List<String> getOcrStringList(MultipartFile image) throws IOException {
+        String base64Image;
+        byte[] imgByte = image.getBytes();
+        base64Image = Base64.getEncoder().encodeToString(imgByte);
+        String contentType = image.getContentType();   // 예: "image/jpeg"
+        String format = (contentType != null && contentType.contains("/"))
+                ? contentType.split("/")[1]
+                : "jpg";
+        String name = image.getOriginalFilename();
+        JsonNode json = sendOcrRequest(format, name, base64Image).orElseThrow(() -> new OcrResponseNotFoundException());
         return parsingJsonToString(json);
     }
 
@@ -69,7 +83,7 @@ public class NaverOcrService {
         requestBody.put("version", "V2");
         requestBody.put("requestId", UUID.randomUUID().toString());
         requestBody.put("timestamp", System.currentTimeMillis());
-        requestBody.put("image", setImageBody(type, name, data));
+        requestBody.put("images", List.of(setImageBody(type, name, data)));
 
         return requestBody;
     }

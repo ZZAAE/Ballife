@@ -3,10 +3,13 @@ package com.prologue.ballife.service.medicine;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ import com.prologue.ballife.exception.MedicineNotFoundException;
 import com.prologue.ballife.repository.medicineMongo.MedicineRepository;
 import com.prologue.ballife.util.MediApiXMLParser;
 import com.prologue.ballife.web.dto.medicine.MedicineApiResponse;
+import com.prologue.ballife.web.dto.medicine.MedicineItemDto;
+import com.prologue.ballife.web.dto.medicine.MedicineItemDto.MedicineItemResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +60,26 @@ public class MedicineApiService {
             return medicineRepository.findByItemSeq(item.getItemSeq())
                     .orElseThrow(()->e);
         }
+    }
+
+    public List<MedicineItemDto.MedicineItemResponse> findOrFetchList(List<String> itemList){
+        // 중복 제거 후 외부 API 호출을 병렬로 수행 (순차 시 토큰 수만큼 지연 누적 → 프론트 타임아웃)
+        List<MedicineItemDto.MedicineItemResponse> medicineList = itemList.parallelStream()
+                .distinct()
+                .map(item -> {
+                    try {
+                        return MedicineItemResponse.from(findOrFetch(item));
+                    } catch (MedicineNotFoundException e) {
+                        // 성분명·잡토큰 등 식약처 API에 없는 항목은 건너뜀
+                        log.info("약 조회 실패, 건너뜀: {}", item);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        log.info("약 조회 결과: 요청 {}건 중 {}건 매칭", itemList.size(), medicineList.size());
+        return medicineList;
     }
 
     private Medicine toEntity(MedicineApiResponse.MediApiItem item) {

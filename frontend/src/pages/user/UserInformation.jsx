@@ -14,6 +14,7 @@ import userConfigApi from "../../api/userConfigApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
+import PrescriptionOcrTestModal from "../../modals/prescriptionOcrTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
 
 const ML_PER_CUP = 200;
@@ -944,7 +945,13 @@ function UserInformation() {
           onClose={() => SetPreResisterModalOpen(false)}
         /> */}
 
-        <MedicineSearchTestModal
+        {/* <MedicineSearchTestModal
+          isOpen={isPreResisterModalOpen}
+          onClose={() => SetPreResisterModalOpen(false)}
+          onSaved={handleMedicineSaved}
+        /> */}
+
+        <PrescriptionOcrTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
           onSaved={handleMedicineSaved}

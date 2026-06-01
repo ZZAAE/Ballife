@@ -19,6 +19,12 @@ const medicineApi = {
     return api.post(`/${prescriptionId}`);
   },
 
+  //OCR 스캔 (OCR + LLM + 식약처 조회로 시간이 걸려 타임아웃을 넉넉히 둔다)
+  ocrScan: (formData) => {
+    return api.post("/ocr", formData, { timeout: 60000 });
+  },
+
+  //약 조회
   search: (itemName) => {
     return api.get('/medicines/search', {params: {itemName}});
   }
