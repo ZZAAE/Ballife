@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 /* ---------- Avatars ---------- */
 const BotAvatar = ({ size = 20 }) => (
@@ -31,15 +32,29 @@ const UserAvatar = () => (
 );
 
 export default function BallChatbot() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content, time}
   const [input, setInput] = useState("");
   const [isWaiting, setIsWaiting] = useState(false);
+  const [attachedImage, setAttachedImage] = useState(null); // 첨부 이미지 data URL
 
   const chatBodyRef = useRef(null);
   const textareaRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const isComposing = useRef(false);
+  const historyLoadedRef = useRef(null); // 이전 대화 기록을 불러온 사용자 id
+  const messagesUserRef = useRef(null); // 현재 화면 메시지가 속한 사용자 id
+
+  // 사용자 변경(로그인/로그아웃/계정 전환) 시 화면 기록 초기화
+  // — 이펙트가 아닌 렌더 단계의 가드된 리셋(React 권장: 식별자 변경 시 상태 초기화)
+  const currentUserKey = user?.id ?? user?.userId ?? null;
+  if (messagesUserRef.current !== currentUserKey) {
+    messagesUserRef.current = currentUserKey;
+    historyLoadedRef.current = null;
+    setMessages([]);
+  }
 
   /* ---------- Auto-scroll to bottom on new message ---------- */
   useEffect(() => {
@@ -64,6 +79,34 @@ export default function BallChatbot() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
+
+  /* ---------- 모달 첫 진입 시 이전 대화 기록 복원 (사용자별 1회) ---------- */
+  useEffect(() => {
+    if (!isOpen) return;
+    const userId = Number(user?.id ?? user?.userId);
+    if (!Number.isFinite(userId)) return;
+    if (historyLoadedRef.current === userId) return; // 이미 이 사용자 기록을 불러옴
+    historyLoadedRef.current = userId;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8001/chat/history/${userId}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const restored = (data.messages || []).map((m) => ({
+          role: m.role,
+          content: m.content,
+          time: "",
+        }));
+        // 이 사용자 기준으로 교체 (계정 전환 시 이전 사용자 메시지 제거)
+        setMessages(restored);
+      } catch (err) {
+        console.error("대화 기록 복원 실패:", err);
+      }
+    })();
+  }, [isOpen, user]);
 
   /* ---------- Auto-resize textarea ---------- */
   function resizeTextarea() {
@@ -100,15 +143,94 @@ export default function BallChatbot() {
     return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
 
+  /* ---------- 이미지 첨부 ---------- */
+  // 업로드 이미지를 최대 변(maxSize)에 맞춰 축소 + JPEG 압축해 data URL 로 변환
+  // (전송 용량과 비전 토큰 비용을 줄이기 위함)
+  function fileToResizedDataURL(file, maxSize = 1024, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      const img = new Image();
+      reader.onload = () => {
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          if (width >= height) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleFileSelect(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일 다시 선택 가능하게 초기화
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "현재는 이미지(사진)만 첨부할 수 있어요.",
+          time: nowTime(),
+        },
+      ]);
+      return;
+    }
+    try {
+      const dataUrl = await fileToResizedDataURL(file);
+      setAttachedImage(dataUrl);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "사진을 불러오지 못했어요. 다시 시도해 주세요.",
+          time: nowTime(),
+        },
+      ]);
+    }
+  }
+
   /* ---------- 챗봇에 보내기 ---------- */
   async function send() {
     const text = input.trim();
-    if (!text || isWaiting) return;
+    const image = attachedImage;
+    if ((!text && !image) || isWaiting) return;
 
-    const newUserMsg = { role: "user", content: text, time: nowTime() };
+    // userId 가 없으면(미로그인/세션 만료/구버전 저장정보) 서버가 422 를 반환하므로 사전 차단
+    const userId = Number(user?.id ?? user?.userId);
+    if (!Number.isFinite(userId)) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "로그인 후 이용할 수 있어요. 로그인 정보를 확인해 주세요.",
+          time: nowTime(),
+        },
+      ]);
+      return;
+    }
+
+    const newUserMsg = { role: "user", content: text, image, time: nowTime() };
     const updated = [...messages, newUserMsg];
     setMessages(updated);
     setInput("");
+    setAttachedImage(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsWaiting(true);
 
@@ -116,7 +238,12 @@ export default function BallChatbot() {
       const response = await fetch("http://localhost:8001/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({
+        message: text,
+        userId,
+        token: localStorage.getItem("accessToken"),
+        image,
+      }),
     });
     const data = await response.json();
     const reply = data.reply || "응답을 받지 못했어요.";
@@ -400,6 +527,35 @@ export default function BallChatbot() {
         .ball-send-btn:hover:not(:disabled) { background: var(--navy-800); color: #fff; }
         .ball-send-btn:disabled { background: var(--gray-300); color: #fff; }
 
+        /* 메시지 내 첨부 이미지 */
+        .ball-msg-img {
+          display: block;
+          max-width: 220px; max-height: 220px;
+          width: auto; height: auto;
+          border-radius: 10px;
+          margin-bottom: 6px;
+        }
+        .ball-bubble.is-user .ball-msg-img:last-child { margin-bottom: 0; }
+        .ball-msg-text { display: block; }
+
+        /* 입력창 위 첨부 미리보기 */
+        .ball-attach {
+          position: relative; display: inline-block;
+          margin: 0 0 8px 4px;
+        }
+        .ball-attach img {
+          max-width: 90px; max-height: 90px;
+          border-radius: 8px; display: block;
+          border: 1px solid var(--gray-200);
+        }
+        .ball-attach__remove {
+          position: absolute; top: -6px; right: -6px;
+          width: 20px; height: 20px; border-radius: 50%;
+          border: none; background: var(--navy-900); color: #fff;
+          font-size: 14px; line-height: 1; cursor: pointer; padding: 0;
+          display: flex; align-items: center; justify-content: center;
+        }
+
         .ball-disclaimer {
           text-align: center; font-size: 10.5px;
           color: var(--gray-500); padding: 8px 0 4px;
@@ -518,7 +674,18 @@ export default function BallChatbot() {
                 m.role === "user" ? (
                   <div key={i} className="ball-row is-user">
                     <div className="ball-stack">
-                      <div className="ball-bubble is-user">{m.content}</div>
+                      <div className="ball-bubble is-user">
+                        {m.image && (
+                          <img
+                            src={m.image}
+                            alt="첨부 이미지"
+                            className="ball-msg-img"
+                          />
+                        )}
+                        {m.content && (
+                          <span className="ball-msg-text">{m.content}</span>
+                        )}
+                      </div>
                       <div className="ball-time">{m.time}</div>
                     </div>
                     <div className="ball-avatar is-user">
@@ -560,8 +727,33 @@ export default function BallChatbot() {
 
             {/* Input */}
             <div className="ball-input-wrap">
+              {attachedImage && (
+                <div className="ball-attach">
+                  <img src={attachedImage} alt="첨부 미리보기" />
+                  <button
+                    type="button"
+                    className="ball-attach__remove"
+                    aria-label="첨부 제거"
+                    onClick={() => setAttachedImage(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <div className="ball-input">
-                <button className="ball-icon-btn" type="button" aria-label="파일 첨부">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleFileSelect}
+                />
+                <button
+                  className="ball-icon-btn"
+                  type="button"
+                  aria-label="파일 첨부"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M21 12 L12 21 a5 5 0 0 1 -7 -7 L14 5 a3.5 3.5 0 0 1 5 5 L10 19"
@@ -590,7 +782,7 @@ export default function BallChatbot() {
                   type="button"
                   aria-label="전송"
                   onClick={send}
-                  disabled={!input.trim() || isWaiting}
+                  disabled={(!input.trim() && !attachedImage) || isWaiting}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path

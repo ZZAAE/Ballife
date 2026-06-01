@@ -1,0 +1,14 @@
+name: Ballife Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+    description: 'Base URL for the local Spring Boot server'
+    enabled: true
+  - key: userId
+    value: '1'
+    description: 'Default test user ID'
+    enabled: true
+  - key: token
+    value: ''
+    description: 'JWT Bearer token — obtain from your login endpoint and paste here'
+    enabled: true

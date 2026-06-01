@@ -201,7 +201,20 @@ export default function BloodSugarRecord() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <AIAnalysisCard />
+              <AIAnalysisCard
+                metric="bloodSugar"
+                userId={userId}
+                data={{
+                  avgMealBefore,
+                  avgMealAfter,
+                  latestMealBefore: latestMealBefore?.bloodSugar ?? null,
+                  latestMealAfter: latestMealAfter?.bloodSugar ?? null,
+                  latestFasting: latestFasting?.bloodSugar ?? null,
+                  count: filteredRecords.length,
+                  range: { start: filterStart, end: filterEnd },
+                  trend: chartData,
+                }}
+              />
 
               <ChartSection
                 title="혈당 변화 추이"

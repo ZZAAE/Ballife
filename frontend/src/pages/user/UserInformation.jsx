@@ -171,6 +171,16 @@ function UserInformation() {
     return next;
   };
 
+  // "건강 분석 보고서" 버튼 → public/reports 폴더에 있는 PDF 파일을 새 탭으로 연다.
+  // (파일명에 한글/공백이 있어 URL 인코딩 필요)
+  const handlePrintHealthReport = () => {
+    const url = `/reports/${encodeURIComponent("건강 분석 보고서.pdf")}`;
+    const win = window.open(url, "_blank");
+    if (!win) {
+      toast.error("팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.");
+    }
+  };
+
   useEffect(() => {
     if (!userId) {
       const syncDraftProfile = (event) => {
@@ -563,10 +573,10 @@ function UserInformation() {
                     {subscription?.reportAccess && (
                       <button
                         type="button"
-                        onClick={() => navigate("/report/health")}
+                        onClick={handlePrintHealthReport}
                         className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
                       >
-                        건강 리포트
+                        건강 분석 보고서
                       </button>
                     )}
                     <button
@@ -642,7 +652,10 @@ function UserInformation() {
                           보유 포인트
                         </dt>
                         <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
-                          {memberProfile?.point != null ? Number(memberProfile.point).toLocaleString() : "0"} P
+                          {memberProfile?.point != null
+                            ? Number(memberProfile.point).toLocaleString()
+                            : "0"}{" "}
+                          P
                         </dd>
                       </div>
                       <div>
@@ -650,7 +663,12 @@ function UserInformation() {
                           누적 포인트
                         </dt>
                         <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
-                          {memberProfile?.usePointCount != null ? Number(memberProfile.usePointCount).toLocaleString() : "0"} P
+                          {memberProfile?.usePointCount != null
+                            ? Number(
+                                memberProfile.usePointCount,
+                              ).toLocaleString()
+                            : "0"}{" "}
+                          P
                         </dd>
                       </div>
                     </div>
@@ -734,15 +752,17 @@ function UserInformation() {
                   </div>
                 </div>
 
-                {/* 최근 데이터 리포트 (주간) */}
+                {/* 건강 리포트 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
-                    최근 데이터 리포트
+                    건강 리포트
                   </h3>
-                  {recentReports.length === 0 ? (
-                    <p className="text-[13px] text-[#94A3B8]">?</p>
-                  ) : (
-                    <ul className="space-y-3">
+                  <p className="mb-4 text-[13px] text-[#64748B]">
+                    나의 최근 건강 지표를 한눈에 확인하세요.
+                  </p>
+
+                  {recentReports.length > 0 && (
+                    <ul className="mb-4 space-y-3">
                       {recentReports.map((report, idx) => (
                         <li
                           key={idx}
@@ -764,6 +784,15 @@ function UserInformation() {
                       ))}
                     </ul>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/report/health")}
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#0f1c33] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#1a2d4d]"
+                  >
+                    건강 리포트 보기
+                    <span aria-hidden>›</span>
+                  </button>
                 </div>
               </div>
 
