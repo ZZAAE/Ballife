@@ -270,7 +270,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]"
+        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] 2xl:h-[880px]"
       >
         {/* 고정 상단 영역 */}
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
