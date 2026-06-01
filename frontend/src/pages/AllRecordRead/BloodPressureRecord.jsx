@@ -313,7 +313,19 @@ export default function BloodPressureRecord() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <AIAnalysisCard />
+              <AIAnalysisCard
+                metric="bloodPressure"
+                userId={userId}
+                data={{
+                  avgSystolic: metrics.avgSystolic,
+                  avgDiastolic: metrics.avgDiastolic,
+                  status: avgStatus.label,
+                  maxSystolic: metrics.maxSystolicRecord?.systolicBP ?? null,
+                  minDiastolic: metrics.minDiastolicRecord?.diastolicBP ?? null,
+                  range: { start: filterStart, end: filterEnd },
+                  trend: bpData,
+                }}
+              />
 
               <ChartSection
                 title="혈압 변화 추이"
