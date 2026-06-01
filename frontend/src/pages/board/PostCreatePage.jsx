@@ -7,8 +7,6 @@ import Button from "../../components/Button";
 import RichTextEditor from "../../components/board/RichTextEditor";
 import { isRichTextEmpty } from "../../components/board/richTextEditorUtils";
 
-const DRAFT_STORAGE_KEY = "board-post-create-draft";
-
 function createEmptyFormData() {
   return {
     category: "",
@@ -17,39 +15,12 @@ function createEmptyFormData() {
   };
 }
 
-function readDraft() {
-  try {
-    const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-
-    if (!rawDraft) {
-      return createEmptyFormData();
-    }
-
-    const parsedDraft = JSON.parse(rawDraft);
-
-    return {
-      category: parsedDraft.category ?? "",
-      title: parsedDraft.title ?? "",
-      content: parsedDraft.content ?? "",
-    };
-  } catch {
-    return createEmptyFormData();
-  }
-}
-
-function hasDraftContent(formData) {
-  return Boolean(
-    formData.category ||
-    formData.title.trim() ||
-    !isRichTextEmpty(formData.content),
-  );
-}
-
 function PostCreatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(() => readDraft());
+  // 등록을 누르지 않고 나갔다 다시 들어오면 항상 빈 폼으로 시작한다 (임시저장/복원 없음)
+  const [formData, setFormData] = useState(createEmptyFormData);
 
   // 비로그인 사용자는 작성 페이지 진입 차단
   useEffect(() => {
@@ -83,19 +54,6 @@ function PostCreatePage() {
     setFormData((prev) => ({ ...prev, content }));
   };
 
-  const clearDraft = () => {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
-  };
-
-  useEffect(() => {
-    if (!hasDraftContent(formData)) {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-      return;
-    }
-
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
-  }, [formData]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -124,7 +82,6 @@ function PostCreatePage() {
     try {
       setLoading(true);
       const res = await postApi.createPost(user.userId, formData);
-      clearDraft();
       toast.success("등록되었습니다.");
       navigate(`/posts/${res.data.id}`);
     } catch (error) {

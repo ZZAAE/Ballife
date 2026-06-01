@@ -1,0 +1,72 @@
+$kind: http-request
+name: 'POST Chatbot Message'
+method: POST
+url: '{{baseUrl}}/api/chatbot/message'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "userId": 1,
+      "message": "How is my blood sugar this week?"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // ── Status checks ──────────────────────────────────────────────
+      pm.test("Status 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response time < 8000ms (AI chatbot response allowed extra time)", function () {
+          pm.expect(pm.response.responseTime).to.be.below(8000);
+      });
+
+      // ── Body structure ──────────────────────────────────────────────
+      pm.test("Response is a JSON object", function () {
+          pm.response.to.be.json;
+          const body = pm.response.json();
+          pm.expect(body).to.be.an("object");
+      });
+
+      pm.test("Response contains a chatbot reply field", function () {
+          const body = pm.response.json();
+          const reply = body.reply || body.answer || body.message || body.content || body.response;
+          pm.expect(reply).to.be.a("string").and.to.have.length.above(0);
+      });
+
+      pm.test("AI reply does not contain a disease diagnosis", function () {
+          const body = pm.response.json();
+          const reply = (body.reply || body.answer || body.message || body.content || body.response || "").toLowerCase();
+          const diagnosisKeywords = ["you have", "you are diagnosed", "you suffer from", "diagnosis:"];
+          diagnosisKeywords.forEach(function (kw) {
+              pm.expect(reply).to.not.include(kw,
+                  "AI must not diagnose diseases — diseaseIndex is context-only.");
+          });
+      });
+
+      // ── Debug helpers ───────────────────────────────────────────────
+      const status = pm.response.code;
+      if (status === 401) {
+          console.error("[401 Unauthorized] JWT token is missing or expired. " +
+              "Set the `token` environment variable to a valid Bearer token, " +
+              "or whitelist /api/chatbot/** in Spring Security config.");
+      } else if (status === 404) {
+          console.warn("[404 Not Found] userId=" +
+              pm.environment.get("userId") +
+              " not found. Check the userId in the request body.");
+      } else if (status === 400) {
+          console.warn("[400 Bad Request] Ensure the body has both `userId` (integer) " +
+              "and `message` (non-empty string). Response: " + pm.response.text());
+      } else if (status === 500) {
+          console.error("[500 Internal Server Error] This may be an OpenAI API error " +
+              "(invalid key, quota exceeded, or network issue). " +
+              "Check Spring Boot logs and your OPENAI_API_KEY env variable. " +
+              "Response: " + pm.response.text());
+      }

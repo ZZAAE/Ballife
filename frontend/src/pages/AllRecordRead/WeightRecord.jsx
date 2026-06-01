@@ -255,7 +255,17 @@ export default function WeightRecord() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <AIAnalysisCard />
+              <AIAnalysisCard
+                metric="weight"
+                userId={userId}
+                data={{
+                  current: latestWeight,
+                  target: targetWeight,
+                  bmi,
+                  range: chartRange,
+                  trend: chartData,
+                }}
+              />
 
               <div className="mb-8 flex flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6 h-[calc(100vh-500px)] min-h-[280px] xl:col-span-2">
                 <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">

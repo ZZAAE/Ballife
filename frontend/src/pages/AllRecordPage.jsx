@@ -443,6 +443,9 @@ function AllRecordPage() {
     }
   };
 
+  // React Compiler가 이 컴포넌트 최적화를 건너뛰며 수동 useCallback 메모를
+  // 보존하지 못해 발생하는 경고. 동작·성능에는 영향 없어 의도적으로 억제한다.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const fetchAll = useCallback(async () => {
     if (!userId || !selectedDate) return;
 

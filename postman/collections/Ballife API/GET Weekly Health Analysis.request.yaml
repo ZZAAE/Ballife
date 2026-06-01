@@ -1,0 +1,52 @@
+$kind: http-request
+name: 'GET Weekly Health Analysis'
+method: GET
+url: '{{baseUrl}}/api/health-analysis/weekly/{{userId}}'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // ── Status checks ──────────────────────────────────────────────
+      pm.test("Status 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response time < 3000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(3000);
+      });
+
+      // ── Body structure ──────────────────────────────────────────────
+      pm.test("Response is a JSON object", function () {
+          pm.response.to.be.json;
+          const body = pm.response.json();
+          pm.expect(body).to.be.an("object");
+      });
+
+      pm.test("Response contains userId", function () {
+          const body = pm.response.json();
+          pm.expect(body).to.have.property("userId");
+      });
+
+      // ── Debug helpers ───────────────────────────────────────────────
+      const status = pm.response.code;
+      if (status === 401) {
+          console.error("[401 Unauthorized] JWT token is missing or expired. " +
+              "Set the `token` environment variable to a valid Bearer token, " +
+              "or whitelist /api/health-analysis/** in Spring Security config.");
+      } else if (status === 404) {
+          console.warn("[404 Not Found] No health data found for userId=" +
+              pm.environment.get("userId") +
+              ". Make sure the user exists and has records for the past 7 days.");
+      } else if (status === 400) {
+          console.warn("[400 Bad Request] Check that userId is a valid integer. " +
+              "Response: " + pm.response.text());
+      } else if (status === 500) {
+          console.error("[500 Internal Server Error] Check Spring Boot logs. " +
+              "Response: " + pm.response.text());
+      }

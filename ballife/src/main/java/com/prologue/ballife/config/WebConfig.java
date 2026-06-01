@@ -18,10 +18,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${storage.local.url-prefix:/uploads}")
     private String storageUrlPrefix;
 
+    // SecurityConfig 와 동일한 허용 Origin 사용. 배포 시 APP_CORS_ALLOWED_ORIGINS 로 주입.
+    @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*}")
+    private String[] allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173", "http://localhost:3000")
+                .allowedOriginPatterns(allowedOrigins) // 패턴(localhost:*) 지원하려면 allowedOrigins 가 아닌 패턴 메서드 필요
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

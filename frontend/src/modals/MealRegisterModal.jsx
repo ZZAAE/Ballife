@@ -319,7 +319,13 @@ export default function MealRegisterModal({
       // 3) AI 분석 호출 (OpenAI Vision + 식약처 영양정보)
       try {
         const res = await mealAnalysisApi.analyze(file);
+        console.log("[MealAnalysis] 서버 응답 전체:", res);
+        console.log("[MealAnalysis] res.data:", res?.data);
         const foods = Array.isArray(res?.data?.foods) ? res.data.foods : [];
+        console.log("[MealAnalysis] foods 배열:", foods);
+        foods.forEach((f, i) =>
+          console.log(`[MealAnalysis] food[${i}]:`, JSON.stringify(f, null, 2))
+        );
         const recognizedFoods = foods.filter((f) => f.nutritionFound);
 
         if (recognizedFoods.length === 0) {
