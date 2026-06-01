@@ -168,7 +168,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm px-4 py-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-y-auto rounded-[32px] bg-white p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
 
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">

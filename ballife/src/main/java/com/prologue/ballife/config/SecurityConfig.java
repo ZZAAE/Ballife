@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,10 @@ public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
         private final ObjectMapper objectMapper;
+
+        // 콤마로 구분한 허용 Origin 패턴. 배포 시 환경변수 APP_CORS_ALLOWED_ORIGINS 로 실제 프론트 주소 주입.
+        @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*}")
+        private String[] allowedOrigins;
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -88,10 +93,8 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // 허용할 Origin (프론트엔드 주소)
-                configuration.setAllowedOriginPatterns(List.of(
-                                "http://localhost:*",
-                                "http://127.0.0.1:*"));
+                // 허용할 Origin (프론트엔드 주소) — app.cors.allowed-origins 로 주입
+                configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins));
 
                 // 허용할 HTTP 메서드
                 configuration.setAllowedMethods(Arrays.asList(

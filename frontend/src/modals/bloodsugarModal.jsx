@@ -595,7 +595,7 @@ export default function BloodSugarModal({
 
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm">
-      <div className="relative flex w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]" onClick={(e) => e.stopPropagation()}>
+      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]" onClick={(e) => e.stopPropagation()}>
 
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
@@ -640,7 +640,7 @@ export default function BloodSugarModal({
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           
           {/* 시간 선택 */}
           <div className="flex gap-3 items-center mb-6">
