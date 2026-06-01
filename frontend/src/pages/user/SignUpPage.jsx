@@ -119,6 +119,33 @@ function SignUpPage() {
     }
   };
 
+  // 개발용 자동 입력 (배포 전 삭제)
+  const handleAutoFill = () => {
+    const rand = Math.floor(Math.random() * 10000);
+    const testLoginId = `tester${rand}`;
+    const testLocal = `tester${rand}`;
+    const testDomain = "gmail.com";
+    setFormData({
+      loginId: testLoginId,
+      password: "test1234",
+      passwordConfirm: "test1234",
+      username: "홍길동",
+      email: `${testLocal}@${testDomain}`,
+      birthDate: "2000-01-15",
+      nickname: "길동이",
+      gender: "남성",
+      weight: "65",
+      height: "175",
+      diseaseIndex: "",
+    });
+    setEmailLocalState(testLocal);
+    setEmailDomainState(testDomain);
+    setIsCustomDomain(false);
+    setErrors({});
+    setLoginIdStatus("available"); // 중복확인 통과 처리
+    toast.success("테스트 데이터 자동 입력 완료");
+  };
+
   const validate = () => {
     const newErrors = {};
 
@@ -228,6 +255,15 @@ function SignUpPage() {
         <h1 className="text-2xl font-medium text-center text-gray-900 mb-8 tracking-tight">
           회원가입
         </h1>
+
+        {/* 개발용 임시 자동입력 버튼 (배포 전 삭제) */}
+        <button
+          type="button"
+          onClick={handleAutoFill}
+          className="w-full h-10 mb-4 rounded border border-dashed border-orange-400 text-orange-600 text-xs font-medium hover:bg-orange-50 transition"
+        >
+          [DEV] 테스트 데이터 자동 입력
+        </button>
 
         <form onSubmit={handleSubmit} noValidate>
 

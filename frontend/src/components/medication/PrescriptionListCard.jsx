@@ -4,7 +4,7 @@ const defaultPrescriptions = [
   {
     id: 1,
     groupName: "혈압약",
-    dosage: "5정",
+    dosage: "1정",
     scheduleLabel: "아침 · 점심 · 저녁",
   },
   {
