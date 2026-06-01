@@ -77,13 +77,16 @@ class HealthAnalysisControllerTest {
     }
 
     private HealthAnalysisResponse stubResponse(Long userId, String type) {
+        // 기존 7 args (userId, period, bp, bs, bmi, med, disease) +
+        // Step B 추가 2 args (user, recordingStats) = 9 args
         return new HealthAnalysisResponse(
                 userId,
                 new HealthAnalysisResponse.Period(
                         type,
                         LocalDate.now().minusDays(6),
                         LocalDate.now()),
-                null, null, null, null, null);
+                null, null, null, null, null,
+                null, null);
     }
 
     // ============================================================

@@ -1,12 +1,14 @@
 package com.prologue.ballife.service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -184,6 +186,13 @@ public class HealthAnalysisService {
         DiseaseProfileAnalysisResult diseaseResult =
                 diseaseProfileAnalyzer.analyze(user.getDiseaseIndex());
 
+        // 3-6. 보고서용 user 섹션 (이름/나이/성별/키/몸무게 + 간략 질환)
+        HealthAnalysisResponse.User userSection = buildUserSection(user, diseaseResult);
+
+        // 3-7. 측정 기록률 (보고서용)
+        HealthAnalysisResponse.RecordingStats stats =
+                buildRecordingStats(user, userId, startDate, endDate);
+
         // 4. 응답 조립
         return new HealthAnalysisResponse(
                 userId,
@@ -192,8 +201,81 @@ public class HealthAnalysisService {
                 bsResult,
                 bmiResult,
                 medResult,
-                diseaseResult
+                diseaseResult,
+                userSection,
+                stats
         );
+    }
+
+    // ─────────────────────────── 보고서용 user 섹션 ───────────────────────────
+
+    /**
+     * User 엔티티 + DiseaseProfileAnalysisResult 를 받아 보고서용 User record 빌드.
+     *
+     *  - User.username   → User.name (응답 JSON은 "name"으로 노출)
+     *  - User.birthDate  → 오늘(LocalDate.now()) 기준 만나이
+     *  - 질환은 챗봇용 풀스펙(diseaseProfile)에서 label/subtypeLabel만 골라 간략 요약
+     */
+    private HealthAnalysisResponse.User buildUserSection(
+            User user, DiseaseProfileAnalysisResult diseaseResult) {
+
+        Integer age = (user.getBirthDate() == null)
+                ? null
+                : Period.between(user.getBirthDate(), LocalDate.now()).getYears();
+
+        List<HealthAnalysisResponse.DiseaseSummary> diseases =
+                (diseaseResult == null || diseaseResult.diseases() == null)
+                        ? List.of()
+                        : diseaseResult.diseases().stream()
+                                .map(d -> new HealthAnalysisResponse.DiseaseSummary(
+                                        d.diseaseLabel(), d.subtypeLabel()))
+                                .collect(Collectors.toList());
+
+        return new HealthAnalysisResponse.User(
+                user.getUsername(),
+                age,
+                user.getGender(),
+                user.getHeight(),
+                user.getWeight(),
+                diseases
+        );
+    }
+
+    // ─────────────────────────── 측정 기록률 ───────────────────────────
+
+    /**
+     * 기간 내 distinct 측정 날짜 수 / 기간 일수.
+     * rate는 소수점 셋째 자리까지 (예: 23/30 → 0.767).
+     * 기간 일수가 0인 비정상 케이스는 rate 0.0 (validate에서 걸러지므로 사실 발생 안 함).
+     */
+    private HealthAnalysisResponse.RecordingStats buildRecordingStats(
+            User user, Long userId, LocalDate startDate, LocalDate endDate) {
+
+        int periodDays = (int) (ChronoUnit.DAYS.between(startDate, endDate) + 1);
+
+        long bpDays  = bioValueRecordRepository
+                .countDistinctRecordDates(user, CAT_BLOOD_PRESSURE, startDate, endDate);
+        long bsDays  = bioValueRecordRepository
+                .countDistinctRecordDates(user, CAT_BLOOD_SUGAR, startDate, endDate);
+        long medDays = userMedicineRecordRepository
+                .countDistinctIntakeDates(userId, startDate, endDate);
+
+        return new HealthAnalysisResponse.RecordingStats(
+                (int) bpDays,
+                (int) bsDays,
+                (int) medDays,
+                periodDays,
+                round3(bpDays,  periodDays),
+                round3(bsDays,  periodDays),
+                round3(medDays, periodDays)
+        );
+    }
+
+    /** numerator/denominator 비율을 소수점 셋째 자리에서 반올림 (denominator <= 0 이면 0.0). */
+    private double round3(long numerator, int denominator) {
+        if (denominator <= 0) return 0.0;
+        double raw = (double) numerator / denominator;
+        return Math.round(raw * 1000.0) / 1000.0;
     }
 
     /**

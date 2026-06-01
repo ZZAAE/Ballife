@@ -87,4 +87,19 @@ public interface BioValueRecordRepository extends JpaRepository<BioValueRecord, 
 
     //카테고리별로 Page로 불러옴
     Page<BioValueRecord> findByUserAndCategoryIn(User user, List<String> category, Pageable pageable);
+
+    /**
+     * 특정 유저의 특정 카테고리(prefix)의 특정 기간 동안
+     * 측정 기록이 존재한 distinct 날짜 수.
+     *
+     * 보고서 "측정 기록률" 분자로 사용한다.
+     * 예) 기간 30일 중 23일에 혈압 기록이 있으면 23 반환 → rate = 23/30.
+     */
+    @Query("SELECT COUNT(DISTINCT b.recordDate) FROM BioValueRecord b "
+         + "WHERE b.user = :user AND b.category LIKE CONCAT(:category, '%') "
+         + "AND b.recordDate BETWEEN :start AND :end")
+    long countDistinctRecordDates(@Param("user") User user,
+                                  @Param("category") String category,
+                                  @Param("start") LocalDate start,
+                                  @Param("end") LocalDate end);
 }

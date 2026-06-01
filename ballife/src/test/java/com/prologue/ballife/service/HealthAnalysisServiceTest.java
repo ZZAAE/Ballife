@@ -617,4 +617,225 @@ class HealthAnalysisServiceTest {
                 anyLong(), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(0L);
     }
+
+    /**
+     * Step B 테스트용 풀스펙 User stub.
+     * birthDate를 정확히 (오늘 - N년 - 1일)로 두면 만 N세가 결정적으로 나옴
+     * (생일이 어제라서 이미 지난 상태).
+     */
+    private User stubFullUser(Long userId, String username, String gender,
+                              Double height, Double weight, String diseaseIndex,
+                              int ageYears) {
+        User u = User.builder()
+                .userId(userId)
+                .username(username)
+                .gender(gender)
+                .height(height)
+                .weight(weight)
+                .diseaseIndex(diseaseIndex)
+                .birthDate(LocalDate.now().minusYears(ageYears).minusDays(1))
+                .build();
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(u));
+        return u;
+    }
+
+    // ============================================================
+    //  H. 보고서용 user 섹션 (Step B)
+    // ============================================================
+    @Nested
+    @DisplayName("보고서용 user 섹션 (UserSection)")
+    class UserSection {
+
+        @Test
+        @DisplayName("H-1: user 정보 (name/age/gender/height/weight) 매핑 정확")
+        void userFields_mappedCorrectly() {
+            // given
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 175.5, 70.2, null, 30);
+            stubAllReposEmpty(userId);
+
+            // when
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // then
+            assertThat(res.user()).isNotNull();
+            assertThat(res.user().name()).isEqualTo("김환자");          // username → name 매핑
+            assertThat(res.user().age()).isEqualTo(30);                  // 어제 생일 → 만 30세 결정
+            assertThat(res.user().gender()).isEqualTo("남");
+            assertThat(res.user().height()).isEqualTo(175.5);           // Double 그대로
+            assertThat(res.user().weight()).isEqualTo(70.2);
+        }
+
+        @Test
+        @DisplayName("H-2: 보유 질환 1개 → DiseaseSummary 1건 (label/subtypeLabel 매핑)")
+        void singleDisease_mappedToSummary() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 175.0, 70.0, "hypertension:type2", 30);
+            stubAllReposEmpty(userId);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.user().diseases()).hasSize(1);
+            assertThat(res.user().diseases().get(0).label()).isEqualTo("고혈압");
+            assertThat(res.user().diseases().get(0).subtypeLabel()).isEqualTo("1기");
+        }
+
+        @Test
+        @DisplayName("H-3: 보유 질환 3개 → DiseaseSummary 3건 (순서 보존)")
+        void multipleDiseases_mappedToSummariesInOrder() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 175.0, 70.0,
+                    "hypertension:type2,diabetes:type1,gout:CHRONIC", 30);
+            stubAllReposEmpty(userId);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.user().diseases())
+                    .extracting(HealthAnalysisResponse.DiseaseSummary::label)
+                    .containsExactly("고혈압", "당뇨", "통풍");
+            assertThat(res.user().diseases())
+                    .extracting(HealthAnalysisResponse.DiseaseSummary::subtypeLabel)
+                    .containsExactly("1기", "1형", "만성");
+        }
+
+        @Test
+        @DisplayName("H-4: 보유 질환 없음 (diseaseIndex=null) → 빈 리스트")
+        void noDisease_emptyList() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 175.0, 70.0, null, 30);
+            stubAllReposEmpty(userId);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.user().diseases()).isEmpty();
+        }
+    }
+
+    // ============================================================
+    //  I. min/max + recordingStats (Step B)
+    // ============================================================
+    @Nested
+    @DisplayName("min/max + 측정 기록률 (MinMaxAndRecordingStats)")
+    class MinMaxAndRecordingStats {
+
+        @Test
+        @DisplayName("I-1: 혈압 min/max 계산 정확")
+        void bloodPressure_minMax_calculated() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 170.0, 65.0, null, 30);
+
+            // 혈압: 110/70, 130/85, 120/78 → sys [110,130,120], dia [70,85,78]
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bpRecord(110, 70),
+                        bpRecord(130, 85),
+                        bpRecord(120, 78)
+                ));
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of());
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.bloodPressure().minSystolic()).isEqualTo(110);
+            assertThat(res.bloodPressure().maxSystolic()).isEqualTo(130);
+            assertThat(res.bloodPressure().minDiastolic()).isEqualTo(70);
+            assertThat(res.bloodPressure().maxDiastolic()).isEqualTo(85);
+        }
+
+        @Test
+        @DisplayName("I-2: 혈당 3그룹 각각 min/max 계산 정확 (공복/식전/식후 분리)")
+        void bloodSugar_threeGroups_minMax_separated() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 170.0, 65.0, null, 30);
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+            // 공복 [85, 95, 90], 식전 [100, 110], 식후 [140, 165, 155]
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bsRecord("공복", 85), bsRecord("공복", 95), bsRecord("공복", 90),
+                        bsRecord("아침식전", 100), bsRecord("점심식전", 110),
+                        bsRecord("아침식후", 140), bsRecord("점심식후", 165), bsRecord("저녁식후", 155)
+                ));
+            when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+                .thenReturn(List.of());
+            when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.bloodSugar().fastingMin()).isEqualTo(85);
+            assertThat(res.bloodSugar().fastingMax()).isEqualTo(95);
+            assertThat(res.bloodSugar().preMealMin()).isEqualTo(100);
+            assertThat(res.bloodSugar().preMealMax()).isEqualTo(110);
+            assertThat(res.bloodSugar().postMealMin()).isEqualTo(140);
+            assertThat(res.bloodSugar().postMealMax()).isEqualTo(165);
+        }
+
+        @Test
+        @DisplayName("I-3: recordingStats — 기간 7일 중 혈압 5일, 혈당 7일, 복약 3일 → rate 0.714/1.000/0.429")
+        void recordingStats_calculated() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 170.0, 65.0, null, 30);
+            stubAllReposEmpty(userId);
+
+            // distinct count stub (analyzeWeekly 기간은 7일)
+            when(bioValueRecordRepository.countDistinctRecordDates(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(5L);
+            when(bioValueRecordRepository.countDistinctRecordDates(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(7L);
+            when(userMedicineRecordRepository.countDistinctIntakeDates(
+                    anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(3L);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            assertThat(res.recordingStats()).isNotNull();
+            assertThat(res.recordingStats().periodDays()).isEqualTo(7);
+            assertThat(res.recordingStats().bloodPressureDays()).isEqualTo(5);
+            assertThat(res.recordingStats().bloodSugarDays()).isEqualTo(7);
+            assertThat(res.recordingStats().medicationDays()).isEqualTo(3);
+            // 소수점 셋째 자리 반올림: 5/7=0.7142...→0.714, 7/7=1.0, 3/7=0.4285...→0.429
+            assertThat(res.recordingStats().bloodPressureRate()).isEqualTo(0.714);
+            assertThat(res.recordingStats().bloodSugarRate()).isEqualTo(1.0);
+            assertThat(res.recordingStats().medicationRate()).isEqualTo(0.429);
+        }
+
+        @Test
+        @DisplayName("I-4: distinct count 0 → rate 모두 0.0, periodDays는 그대로")
+        void recordingStats_allZero_ratesAreZero() {
+            Long userId = 1L;
+            stubFullUser(userId, "김환자", "남", 170.0, 65.0, null, 30);
+            stubAllReposEmpty(userId);
+            // countDistinctRecordDates / countDistinctIntakeDates 는 default 0L 반환 (stub 안 함)
+
+            HealthAnalysisResponse res = service.analyzeMonthly(userId);
+
+            assertThat(res.recordingStats().periodDays()).isEqualTo(30);
+            assertThat(res.recordingStats().bloodPressureDays()).isEqualTo(0);
+            assertThat(res.recordingStats().bloodSugarDays()).isEqualTo(0);
+            assertThat(res.recordingStats().medicationDays()).isEqualTo(0);
+            assertThat(res.recordingStats().bloodPressureRate()).isEqualTo(0.0);
+            assertThat(res.recordingStats().bloodSugarRate()).isEqualTo(0.0);
+            assertThat(res.recordingStats().medicationRate()).isEqualTo(0.0);
+        }
+    }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 혈당 분석기.
- * 공복/식전/식후 측정값 리스트를 받아 각 그룹의 평균을 내고 구간을 분류한다.
+ * 공복/식전/식후 측정값 리스트를 받아 각 그룹의 평균/min/max를 내고 구간을 분류한다.
  *
  * - 공복(fasting)  : BloodSugarStandard.classifyFasting 적용
  * - 식전(preMeal)  : 공복에 준하는 상태로 보고 동일하게 classifyFasting 재사용
@@ -50,7 +50,12 @@ public class BloodSugarAnalyzer {
 
                 postMealAvg,
                 p   == null ? null : p.status,
-                p   == null ? null : p.label
+                p   == null ? null : p.label,
+
+                // min/max — 빈 리스트면 null
+                min(fastingValues),  max(fastingValues),
+                min(preMealValues),  max(preMealValues),
+                min(postMealValues), max(postMealValues)
         );
     }
 
@@ -60,5 +65,19 @@ public class BloodSugarAnalyzer {
         int sum = 0;
         for (Integer v : values) sum += v;
         return Math.round((float) sum / values.size());
+    }
+
+    private Integer min(List<Integer> values) {
+        if (values == null || values.isEmpty()) return null;
+        int m = Integer.MAX_VALUE;
+        for (Integer v : values) if (v < m) m = v;
+        return m;
+    }
+
+    private Integer max(List<Integer> values) {
+        if (values == null || values.isEmpty()) return null;
+        int m = Integer.MIN_VALUE;
+        for (Integer v : values) if (v > m) m = v;
+        return m;
     }
 }
