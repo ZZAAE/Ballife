@@ -1,14 +1,17 @@
 package com.prologue.ballife.service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
 import com.prologue.ballife.analyzer.BloodPressureAnalyzer;
@@ -32,19 +35,27 @@ import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
 
 /**
- * 주간(최근 7일) 건강 분석 서비스.
+ * 건강 분석 서비스.
  *
- * 처리 순서:
- * 1. userId → User 조회 (없으면 ResourceNotFoundException)
- * 2. 분석 기간 계산: endDate = 오늘, startDate = 오늘 - 6일 (오늘 포함 7일)
+ * 핵심 메서드: {@link #analyzeByPeriod(Long, LocalDate, LocalDate, String)}
+ *   - 임의 기간(start~end) + 라벨(periodType)을 받아 분석 결과를 조립한다.
+ *   - 검증: null / start>end / end가 미래 / 기간이 91일 이상 → 400 BadRequest
+ *
+ * wrapper 메서드 2개:
+ *   - {@link #analyzeWeekly(Long)}  : 오늘 포함 7일,  type="WEEKLY"
+ *   - {@link #analyzeMonthly(Long)} : 오늘 포함 30일, type="MONTHLY"
+ *
+ * 처리 순서 (analyzeByPeriod):
+ * 1. (검증) 날짜 인자 유효성 검사
+ * 2. userId → User 조회 (없으면 ResourceNotFoundException)
  * 3. 측정 기록 조회 & 분류:
  *    - 혈압: BioValueRecord category "BloodPressure"% prefix → systolic/diastolic 리스트
  *    - 혈당: BioValueRecord category "BloodSugar"% prefix → 카테고리 접미사로 fasting/preMeal/postMeal 분류
  *           ("BloodSugar-취침전"은 분석 제외)
- *    - 체중·키는 User 엔티티에서 직접 (BMI는 최근 7일 측정값이 아니라 회원 정보 기준)
+ *    - 체중·키는 User 엔티티에서 직접 (BMI는 기간 측정값이 아니라 회원 정보 기준)
  * 4. 복약 분석:
- *    - 활성 Prescription 리스트 → intakeIntervals 콤마 split → TakenCategory 매칭 토큰 수 × 7일 = scheduledCount
- *    - 최근 7일 UserMedicineRecord 행 수 = takenCount
+ *    - 활성 Prescription 리스트 → intakeIntervals 콤마 split → TakenCategory 매칭 토큰 수 × (기간 일수) = scheduledCount
+ *    - 기간 내 UserMedicineRecord 행 수 = takenCount
  * 5. 보유 질환: User.diseaseIndex 문자열 그대로 DiseaseProfileAnalyzer에 전달
  * 6. 모든 결과를 HealthAnalysisResponse로 묶어 반환
  */
@@ -52,8 +63,14 @@ import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
 @Transactional(readOnly = true)
 public class HealthAnalysisService {
 
-    private static final int PERIOD_DAYS = 7;
-    private static final String PERIOD_TYPE_WEEKLY = "WEEKLY";
+    private static final int PERIOD_DAYS_WEEKLY  = 7;
+    private static final int PERIOD_DAYS_MONTHLY = 30;
+    /** 의료 분석 의미 흐려짐 방지를 위한 최대 분석 기간(일수, 양 끝 포함). */
+    private static final int PERIOD_MAX_DAYS     = 90;
+
+    public  static final String PERIOD_TYPE_WEEKLY  = "WEEKLY";
+    public  static final String PERIOD_TYPE_MONTHLY = "MONTHLY";
+    public  static final String PERIOD_TYPE_CUSTOM  = "CUSTOM";
 
     // BioValueRecord.category 의 prefix
     private static final String CAT_BLOOD_PRESSURE = "BloodPressure";
@@ -106,17 +123,50 @@ public class HealthAnalysisService {
         this.diseaseProfileAnalyzer = diseaseProfileAnalyzer;
     }
 
-    /** 주간(최근 7일) 건강 분석. */
+    // ============================================================
+    //  wrapper 메서드 — 미리 정의된 기간으로 호출
+    // ============================================================
+
+    /** 주간(오늘 포함 7일) 건강 분석. */
     public HealthAnalysisResponse analyzeWeekly(Long userId) {
-        // 1. User 조회
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(PERIOD_DAYS_WEEKLY - 1);
+        return analyzeByPeriod(userId, startDate, endDate, PERIOD_TYPE_WEEKLY);
+    }
+
+    /** 월간(오늘 포함 30일) 건강 분석. */
+    public HealthAnalysisResponse analyzeMonthly(Long userId) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(PERIOD_DAYS_MONTHLY - 1);
+        return analyzeByPeriod(userId, startDate, endDate, PERIOD_TYPE_MONTHLY);
+    }
+
+    // ============================================================
+    //  핵심 메서드 — 임의 기간 분석
+    // ============================================================
+
+    /**
+     * 임의 기간 건강 분석.
+     *
+     * @param userId      대상 사용자 ID
+     * @param startDate   분석 시작일 (포함)
+     * @param endDate     분석 종료일 (포함)
+     * @param periodType  응답의 Period.type 라벨 ("WEEKLY"/"MONTHLY"/"CUSTOM")
+     * @throws ResponseStatusException 400 BadRequest 검증 실패 시
+     * @throws ResourceNotFoundException 회원 없음
+     */
+    public HealthAnalysisResponse analyzeByPeriod(
+            Long userId, LocalDate startDate, LocalDate endDate, String periodType) {
+
+        // 1. 날짜 인자 검증
+        validatePeriod(startDate, endDate);
+
+        // 2. User 조회
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
 
-        // 2. 분석 기간 계산
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(PERIOD_DAYS - 1);
         HealthAnalysisResponse.Period period =
-                new HealthAnalysisResponse.Period(PERIOD_TYPE_WEEKLY, startDate, endDate);
+                new HealthAnalysisResponse.Period(periodType, startDate, endDate);
 
         // 3-1. 혈압 분석
         BloodPressureAnalysisResult bpResult = analyzeBloodPressure(user, startDate, endDate);
@@ -144,6 +194,34 @@ public class HealthAnalysisService {
                 medResult,
                 diseaseResult
         );
+    }
+
+    /**
+     * 날짜 인자 유효성 검증. 실패하면 {@link ResponseStatusException}(400)을 던진다.
+     *
+     * 규칙:
+     *   - start, end 모두 not null
+     *   - start ≤ end
+     *   - end ≤ today
+     *   - 기간 일수(end - start + 1) ≤ 90
+     */
+    private void validatePeriod(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "기간이 누락되었습니다.");
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "시작일이 종료일보다 늦습니다.");
+        }
+        if (endDate.isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "종료일이 미래입니다.");
+        }
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (days > PERIOD_MAX_DAYS) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "분석 기간은 최대 " + PERIOD_MAX_DAYS + "일입니다.");
+        }
     }
 
     // ─────────────────────────── 혈압 ───────────────────────────
@@ -222,8 +300,8 @@ public class HealthAnalysisService {
     // ─────────────────────────── 복약 ───────────────────────────
 
     /**
-     * scheduledCount = 활성 처방의 intakeIntervals 토큰 합 × 7일
-     * takenCount     = 최근 7일간 UserMedicineRecord 행 수
+     * scheduledCount = 활성 처방의 intakeIntervals 토큰 합 × (기간 일수)
+     * takenCount     = 기간 내 UserMedicineRecord 행 수
      */
     private MedicationAnalysisResult analyzeMedication(
             Long userId, LocalDate startDate, LocalDate endDate) {
@@ -236,7 +314,8 @@ public class HealthAnalysisService {
         for (Prescription p : activePrescriptions) {
             dailyDoses += countDailyDoses(p.getIntakeIntervals());
         }
-        int scheduledCount = dailyDoses * PERIOD_DAYS;
+        int periodDays = (int) (ChronoUnit.DAYS.between(startDate, endDate) + 1);
+        int scheduledCount = dailyDoses * periodDays;
 
         // 실제 복용 횟수
         long taken = userMedicineRecordRepository

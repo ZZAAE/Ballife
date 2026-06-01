@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.prologue.ballife.analyzer.BloodPressureAnalyzer;
 import com.prologue.ballife.analyzer.BloodSugarAnalyzer;
@@ -458,5 +459,162 @@ class HealthAnalysisServiceTest {
                     .hasMessageContaining("회원")
                     .hasMessageContaining("99");
         }
+    }
+
+    // ============================================================
+    //  F. 기간 검증 (analyzeByPeriod validatePeriod)
+    // ============================================================
+    @Nested
+    @DisplayName("기간 검증 (PeriodValidation)")
+    class PeriodValidation {
+
+        @Test
+        @DisplayName("C-1 보강: 90일치 (today-89 ~ today) → 통과 (경계 안)")
+        void exactly90Days_passes() {
+            // given
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            stubAllReposEmpty(userId);
+
+            LocalDate end = LocalDate.now();
+            LocalDate start = end.minusDays(89); // 90일치
+
+            // when
+            HealthAnalysisResponse res = service.analyzeByPeriod(
+                    userId, start, end, HealthAnalysisService.PERIOD_TYPE_CUSTOM);
+
+            // then
+            assertThat(res.period().startDate()).isEqualTo(start);
+            assertThat(res.period().endDate()).isEqualTo(end);
+        }
+
+        @Test
+        @DisplayName("C-2 보강: 91일치 (today-90 ~ today) → 400, '최대 90일'")
+        void exactly91Days_throws400() {
+            LocalDate end = LocalDate.now();
+            LocalDate start = end.minusDays(90); // 91일치
+
+            assertThatThrownBy(() -> service.analyzeByPeriod(
+                    1L, start, end, HealthAnalysisService.PERIOD_TYPE_CUSTOM))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("400")
+                    .hasMessageContaining("90일");
+        }
+
+        @Test
+        @DisplayName("start > end → 400, '시작일이 종료일보다 늦습니다'")
+        void startAfterEnd_throws400() {
+            LocalDate end = LocalDate.now().minusDays(5);
+            LocalDate start = end.plusDays(1); // start = end + 1
+
+            assertThatThrownBy(() -> service.analyzeByPeriod(
+                    1L, start, end, HealthAnalysisService.PERIOD_TYPE_CUSTOM))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("400")
+                    .hasMessageContaining("시작일");
+        }
+
+        @Test
+        @DisplayName("endDate가 미래 (today+1) → 400, '종료일이 미래'")
+        void endInFuture_throws400() {
+            LocalDate start = LocalDate.now().minusDays(1);
+            LocalDate end = LocalDate.now().plusDays(1);
+
+            assertThatThrownBy(() -> service.analyzeByPeriod(
+                    1L, start, end, HealthAnalysisService.PERIOD_TYPE_CUSTOM))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("400")
+                    .hasMessageContaining("미래");
+        }
+    }
+
+    // ============================================================
+    //  G. 기간 선택 (wrapper 동작 + analyzeByPeriod 직접 호출)
+    // ============================================================
+    @Nested
+    @DisplayName("기간 선택 (PeriodSelection)")
+    class PeriodSelection {
+
+        @Test
+        @DisplayName("D-1: analyzeMonthly → startDate=today-29, Period.type='MONTHLY'")
+        void analyzeMonthly_30DaysAndMonthlyType() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            stubAllReposEmpty(userId);
+
+            HealthAnalysisResponse res = service.analyzeMonthly(userId);
+
+            LocalDate today = LocalDate.now();
+            assertThat(res.period().type()).isEqualTo("MONTHLY");
+            assertThat(res.period().endDate()).isEqualTo(today);
+            assertThat(res.period().startDate()).isEqualTo(today.minusDays(29));
+        }
+
+        @Test
+        @DisplayName("D-2: analyzeByPeriod(today-45, today, 'CUSTOM') → 그 날짜+CUSTOM 그대로 Period에")
+        void analyzeByPeriod_customDates_putExactlyInPeriod() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            stubAllReposEmpty(userId);
+
+            LocalDate end = LocalDate.now();
+            LocalDate start = end.minusDays(45); // 46일치
+
+            HealthAnalysisResponse res = service.analyzeByPeriod(
+                    userId, start, end, HealthAnalysisService.PERIOD_TYPE_CUSTOM);
+
+            assertThat(res.period().type()).isEqualTo("CUSTOM");
+            assertThat(res.period().startDate()).isEqualTo(start);
+            assertThat(res.period().endDate()).isEqualTo(end);
+        }
+
+        @Test
+        @DisplayName("D-3: analyzeWeekly 여전히 today-6 ~ today + 'WEEKLY' (기존 회귀 방지)")
+        void analyzeWeekly_stillSevenDaysAndWeeklyType() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            stubAllReposEmpty(userId);
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            LocalDate today = LocalDate.now();
+            assertThat(res.period().type()).isEqualTo("WEEKLY");
+            assertThat(res.period().endDate()).isEqualTo(today);
+            assertThat(res.period().startDate()).isEqualTo(today.minusDays(6));
+        }
+
+        @Test
+        @DisplayName("D-4: analyzeByPeriod(today, today, 'CUSTOM') → 200 OK (1일치 허용)")
+        void analyzeByPeriod_singleDay_allowed() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            stubAllReposEmpty(userId);
+
+            LocalDate today = LocalDate.now();
+
+            HealthAnalysisResponse res = service.analyzeByPeriod(
+                    userId, today, today, HealthAnalysisService.PERIOD_TYPE_CUSTOM);
+
+            assertThat(res.period().startDate()).isEqualTo(today);
+            assertThat(res.period().endDate()).isEqualTo(today);
+            assertThat(res.period().type()).isEqualTo("CUSTOM");
+        }
+    }
+
+    /**
+     * 기간 검증/선택 테스트용 — 모든 Repository를 빈 결과로 stub해
+     * 분석 통과만 시키고 Period 자체에만 집중.
+     * (검증 통과 케이스에서 NullPointerException 없이 끝까지 흘러가도록.)
+     */
+    private void stubAllReposEmpty(Long userId) {
+        when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                any(User.class), any(String.class),
+                any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of());
+        when(prescriptionRepository.findByUser_UserIdAndIsDeletedFalse(userId))
+            .thenReturn(List.of());
+        when(userMedicineRecordRepository.countByPrescription_User_UserIdAndIntakeDateBetween(
+                anyLong(), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(0L);
     }
 }

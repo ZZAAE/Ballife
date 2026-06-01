@@ -66,14 +66,21 @@ class HealthAnalysisControllerTest {
                 .build();
         me = new CustomUserDetails(testUser);
 
-        when(healthAnalysisService.analyzeWeekly(42L)).thenReturn(stubResponse(42L));
+        when(healthAnalysisService.analyzeWeekly(42L)).thenReturn(stubResponse(42L, "WEEKLY"));
+        when(healthAnalysisService.analyzeMonthly(42L)).thenReturn(stubResponse(42L, "MONTHLY"));
+        when(healthAnalysisService.analyzeByPeriod(
+                org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.any(LocalDate.class),
+                org.mockito.ArgumentMatchers.any(LocalDate.class),
+                org.mockito.ArgumentMatchers.anyString()))
+            .thenReturn(stubResponse(42L, "CUSTOM"));
     }
 
-    private HealthAnalysisResponse stubResponse(Long userId) {
+    private HealthAnalysisResponse stubResponse(Long userId, String type) {
         return new HealthAnalysisResponse(
                 userId,
                 new HealthAnalysisResponse.Period(
-                        "WEEKLY",
+                        type,
                         LocalDate.now().minusDays(6),
                         LocalDate.now()),
                 null, null, null, null, null);
@@ -127,6 +134,76 @@ class HealthAnalysisControllerTest {
         void unauthenticated_returns401() throws Exception {
             mockMvc.perform(get("/api/health-analysis/weekly/{userId}", 42L))
                    .andExpect(status().isUnauthorized());
+        }
+    }
+
+    // ============================================================
+    //  C. 신규 GET /monthly (본인 데이터, @AuthenticationPrincipal)
+    // ============================================================
+    @Nested
+    @DisplayName("신규 GET /monthly (본인 데이터, @AuthenticationPrincipal)")
+    class GetMyMonthly {
+
+        @Test
+        @DisplayName("인증된 사용자 → 200 OK + service.analyzeMonthly(principal.userId) 호출")
+        void authenticated_returnsOkAndCallsMonthly() throws Exception {
+            mockMvc.perform(get("/api/health-analysis/monthly").with(user(me)))
+                   .andExpect(status().isOk());
+
+            verify(healthAnalysisService, times(1)).analyzeMonthly(eq(42L));
+        }
+
+        @Test
+        @DisplayName("인증 없이 호출 → 401 Unauthorized")
+        void unauthenticated_returns401() throws Exception {
+            mockMvc.perform(get("/api/health-analysis/monthly"))
+                   .andExpect(status().isUnauthorized());
+        }
+    }
+
+    // ============================================================
+    //  D. 신규 GET /range (커스텀 기간, @RequestParam)
+    // ============================================================
+    @Nested
+    @DisplayName("신규 GET /range (커스텀 기간)")
+    class GetMyRange {
+
+        @Test
+        @DisplayName("인증 + 유효 날짜 → 200 OK + service.analyzeByPeriod(userId, start, end, 'CUSTOM') 호출")
+        void authenticated_validRange_returnsOk() throws Exception {
+            LocalDate start = LocalDate.now().minusDays(10);
+            LocalDate end = LocalDate.now();
+
+            mockMvc.perform(get("/api/health-analysis/range")
+                            .param("startDate", start.toString())
+                            .param("endDate", end.toString())
+                            .with(user(me)))
+                   .andExpect(status().isOk());
+
+            verify(healthAnalysisService, times(1))
+                    .analyzeByPeriod(eq(42L), eq(start), eq(end), eq("CUSTOM"));
+        }
+
+        @Test
+        @DisplayName("인증 없이 호출 → 401 Unauthorized")
+        void unauthenticated_returns401() throws Exception {
+            LocalDate start = LocalDate.now().minusDays(10);
+            LocalDate end = LocalDate.now();
+
+            mockMvc.perform(get("/api/health-analysis/range")
+                            .param("startDate", start.toString())
+                            .param("endDate", end.toString()))
+                   .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("잘못된 날짜 형식(startDate=invalid) → 400 Bad Request (Spring 기본 처리)")
+        void invalidDateFormat_returns400() throws Exception {
+            mockMvc.perform(get("/api/health-analysis/range")
+                            .param("startDate", "invalid")
+                            .param("endDate", LocalDate.now().toString())
+                            .with(user(me)))
+                   .andExpect(status().isBadRequest());
         }
     }
 }
