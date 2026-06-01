@@ -16,8 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 음식 사진 분석 흐름 총괄.
- *  - VisionService 로 음식명/그램 추출
- *  - FoodNutritionService 로 영양성분 조회
+ *  - 1차: 자체 YOLO 모델(FoodModelClient)로 음식명 인식
+ *  - 2차(폴백): 모델이 모르면 VisionService(OpenAI)로 음식명 추출
+ *  - FoodNutritionService 로 영양성분 조회 (식약처 + MongoDB 캐시)
  *  - 그램 비율로 환산 후 합산해서 응답 DTO 빌드
  */
 @Slf4j
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MealAnalysisService {
 
+    private final FoodModelClient foodModelClient;
     private final VisionService visionService;
     private final FoodNutritionService nutritionService;
 
@@ -37,10 +39,27 @@ public class MealAnalysisService {
         log.info("파일명: {} / 크기: {} bytes / 타입: {}",
                 file.getOriginalFilename(), file.getSize(), file.getContentType());
 
-        String dataUrl = toDataUrl(file);
-        List<VisionService.RecognizedFood> recognized = visionService.analyze(dataUrl);
+        // 1차: 자체 YOLO 모델로 인식 시도. 모델이 확신하면 그 결과를 사용.
+        List<VisionService.RecognizedFood> recognized;
+        String analyzedBy;            // "YOLO" / "OpenAI" — 어떤 엔진으로 인식했는지
+        Double confidence = null;     // YOLO 신뢰도(0~1). OpenAI 폴백이면 null
+        Optional<FoodModelClient.Result> modelResult = foodModelClient.classify(file);
+        if (modelResult.isPresent()) {
+            String food = modelResult.get().getFood();
+            confidence = modelResult.get().getConfidence();
+            analyzedBy = "YOLO";
+            log.info("[분석경로] 자체 YOLO 모델 사용 → '{}' (신뢰도 {}%)",
+                    food, Math.round(confidence * 100));
+            // 그램은 기존과 동일하게 100 고정 (사용자가 모달에서 조정)
+            recognized = List.of(new VisionService.RecognizedFood(food, 100.0));
+        } else {
+            // 2차(폴백): 모델이 모르면 OpenAI Vision 으로 음식명 추출
+            analyzedBy = "OpenAI";
+            log.info("[분석경로] 모델 미인식 → OpenAI Vision 폴백");
+            recognized = visionService.analyze(toDataUrl(file));
+        }
 
-        log.info("[Vision] 인식된 음식 수: {}", recognized.size());
+        log.info("[인식 결과] 음식 수: {}", recognized.size());
         for (VisionService.RecognizedFood r : recognized) {
             log.info("  - 음식명: {} / 추정 그램: {}g", r.getName(), r.getGrams());
         }
@@ -145,6 +164,8 @@ public class MealAnalysisService {
                 .foods(items)
                 .totals(totals)
                 .unrecognized(unrecognized)
+                .analyzedBy(analyzedBy)
+                .confidence(confidence)
                 .build();
     }
 
