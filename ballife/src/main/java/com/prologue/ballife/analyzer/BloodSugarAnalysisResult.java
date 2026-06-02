@@ -11,6 +11,10 @@ package com.prologue.ballife.analyzer;
  * - 식후(postMeal) : "BloodSugar-아침식후 / 점심식후 / 저녁식후". 식후 2시간 기준.
  *
  * 취침전(BloodSugar-취침전)은 저녁식후 영향이 남아있어 공복도 식후도 아니므로 분석에서 제외.
+ *
+ * 필드 순서: (기존 9개 → 뒤에 min/max 6개 추가)
+ *   기존 — fastingValue/Status/Label, preMealValue/Status/Label, postMealValue/Status/Label
+ *   추가 — fastingMin/Max, preMealMin/Max, postMealMin/Max (보고서용)
  */
 public record BloodSugarAnalysisResult(
         Integer fastingValue,    // 공복혈당 평균 (없으면 null)
@@ -23,5 +27,12 @@ public record BloodSugarAnalysisResult(
 
         Integer postMealValue,   // 식후혈당 평균 (없으면 null)
         String  postMealStatus,
-        String  postMealLabel
+        String  postMealLabel,
+
+        Integer fastingMin,      // 공복 최저값 (없으면 null)
+        Integer fastingMax,      // 공복 최고값 (없으면 null)
+        Integer preMealMin,      // 식전 최저값
+        Integer preMealMax,      // 식전 최고값
+        Integer postMealMin,     // 식후 최저값
+        Integer postMealMax      // 식후 최고값
 ) {}

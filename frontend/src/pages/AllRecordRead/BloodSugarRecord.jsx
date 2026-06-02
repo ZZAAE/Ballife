@@ -150,7 +150,7 @@ export default function BloodSugarRecord() {
     <div className="min-h-screen bg-[#F9FAFB] text-[#0F172A] font-['Noto_Sans_KR']">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">혈당 기록 확인</h1>
             <p className="mb-8 text-sm text-gray-500">지난 혈당 변화를 분석한 결과입니다.</p>
 
@@ -201,7 +201,20 @@ export default function BloodSugarRecord() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <AIAnalysisCard />
+              <AIAnalysisCard
+                metric="bloodSugar"
+                userId={userId}
+                data={{
+                  avgMealBefore,
+                  avgMealAfter,
+                  latestMealBefore: latestMealBefore?.bloodSugar ?? null,
+                  latestMealAfter: latestMealAfter?.bloodSugar ?? null,
+                  latestFasting: latestFasting?.bloodSugar ?? null,
+                  count: filteredRecords.length,
+                  range: { start: filterStart, end: filterEnd },
+                  trend: chartData,
+                }}
+              />
 
               <ChartSection
                 title="혈당 변화 추이"

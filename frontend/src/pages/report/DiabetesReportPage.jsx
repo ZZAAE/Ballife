@@ -94,7 +94,7 @@ export default function DiabetesReportPage() {
             <Activity size={18} className="text-emerald-400" />
             <h3 className="font-semibold text-[14px]">당뇨의 종류</h3>
           </div>
-          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-2 gap-10 !p-8">
+          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 !p-6 md:!p-8">
              <div>
                <h4 className="font-extrabold text-[14px] mb-4 text-gray-800 border-b pb-2">제1형 당뇨병</h4>
                <p className="text-[12px] text-gray-500 leading-relaxed mb-3">

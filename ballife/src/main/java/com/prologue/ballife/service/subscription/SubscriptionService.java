@@ -95,6 +95,11 @@ public class SubscriptionService {
 
         if (plan == SubscriptionPlan.FAMILY) {
             familyService.ensureGroupForOwner(user);
+        } else {
+            // 개인 플랜 등 비-가족 플랜으로 전환 시 소유 그룹을 동결한다.
+            // → groupActive=false 가 되어 가족 건강 정보가 모두 비공개로 가려진다.
+            //   (소유 그룹이 없으면 무시된다.)
+            familyService.freezeOwnerGroup(userId);
         }
 
         return getStatus(userId);

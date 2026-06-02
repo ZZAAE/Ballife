@@ -1,1 +1,6 @@
 node_modules/
+
+# application.yml만 차단 (어느 위치든). .example은 명시적 허용.
+# 신규 합류자는 application.yml.example을 복사해서 application.yml 만들고 본인 환경에 맞춰 수정.
+**/application.yml
+!**/application.yml.example

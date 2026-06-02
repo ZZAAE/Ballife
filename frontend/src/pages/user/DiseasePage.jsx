@@ -107,8 +107,8 @@ function DiseasePage() {
 	};
 
 	return (
-		<div className="flex h-screen items-center justify-center overflow-hidden bg-white px-8 py-6">
-			<div className="flex w-1/3 flex-col rounded-[28px] bg-white px-8 py-6 sm:px-10">
+		<div className="flex h-screen items-center justify-center overflow-hidden bg-white px-4 py-6 md:px-8">
+			<div className="flex w-full max-w-md flex-col rounded-[28px] bg-white px-6 py-6 sm:px-10 lg:w-1/3 lg:max-w-none">
 				<h1 className="text-2xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
 
 				<form onSubmit={handleSubmit} className="mt-6 flex flex-col">

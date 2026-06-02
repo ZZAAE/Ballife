@@ -8,7 +8,7 @@ export const DEFAULT_PRESCRIPTION_GROUPS = [
     id: 1,
     groupName: "혈압약",
     drugId: "bp",
-    dosage: "5정",
+    dosage: "1정",
     intakeTime: "2026-05-15 18:30",
     medicines: [
       {

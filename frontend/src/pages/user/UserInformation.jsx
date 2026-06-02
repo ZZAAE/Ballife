@@ -480,9 +480,9 @@ function UserInformation() {
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
+          <div className="mx-auto box-border max-w-[1280px] px-4 sm:px-6 py-8">
             {/* 프로필 헤더 */}
-            <div className="mb-8 flex items-center gap-6">
+            <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-300 text-4xl text-gray-500">
                 {profile.profileImage ? (
                   <img
@@ -499,7 +499,7 @@ function UserInformation() {
                   {profile.name}
                 </h2>
                 <p className="text-sm text-gray-400">{profile.username}</p>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => navigate("/member/edit/profile")}
@@ -539,7 +539,7 @@ function UserInformation() {
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr]">
               {/* 좌측 패널 */}
-              <div className="flex flex-col gap-5 pr-8">
+              <div className="flex flex-col gap-5 lg:pr-8">
                 {/* 구독 카드 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <div className="mb-3 flex items-center justify-between">
