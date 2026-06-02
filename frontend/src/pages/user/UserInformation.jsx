@@ -4,7 +4,7 @@ import TargetModal from "../../modals/TargetModal";
 import SubscriptionModal from "../../modals/SubscriptionModal";
 import UserMedalModal from "../../modals/UserMedalModal";
 import medalApi from "../../api/medalApi";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Crown } from "lucide-react";
@@ -16,28 +16,9 @@ import mealApi from "../../api/mealApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import PrescriptionOcrTestModal from "../../modals/prescriptionOcrTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+import medicineApi from "../../api/medicineApi";
 
 const ML_PER_CUP = 200;
-
-const getSavedMedicineStorageKey = (userId) =>
-  userId ? `savedMedicineInfo.${userId}` : null;
-
-const loadSavedMedicines = (userId) => {
-  const storageKey = getSavedMedicineStorageKey(userId);
-  if (!storageKey) {
-    return [];
-  }
-
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed;
-    return parsed ? [parsed] : [];
-  } catch {
-    return [];
-  }
-};
 
 const formatTodayDate = () => {
   const d = new Date();
@@ -134,7 +115,9 @@ function UserInformation() {
   const [todayBurnedCalorie, setTodayBurnedCalorie] = useState(null);
   const [todayWaterCup, setTodayWaterCup] = useState(0);
   const [todayIntakeCalorie, setTodayIntakeCalorie] = useState(0);
-  const [, setSavedMedicinesVersion] = useState(0);
+  const [savedPrescriptions, setSavedPrescriptions] = useState([]);
+  const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
+  const [editingPrescription, setEditingPrescription] = useState(null);
   const [trackedUserId, setTrackedUserId] = useState(userId);
 
   // 계정이 바뀌는 순간(렌더 중) 이전 사용자의 잔여 정보를 즉시 비운다.
@@ -146,30 +129,54 @@ function UserInformation() {
     setTodayBurnedCalorie(null);
     setTodayWaterCup(0);
     setTodayIntakeCalorie(0);
+    setSavedPrescriptions([]);
+    setExpandedPrescriptionId(null);
   }
 
-  const savedMedicines = loadSavedMedicines(userId);
-
-  const handleMedicineSaved = (medicine) => {
-    if (!medicine) return;
+  // 백엔드에서 사용자의 처방전 목록 + 처방전별 약 목록을 함께 불러온다.
+  const loadMedicinesFromServer = useCallback(async () => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      setSavedPrescriptions([]);
       return;
     }
-
-    const storageKey = getSavedMedicineStorageKey(userId);
-    const prev = loadSavedMedicines(userId);
-    const exists = prev.some(
-      (m) => m.itemSeq && medicine.itemSeq && m.itemSeq === medicine.itemSeq,
-    );
-    const next = exists ? prev : [...prev, medicine];
     try {
-      localStorage.setItem(storageKey, JSON.stringify(next));
+      const { data: prescriptions } = await medicineApi.getPrescriptions(userId);
+      const withMedicines = await Promise.all(
+        (prescriptions || []).map((p) =>
+          medicineApi
+            .getUserMedicine(p.prescriptionId)
+            .then((res) => ({ ...p, medicines: res.data || [] }))
+            .catch(() => ({ ...p, medicines: [] })),
+        ),
+      );
+      setSavedPrescriptions(withMedicines);
     } catch {
-      // 저장 실패는 무시
+      setSavedPrescriptions([]);
     }
-    setSavedMedicinesVersion((prevVersion) => prevVersion + 1);
-    return next;
+  }, [userId]);
+
+  useEffect(() => {
+    loadMedicinesFromServer();
+  }, [loadMedicinesFromServer]);
+
+  // 모달에서 등록/수정이 끝나면 서버에서 최신 약 목록을 다시 불러온다.
+  const handleMedicineSaved = () => {
+    loadMedicinesFromServer();
+  };
+
+  // 처방전 삭제
+  const handleDeletePrescription = async (prescriptionId) => {
+    if (!window.confirm("이 처방전을 삭제할까요?")) return;
+    try {
+      await medicineApi.deletePrescription(prescriptionId);
+      toast.success("처방전이 삭제되었습니다.");
+      if (expandedPrescriptionId === prescriptionId) {
+        setExpandedPrescriptionId(null);
+      }
+      loadMedicinesFromServer();
+    } catch (error) {
+      console.error("처방전 삭제 실패", error);
+    }
   };
 
   // "건강 분석 보고서" 버튼 → public/reports 폴더에 있는 PDF 파일을 새 탭으로 연다.
@@ -849,59 +856,71 @@ function UserInformation() {
                   <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-gray-800">
-                        💊 약 등록
+                        💊 처방전 목록
                       </h3>
-                      <button
-                        className="text-xs text-blue-500 hover:underline"
-                        onClick={() => navigate("/medication")}
-                      >
-                        편집
-                      </button>
                     </div>
-                    <div
-                      className={`flex flex-1 rounded-2xl bg-gray-100 p-6 min-h-[260px] overflow-y-auto ${
-                        savedMedicines.length > 0
-                          ? "items-start justify-start"
-                          : "items-center justify-center"
-                      }`}
-                    >
-                      {savedMedicines.length > 0 ? (
-                        <div className="flex w-full flex-col gap-4">
-                          {savedMedicines.map((m, idx) => (
-                            <dl
-                              key={m.itemSeq ?? idx}
-                              className={`grid w-full grid-cols-[88px_1fr] gap-y-2 text-[13px] content-start ${
-                                idx !== 0 ? "border-t border-gray-200 pt-4" : ""
-                              }`}
-                            >
-                              <dt className="text-gray-500">품목기준코드</dt>
-                              <dd className="text-gray-800 break-all">
-                                {m.itemSeq || "-"}
-                              </dd>
-                              <dt className="text-gray-500">성상</dt>
-                              <dd className="text-gray-800 break-words">
-                                {m.chart || "-"}
-                              </dd>
-                              <dt className="text-gray-500">저장방법</dt>
-                              <dd className="text-gray-800 break-words">
-                                {m.storageMethod || "-"}
-                              </dd>
-                            </dl>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="text-5xl">💊</div>
-                          <p className="text-xs text-gray-400">저장된 이미지</p>
-                          <p className="text-[10px] text-gray-300">예시</p>
-                        </div>
-                      )}
+                    <div className="flex flex-1 flex-col gap-3 min-h-[440px]">
+                      {/* 처방전 목록 */}
+                      <div className="flex flex-1 flex-col overflow-y-auto">
+                        {savedPrescriptions.length > 0 ? (
+                          <div className="flex flex-col gap-2">
+                            {savedPrescriptions.map((p) => {
+                              const selected =
+                                expandedPrescriptionId === p.prescriptionId;
+                              return (
+                                <div
+                                  key={p.prescriptionId}
+                                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
+                                    selected
+                                      ? "border-blue-400 bg-blue-50"
+                                      : "border-gray-200 bg-white"
+                                  }`}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setExpandedPrescriptionId(p.prescriptionId)
+                                    }
+                                    className="flex-1 truncate text-left text-[13px] font-semibold text-gray-800"
+                                  >
+                                    {p.prescriptionName || "이름 없음"}
+                                  </button>
+                                  <div className="flex shrink-0 gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingPrescription(p)}
+                                      className="text-xs font-semibold text-blue-500 hover:underline"
+                                    >
+                                      수정
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeletePrescription(p.prescriptionId)
+                                      }
+                                      className="text-xs font-semibold text-red-500 hover:underline"
+                                    >
+                                      삭제
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex flex-1 items-center justify-center">
+                            <p className="text-xs text-gray-400">
+                              등록된 처방전이 없습니다.
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <button
                       className="mt-3 h-11 w-full rounded-xl bg-[#0f1c33] text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       onClick={() => SetPreResisterModalOpen(true)}
                     >
-                      사진 업로드
+                      처방전 업로드
                     </button>
                   </div>
 
@@ -954,6 +973,14 @@ function UserInformation() {
         <PrescriptionOcrTestModal
           isOpen={isPreResisterModalOpen}
           onClose={() => SetPreResisterModalOpen(false)}
+          onSaved={handleMedicineSaved}
+        />
+
+        <PrescriptionOcrTestModal
+          key={editingPrescription?.prescriptionId ?? "edit"}
+          isOpen={!!editingPrescription}
+          prescription={editingPrescription}
+          onClose={() => setEditingPrescription(null)}
           onSaved={handleMedicineSaved}
         />
 

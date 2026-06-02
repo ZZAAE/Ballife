@@ -15,18 +15,36 @@ const DEFAULT_INTAKE_INTERVALS = ["아침", "점심", "저녁"];
  *   (base64 변환은 백엔드에서 수행)
  * - 백엔드는 OCR로 추출한 "약이름 문자열 목록"만 반환한다고 가정 (테스트 단계)
  */
-export default function PrescriptionOcrTestModal({ isOpen, onClose }) {
+export default function PrescriptionOcrTestModal({
+  isOpen,
+  onClose,
+  onSaved,
+  prescription = null,
+}) {
+  const isEdit = !!prescription;
   const fileInputRef = useRef(null);
 
+  // 수정 모드면 기존 처방전 값으로 초기화한다.
+  // (수정 인스턴스는 처방전마다 key 로 remount 되므로 초기값이 매번 갱신된다)
   const [preview, setPreview] = useState(null);          // 이미지 미리보기 URL
   const [fileName, setFileName] = useState("");
-  const [medicineNames, setMedicineNames] = useState([]); // OCR로 추출된 약이름 목록
+  const [medicineNames, setMedicineNames] = useState(() =>
+    (prescription?.medicines ?? [])
+      .map((m) => (typeof m === "string" ? m : m.medicineName))
+      .filter(Boolean),
+  ); // OCR로 추출된 약이름 목록
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);   // 약 수동 추가용 검색 모달
-  const [prescriptionName, setPrescriptionName] = useState("");  // 처방전 이름
-  const [memo, setMemo] = useState("");                          // 처방전 메모
-  const [intakeIntervals, setIntakeIntervals] = useState(DEFAULT_INTAKE_INTERVALS);  // 복용 시간대 (기본: 아침/점심/저녁)
+  const [prescriptionName, setPrescriptionName] = useState(
+    prescription?.prescriptionName ?? "",
+  );  // 처방전 이름
+  const [memo, setMemo] = useState(prescription?.memo ?? "");  // 처방전 메모
+  const [intakeIntervals, setIntakeIntervals] = useState(() =>
+    prescription?.intakeIntervals
+      ? prescription.intakeIntervals.split(",").filter(Boolean)
+      : DEFAULT_INTAKE_INTERVALS,
+  );  // 복용 시간대 (기본: 아침/점심/저녁)
 
   if (!isOpen) return null;
 
@@ -84,20 +102,37 @@ export default function PrescriptionOcrTestModal({ isOpen, onClose }) {
     };
 
     try {
-      await medicineApi.registerMedicine(payload);
-      toast.success("처방전이 등록되었습니다.");
+      if (isEdit) {
+        await medicineApi.updateMedicine(prescription.prescriptionId, payload);
+        toast.success("처방전이 수정되었습니다.");
+      } else {
+        await medicineApi.registerMedicine(payload);
+        toast.success("처방전이 등록되었습니다.");
+      }
+      // 부모(회원정보)가 서버에서 최신 목록을 다시 불러오도록 알린다.
+      onSaved?.();
       handleClose();
     } catch (err) {
-      console.error("처방전 등록 실패", err);
+      console.error(isEdit ? "처방전 수정 실패" : "처방전 등록 실패", err);
     }
   };
 
   // SearchMedicineModal에서 선택한 약을 목록에 추가 (중복은 무시)
   const handleAddMedicine = (medicine) => {
     const name = typeof medicine === "string" ? medicine : medicine?.name;
-    if (!name) return;
-    setMedicineNames((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    if (!name) {
+      toast.error("약 이름을 가져오지 못했습니다.");
+      return;
+    }
+    const exists = medicineNames.includes(name);
+    // 추가한 약은 목록 맨 앞에 넣어 바로 보이게 한다.
+    setMedicineNames((prev) => (prev.includes(name) ? prev : [name, ...prev]));
     setSearchOpen(false);
+    if (exists) {
+      toast.error("이미 추가된 약입니다.");
+    } else {
+      toast.success(`'${name}' 추가됨`);
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -166,7 +201,7 @@ export default function PrescriptionOcrTestModal({ isOpen, onClose }) {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ color: "#1B1F2A", fontSize: 22, fontWeight: 700 }}>
-              처방전 등록
+              {isEdit ? "처방전 수정" : "처방전 등록"}
             </span>
             <span style={{ color: "#94A3B8", fontSize: 14 }}>
               처방전 이미지를 올리면 약 이름을 자동으로 추출해드려요.
@@ -454,7 +489,7 @@ export default function PrescriptionOcrTestModal({ isOpen, onClose }) {
             cursor: "pointer",
           }}
         >
-          등록
+          {isEdit ? "수정" : "등록"}
         </button>
       </div>
     </div>

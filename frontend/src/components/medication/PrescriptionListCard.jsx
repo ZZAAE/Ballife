@@ -1,24 +1,22 @@
-import { FileText } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
-const defaultPrescriptions = [
-  {
-    id: 1,
-    groupName: "혈압약",
-    dosage: "1정",
-    scheduleLabel: "아침 · 점심 · 저녁",
-  },
-  {
-    id: 2,
-    groupName: "당뇨약",
-    dosage: "3정",
-    scheduleLabel: "아침 · 점심 · 저녁",
-  },
-];
+const PAGE_SIZE = 3;
 
 export default function PrescriptionListCard({
-  prescriptions = defaultPrescriptions,
+  prescriptions = [],
   onSelectGroup,
 }) {
+  const [page, setPage] = useState(0);
+
+  const totalPages = Math.max(1, Math.ceil(prescriptions.length / PAGE_SIZE));
+  // 목록이 줄어 현재 페이지가 범위를 벗어나면 마지막 페이지로 보정
+  const safePage = Math.min(page, totalPages - 1);
+  const pageItems = prescriptions.slice(
+    safePage * PAGE_SIZE,
+    safePage * PAGE_SIZE + PAGE_SIZE,
+  );
+
   return (
     <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
       <div className="px-4 md:px-8 pt-7 pb-5">
@@ -45,13 +43,13 @@ export default function PrescriptionListCard({
             처방된 약이 없습니다.
           </div>
         )}
-        {prescriptions.map((item, index) => (
+        {pageItems.map((item, index) => (
           <button
             key={item.id}
             type="button"
             onClick={() => onSelectGroup(item)}
             className={`w-full grid grid-cols-3 items-center py-7 text-left hover:bg-gray-50 transition ${
-              index !== prescriptions.length - 1 ? "border-b border-gray-100" : ""
+              index !== pageItems.length - 1 ? "border-b border-gray-100" : ""
             }`}
           >
             <div className="pl-4 md:pl-10 pr-4 flex items-center gap-3 min-w-0">
@@ -73,6 +71,48 @@ export default function PrescriptionListCard({
           </button>
         ))}
       </div>
+
+      {/* 페이징 (3개 초과일 때만) */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 border-t border-gray-100 py-4">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
+            disabled={safePage === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
+            aria-label="이전 페이지"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setPage(i)}
+              className={`h-8 min-w-8 rounded-lg px-2 text-[13px] font-semibold transition ${
+                i === safePage
+                  ? "bg-[#EAF3FF] text-[#2563EB] border border-[#D6E6FF]"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              setPage((p) => Math.min(totalPages - 1, Math.min(p, totalPages - 1) + 1))
+            }
+            disabled={safePage === totalPages - 1}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
+            aria-label="다음 페이지"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

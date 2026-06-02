@@ -91,8 +91,8 @@ export default function PrescriptionDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4 py-6">
-      <div className="w-full max-w-[900px] max-h-[90vh] overflow-y-auto rounded-2xl bg-[#F3F4F6] shadow-2xl">
-        <div className="flex items-start justify-between px-5 md:px-8 pt-8 pb-6">
+      <div className="flex w-full max-w-[900px] max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-[#F3F4F6] shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between px-5 md:px-8 pt-8 pb-6">
           <div>
             <h2 className="text-[30px] font-semibold text-gray-700 leading-tight">
               나의 [{group.groupName}] 처방 목록
@@ -111,7 +111,7 @@ export default function PrescriptionDetailModal({
           </button>
         </div>
 
-        <div className="px-5 md:px-8 pb-8 space-y-5">
+        <div className="space-y-5 overflow-y-auto px-5 md:px-8 pb-8 max-h-[min(540px,calc(90vh-160px))]">
           {medicines.length === 0 ? (
             <div className="bg-white rounded-2xl px-5 py-12 text-center text-[15px] text-gray-400 shadow-sm">
               처방된 약이 없습니다. 약을 모두 삭제하면 이 그룹은 복용 일정·이행률에서도 사라집니다.

@@ -8,8 +8,8 @@ import SavedRecordsCard from "../components/medication/SavedRecordsCard";
 import TodayScheduleCard from "../components/medication/TodayScheduleCard";
 import WeeklyCalendarCard from "../components/medication/WeeklyCalendarCard";
 import {
-  loadPrescriptionGroups,
-  savePrescriptionGroups,
+  mapPrescriptionsToGroups,
+  buildSchedulesFromGroups,
 } from "../components/medication/prescriptionData";
 import PrescriptionDetailModal from "../modals/PrescriptionDetailModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
@@ -52,70 +52,36 @@ const formatTimeNow = () => {
   return `${h}:${m}`;
 };
 
-const INITIAL_TODAY_SCHEDULES = [
-  {
-    id: "morning",
-    label: "아침",
-    time: "08:00",
-    name: "아침약",
-    note: "식후 30분 복용",
-    drugs: [
-      { id: "bp", name: "혈압약", taken: false },
-      { id: "diabetes", name: "당뇨약", taken: false },
-    ],
-  },
-  {
-    id: "lunch",
-    label: "점심",
-    time: "13:00",
-    name: "점심약",
-    note: "식사 중 복용",
-    drugs: [
-      { id: "bp", name: "혈압약", taken: false },
-      { id: "diabetes", name: "당뇨약", taken: false },
-    ],
-  },
-  {
-    id: "dinner",
-    label: "저녁",
-    time: "19:00",
-    name: "저녁약",
-    note: "식후 30분 복용",
-    drugs: [
-      { id: "bp", name: "혈압약", taken: false },
-      { id: "diabetes", name: "당뇨약", taken: false },
-    ],
-  },
-];
-
-// 기본 일정의 깊은 복제본 (모든 약 미복용)
-const cloneInitialSchedules = () =>
-  INITIAL_TODAY_SCHEDULES.map((s) => ({
-    ...s,
-    drugs: s.drugs.map((d) => ({ ...d })),
-  }));
-
 // 선택한 날짜의 복용 일정 로드.
-// - 오늘/과거: 사용자가 실제 체크해 저장한 기록(localStorage)을 사용.
-//   기록이 없으면 전부 미복용(기본 일정) — 주간 달력이 미복용으로 굳히는 것과 동일.
-// - 미래: 아직 기록 없음 → 전부 미복용
-const loadSchedulesForDate = (dateKey, todayKey) => {
+// - 기준 일정은 현재 처방 그룹의 복용 시간대로부터 동적으로 생성한다.
+// - 오늘/과거: 사용자가 실제 체크해 저장한 복용 여부(localStorage)를 슬롯/약 id 기준으로 병합.
+// - 미래/기록 없음: 전부 미복용(기준 일정 그대로).
+const loadSchedulesForDate = (dateKey, todayKey, groups) => {
+  const base = buildSchedulesFromGroups(groups, dateKey);
   if (dateKey <= todayKey) {
     try {
       const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateKey);
       if (raw) {
-        const parsed = JSON.parse(raw);
-        const isValid =
-          Array.isArray(parsed) &&
-          parsed.length === INITIAL_TODAY_SCHEDULES.length &&
-          parsed.every((s) => Array.isArray(s.drugs));
-        if (isValid) return parsed;
+        const saved = JSON.parse(raw);
+        if (Array.isArray(saved)) {
+          return base.map((slot) => {
+            const savedSlot = saved.find((s) => s.id === slot.id);
+            if (!savedSlot || !Array.isArray(savedSlot.drugs)) return slot;
+            return {
+              ...slot,
+              drugs: slot.drugs.map((d) => {
+                const sd = savedSlot.drugs.find((x) => x.id === d.id);
+                return sd ? { ...d, taken: !!sd.taken } : d;
+              }),
+            };
+          });
+        }
       }
     } catch {
-      // 무시하고 기본 일정 사용
+      // 무시하고 기준 일정 사용
     }
   }
-  return cloneInitialSchedules();
+  return base;
 };
 
 export default function MedicationPage() {
@@ -166,36 +132,37 @@ export default function MedicationPage() {
     useState(false);
 
   // 처방 그룹 = 약 페이지 전체의 단일 데이터 소스 (목록·일정·이행률·달력 모두 연결)
-  const [prescriptionGroups, setPrescriptionGroups] = useState(() =>
-    loadPrescriptionGroups()
-  );
-
-  useEffect(() => {
-    savePrescriptionGroups(prescriptionGroups);
-  }, [prescriptionGroups]);
-
-  // 백엔드 처방전의 복용량(dosage)을 그룹명 기준으로 매핑해 표시값에 덮어쓴다
+  // 데이터는 백엔드 처방전에서 받아온다 (회원정보에서 등록/수정/삭제한 내용과 동일 소스).
   const { user } = useAuth();
   const userId = resolveUserId(user);
-  const [backendDosageByName, setBackendDosageByName] = useState({});
+  const [prescriptionGroups, setPrescriptionGroups] = useState([]);
 
   useEffect(() => {
-    if (userId == null) return;
-    medicineApi
-      .getPrescriptions(userId)
-      .then((res) => {
+    let cancelled = false;
+    (async () => {
+      if (userId == null) {
+        if (!cancelled) setPrescriptionGroups([]);
+        return;
+      }
+      try {
+        const res = await medicineApi.getPrescriptions(userId);
         const list = Array.isArray(res.data) ? res.data : [];
-        const map = {};
-        list.forEach((p) => {
-          if (p.prescriptionName && p.dosage != null) {
-            map[p.prescriptionName] = p.dosage;
-          }
-        });
-        setBackendDosageByName(map);
-      })
-      .catch(() => {
-        // 백엔드 미연결/데이터 없음 → 기본(localStorage) 복용량 사용
-      });
+        const withMeds = await Promise.all(
+          list.map((p) =>
+            medicineApi
+              .getUserMedicine(p.prescriptionId)
+              .then((r) => ({ ...p, medicines: r.data || [] }))
+              .catch(() => ({ ...p, medicines: [] }))
+          )
+        );
+        if (!cancelled) setPrescriptionGroups(mapPrescriptionsToGroups(withMeds));
+      } catch {
+        if (!cancelled) setPrescriptionGroups([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   // 약이 1개 이상 남은 그룹만 활성 (빈 그룹은 페이지 전체에서 제외)
@@ -237,9 +204,17 @@ export default function MedicationPage() {
 
   // 복용 일정 카드에서 조회/수정 중인 날짜 (기본 오늘, 헤더에서 변경 가능)
   const [scheduleDate, setScheduleDate] = useState(todayKey);
-  const [todaySchedules, setTodaySchedules] = useState(() =>
-    loadSchedulesForDate(todayKey, todayKey)
-  );
+  const [todaySchedules, setTodaySchedules] = useState([]);
+
+  // 처방 그룹이 (백엔드에서) 로드/변경되면 현재 보고 있는 날짜의 일정을 다시 만든다.
+  // effect 대신 렌더 중 조건부 setState 사용 (React 권장: prop/state 변화에 맞춰 state 조정).
+  const [syncedGroups, setSyncedGroups] = useState(null);
+  if (syncedGroups !== prescriptionGroups) {
+    setSyncedGroups(prescriptionGroups);
+    setTodaySchedules(
+      loadSchedulesForDate(scheduleDate, todayKey, prescriptionGroups)
+    );
+  }
 
   // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
   // 삭제된 약은 localStorage 에서도 제외 → RecordSummary 의 복용 상태 오판 방지
@@ -261,21 +236,17 @@ export default function MedicationPage() {
   // 주간 달력에 표시할 "과거 날짜의 실제 저장 일정" 모음.
   // 오늘 저장된 복용 체크는 날짜가 지나면 그대로 과거 기록이 되므로,
   // 복용 확인을 누르지 않은 슬롯은 달력에서 자동으로 미복용(miss)으로 굳는다.
+  // 각 날짜의 "기대 복용 일정"(등록일 이후 약만 포함) + 저장된 복용 여부를 병합.
+  // 등록일 이전 날짜는 약이 없으므로 빈 일정 → 달력에서 미복용으로 굳지 않는다.
   const savedSchedulesByDate = useMemo(() => {
     const map = {};
     const base = new Date(todayKey + "T00:00:00");
-    for (let offset = -7; offset <= 0; offset++) {
+    // 과거 7일 ~ 미래 7일: 등록일 이후 날짜는 (미래 포함) 약이 계속 잡히게 한다.
+    for (let offset = -7; offset <= 7; offset++) {
       const d = new Date(base);
       d.setDate(d.getDate() + offset);
       const key = formatDateKey(d);
-      try {
-        const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + key);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) map[key] = parsed;
-      } catch {
-        // 손상된 항목은 무시
-      }
+      map[key] = loadSchedulesForDate(key, todayKey, prescriptionGroups);
     }
     // 지금 보고 있는 과거 날짜는 편집 중인 라이브 상태로 덮어써,
     // TodayScheduleCard 의 복용/부분복용/미복용이 달력에 즉시 반영되게 한다.
@@ -283,21 +254,20 @@ export default function MedicationPage() {
       map[scheduleDate] = todaySchedules;
     }
     return map;
-    // todaySchedules 가 바뀌면 오늘 분 localStorage 도 갱신되므로 의존성에 포함
-  }, [todayKey, todaySchedules, scheduleDate]);
+  }, [todayKey, todaySchedules, scheduleDate, prescriptionGroups]);
 
   // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
   const handleScheduleDateChange = (newDate) => {
     if (!newDate) return;
     setScheduleDate(newDate);
-    setTodaySchedules(loadSchedulesForDate(newDate, todayKey));
+    setTodaySchedules(loadSchedulesForDate(newDate, todayKey, prescriptionGroups));
   };
 
   // 주간 달력은 항상 실제 오늘 기준 데이터를 사용
   const weekTodaySchedules =
     scheduleDate === todayKey
       ? todaySchedules
-      : loadSchedulesForDate(todayKey, todayKey);
+      : loadSchedulesForDate(todayKey, todayKey, prescriptionGroups);
 
   // 활성 그룹의 약만 일정에 노출 (오늘부터 적용 — 과거 기록은 그 당시 약을 그대로 보존)
   const filterToActiveDrugs = (schedules) =>
@@ -316,17 +286,20 @@ export default function MedicationPage() {
   const weekDisplaySchedules = filterToActiveDrugs(weekTodaySchedules);
 
   // 처방 목록에 표시할 "복용일정" = 그 그룹의 약이 포함된 일정 슬롯(아침·점심·저녁)
-  // 복용량은 백엔드 값이 있으면 그것을 우선 사용(없으면 기본값)
   const prescriptionsForList = activeGroups.map((g) => {
     const slots = displaySchedules
       .filter((slot) => slot.drugs.some((d) => d.id === g.drugId))
       .map((slot) => slot.label);
     return {
       ...g,
-      dosage: backendDosageByName[g.groupName] ?? g.dosage,
       scheduleLabel: slots.length > 0 ? slots.join(" · ") : "-",
     };
   });
+
+  // 메모장 = 메모가 입력된 처방 그룹들
+  const memoList = activeGroups
+    .filter((g) => g.memo)
+    .map((g) => ({ id: g.id, groupName: g.groupName, content: g.memo }));
 
   const handleToggleDrug = (scheduleId, drugId) => {
     setTodaySchedules((prev) =>
@@ -424,7 +397,7 @@ export default function MedicationPage() {
               onToggleAllDrugs={handleToggleAllDrugs}
             />
             <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
-              <MemoCard />
+              <MemoCard memoList={memoList} />
               <WeeklyCalendarCard
                 todaySchedules={weekDisplaySchedules}
                 drugNames={prescriptionGroups.map((g) => g.groupName)}

@@ -70,6 +70,44 @@ public class MedicineService {
 
     }
 
+    // 처방전+약 전체 수정 (처방전 정보 갱신 + 약 목록 통째로 교체)
+    @Transactional
+    public PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse updateMedicine(
+            Long userId,
+            Long prescriptionId,
+            PrescriptionAndMedicineDto.CreateRequest request) {
+
+        Prescription prescription = prescriptionRepository
+                .findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
+                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+
+        // 1. 처방전 정보 갱신
+        prescription.setPrescriptionName(request.getPrescriptionName());
+        if (request.getPrescriptionDate() != null) {
+            prescription.setPrescriptionDate(request.getPrescriptionDate());
+        }
+        prescription.setMemo(request.getMemo());
+        prescription.setIntakeIntervals(request.getIntakeIntervals());
+        prescription.setDosage(request.getDosage());
+
+        // 2. 기존 약 목록 제거 후 새 목록으로 교체
+        userMedicineRepository.deleteByPrescription_PrescriptionId(prescriptionId);
+
+        List<UserMedicine> savedList = new ArrayList<>();
+        if (request.getMedicines() != null) {
+            for (UserMedicineDto.CreateRequest u : request.getMedicines()) {
+                UserMedicine userMedicine = UserMedicine.builder()
+                        .prescription(prescription) // FK 연결
+                        .medicineName(u.getMedicineName())
+                        .supplementId(u.getSupplementId())
+                        .build();
+                savedList.add(userMedicineRepository.save(userMedicine));
+            }
+        }
+
+        return PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse.from(prescription, savedList);
+    }
+
     // 처방전 조회 //임시로 받음 userId
     public List<PrescriptionDto.PrescriptionResponse> getPrescription(Long userId) {
 
