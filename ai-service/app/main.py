@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
@@ -11,6 +11,8 @@ import asyncio
 import json
 from collections import defaultdict
 from datetime import date
+
+from app.food_classifier import predict as predict_food, warmup as warmup_food_model
 
 load_dotenv()
 
@@ -367,3 +369,23 @@ async def clear_history(user_id: int):
     conversation_histories.pop(user_id, None)
     display_histories.pop(user_id, None)
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────
+# 음식 사진 → 자체 YOLO 모델 분류 (Spring이 1차로 호출)
+# 모델이 확신하면 known=True + 음식명 반환, 모르면 known=False (Spring이 OpenAI로 폴백)
+# ─────────────────────────────────────────────────────────────
+@app.post("/predict-food")
+async def predict_food_endpoint(file: UploadFile = File(...)):
+    image_bytes = await file.read()
+    try:
+        # YOLO 추론은 CPU 바운드라 별도 스레드에서 실행 (이벤트 루프 비차단)
+        return await asyncio.to_thread(predict_food, image_bytes)
+    except Exception as e:  # noqa: BLE001 - 어떤 실패든 known=False 로 폴백 유도
+        return {"known": False, "food": None, "confidence": 0.0, "candidates": [], "error": str(e)}
+
+
+@app.on_event("startup")
+async def _warmup_model():
+    # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
+    asyncio.create_task(asyncio.to_thread(warmup_food_model))

@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+# 음식 분류 모델 가중치 (대용량, git 미포함 — 별도 배포/복사)
+app/model/*.pt

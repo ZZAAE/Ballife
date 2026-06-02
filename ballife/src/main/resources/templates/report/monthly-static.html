@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ballife 월간 건강 보고서</title>
+
+  <!--
+    ⚠️ OpenHTMLtoPDF 사용 시 HTML named entity 금지
+
+    이 템플릿은 OpenHTMLtoPDF로 PDF 변환되는데, strict XML 파서를
+    사용하기 때문에 XML 기본 5개 외 HTML named entity는 인식 못 함.
+
+    ✅ 허용 : &amp; &lt; &gt; &quot; &apos;
+    ❌ 금지 : &nbsp; &copy; &middot; &hellip; &mdash; 등 모든 HTML5 entity
+    ✅ 대안 : numeric reference 사용
+             &nbsp;   → &#160;
+             &copy;   → &#169;
+             &middot; → &#183;
+             &hellip; → &#8230;
+             &mdash;  → &#8212;
+
+    Step D-2 Thymeleaf 변환 시에도 동일 규칙 유지.
+  -->
+
+  <style>
+    /* ============================================================
+     * 페이지 설정 (A4, 여백, 페이지 번호)
+     * ============================================================ */
+    @page {
+      size: A4;
+      margin: 20mm 18mm 22mm 18mm;
+      @bottom-right {
+        content: "page " counter(page) " / " counter(pages);
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 9pt;
+        color: #6b7280;
+      }
+    }
+
+    /* ============================================================
+     * 기본 타이포그래피
+     * ============================================================ */
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ============================================================
+     * 보고서 헤더
+     * ============================================================ */
+    .report-header {
+      border-bottom: 2px solid #1f2937;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+    .report-title {
+      font-size: 22pt;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 6px 0;
+    }
+    .report-meta {
+      font-size: 10pt;
+      color: #6b7280;
+    }
+
+    /* ============================================================
+     * 섹션
+     * ============================================================ */
+    .section {
+      margin-bottom: 28px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 10px 0;
+      padding-left: 8px;
+      border-left: 3px solid #94a3b8;
+    }
+
+    /* ============================================================
+     * 환자 정보 박스 (가로 5컬럼 레이아웃)
+     * ============================================================ */
+    .patient-box {
+      background-color: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 14px 18px;
+    }
+    .patient-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    /* 표 일반 td(padding/border) 상속을 차단해서 박스 내부는 깔끔하게.
+       chain 셀렉터로 specificity 부스트 (본문 표의 tbody tr:last-child td 영향 차단). */
+    .patient-box .patient-info-table td {
+      padding: 0;
+      border: none;
+      vertical-align: top;
+    }
+    .patient-col {
+      padding-right: 8px;
+    }
+    .patient-col-label {
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.5pt;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .patient-col-value {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    /* BMI 상태 색상 강조 (값 자체에 색을 입힘) */
+    .bmi-normal  { color: #059669; }
+    .bmi-warning { color: #d97706; }
+    .bmi-risk    { color: #dc2626; }
+
+    /* 보유 질환 줄 (박스 아래 별도) */
+    .disease-row {
+      margin-top: 10px;
+      padding-left: 4px;
+    }
+    .disease-row-label {
+      display: inline-block;
+      font-size: 10pt;
+      font-weight: 600;
+      color: #6b7280;
+      margin-right: 10px;
+    }
+    .disease-tag {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 10pt;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    /* ============================================================
+     * 표 (가로 줄만, 줄무늬 없음, 깔끔 톤)
+     *   - 헤더 옅은 배경 + 회색 글자 (본문보다 튀지 않음)
+     *   - 본문 가로선은 옅게, 표 시작/끝 줄만 약간 진하게
+     * ============================================================ */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11pt;
+    }
+    th {
+      background-color: #f8fafc;
+      color: #6b7280;
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 10pt;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    /* 표 마지막 행의 아래 줄은 진하게 (시각적 경계) */
+    tbody tr:last-child td {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    /* 숫자 칼럼 공통 — 우측 정렬 + tabular-nums (자릿수 폭 균일) */
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .label-cell {
+      font-weight: 600;
+    }
+    /* 평균 / 값 / 최저 / 최고 — 굵기 통일(400), 색상으로만 구분
+         평균 : 검정    (#1f2937)
+         최저 : 파랑    (#3b82f6)
+         최고 : 빨강    (#dc2626)
+    */
+    .avg-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #1f2937;
+    }
+    .min-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #3b82f6;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .max-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #dc2626;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    /* "—" 자리 표시용 — 회색 (BMI/복약처럼 min/max 무의미한 행) */
+    .minmax-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #94a3b8;
+    }
+
+    /* ============================================================
+     * 상태 칩 4종 — 원형 캡슐 + 부피 + 진한 톤
+     * ============================================================ */
+    .chip {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 10pt;
+      font-weight: 700;
+    }
+    .chip-normal  { background: #d1fae5; color: #065f46; }
+    .chip-caution { background: #fed7aa; color: #9a3412; }
+    .chip-risk    { background: #fecaca; color: #991b1b; }
+    .chip-low     { background: #dbeafe; color: #1e40af; }
+
+    /* ============================================================
+     * "다음 진료 질문" 자리 (Step D-3 LLM 결과 영역)
+     * ============================================================ */
+    .placeholder {
+      background-color: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 4px;
+      padding: 18px 20px;
+      color: #6b7280;
+      font-size: 10pt;
+      text-align: center;
+    }
+
+    /* ============================================================
+     * 면책 푸터
+     * ============================================================ */
+    .footer-disclaimer {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 8.5pt;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       헤더
+       ============================================================ -->
+  <div class="report-header">
+    <h1 class="report-title">Ballife 월간 건강 보고서</h1>
+    <div class="report-meta">
+      분석 기간 : 2026-05-03 ~ 2026-06-01 (30일)
+      &#160;·&#160; 생성일 : 2026-06-01
+    </div>
+  </div>
+
+  <!-- ============================================================
+       환자 정보
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">환자 정보</h2>
+    <div class="patient-box">
+      <table class="patient-info-table">
+        <tr>
+          <td class="patient-col">
+            <div class="patient-col-label">NAME</div>
+            <div class="patient-col-value">홍길동</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">AGE / SEX</div>
+            <div class="patient-col-value">30 · 남</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">HEIGHT</div>
+            <div class="patient-col-value">170 cm</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">WEIGHT</div>
+            <div class="patient-col-value">75 kg</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">BMI</div>
+            <div class="patient-col-value bmi-risk">25.8 (비만)</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="disease-row">
+      <span class="disease-row-label">보유 질환</span>
+      <span class="disease-tag">고혈압 · 1기</span>
+      <span class="disease-tag">당뇨 · 2형</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       혈압
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">혈압 (mmHg)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">수축기</td>
+          <td class="num avg-cell">128</td>
+          <td class="num min-cell">115</td>
+          <td class="num max-cell">142</td>
+          <td><span class="chip chip-caution">다소 높음</span></td>
+        </tr>
+        <tr>
+          <td class="label-cell">이완기</td>
+          <td class="num avg-cell">82</td>
+          <td class="num min-cell">70</td>
+          <td class="num max-cell">90</td>
+          <td><span class="chip chip-caution">다소 높음</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================
+       혈당 (공복 / 식전 / 식후 3그룹)
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">혈당 (mg/dL)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">공복</td>
+          <td class="num avg-cell">108</td>
+          <td class="num min-cell">95</td>
+          <td class="num max-cell">125</td>
+          <td><span class="chip chip-caution">다소 높음</span></td>
+        </tr>
+        <tr>
+          <td class="label-cell">식전</td>
+          <td class="num avg-cell">101</td>
+          <td class="num min-cell">95</td>
+          <td class="num max-cell">112</td>
+          <td><span class="chip chip-caution">다소 높음</span></td>
+        </tr>
+        <tr>
+          <td class="label-cell">식후</td>
+          <td class="num avg-cell">168</td>
+          <td class="num min-cell">145</td>
+          <td class="num max-cell">215</td>
+          <td><span class="chip chip-caution">다소 높음</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================
+       BMI / 복약 (5칼럼 — 혈압/혈당 표와 동일 구조)
+         min/max 무의미한 행은 "—" (minmax-cell, 회색)
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">체중 · 복약</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">BMI</td>
+          <td class="num avg-cell">25.8</td>
+          <td class="num minmax-cell">—</td>
+          <td class="num minmax-cell">—</td>
+          <td><span class="chip chip-risk">비만</span></td>
+        </tr>
+        <tr>
+          <td class="label-cell">복약 이행률</td>
+          <td class="num avg-cell">79 % (22 / 28)</td>
+          <td class="num minmax-cell">—</td>
+          <td class="num minmax-cell">—</td>
+          <td><span class="chip chip-caution">다소 부족</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================
+       측정 기록률
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">측정 기록률</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">항목</th>
+          <th class="num" style="width: 35%;">기록 일수</th>
+          <th class="num" style="width: 35%;">비율</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">혈압</td>
+          <td class="num">23 / 30 일</td>
+          <td class="num">76.7 %</td>
+        </tr>
+        <tr>
+          <td class="label-cell">혈당</td>
+          <td class="num">28 / 30 일</td>
+          <td class="num">93.3 %</td>
+        </tr>
+        <tr>
+          <td class="label-cell">복약</td>
+          <td class="num">25 / 30 일</td>
+          <td class="num">83.3 %</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================
+       다음 진료 질문 (Step D-3 LLM 자리)
+       ============================================================ -->
+  <div class="section">
+    <h2 class="section-title">다음 진료 시 질문</h2>
+    <div class="placeholder">
+      ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
+    </div>
+  </div>
+
+  <!-- ============================================================
+       면책 푸터
+       ============================================================ -->
+  <div class="footer-disclaimer">
+    본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며,
+    의학적 진단을 대체하지 않습니다. 측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다.
+    수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.
+  </div>
+
+</body>
+</html>

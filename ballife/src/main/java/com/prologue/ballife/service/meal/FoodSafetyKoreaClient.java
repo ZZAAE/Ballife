@@ -4,6 +4,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -56,46 +58,10 @@ public class FoodSafetyKoreaClient {
 
     /** 음식명으로 영양성분 1건 검색 (첫 결과 사용) */
     public Optional<FoodNutrition> searchByName(String foodName) {
-        if (serviceKey == null || serviceKey.isBlank()) {
-            log.warn("[FoodSafetyKoreaClient] FOOD_SAFETY_KEY 미설정 — 외부 호출 생략");
-            return Optional.empty();
-        }
         if (foodName == null || foodName.isBlank()) return Optional.empty();
-
-        // 모든 파라미터를 직접 URL 인코딩한 raw URI를 만든다.
-        // (WebClient.queryParam 은 `+` 같은 문자를 자동 인코딩하지 않을 수 있어 키 불일치 발생)
-        String url = baseUrl + "/" + operation
-                + "?serviceKey=" + URLEncoder.encode(serviceKey, StandardCharsets.UTF_8)
-                + "&type=json"
-                + "&pageNo=1"
-                + "&numOfRows=5"
-                + "&FOOD_NM_KR=" + URLEncoder.encode(foodName, StandardCharsets.UTF_8);
-        URI rawUri = URI.create(url);
-
+        String body = fetchRaw(foodName, 5);
+        if (body == null || body.isBlank()) return Optional.empty();
         try {
-            String body = client.get()
-                    .uri(rawUri)
-                    .exchangeToMono(resp -> resp.bodyToMono(String.class)
-                            .defaultIfEmpty("")
-                            .map(b -> {
-                                if (!resp.statusCode().is2xxSuccessful()) {
-                                    log.warn("[FoodSafetyKoreaClient] {} 응답: {}",
-                                            resp.statusCode(),
-                                            b.length() > 1200 ? b.substring(0, 1200) + "..." : b);
-                                    return ""; // 본문은 비웠지만 호출은 끝
-                                }
-                                return b;
-                            }))
-                    .onErrorResume(e -> {
-                        log.warn("[FoodSafetyKoreaClient] 호출 실패 ({}): {}", foodName, e.getMessage());
-                        return Mono.empty();
-                    })
-                    .block();
-
-            if (body == null || body.isBlank()) return Optional.empty();
-            log.info("[FoodSafetyKoreaClient][RAW] keyword='{}' response={}", foodName,
-                    body.length() > 1200 ? body.substring(0, 1200) + "..." : body);
-
             JsonNode row = pickFirstRow(objectMapper.readTree(body));
             if (row == null || row.isMissingNode() || row.isNull()) {
                 log.info("[FoodSafetyKoreaClient] '{}' 검색 결과 0건", foodName);
@@ -106,6 +72,103 @@ public class FoodSafetyKoreaClient {
             log.warn("[FoodSafetyKoreaClient] 파싱 실패 ({}): {}", foodName, e.getMessage());
             return Optional.empty();
         }
+    }
+
+    /**
+     * 음식명(부분 일치)으로 후보 여러 건 검색 — 자동완성용.
+     * 각 후보의 name 은 응답의 실제 식품명(FOOD_NM_KR)을 사용한다.
+     */
+    public List<FoodNutrition> searchCandidates(String query, int limit) {
+        if (query == null || query.isBlank()) return List.of();
+        int rows = Math.max(1, Math.min(limit, 50));
+        String body = fetchRaw(query, rows);
+        if (body == null || body.isBlank()) return List.of();
+        try {
+            List<JsonNode> rowNodes = pickAllRows(objectMapper.readTree(body));
+            List<FoodNutrition> out = new ArrayList<>();
+            for (JsonNode row : rowNodes) {
+                String name = firstString(row, "FOOD_NM_KR", "DESC_KOR", "식품명");
+                if (name == null || name.isBlank()) name = query;
+                out.add(toFoodNutrition(cleanName(name), row));
+                if (out.size() >= rows) break;
+            }
+            return out;
+        } catch (Exception e) {
+            log.warn("[FoodSafetyKoreaClient] 후보 파싱 실패 ({}): {}", query, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * 식약처 식품명을 사용자용으로 정리.
+     *  - "김치찌개_돼지고기" → "김치찌개 (돼지고기)" (첫 구간=대표명, 나머지=부가설명)
+     *  - foodName 컬럼이 varchar(20) 이라 20자로 제한 (길면 대표명만)
+     */
+    private String cleanName(String raw) {
+        if (raw == null || raw.isBlank()) return raw;
+        String s = raw.trim();
+        String display;
+        if (s.contains("_")) {
+            String[] parts = s.split("_");
+            String head = parts[0].trim();
+            StringBuilder tail = new StringBuilder();
+            for (int i = 1; i < parts.length; i++) {
+                String p = parts[i].trim();
+                if (p.isEmpty()) continue;
+                if (tail.length() > 0) tail.append(" ");
+                tail.append(p);
+            }
+            display = tail.length() > 0 ? head + " (" + tail + ")" : head;
+        } else {
+            display = s;
+        }
+        if (display.length() > 20) {
+            String head = s.contains("_") ? s.split("_")[0].trim() : s;
+            display = head.length() <= 20 ? head : head.substring(0, 20);
+        }
+        return display;
+    }
+
+    /** 식약처 API 호출 후 원문(JSON) 반환. 키 미설정/실패 시 빈 문자열. */
+    private String fetchRaw(String keyword, int numOfRows) {
+        if (serviceKey == null || serviceKey.isBlank()) {
+            log.warn("[FoodSafetyKoreaClient] FOOD_SAFETY_KEY 미설정 — 외부 호출 생략");
+            return "";
+        }
+        // 모든 파라미터를 직접 URL 인코딩한 raw URI를 만든다.
+        // (WebClient.queryParam 은 `+` 같은 문자를 자동 인코딩하지 않을 수 있어 키 불일치 발생)
+        String url = baseUrl + "/" + operation
+                + "?serviceKey=" + URLEncoder.encode(serviceKey, StandardCharsets.UTF_8)
+                + "&type=json"
+                + "&pageNo=1"
+                + "&numOfRows=" + numOfRows
+                + "&FOOD_NM_KR=" + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+        URI rawUri = URI.create(url);
+
+        String body = client.get()
+                .uri(rawUri)
+                .exchangeToMono(resp -> resp.bodyToMono(String.class)
+                        .defaultIfEmpty("")
+                        .map(b -> {
+                            if (!resp.statusCode().is2xxSuccessful()) {
+                                log.warn("[FoodSafetyKoreaClient] {} 응답: {}",
+                                        resp.statusCode(),
+                                        b.length() > 1200 ? b.substring(0, 1200) + "..." : b);
+                                return "";
+                            }
+                            return b;
+                        }))
+                .onErrorResume(e -> {
+                    log.warn("[FoodSafetyKoreaClient] 호출 실패 ({}): {}", keyword, e.getMessage());
+                    return Mono.empty();
+                })
+                .block();
+
+        if (body != null && !body.isBlank()) {
+            log.info("[FoodSafetyKoreaClient][RAW] keyword='{}' response={}", keyword,
+                    body.length() > 1200 ? body.substring(0, 1200) + "..." : body);
+        }
+        return body == null ? "" : body;
     }
 
     /**
@@ -130,6 +193,30 @@ public class FoodSafetyKoreaClient {
             if (n.isObject()) return n;
         }
         return null;
+    }
+
+    /** pickFirstRow 와 동일한 후보 구조에서 모든 row 를 리스트로 반환 (자동완성용). */
+    private List<JsonNode> pickAllRows(JsonNode root) {
+        JsonNode[] candidates = new JsonNode[] {
+                root.at("/body/items/item"),
+                root.at("/response/body/items/item"),
+                root.at("/body/items"),
+                root.at("/response/body/items"),
+                root.at("/I2790/row"),
+                root.at("/data"),
+        };
+        for (JsonNode n : candidates) {
+            if (n == null || n.isMissingNode() || n.isNull()) continue;
+            List<JsonNode> out = new ArrayList<>();
+            if (n.isArray()) {
+                n.forEach(out::add);
+                if (!out.isEmpty()) return out;
+            } else if (n.isObject()) {
+                out.add(n);
+                return out;
+            }
+        }
+        return List.of();
     }
 
     /**

@@ -102,7 +102,7 @@ export default function MealRegisterModal({
       mealItemId: c.mealItemId,
       foodName: c.foodName,
       mealPhoto: c.mealPhoto ?? null,
-      grams: c.grams ?? 100,
+      grams: c.grams ?? null, // DB 실제값 그대로 (null이면 chip에 g 미표시 — 가짜 100으로 가리지 않음)
       calorie: c.calorie ?? 0,
       carbohydrate: c.carbohydrate ?? 0,
       sugar: c.sugar ?? 0,
@@ -187,6 +187,12 @@ export default function MealRegisterModal({
   }, [timeEditing]);
   const fileInputRef = useRef(null);
   const analysisTimerRef = useRef(null);
+  const searchTimerRef = useRef(null);
+
+  // 음식명 자동완성(식약처 검색)
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const grams = formData.grams ?? 100;
   const portion = grams / 100;
@@ -214,6 +220,55 @@ export default function MealRegisterModal({
     }));
   };
 
+  // 음식명 입력 → 식약처 검색 (300ms 디바운스)
+  const onFoodNameChange = (value) => {
+    updateForm((d) => ({ ...d, foodName: value }));
+    clearTimeout(searchTimerRef.current);
+    const q = value.trim();
+    if (!q) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    setIsSearching(true);
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await mealAnalysisApi.searchFoods(q);
+        setSuggestions(Array.isArray(res?.data) ? res.data : []);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("음식 검색 실패:", err);
+        setSuggestions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+  };
+
+  // 검색 결과 선택 → 음식명 + 영양소(100g 기준)를 폼에 채움 (현재 grams 기준으로 환산 표시)
+  const selectSuggestion = (item) => {
+    const base = {
+      calories: item.calories ?? null,
+      carbs: item.carbs ?? null,
+      protein: item.protein ?? null,
+      // UI '지방' 필드는 저장 시 saturatedFat 으로 들어가므로 동일 관례 유지
+      fat: item.saturatedFat ?? item.fat ?? null,
+      sugar: item.sugar ?? null,
+      sodium: item.sodium ?? null,
+      cholesterol: item.cholesterol ?? null,
+    };
+    updateForm((d) => {
+      const p = (d.grams ?? 100) / 100;
+      const display = {};
+      NUTRIENTS.forEach((n) => {
+        display[n.key] = base[n.key] != null ? formatValue(base[n.key], p, n.integer) : "";
+      });
+      return { ...d, foodName: item.name, baseValues: base, displayValues: display };
+    });
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
   // "음식 추가" — 폼·이미지 영역 완전히 비우기 (chips 배열은 유지)
   // chips에 사진 URL이 보존되어 있으므로 chip 클릭 시 원래 사진으로 복원됨
   const resetForm = () => {
@@ -221,6 +276,8 @@ export default function MealRegisterModal({
     setEditingChipId(null);
     setImageUrl(null);
     setAnalyzed(false);
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
 
   // chip 클릭 → 그 음식 데이터를 form에 로드 + 사진 미리보기 복원
@@ -287,6 +344,19 @@ export default function MealRegisterModal({
     const reader = new FileReader();
     reader.onload = async (e) => {
       const dataUrl = e.target.result;
+
+      // 현재 '미저장 pending chip'을 편집 중인데 새 사진을 고르면,
+      // 그 항목을 교체하는 것으로 본다 (이전 분석 결과가 유령처럼 남는 문제 방지).
+      // 새 음식을 '추가'하려면 "음식 추가"(resetForm)로 editingChipId 를 비운 뒤 올린다.
+      if (editingChipId != null) {
+        setChips((prev) =>
+          prev.filter(
+            (c) => !(c.mealItemId == null && c.tempId === editingChipId),
+          ),
+        );
+        setEditingChipId(null);
+      }
+
       setImageUrl(dataUrl);
       setIsAnalyzing(true);
       setAnalyzed(false);
@@ -321,6 +391,25 @@ export default function MealRegisterModal({
         const res = await mealAnalysisApi.analyze(file);
         console.log("[MealAnalysis] 서버 응답 전체:", res);
         console.log("[MealAnalysis] res.data:", res?.data);
+
+        // 어떤 엔진으로 분석했는지 콘솔에 표시 (YOLO 자체 모델 vs OpenAI Vision 폴백)
+        const analyzedBy = res?.data?.analyzedBy;
+        const confidence = res?.data?.confidence;
+        if (analyzedBy === "YOLO") {
+          const pct = confidence != null ? `${Math.round(confidence * 100)}%` : "?";
+          console.log(
+            `%c[음식분석] 🧠 자체 YOLO 모델 사용 (신뢰도 ${pct})`,
+            "color:#16a34a;font-weight:bold;",
+          );
+        } else if (analyzedBy === "OpenAI") {
+          console.log(
+            "%c[음식분석] 🤖 OpenAI Vision 폴백 사용 (모델이 음식을 확신하지 못함)",
+            "color:#2563eb;font-weight:bold;",
+          );
+        } else {
+          console.log("[음식분석] 분석 엔진 정보 없음:", analyzedBy);
+        }
+
         const foods = Array.isArray(res?.data?.foods) ? res.data.foods : [];
         console.log("[MealAnalysis] foods 배열:", foods);
         foods.forEach((f, i) =>
@@ -439,9 +528,20 @@ export default function MealRegisterModal({
     });
   };
 
-  // 저장된 chip 삭제 (백엔드 MealItem도 삭제)
+  // chip 삭제 (X 버튼). 미저장(pending) chip은 로컬에서만, 저장된 chip은 백엔드까지 삭제.
   const removeChip = async (chip) => {
-    if (!user?.id || !chip.mealItemId) return;
+    if (!user?.id) return;
+
+    // 1) 미저장 pending chip(mealItemId 없음): DB 호출 없이 로컬에서만 제거
+    if (chip.mealItemId == null) {
+      setChips((prev) => prev.filter((c) => c.tempId !== chip.tempId));
+      if (chip.tempId === editingChipId) {
+        resetForm();
+      }
+      return;
+    }
+
+    // 2) 저장된 chip: 백엔드 MealItem 도 삭제
     try {
       await mealApi.deleteMealItem(user.id, chip.mealItemId);
       setChips((prev) =>
@@ -460,6 +560,7 @@ export default function MealRegisterModal({
   useEffect(() => {
     return () => {
       clearTimeout(analysisTimerRef.current);
+      clearTimeout(searchTimerRef.current);
     };
   }, []);
 
@@ -467,7 +568,8 @@ export default function MealRegisterModal({
     if (v === "" || v == null) return 0;
     const n = parseFloat(v);
     if (Number.isNaN(n)) return 0;
-    return isInt ? Math.round(n) : n;
+    // 칼로리/나트륨/콜레스테롤은 정수, 그 외 영양소는 소수점 첫째 자리까지만 저장
+    return isInt ? Math.round(n) : Math.round(n * 10) / 10;
   };
 
   const handleDelete = async () => {
@@ -490,12 +592,14 @@ export default function MealRegisterModal({
   };
 
   // AI 분석 후 로컬에 쌓인 pending chips(mealItemId=null)를 DB에 일괄 저장
-  const flushPendingChips = async () => {
+  // chipsToFlush: 명시하지 않으면 현재 chips state 사용.
+  //   (편집 직후처럼 setChips 반영 전이라면 갱신된 배열을 직접 넘겨야 최신 grams가 저장됨)
+  const flushPendingChips = async (chipsToFlush = chips) => {
     if (!user?.id) {
       toast.error("로그인이 필요합니다.");
       return;
     }
-    const pending = chips.filter((c) => c.mealItemId == null);
+    const pending = chipsToFlush.filter((c) => c.mealItemId == null);
     if (pending.length === 0) return;
 
     setIsSaving(true);
@@ -517,11 +621,11 @@ export default function MealRegisterModal({
       }
 
       // 순서 보존을 위해 순차 저장
-      const updated = [...chips];
+      const updated = [...chipsToFlush];
       for (let i = 0; i < updated.length; i++) {
         const c = updated[i];
         if (c.mealItemId != null) continue;
-        // grams 는 백엔드 DTO에 없음
+        // chip의 영양소 + grams 를 그대로 전송 (백엔드 MealItemSaveRequest 에 grams 포함됨)
         const { mealItemId: _, tempId: __, ...itemPayload } = c;
         try {
           const res = await mealApi.createMealItem(user.id, mealId, itemPayload);
@@ -582,18 +686,19 @@ export default function MealRegisterModal({
       };
 
       if (editingChipId != null) {
-        // pending chip(tempId) 수정 → 로컬에서만 갱신 (DB 저장은 최종 "저장" 버튼에서)
+        // pending chip(tempId) 저장 → 폼값을 chip에 반영 후 즉시 DB 저장
         const editingPending = chips.find(
           (c) => c.mealItemId == null && c.tempId === editingChipId,
         );
         if (editingPending) {
-          setChips((prev) =>
-            prev.map((c) =>
-              c.tempId === editingChipId ? { ...c, ...payload } : c,
-            ),
+          // 폼의 현재 값(grams·환산 영양소 포함)을 pending chip에 반영하고 곧바로 DB에 저장.
+          // (예전엔 chip에만 반영하고 별도 저장 클릭을 또 요구해서, 미반영된 grams=100이 저장되는 버그가 있었음)
+          const updatedChips = chips.map((c) =>
+            c.tempId === editingChipId ? { ...c, ...payload } : c,
           );
-          toast.success("수정되었습니다. (저장 버튼을 눌러야 DB에 반영됨)");
+          setChips(updatedChips);
           resetForm();
+          await flushPendingChips(updatedChips);
         } else {
           // 이미 저장된 chip 수정: DB 업데이트
           await mealApi.updateMealItem(user.id, editingChipId, payload);
@@ -634,6 +739,7 @@ export default function MealRegisterModal({
         ]);
 
         toast.success("저장되었습니다.");
+        resetForm(); // 저장 후 폼 초기화 (pending 저장 경로와 동작 일치 — 저장된 음식이 '편집 중'처럼 남지 않게)
         onSaved?.();
       }
     } catch (err) {
@@ -641,12 +747,10 @@ export default function MealRegisterModal({
     } finally {
       setIsSaving(false);
     }
-
-    // 폼 저장 후, AI로 추가된 pending chips가 남아있으면 같이 저장
-    const remainingPending = chips.filter((c) => c.mealItemId == null);
-    if (remainingPending.length > 0) {
-      await flushPendingChips();
-    }
+    // 주의: 여기서 pending chips 를 자동 flush 하지 않는다.
+    //  - editing-pending 분기는 이미 flushPendingChips(updatedChips) 로 저장함
+    //  - 옛날엔 stale 클로저(chips)를 읽어 grams=100 이 잘못 저장/중복 저장되던 버그가 있었음
+    //  - 남은 pending 은 사용자가 chip 을 눌러 명시적으로 저장한다 (foodName 비면 flushPendingChips 경로)
   };
 
   return (
@@ -1067,23 +1171,68 @@ export default function MealRegisterModal({
                 <div className="text-[13px] font-semibold mb-[9px]">
                   음식 이름
                 </div>
-                <input
-                  type="text"
-                  maxLength={20}
-                  value={formData.foodName}
-                  onChange={(e) =>
-                    updateForm((d) => ({ ...d, foodName: e.target.value }))
-                  }
-                  className="mr-input w-full text-sm font-medium outline-none transition-all"
-                  style={{
-                    padding: "14px 18px",
-                    background: "#f1f3f5",
-                    border: "1.5px solid transparent",
-                    borderRadius: "14px",
-                    color: "#1a1f2e",
-                    fontFamily: "inherit",
-                  }}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    maxLength={20}
+                    value={formData.foodName}
+                    onChange={(e) => onFoodNameChange(e.target.value)}
+                    onFocus={() => {
+                      if (suggestions.length > 0) setShowSuggestions(true);
+                    }}
+                    onBlur={() => {
+                      // 항목 클릭(onMouseDown)이 먼저 처리되도록 약간 지연 후 닫기
+                      setTimeout(() => setShowSuggestions(false), 150);
+                    }}
+                    placeholder="음식 이름을 입력하면 식약처 DB에서 검색됩니다"
+                    className="mr-input w-full text-sm font-medium outline-none transition-all"
+                    style={{
+                      padding: "14px 18px",
+                      background: "#f1f3f5",
+                      border: "1.5px solid transparent",
+                      borderRadius: "14px",
+                      color: "#1a1f2e",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                  {showSuggestions && (suggestions.length > 0 || isSearching) && (
+                    <div
+                      className="absolute left-0 right-0 z-20 mt-1 overflow-hidden rounded-[14px] bg-white"
+                      style={{
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 8px 24px rgba(15,19,32,0.12)",
+                        maxHeight: 260,
+                        overflowY: "auto",
+                      }}
+                    >
+                      {isSearching && suggestions.length === 0 ? (
+                        <div className="px-4 py-3 text-[13px] text-slate-400">
+                          검색 중...
+                        </div>
+                      ) : (
+                        suggestions.map((s, i) => (
+                          <div
+                            key={`${s.name}-${i}`}
+                            // onMouseDown: input blur 보다 먼저 실행되도록
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              selectSuggestion(s);
+                            }}
+                            className="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors hover:bg-[#f1f5f9]"
+                            style={{ borderBottom: "1px solid #f1f5f9" }}
+                          >
+                            <span className="text-[13.5px] font-medium text-slate-800 truncate">
+                              {s.name}
+                            </span>
+                            <span className="ml-3 shrink-0 text-[11.5px] text-slate-400">
+                              {Math.round(s.calories ?? 0)}kcal / 100g
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* 섭취량 (g) 입력 */}
