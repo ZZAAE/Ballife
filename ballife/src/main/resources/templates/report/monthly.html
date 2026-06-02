@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ballife 월간 건강 보고서</title>
+
+  <!--
+    Step 14 — Thymeleaf 변수화 버전 (monthly-static.html 디자인 그대로, 더미값만 ${...} 교체)
+
+    바인딩 모델: com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse
+      ${period.startDate} / ${period.endDate}
+      ${user.name} / ${user.age} / ${user.gender} / ${user.height} / ${user.weight}
+      ${user.diseases}  (List of DiseaseSummary, label / subtypeLabel)
+      ${bloodPressure}  (avg/min/max Systolic/Diastolic, status, label)
+      ${bloodSugar}     (fasting/preMeal/postMeal Value/Min/Max + Status/Label)
+      ${bmi}            (value, status, label)
+      ${medication}     (scheduledCount, takenCount, adherenceRate, status, label)
+      ${recordingStats} (bloodPressureDays/bloodSugarDays/medicationDays/periodDays
+                         + 각 rate Double 0.000~1.000)
+
+    null 정책 (사용자 결정):
+      Q1. 혈당 그룹별(공복/식전/식후) 측정 없음   → 행 표시, 셀은 "—"
+      Q2. 보유 질환 0개                          → "신고된 질환 없음" 회색 태그
+      Q3. 측정 기록 0건 (예: 혈압 미측정)         → 표 표시, 셀 "—", 게이지 0%
+
+    상태 칩 매핑: status (NORMAL/CAUTION/RISK/LOW) → 'chip-' + lowercase(status)
+                  CSS: chip-normal / chip-caution / chip-risk / chip-low
+
+    제거된 섹션 (이전 디자인에 있었음): 운동 / 수분
+      실제 API에 해당 데이터 없음. Step 14 이후 데이터 모델 갖춰지면 추가.
+
+    OpenHTMLtoPDF 컨벤션 (monthly-static.html 와 동일):
+      ✅ 허용 entity : &amp; &lt; &gt; &quot; &apos;
+      ❌ 금지 entity : &nbsp; &copy; &middot; &hellip; &mdash; (numeric ref / literal 사용)
+      ❌ XML 주석 내 연속 dash 금지
+      ❌ flexbox / grid → table + inline-block
+      ❌ CSS custom properties → hex literal
+      ❌ position: absolute 자식 너비 채움 → table 2칸 fallback (게이지 막대)
+  -->
+
+  <style>
+    /* ============================================================
+     * 페이지 설정 (A4)
+     * ============================================================ */
+    @page {
+      size: A4;
+      margin: 18mm 16mm 20mm 16mm;
+      @bottom-right {
+        content: "Ballife  ·  page " counter(page) " / " counter(pages);
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 8.5pt;
+        color: #94a3b8;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 10.5pt;
+      color: #334155;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .page { max-width: 210mm; margin: 0 auto; }
+
+    @media screen {
+      body { background: #eceff3; padding: 28px 16px; }
+      .page {
+        background: #fff;
+        padding: 20mm 16mm;
+        box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 12px 32px rgba(15,23,42,.10);
+        border-radius: 6px;
+      }
+    }
+
+    @media print {
+      html, body { background: #fff; }
+      .page {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        max-width: none;
+        margin: 0;
+      }
+      .section { break-inside: avoid; page-break-inside: avoid; }
+      .report-header { break-after: avoid; }
+    }
+
+    .report-header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+    .report-header table { width: 100%; border-collapse: collapse; }
+    .report-header td { vertical-align: bottom; padding: 0; border: none; }
+
+    .brand-eyebrow {
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 2.5pt;
+      color: #0d9488;
+      margin-bottom: 5px;
+    }
+    .report-title {
+      font-size: 21pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.3pt;
+    }
+    .report-meta {
+      text-align: right;
+      font-size: 9pt;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .report-meta .meta-key {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .report-meta .meta-val {
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .section {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      background: #fff;
+    }
+    .section-head {
+      padding: 11px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .section-head table { width: 100%; border-collapse: collapse; }
+    .section-head td { padding: 0; border: none; vertical-align: middle; }
+    .section-title {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+    .section-title .marker {
+      display: inline-block;
+      width: 4px;
+      height: 13px;
+      background: #0d9488;
+      border-radius: 2px;
+      vertical-align: -1px;
+      margin-right: 9px;
+    }
+    .section-unit {
+      text-align: right;
+      font-size: 8.5pt;
+      font-weight: 600;
+      letter-spacing: 0.5pt;
+      color: #94a3b8;
+    }
+    .section-body { padding: 6px 18px 10px 18px; }
+
+    .patient { padding: 16px 18px; }
+    .patient table { width: 100%; border-collapse: collapse; }
+    .patient td { padding: 0; border: none; vertical-align: middle; }
+
+    .patient-name {
+      font-size: 17pt;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.2pt;
+    }
+    .patient-name .sub {
+      font-size: 10pt;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 10px;
+      letter-spacing: 0;
+    }
+    .disease-cell { text-align: right; }
+    .disease-tag {
+      display: inline-block;
+      background: #f0fdfa;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+      padding: 3px 11px;
+      border-radius: 9999px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    .disease-tag-empty {
+      background: #f8fafc;
+      color: #94a3b8;
+      border-color: #e2e8f0;
+    }
+
+    .vitals {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .vitals table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .vitals td {
+      padding: 0;
+      border: none;
+      border-left: 1px solid #f1f5f9;
+      vertical-align: top;
+      padding-left: 16px;
+    }
+    .vitals td:first-child { border-left: none; padding-left: 0; }
+    .vital-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 1pt;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+    .vital-value {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .vital-value .vu {
+      font-size: 9.5pt;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 2px;
+    }
+    .vital-value .vstate {
+      display: block;
+      font-size: 8.5pt;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .v-normal  { color: #059669; }
+    .v-warning { color: #d97706; }
+    .v-risk    { color: #dc2626; }
+
+    table.data { width: 100%; border-collapse: collapse; font-size: 10.5pt; table-layout: fixed; }
+    table.data th {
+      color: #94a3b8;
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 6px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      letter-spacing: 0.5pt;
+    }
+    table.data th.num { text-align: right; }
+    table.data td {
+      padding: 11px 6px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    table.data tbody tr:last-child td { border-bottom: none; }
+
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .label-cell { font-weight: 600; color: #0f172a; }
+
+    .avg-cell {
+      font-size: 13pt;
+      font-weight: 400;
+      color: #0f172a;
+    }
+    .avg-cell .au {
+      font-size: 8.5pt;
+      font-weight: 500;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+    .min-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 11.5pt;
+      font-weight: 400;
+      color: #3b82f6;
+    }
+    .max-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 11.5pt;
+      font-weight: 400;
+      color: #dc2626;
+    }
+    .na-cell {
+      text-align: right;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+    }
+    .status-cell { text-align: right; }
+
+    .chip {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.2pt;
+      white-space: nowrap;
+    }
+    .chip-normal  { background: #dcfce7; color: #166534; }
+    .chip-caution { background: #fef3c7; color: #92400e; }
+    .chip-risk    { background: #fee2e2; color: #991b1b; }
+    .chip-low     { background: #dbeafe; color: #1e40af; }
+
+    table.gauge-track {
+      width: 100%;
+      height: 8px;
+      border-collapse: collapse;
+      border-radius: 9999px;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+    table.gauge-track td {
+      padding: 0;
+      border: none;
+      height: 8px;
+    }
+    table.gauge-track td.gauge-fill { background: #0d9488; }
+    table.gauge-track td.gauge-rest { background: #f1f5f9; }
+
+    .pct-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 10.5pt;
+    }
+
+    .placeholder {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 16px 18px;
+      color: #64748b;
+      font-size: 9.5pt;
+      text-align: center;
+    }
+
+    .footer-disclaimer {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 8pt;
+      color: #94a3b8;
+      line-height: 1.65;
+    }
+    .footer-disclaimer strong { color: #64748b; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============ 헤더 ============ -->
+    <div class="report-header">
+      <table>
+        <tr>
+          <td>
+            <div class="brand-eyebrow">BALLIFE HEALTH REPORT</div>
+            <h1 class="report-title">월간 건강 보고서</h1>
+          </td>
+          <td class="report-meta">
+            <div>
+              <span class="meta-key">분석 기간 </span>
+              <span class="meta-val" th:text="|${period.startDate} – ${period.endDate}|">2026-05-03 – 2026-06-01</span>
+              <span class="meta-key"> (<span th:text="${recordingStats.periodDays}">30</span>일)</span>
+            </div>
+            <div>
+              <span class="meta-key">생성일 </span>
+              <span class="meta-val" th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">2026-06-01</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ============ 환자 정보 ============ -->
+    <div class="section">
+      <div class="patient">
+        <table>
+          <tr>
+            <td>
+              <span class="patient-name">
+                <span th:text="${user.name}">홍길동</span><span class="sub" th:text="|${user.age}세 · ${user.gender}|">30세 · 남</span>
+              </span>
+            </td>
+            <td class="disease-cell">
+              <th:block th:unless="${#lists.isEmpty(user.diseases)}">
+                <span th:each="d : ${user.diseases}" class="disease-tag"
+                      th:text="${d.subtypeLabel != null ? d.label + ' · ' + d.subtypeLabel : d.label}">고혈압 · 1기</span>
+              </th:block>
+              <span th:if="${#lists.isEmpty(user.diseases)}" class="disease-tag disease-tag-empty">신고된 질환 없음</span>
+            </td>
+          </tr>
+        </table>
+
+        <div class="vitals">
+          <table>
+            <tr>
+              <td>
+                <div class="vital-label">신장</div>
+                <div class="vital-value">
+                  <span th:if="${user.height != null}" th:text="${user.height}">170</span><span th:if="${user.height == null}">—</span><span class="vu">cm</span>
+                </div>
+              </td>
+              <td>
+                <div class="vital-label">체중</div>
+                <div class="vital-value">
+                  <span th:if="${user.weight != null}" th:text="${user.weight}">75</span><span th:if="${user.weight == null}">—</span><span class="vu">kg</span>
+                </div>
+              </td>
+              <td>
+                <div class="vital-label">BMI</div>
+                <div class="vital-value">
+                  <span th:if="${bmi.value != null}" th:text="${bmi.value}">25.8</span><span th:if="${bmi.value == null}">—</span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 혈압 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>혈압</h2></td>
+            <td class="section-unit">mmHg</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 28%;">항목</th>
+              <th class="num" style="width: 16%;">평균</th>
+              <th class="num" style="width: 16%;">최저</th>
+              <th class="num" style="width: 16%;">최고</th>
+              <th style="width: 24%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">수축기</td>
+              <td th:class="${bloodPressure.avgSystolic != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bloodPressure.avgSystolic != null ? bloodPressure.avgSystolic : '—'}">128</td>
+              <td th:class="${bloodPressure.minSystolic != null} ? 'min-cell' : 'na-cell'"
+                  th:text="${bloodPressure.minSystolic != null ? bloodPressure.minSystolic : '—'}">115</td>
+              <td th:class="${bloodPressure.maxSystolic != null} ? 'max-cell' : 'na-cell'"
+                  th:text="${bloodPressure.maxSystolic != null ? bloodPressure.maxSystolic : '—'}">142</td>
+              <td class="status-cell">
+                <span th:if="${bloodPressure.status != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bloodPressure.status)}|"
+                      th:text="${bloodPressure.label}">다소 높음</span>
+                <span th:if="${bloodPressure.status == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-cell">이완기</td>
+              <td th:class="${bloodPressure.avgDiastolic != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bloodPressure.avgDiastolic != null ? bloodPressure.avgDiastolic : '—'}">82</td>
+              <td th:class="${bloodPressure.minDiastolic != null} ? 'min-cell' : 'na-cell'"
+                  th:text="${bloodPressure.minDiastolic != null ? bloodPressure.minDiastolic : '—'}">70</td>
+              <td th:class="${bloodPressure.maxDiastolic != null} ? 'max-cell' : 'na-cell'"
+                  th:text="${bloodPressure.maxDiastolic != null ? bloodPressure.maxDiastolic : '—'}">90</td>
+              <td class="status-cell">
+                <span th:if="${bloodPressure.status != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bloodPressure.status)}|"
+                      th:text="${bloodPressure.label}">다소 높음</span>
+                <span th:if="${bloodPressure.status == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 혈당 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>혈당</h2></td>
+            <td class="section-unit">mg/dL</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 28%;">항목</th>
+              <th class="num" style="width: 16%;">평균</th>
+              <th class="num" style="width: 16%;">최저</th>
+              <th class="num" style="width: 16%;">최고</th>
+              <th style="width: 24%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 공복 -->
+            <tr>
+              <td class="label-cell">공복</td>
+              <td th:class="${bloodSugar.fastingValue != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bloodSugar.fastingValue != null ? bloodSugar.fastingValue : '—'}">108</td>
+              <td th:class="${bloodSugar.fastingMin != null} ? 'min-cell' : 'na-cell'"
+                  th:text="${bloodSugar.fastingMin != null ? bloodSugar.fastingMin : '—'}">95</td>
+              <td th:class="${bloodSugar.fastingMax != null} ? 'max-cell' : 'na-cell'"
+                  th:text="${bloodSugar.fastingMax != null ? bloodSugar.fastingMax : '—'}">125</td>
+              <td class="status-cell">
+                <span th:if="${bloodSugar.fastingStatus != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bloodSugar.fastingStatus)}|"
+                      th:text="${bloodSugar.fastingLabel}">다소 높음</span>
+                <span th:if="${bloodSugar.fastingStatus == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+            <!-- 식전 -->
+            <tr>
+              <td class="label-cell">식전</td>
+              <td th:class="${bloodSugar.preMealValue != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bloodSugar.preMealValue != null ? bloodSugar.preMealValue : '—'}">101</td>
+              <td th:class="${bloodSugar.preMealMin != null} ? 'min-cell' : 'na-cell'"
+                  th:text="${bloodSugar.preMealMin != null ? bloodSugar.preMealMin : '—'}">95</td>
+              <td th:class="${bloodSugar.preMealMax != null} ? 'max-cell' : 'na-cell'"
+                  th:text="${bloodSugar.preMealMax != null ? bloodSugar.preMealMax : '—'}">112</td>
+              <td class="status-cell">
+                <span th:if="${bloodSugar.preMealStatus != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bloodSugar.preMealStatus)}|"
+                      th:text="${bloodSugar.preMealLabel}">다소 높음</span>
+                <span th:if="${bloodSugar.preMealStatus == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+            <!-- 식후 -->
+            <tr>
+              <td class="label-cell">식후</td>
+              <td th:class="${bloodSugar.postMealValue != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bloodSugar.postMealValue != null ? bloodSugar.postMealValue : '—'}">168</td>
+              <td th:class="${bloodSugar.postMealMin != null} ? 'min-cell' : 'na-cell'"
+                  th:text="${bloodSugar.postMealMin != null ? bloodSugar.postMealMin : '—'}">145</td>
+              <td th:class="${bloodSugar.postMealMax != null} ? 'max-cell' : 'na-cell'"
+                  th:text="${bloodSugar.postMealMax != null ? bloodSugar.postMealMax : '—'}">215</td>
+              <td class="status-cell">
+                <span th:if="${bloodSugar.postMealStatus != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bloodSugar.postMealStatus)}|"
+                      th:text="${bloodSugar.postMealLabel}">다소 높음</span>
+                <span th:if="${bloodSugar.postMealStatus == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 체중 · 복약 (통합 — 운동·수분은 API 데이터 부재로 제거) ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>체중 · 복약</h2></td>
+            <td class="section-unit">최근 30일</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 40%;">항목</th>
+              <th class="num" style="width: 28%;">값</th>
+              <th style="width: 32%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- BMI -->
+            <tr>
+              <td class="label-cell">BMI</td>
+              <td th:class="${bmi.value != null} ? 'num avg-cell' : 'na-cell'"
+                  th:text="${bmi.value != null ? bmi.value : '—'}">25.8</td>
+              <td class="status-cell">
+                <span th:if="${bmi.status != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(bmi.status)}|"
+                      th:text="${bmi.label}">비만</span>
+                <span th:if="${bmi.status == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+            <!-- 복약 이행률 -->
+            <tr>
+              <td class="label-cell">복약 이행률</td>
+              <td th:class="${medication.scheduledCount != null} ? 'num avg-cell' : 'na-cell'">
+                <span th:if="${medication.scheduledCount != null}">
+                  [[${medication.takenCount}]] / [[${medication.scheduledCount}]]<span class="au"> 회 · [[${medication.adherenceRate}]]%</span>
+                </span>
+                <span th:if="${medication.scheduledCount == null}">—</span>
+              </td>
+              <td class="status-cell">
+                <span th:if="${medication.status != null}" class="chip"
+                      th:classappend="|chip-${#strings.toLowerCase(medication.status)}|"
+                      th:text="${medication.label}">다소 부족</span>
+                <span th:if="${medication.status == null}" class="na-cell">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 측정 기록률 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>측정 기록률</h2></td>
+            <td class="section-unit">최근 30일</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 14%;">항목</th>
+              <th class="num" style="width: 24%; padding-right: 24px;">기록 일수</th>
+              <th style="width: 44%;">달성도</th>
+              <th class="num" style="width: 18%;">비율</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 혈압 -->
+            <tr>
+              <td class="label-cell">혈압</td>
+              <td class="num" style="padding-right: 24px;">
+                <span th:text="${recordingStats.bloodPressureDays ?: 0}">23</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+              </td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" th:style="|width: ${(recordingStats.bloodPressureRate ?: 0) * 100}%|"></td>
+                    <td class="gauge-rest" th:style="|width: ${(1 - (recordingStats.bloodPressureRate ?: 0)) * 100}%|"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell" th:text="|${#numbers.formatDecimal((recordingStats.bloodPressureRate ?: 0) * 100, 1, 1)} %|">76.7 %</td>
+            </tr>
+            <!-- 혈당 -->
+            <tr>
+              <td class="label-cell">혈당</td>
+              <td class="num" style="padding-right: 24px;">
+                <span th:text="${recordingStats.bloodSugarDays ?: 0}">28</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+              </td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" th:style="|width: ${(recordingStats.bloodSugarRate ?: 0) * 100}%|"></td>
+                    <td class="gauge-rest" th:style="|width: ${(1 - (recordingStats.bloodSugarRate ?: 0)) * 100}%|"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell" th:text="|${#numbers.formatDecimal((recordingStats.bloodSugarRate ?: 0) * 100, 1, 1)} %|">93.3 %</td>
+            </tr>
+            <!-- 복약 -->
+            <tr>
+              <td class="label-cell">복약</td>
+              <td class="num" style="padding-right: 24px;">
+                <span th:text="${recordingStats.medicationDays ?: 0}">25</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+              </td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" th:style="|width: ${(recordingStats.medicationRate ?: 0) * 100}%|"></td>
+                    <td class="gauge-rest" th:style="|width: ${(1 - (recordingStats.medicationRate ?: 0)) * 100}%|"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell" th:text="|${#numbers.formatDecimal((recordingStats.medicationRate ?: 0) * 100, 1, 1)} %|">83.3 %</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 다음 진료 질문 (Step D-3 LLM 자리) ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>다음 진료 시 질문</h2></td>
+            <td class="section-unit">AI 추천</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <div class="placeholder">
+          ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 면책 푸터 ============ -->
+    <div class="footer-disclaimer">
+      <strong>안내</strong>  본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며, 의학적 진단을 대체하지 않습니다.
+      측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다. 수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.
+    </div>
+
+  </div>
+</body>
+</html>
