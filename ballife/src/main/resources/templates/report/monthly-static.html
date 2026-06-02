@@ -71,7 +71,7 @@
      * 섹션
      * ============================================================ */
     .section {
-      margin-bottom: 22px;
+      margin-bottom: 28px;
       page-break-inside: avoid;
     }
     .section-title {
@@ -80,31 +80,61 @@
       color: #1f2937;
       margin: 0 0 10px 0;
       padding-left: 8px;
-      border-left: 4px solid #3b82f6;
+      border-left: 3px solid #94a3b8;
     }
 
     /* ============================================================
-     * 환자 정보 박스
+     * 환자 정보 박스 (가로 5컬럼 레이아웃)
      * ============================================================ */
     .patient-box {
       background-color: #f8fafc;
       border: 1px solid #e5e7eb;
       border-radius: 4px;
-      padding: 12px 16px;
+      padding: 14px 18px;
     }
-    .patient-row {
-      margin: 4px 0;
+    .patient-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
     }
-    .patient-label {
+    /* 표 일반 td(padding/border) 상속을 차단해서 박스 내부는 깔끔하게.
+       chain 셀렉터로 specificity 부스트 (본문 표의 tbody tr:last-child td 영향 차단). */
+    .patient-box .patient-info-table td {
+      padding: 0;
+      border: none;
+      vertical-align: top;
+    }
+    .patient-col {
+      padding-right: 8px;
+    }
+    .patient-col-label {
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.5pt;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .patient-col-value {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    /* BMI 상태 색상 강조 (값 자체에 색을 입힘) */
+    .bmi-normal  { color: #059669; }
+    .bmi-warning { color: #d97706; }
+    .bmi-risk    { color: #dc2626; }
+
+    /* 보유 질환 줄 (박스 아래 별도) */
+    .disease-row {
+      margin-top: 10px;
+      padding-left: 4px;
+    }
+    .disease-row-label {
       display: inline-block;
-      width: 70px;
+      font-size: 10pt;
       font-weight: 600;
       color: #6b7280;
-      font-size: 10pt;
-    }
-    .patient-value {
-      font-size: 11pt;
-      margin-right: 22px;
+      margin-right: 10px;
     }
     .disease-tag {
       display: inline-block;
@@ -118,7 +148,9 @@
     }
 
     /* ============================================================
-     * 표 (가로 줄만, 줄무늬 없음)
+     * 표 (가로 줄만, 줄무늬 없음, 깔끔 톤)
+     *   - 헤더 옅은 배경 + 회색 글자 (본문보다 튀지 않음)
+     *   - 본문 가로선은 옅게, 표 시작/끝 줄만 약간 진하게
      * ============================================================ */
     table {
       width: 100%;
@@ -126,18 +158,23 @@
       font-size: 11pt;
     }
     th {
-      background-color: #f1f5f9;
-      color: #1f2937;
+      background-color: #f8fafc;
+      color: #6b7280;
       font-weight: 700;
       text-align: left;
-      padding: 8px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 10pt;
     }
     td {
-      padding: 8px 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    /* 표 마지막 행의 아래 줄은 진하게 (시각적 경계) */
+    tbody tr:last-child td {
       border-bottom: 1px solid #e5e7eb;
     }
+    /* 숫자 칼럼 공통 — 우측 정렬 + tabular-nums (자릿수 폭 균일) */
     .num {
       text-align: right;
       font-variant-numeric: tabular-nums;
@@ -145,21 +182,51 @@
     .label-cell {
       font-weight: 600;
     }
+    /* 평균 / 값 / 최저 / 최고 — 굵기 통일(400), 색상으로만 구분
+         평균 : 검정    (#1f2937)
+         최저 : 파랑    (#3b82f6)
+         최고 : 빨강    (#dc2626)
+    */
+    .avg-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #1f2937;
+    }
+    .min-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #3b82f6;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .max-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #dc2626;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    /* "—" 자리 표시용 — 회색 (BMI/복약처럼 min/max 무의미한 행) */
+    .minmax-cell {
+      font-size: 12pt;
+      font-weight: 400;
+      color: #94a3b8;
+    }
 
     /* ============================================================
-     * 상태 칩 4종
+     * 상태 칩 4종 — 원형 캡슐 + 부피 + 진한 톤
      * ============================================================ */
     .chip {
       display: inline-block;
-      padding: 2px 10px;
+      padding: 5px 14px;
       border-radius: 9999px;
       font-size: 10pt;
       font-weight: 700;
     }
-    .chip-normal  { background: #ecfdf5; color: #059669; }
-    .chip-caution { background: #fffbeb; color: #d97706; }
-    .chip-risk    { background: #fef2f2; color: #dc2626; }
-    .chip-low     { background: #eff6ff; color: #3b82f6; }
+    .chip-normal  { background: #d1fae5; color: #065f46; }
+    .chip-caution { background: #fed7aa; color: #9a3412; }
+    .chip-risk    { background: #fecaca; color: #991b1b; }
+    .chip-low     { background: #dbeafe; color: #1e40af; }
 
     /* ============================================================
      * "다음 진료 질문" 자리 (Step D-3 LLM 결과 영역)
@@ -206,25 +273,35 @@
   <div class="section">
     <h2 class="section-title">환자 정보</h2>
     <div class="patient-box">
-      <div class="patient-row">
-        <span class="patient-label">이름</span>
-        <span class="patient-value">홍길동</span>
-        <span class="patient-label">나이</span>
-        <span class="patient-value">30 세</span>
-        <span class="patient-label">성별</span>
-        <span class="patient-value">남</span>
-      </div>
-      <div class="patient-row">
-        <span class="patient-label">키</span>
-        <span class="patient-value">170 cm</span>
-        <span class="patient-label">몸무게</span>
-        <span class="patient-value">75 kg</span>
-      </div>
-      <div class="patient-row" style="margin-top: 6px;">
-        <span class="patient-label">보유 질환</span>
-        <span class="disease-tag">고혈압 · 1기</span>
-        <span class="disease-tag">당뇨 · 2형</span>
-      </div>
+      <table class="patient-info-table">
+        <tr>
+          <td class="patient-col">
+            <div class="patient-col-label">NAME</div>
+            <div class="patient-col-value">홍길동</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">AGE / SEX</div>
+            <div class="patient-col-value">30 · 남</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">HEIGHT</div>
+            <div class="patient-col-value">170 cm</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">WEIGHT</div>
+            <div class="patient-col-value">75 kg</div>
+          </td>
+          <td class="patient-col">
+            <div class="patient-col-label">BMI</div>
+            <div class="patient-col-value bmi-risk">25.8 (비만)</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="disease-row">
+      <span class="disease-row-label">보유 질환</span>
+      <span class="disease-tag">고혈압 · 1기</span>
+      <span class="disease-tag">당뇨 · 2형</span>
     </div>
   </div>
 
@@ -236,26 +313,26 @@
     <table>
       <thead>
         <tr>
-          <th style="width: 22%;">항목</th>
-          <th class="num" style="width: 16%;">평균</th>
-          <th class="num" style="width: 16%;">최저</th>
-          <th class="num" style="width: 16%;">최고</th>
-          <th style="width: 30%;">상태</th>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="label-cell">수축기</td>
-          <td class="num">128</td>
-          <td class="num">115</td>
-          <td class="num">142</td>
+          <td class="num avg-cell">128</td>
+          <td class="num min-cell">115</td>
+          <td class="num max-cell">142</td>
           <td><span class="chip chip-caution">다소 높음</span></td>
         </tr>
         <tr>
           <td class="label-cell">이완기</td>
-          <td class="num">82</td>
-          <td class="num">70</td>
-          <td class="num">90</td>
+          <td class="num avg-cell">82</td>
+          <td class="num min-cell">70</td>
+          <td class="num max-cell">90</td>
           <td><span class="chip chip-caution">다소 높음</span></td>
         </tr>
       </tbody>
@@ -270,33 +347,33 @@
     <table>
       <thead>
         <tr>
-          <th style="width: 22%;">그룹</th>
-          <th class="num" style="width: 16%;">평균</th>
-          <th class="num" style="width: 16%;">최저</th>
-          <th class="num" style="width: 16%;">최고</th>
-          <th style="width: 30%;">상태</th>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="label-cell">공복</td>
-          <td class="num">108</td>
-          <td class="num">95</td>
-          <td class="num">125</td>
+          <td class="num avg-cell">108</td>
+          <td class="num min-cell">95</td>
+          <td class="num max-cell">125</td>
           <td><span class="chip chip-caution">다소 높음</span></td>
         </tr>
         <tr>
           <td class="label-cell">식전</td>
-          <td class="num">101</td>
-          <td class="num">95</td>
-          <td class="num">112</td>
+          <td class="num avg-cell">101</td>
+          <td class="num min-cell">95</td>
+          <td class="num max-cell">112</td>
           <td><span class="chip chip-caution">다소 높음</span></td>
         </tr>
         <tr>
           <td class="label-cell">식후</td>
-          <td class="num">168</td>
-          <td class="num">145</td>
-          <td class="num">215</td>
+          <td class="num avg-cell">168</td>
+          <td class="num min-cell">145</td>
+          <td class="num max-cell">215</td>
           <td><span class="chip chip-caution">다소 높음</span></td>
         </tr>
       </tbody>
@@ -304,27 +381,34 @@
   </div>
 
   <!-- ============================================================
-       BMI / 복약
+       BMI / 복약 (5칼럼 — 혈압/혈당 표와 동일 구조)
+         min/max 무의미한 행은 "—" (minmax-cell, 회색)
        ============================================================ -->
   <div class="section">
     <h2 class="section-title">체중 · 복약</h2>
     <table>
       <thead>
         <tr>
-          <th style="width: 30%;">항목</th>
-          <th class="num" style="width: 34%;">값</th>
-          <th style="width: 36%;">상태</th>
+          <th style="width: 28%;">항목</th>
+          <th class="num" style="width: 18%;">평균</th>
+          <th class="num" style="width: 18%;">최저</th>
+          <th class="num" style="width: 18%;">최고</th>
+          <th style="width: 18%;">상태</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="label-cell">BMI</td>
-          <td class="num">25.8</td>
+          <td class="num avg-cell">25.8</td>
+          <td class="num minmax-cell">—</td>
+          <td class="num minmax-cell">—</td>
           <td><span class="chip chip-risk">비만</span></td>
         </tr>
         <tr>
           <td class="label-cell">복약 이행률</td>
-          <td class="num">79 % (22 / 28)</td>
+          <td class="num avg-cell">79 % (22 / 28)</td>
+          <td class="num minmax-cell">—</td>
+          <td class="num minmax-cell">—</td>
           <td><span class="chip chip-caution">다소 부족</span></td>
         </tr>
       </tbody>
