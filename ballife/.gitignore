@@ -40,4 +40,4 @@ out/
 # (root .gitignore의 **/application.yml 와 이중 안전망.
 #  application-mock.yml, application.yml.example 등 다른 yml은 push 허용.)
 application-local.yml
-application.yml
+*.yml
