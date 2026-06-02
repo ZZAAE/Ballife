@@ -20,7 +20,7 @@ import Plus from "../assets/Record/Plus.svg";
 import BloodsugarModal from "../modals/bloodsugarModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import MealRegisterModal from "../modals/MealRegisterModal";
-import WaterRecordModal from "../modals/WaterRecordModal";
+import WaterRecordModal from "../modals/waterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";

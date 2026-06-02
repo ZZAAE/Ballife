@@ -40,30 +40,35 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
     if (!isOpen || !userId) return;
 
     let cancelled = false;
+    const pad = (n) => String(n).padStart(2, "0");
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
 
     Promise.allSettled([
       userConfigApi.getTargetWeight(userId),
-      bioValueRecordApi.getLatestPageByCategory(userId, WEIGHT_CATEGORY),
-    ]).then(([targetRes, latestRes]) => {
+      bioValueRecordApi.searchByDate(userId, WEIGHT_CATEGORY, targetDate),
+    ]).then(([targetRes, dayRes]) => {
       if (cancelled) return;
 
       if (targetRes.status === "fulfilled" && targetRes.value?.data != null) {
         setTargetWeight(Number(targetRes.value.data));
       }
 
-      if (latestRes.status === "fulfilled") {
-        const content = latestRes.value?.data?.content ?? [];
-        const last = content[0];
-        if (last?.weight != null) {
-          setWeight(String(Number(last.weight)));
-        }
+      // 선택한 날짜의 체중 기록을 표시 (없으면 빈 값 → 새 기록 입력)
+      if (dayRes.status === "fulfilled") {
+        const list = Array.isArray(dayRes.value?.data) ? dayRes.value.data : [];
+        const rec = list[0];
+        setWeight(rec?.weight != null ? String(Number(rec.weight)) : "");
+      } else {
+        setWeight("");
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [isOpen, userId]);
+  }, [isOpen, userId, recordDate]);
 
   if (!isOpen) return null;
 
