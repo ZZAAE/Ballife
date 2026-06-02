@@ -5,239 +5,339 @@
   <title>Ballife 월간 건강 보고서</title>
 
   <!--
-    ⚠️ OpenHTMLtoPDF 사용 시 HTML named entity 금지
-
-    이 템플릿은 OpenHTMLtoPDF로 PDF 변환되는데, strict XML 파서를
-    사용하기 때문에 XML 기본 5개 외 HTML named entity는 인식 못 함.
-
-    ✅ 허용 : &amp; &lt; &gt; &quot; &apos;
-    ❌ 금지 : &nbsp; &copy; &middot; &hellip; &mdash; 등 모든 HTML5 entity
-    ✅ 대안 : numeric reference 사용
-             &nbsp;   → &#160;
-             &copy;   → &#169;
-             &middot; → &#183;
-             &hellip; → &#8230;
-             &mdash;  → &#8212;
-
-    Step D-2 Thymeleaf 변환 시에도 동일 규칙 유지.
+    ⚠️ OpenHTMLtoPDF 사용 시 HTML named entity 금지 (strict XML 파서)
+       ✅ 허용 : &amp; &lt; &gt; &quot; &apos;
+       ❌ 금지 : &nbsp; &copy; &middot; &hellip; &mdash; 등 — numeric ref 또는 literal 문자 사용
+    ⚠️ flexbox / grid 미지원 → 레이아웃은 table / inline-block 으로만 구성
+    ⚠️ CSS custom properties 미지원 → :root 변수 대신 모든 색상 토큰은 hex literal 로 인라인
+    폰트: Regular(400) / Bold(700) 만 등록 — medium(500) / semibold(600) 은 가장 가까운
+         weight 로 fallback (500→400, 600→700).
   -->
 
   <style>
     /* ============================================================
-     * 페이지 설정 (A4, 여백, 페이지 번호)
+     * 페이지 설정 (A4)
      * ============================================================ */
     @page {
       size: A4;
-      margin: 20mm 18mm 22mm 18mm;
+      margin: 18mm 16mm 20mm 16mm;
       @bottom-right {
-        content: "page " counter(page) " / " counter(pages);
+        content: "Ballife  ·  page " counter(page) " / " counter(pages);
         font-family: 'Noto Sans KR', sans-serif;
-        font-size: 9pt;
-        color: #6b7280;
+        font-size: 8.5pt;
+        color: #94a3b8;
       }
     }
 
     /* ============================================================
-     * 기본 타이포그래피
+     * 기본
      * ============================================================ */
+    * { box-sizing: border-box; }
+
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      font-size: 11pt;
-      color: #1a1a1a;
+      font-size: 10.5pt;
+      color: #334155;
       line-height: 1.5;
       margin: 0;
     }
 
+    .page { max-width: 210mm; margin: 0 auto; }
+
+    /* 화면 미리보기에서만 종이 느낌 (PDF 는 @page 여백 사용) */
+    @media screen {
+      body { background: #eceff3; padding: 28px 16px; }
+      .page {
+        background: #fff;
+        padding: 20mm 16mm;
+        box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 12px 32px rgba(15,23,42,.10);
+        border-radius: 6px;
+      }
+    }
+
+    @media print {
+      html, body { background: #fff; }
+      .page {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        max-width: none;
+        margin: 0;
+      }
+      .section { break-inside: avoid; page-break-inside: avoid; }
+      .report-header { break-after: avoid; }
+    }
+
     /* ============================================================
-     * 보고서 헤더
+     * 헤더
      * ============================================================ */
     .report-header {
-      border-bottom: 2px solid #1f2937;
-      padding-bottom: 12px;
-      margin-bottom: 24px;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+    .report-header table { width: 100%; border-collapse: collapse; }
+    .report-header td { vertical-align: bottom; padding: 0; border: none; }
+
+    .brand-eyebrow {
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 2.5pt;
+      color: #0d9488;
+      margin-bottom: 5px;
     }
     .report-title {
-      font-size: 22pt;
+      font-size: 21pt;
       font-weight: 700;
-      color: #1f2937;
-      margin: 0 0 6px 0;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.3pt;
     }
     .report-meta {
-      font-size: 10pt;
-      color: #6b7280;
+      text-align: right;
+      font-size: 9pt;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .report-meta .meta-key {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .report-meta .meta-val {
+      color: #334155;
+      font-weight: 600;
     }
 
     /* ============================================================
-     * 섹션
+     * 섹션 카드
      * ============================================================ */
     .section {
-      margin-bottom: 28px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
       page-break-inside: avoid;
+      background: #fff;
     }
+    .section-head {
+      padding: 11px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .section-head table { width: 100%; border-collapse: collapse; }
+    .section-head td { padding: 0; border: none; vertical-align: middle; }
     .section-title {
-      font-size: 13pt;
+      font-size: 11.5pt;
       font-weight: 700;
-      color: #1f2937;
-      margin: 0 0 10px 0;
-      padding-left: 8px;
-      border-left: 3px solid #94a3b8;
+      color: #0f172a;
+      margin: 0;
     }
-
-    /* ============================================================
-     * 환자 정보 박스 (가로 5컬럼 레이아웃)
-     * ============================================================ */
-    .patient-box {
-      background-color: #f8fafc;
-      border: 1px solid #e5e7eb;
-      border-radius: 4px;
-      padding: 14px 18px;
+    .section-title .marker {
+      display: inline-block;
+      width: 4px;
+      height: 13px;
+      background: #0d9488;
+      border-radius: 2px;
+      vertical-align: -1px;
+      margin-right: 9px;
     }
-    .patient-info-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-    /* 표 일반 td(padding/border) 상속을 차단해서 박스 내부는 깔끔하게.
-       chain 셀렉터로 specificity 부스트 (본문 표의 tbody tr:last-child td 영향 차단). */
-    .patient-box .patient-info-table td {
-      padding: 0;
-      border: none;
-      vertical-align: top;
-    }
-    .patient-col {
-      padding-right: 8px;
-    }
-    .patient-col-label {
+    .section-unit {
+      text-align: right;
       font-size: 8.5pt;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: 0.5pt;
       color: #94a3b8;
-      margin-bottom: 4px;
     }
-    .patient-col-value {
-      font-size: 14pt;
-      font-weight: 600;
-      color: #1f2937;
-    }
-    /* BMI 상태 색상 강조 (값 자체에 색을 입힘) */
-    .bmi-normal  { color: #059669; }
-    .bmi-warning { color: #d97706; }
-    .bmi-risk    { color: #dc2626; }
+    .section-body { padding: 6px 18px 10px 18px; }
 
-    /* 보유 질환 줄 (박스 아래 별도) */
-    .disease-row {
-      margin-top: 10px;
-      padding-left: 4px;
+    /* ============================================================
+     * 환자 정보 카드
+     * ============================================================ */
+    .patient { padding: 16px 18px; }
+    .patient table { width: 100%; border-collapse: collapse; }
+    .patient td { padding: 0; border: none; vertical-align: middle; }
+
+    .patient-name {
+      font-size: 17pt;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.2pt;
     }
-    .disease-row-label {
-      display: inline-block;
+    .patient-name .sub {
       font-size: 10pt;
-      font-weight: 600;
-      color: #6b7280;
-      margin-right: 10px;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 10px;
+      letter-spacing: 0;
     }
+    .disease-cell { text-align: right; }
     .disease-tag {
       display: inline-block;
-      background: #eff6ff;
-      color: #1d4ed8;
-      padding: 2px 10px;
+      background: #f0fdfa;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+      padding: 3px 11px;
       border-radius: 9999px;
-      font-size: 10pt;
+      font-size: 9pt;
       font-weight: 600;
-      margin-right: 6px;
+      margin-left: 6px;
     }
 
-    /* ============================================================
-     * 표 (가로 줄만, 줄무늬 없음, 깔끔 톤)
-     *   - 헤더 옅은 배경 + 회색 글자 (본문보다 튀지 않음)
-     *   - 본문 가로선은 옅게, 표 시작/끝 줄만 약간 진하게
-     * ============================================================ */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11pt;
+    .vitals {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
     }
-    th {
-      background-color: #f8fafc;
-      color: #6b7280;
+    .vitals table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .vitals td {
+      padding: 0;
+      border: none;
+      border-left: 1px solid #f1f5f9;
+      vertical-align: top;
+      padding-left: 16px;
+    }
+    .vitals td:first-child { border-left: none; padding-left: 0; }
+    .vital-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 1pt;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+    .vital-value {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .vital-value .vu {
+      font-size: 9.5pt;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 2px;
+    }
+    .vital-value .vstate {
+      display: block;
+      font-size: 8.5pt;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .v-normal  { color: #059669; }
+    .v-warning { color: #d97706; }
+    .v-risk    { color: #dc2626; }
+
+    /* ============================================================
+     * 데이터 표
+     * ============================================================ */
+    table.data { width: 100%; border-collapse: collapse; font-size: 10.5pt; table-layout: fixed; }
+    table.data th {
+      color: #94a3b8;
       font-weight: 700;
       text-align: left;
-      padding: 12px 14px;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 10pt;
+      padding: 9px 6px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      letter-spacing: 0.5pt;
     }
-    td {
-      padding: 12px 14px;
+    table.data th.num { text-align: right; }
+    table.data td {
+      padding: 11px 6px;
       border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
     }
-    /* 표 마지막 행의 아래 줄은 진하게 (시각적 경계) */
-    tbody tr:last-child td {
-      border-bottom: 1px solid #e5e7eb;
+    table.data tbody tr:last-child td { border-bottom: none; }
+
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .label-cell { font-weight: 600; color: #0f172a; }
+
+    .avg-cell {
+      font-size: 13pt;
+      font-weight: 400;
+      color: #0f172a;
     }
-    /* 숫자 칼럼 공통 — 우측 정렬 + tabular-nums (자릿수 폭 균일) */
-    .num {
+    .avg-cell .au {
+      font-size: 8.5pt;
+      font-weight: 500;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+    /* 최저 파랑 / 최고 빨강 — 개별 칼럼, 우측 정렬 + 자릿수 폭 균일 */
+    .min-cell {
       text-align: right;
       font-variant-numeric: tabular-nums;
-    }
-    .label-cell {
-      font-weight: 600;
-    }
-    /* 평균 / 값 / 최저 / 최고 — 굵기 통일(400), 색상으로만 구분
-         평균 : 검정    (#1f2937)
-         최저 : 파랑    (#3b82f6)
-         최고 : 빨강    (#dc2626)
-    */
-    .avg-cell {
-      font-size: 12pt;
-      font-weight: 400;
-      color: #1f2937;
-    }
-    .min-cell {
-      font-size: 12pt;
+      font-size: 11.5pt;
       font-weight: 400;
       color: #3b82f6;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
     }
     .max-cell {
-      font-size: 12pt;
-      font-weight: 400;
-      color: #dc2626;
       text-align: right;
       font-variant-numeric: tabular-nums;
-    }
-    /* "—" 자리 표시용 — 회색 (BMI/복약처럼 min/max 무의미한 행) */
-    .minmax-cell {
-      font-size: 12pt;
+      font-size: 11.5pt;
       font-weight: 400;
-      color: #94a3b8;
+      color: #dc2626;
     }
+    .na-cell {
+      text-align: right;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 상태 칼럼 — 칩을 우측에 정렬 */
+    .status-cell { text-align: right; }
 
     /* ============================================================
-     * 상태 칩 4종 — 원형 캡슐 + 부피 + 진한 톤
+     * 상태 칩
      * ============================================================ */
     .chip {
       display: inline-block;
-      padding: 5px 14px;
+      padding: 4px 12px;
       border-radius: 9999px;
-      font-size: 10pt;
+      font-size: 8.5pt;
       font-weight: 700;
+      letter-spacing: 0.2pt;
+      white-space: nowrap;
     }
-    .chip-normal  { background: #d1fae5; color: #065f46; }
-    .chip-caution { background: #fed7aa; color: #9a3412; }
-    .chip-risk    { background: #fecaca; color: #991b1b; }
+    .chip-normal  { background: #dcfce7; color: #166534; }
+    .chip-caution { background: #fef3c7; color: #92400e; }
+    .chip-risk    { background: #fee2e2; color: #991b1b; }
     .chip-low     { background: #dbeafe; color: #1e40af; }
 
     /* ============================================================
-     * "다음 진료 질문" 자리 (Step D-3 LLM 결과 영역)
+     * 기록률 게이지 — table 2칸 fallback
+     *   (OHP는 position: absolute로 자식 너비 채움이 불안정해 div 대신 table 사용)
+     * ============================================================ */
+    table.gauge-track {
+      width: 100%;
+      height: 8px;
+      border-collapse: collapse;
+      border-radius: 9999px;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+    /* 일반 table.data td 의 padding/border 차단 (같은 specificity, 후행 우선) */
+    table.gauge-track td {
+      padding: 0;
+      border: none;
+      height: 8px;
+    }
+    table.gauge-track td.gauge-fill { background: #0d9488; }
+    table.gauge-track td.gauge-rest { background: #f1f5f9; }
+    .pct-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 10.5pt;
+    }
+
+    /* ============================================================
+     * 진료 질문 placeholder
      * ============================================================ */
     .placeholder {
-      background-color: #f8fafc;
+      background: #f8fafc;
       border: 1px dashed #cbd5e1;
-      border-radius: 4px;
-      padding: 18px 20px;
-      color: #6b7280;
-      font-size: 10pt;
+      border-radius: 8px;
+      padding: 16px 18px;
+      color: #64748b;
+      font-size: 9.5pt;
       text-align: center;
     }
 
@@ -245,227 +345,378 @@
      * 면책 푸터
      * ============================================================ */
     .footer-disclaimer {
-      margin-top: 28px;
+      margin-top: 18px;
       padding-top: 12px;
-      border-top: 1px solid #e5e7eb;
-      font-size: 8.5pt;
-      color: #6b7280;
-      line-height: 1.6;
+      border-top: 1px solid #e2e8f0;
+      font-size: 8pt;
+      color: #94a3b8;
+      line-height: 1.65;
     }
+    .footer-disclaimer strong { color: #64748b; font-weight: 600; }
   </style>
 </head>
 <body>
+  <div class="page">
 
-  <!-- ============================================================
-       헤더
-       ============================================================ -->
-  <div class="report-header">
-    <h1 class="report-title">Ballife 월간 건강 보고서</h1>
-    <div class="report-meta">
-      분석 기간 : 2026-05-03 ~ 2026-06-01 (30일)
-      &#160;·&#160; 생성일 : 2026-06-01
-    </div>
-  </div>
-
-  <!-- ============================================================
-       환자 정보
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">환자 정보</h2>
-    <div class="patient-box">
-      <table class="patient-info-table">
+    <!-- ============ 헤더 ============ -->
+    <div class="report-header">
+      <table>
         <tr>
-          <td class="patient-col">
-            <div class="patient-col-label">NAME</div>
-            <div class="patient-col-value">홍길동</div>
+          <td>
+            <div class="brand-eyebrow">BALLIFE HEALTH REPORT</div>
+            <h1 class="report-title">월간 건강 보고서</h1>
           </td>
-          <td class="patient-col">
-            <div class="patient-col-label">AGE / SEX</div>
-            <div class="patient-col-value">30 · 남</div>
-          </td>
-          <td class="patient-col">
-            <div class="patient-col-label">HEIGHT</div>
-            <div class="patient-col-value">170 cm</div>
-          </td>
-          <td class="patient-col">
-            <div class="patient-col-label">WEIGHT</div>
-            <div class="patient-col-value">75 kg</div>
-          </td>
-          <td class="patient-col">
-            <div class="patient-col-label">BMI</div>
-            <div class="patient-col-value bmi-risk">25.8 (비만)</div>
+          <td class="report-meta">
+            <div><span class="meta-key">분석 기간 </span><span class="meta-val">2026-05-03 – 2026-06-01</span><span class="meta-key"> (30일)</span></div>
+            <div><span class="meta-key">생성일 </span><span class="meta-val">2026-06-01</span></div>
           </td>
         </tr>
       </table>
     </div>
-    <div class="disease-row">
-      <span class="disease-row-label">보유 질환</span>
-      <span class="disease-tag">고혈압 · 1기</span>
-      <span class="disease-tag">당뇨 · 2형</span>
+
+    <!-- ============ 환자 정보 ============ -->
+    <div class="section">
+      <div class="patient">
+        <table>
+          <tr>
+            <td>
+              <span class="patient-name">홍길동<span class="sub">30세 · 남</span></span>
+            </td>
+            <td class="disease-cell">
+              <span class="disease-tag">고혈압 · 1기</span>
+              <span class="disease-tag">당뇨 · 2형</span>
+            </td>
+          </tr>
+        </table>
+
+        <div class="vitals">
+          <table>
+            <tr>
+              <td>
+                <div class="vital-label">신장</div>
+                <div class="vital-value">170<span class="vu">cm</span></div>
+              </td>
+              <td>
+                <div class="vital-label">체중</div>
+                <div class="vital-value">75<span class="vu">kg</span></div>
+              </td>
+              <td>
+                <div class="vital-label">BMI</div>
+                <div class="vital-value">25.8</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- ============================================================
-       혈압
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">혈압 (mmHg)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 28%;">항목</th>
-          <th class="num" style="width: 18%;">평균</th>
-          <th class="num" style="width: 18%;">최저</th>
-          <th class="num" style="width: 18%;">최고</th>
-          <th style="width: 18%;">상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="label-cell">수축기</td>
-          <td class="num avg-cell">128</td>
-          <td class="num min-cell">115</td>
-          <td class="num max-cell">142</td>
-          <td><span class="chip chip-caution">다소 높음</span></td>
-        </tr>
-        <tr>
-          <td class="label-cell">이완기</td>
-          <td class="num avg-cell">82</td>
-          <td class="num min-cell">70</td>
-          <td class="num max-cell">90</td>
-          <td><span class="chip chip-caution">다소 높음</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ============================================================
-       혈당 (공복 / 식전 / 식후 3그룹)
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">혈당 (mg/dL)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 28%;">항목</th>
-          <th class="num" style="width: 18%;">평균</th>
-          <th class="num" style="width: 18%;">최저</th>
-          <th class="num" style="width: 18%;">최고</th>
-          <th style="width: 18%;">상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="label-cell">공복</td>
-          <td class="num avg-cell">108</td>
-          <td class="num min-cell">95</td>
-          <td class="num max-cell">125</td>
-          <td><span class="chip chip-caution">다소 높음</span></td>
-        </tr>
-        <tr>
-          <td class="label-cell">식전</td>
-          <td class="num avg-cell">101</td>
-          <td class="num min-cell">95</td>
-          <td class="num max-cell">112</td>
-          <td><span class="chip chip-caution">다소 높음</span></td>
-        </tr>
-        <tr>
-          <td class="label-cell">식후</td>
-          <td class="num avg-cell">168</td>
-          <td class="num min-cell">145</td>
-          <td class="num max-cell">215</td>
-          <td><span class="chip chip-caution">다소 높음</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ============================================================
-       BMI / 복약 (5칼럼 — 혈압/혈당 표와 동일 구조)
-         min/max 무의미한 행은 "—" (minmax-cell, 회색)
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">체중 · 복약</h2>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 28%;">항목</th>
-          <th class="num" style="width: 18%;">평균</th>
-          <th class="num" style="width: 18%;">최저</th>
-          <th class="num" style="width: 18%;">최고</th>
-          <th style="width: 18%;">상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="label-cell">BMI</td>
-          <td class="num avg-cell">25.8</td>
-          <td class="num minmax-cell">—</td>
-          <td class="num minmax-cell">—</td>
-          <td><span class="chip chip-risk">비만</span></td>
-        </tr>
-        <tr>
-          <td class="label-cell">복약 이행률</td>
-          <td class="num avg-cell">79 % (22 / 28)</td>
-          <td class="num minmax-cell">—</td>
-          <td class="num minmax-cell">—</td>
-          <td><span class="chip chip-caution">다소 부족</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ============================================================
-       측정 기록률
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">측정 기록률</h2>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 30%;">항목</th>
-          <th class="num" style="width: 35%;">기록 일수</th>
-          <th class="num" style="width: 35%;">비율</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="label-cell">혈압</td>
-          <td class="num">23 / 30 일</td>
-          <td class="num">76.7 %</td>
-        </tr>
-        <tr>
-          <td class="label-cell">혈당</td>
-          <td class="num">28 / 30 일</td>
-          <td class="num">93.3 %</td>
-        </tr>
-        <tr>
-          <td class="label-cell">복약</td>
-          <td class="num">25 / 30 일</td>
-          <td class="num">83.3 %</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ============================================================
-       다음 진료 질문 (Step D-3 LLM 자리)
-       ============================================================ -->
-  <div class="section">
-    <h2 class="section-title">다음 진료 시 질문</h2>
-    <div class="placeholder">
-      ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
+    <!-- ============ 혈압 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>혈압</h2></td>
+            <td class="section-unit">mmHg</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 28%;">항목</th>
+              <th class="num" style="width: 16%;">평균</th>
+              <th class="num" style="width: 16%;">최저</th>
+              <th class="num" style="width: 16%;">최고</th>
+              <th style="width: 24%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">수축기</td>
+              <td class="num avg-cell">128</td>
+              <td class="min-cell">115</td>
+              <td class="max-cell">142</td>
+              <td class="status-cell"><span class="chip chip-caution">다소 높음</span></td>
+            </tr>
+            <tr>
+              <td class="label-cell">이완기</td>
+              <td class="num avg-cell">82</td>
+              <td class="min-cell">70</td>
+              <td class="max-cell">90</td>
+              <td class="status-cell"><span class="chip chip-caution">다소 높음</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- ============================================================
-       면책 푸터
-       ============================================================ -->
-  <div class="footer-disclaimer">
-    본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며,
-    의학적 진단을 대체하지 않습니다. 측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다.
-    수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.
-  </div>
+    <!-- ============ 혈당 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>혈당</h2></td>
+            <td class="section-unit">mg/dL</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 28%;">항목</th>
+              <th class="num" style="width: 16%;">평균</th>
+              <th class="num" style="width: 16%;">최저</th>
+              <th class="num" style="width: 16%;">최고</th>
+              <th style="width: 24%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">공복</td>
+              <td class="num avg-cell">108</td>
+              <td class="min-cell">95</td>
+              <td class="max-cell">125</td>
+              <td class="status-cell"><span class="chip chip-caution">다소 높음</span></td>
+            </tr>
+            <tr>
+              <td class="label-cell">식전</td>
+              <td class="num avg-cell">101</td>
+              <td class="min-cell">95</td>
+              <td class="max-cell">112</td>
+              <td class="status-cell"><span class="chip chip-caution">다소 높음</span></td>
+            </tr>
+            <tr>
+              <td class="label-cell">식후</td>
+              <td class="num avg-cell">168</td>
+              <td class="min-cell">145</td>
+              <td class="max-cell">215</td>
+              <td class="status-cell"><span class="chip chip-caution">다소 높음</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!-- ============ 체중 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>체중</h2></td>
+            <td class="section-unit"></td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 40%;">항목</th>
+              <th class="num" style="width: 28%;">값</th>
+              <th style="width: 32%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">체중</td>
+              <td class="num avg-cell">75<span class="au">kg</span></td>
+              <td class="status-cell"><span class="chip chip-caution">관리 필요</span></td>
+            </tr>
+            <tr>
+              <td class="label-cell">BMI</td>
+              <td class="num avg-cell">25.8</td>
+              <td class="status-cell"><span class="chip chip-risk">비만</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 복약 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>복약</h2></td>
+            <td class="section-unit">최근 30일</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 40%;">항목</th>
+              <th class="num" style="width: 28%;">복용 / 처방</th>
+              <th style="width: 32%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">복약 이행률</td>
+              <td class="num avg-cell">21 / 30<span class="au">회 · 70%</span></td>
+              <td class="status-cell"><span class="chip chip-caution">다소 부족</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 운동 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>운동</h2></td>
+            <td class="section-unit">최근 30일</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 40%;">항목</th>
+              <th class="num" style="width: 28%;">값</th>
+              <th style="width: 32%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">운동 일수</td>
+              <td class="num avg-cell">12 / 30<span class="au">일</span></td>
+              <td class="status-cell"><span class="chip chip-caution">다소 부족</span></td>
+            </tr>
+            <tr>
+              <td class="label-cell">주 평균</td>
+              <td class="num avg-cell">2.8<span class="au">회/주</span></td>
+              <td class="status-cell"><span class="chip chip-caution">다소 부족</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 수분 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>수분</h2></td>
+            <td class="section-unit">일 평균</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 40%;">항목</th>
+              <th class="num" style="width: 28%;">값</th>
+              <th style="width: 32%; text-align: right;">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">일 평균 섭취량</td>
+              <td class="num avg-cell">1.4 / 2.0<span class="au">L</span></td>
+              <td class="status-cell"><span class="chip chip-caution">다소 부족</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 측정 기록률 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>측정 기록률</h2></td>
+            <td class="section-unit">최근 30일</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 14%;">항목</th>
+              <th class="num" style="width: 24%; padding-right: 24px;">기록 일수</th>
+              <th style="width: 44%;">달성도</th>
+              <th class="num" style="width: 18%;">비율</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label-cell">혈압</td>
+              <td class="num" style="padding-right: 24px;">23 / 30 일</td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" style="width: 76.7%;"></td>
+                    <td class="gauge-rest" style="width: 23.3%;"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell">76.7 %</td>
+            </tr>
+            <tr>
+              <td class="label-cell">혈당</td>
+              <td class="num" style="padding-right: 24px;">28 / 30 일</td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" style="width: 93.3%;"></td>
+                    <td class="gauge-rest" style="width: 6.7%;"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell">93.3 %</td>
+            </tr>
+            <tr>
+              <td class="label-cell">복약</td>
+              <td class="num" style="padding-right: 24px;">25 / 30 일</td>
+              <td>
+                <table class="gauge-track">
+                  <tr>
+                    <td class="gauge-fill" style="width: 83.3%;"></td>
+                    <td class="gauge-rest" style="width: 16.7%;"></td>
+                  </tr>
+                </table>
+              </td>
+              <td class="pct-cell">83.3 %</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 다음 진료 질문 ============ -->
+    <div class="section">
+      <div class="section-head">
+        <table>
+          <tr>
+            <td><h2 class="section-title"><span class="marker"></span>다음 진료 시 질문</h2></td>
+            <td class="section-unit">AI 추천</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section-body">
+        <div class="placeholder">
+          ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 면책 푸터 ============ -->
+    <div class="footer-disclaimer">
+      <strong>안내</strong>  본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며, 의학적 진단을 대체하지 않습니다.
+      측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다. 수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.
+    </div>
+
+  </div>
 </body>
 </html>
