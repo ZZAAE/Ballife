@@ -94,11 +94,7 @@ foodsafety:
 storage:
   type: local
   local:
-<<<<<<< HEAD:ballife/src/main/resources/application.yml.example
     base-path: "<YOUR_LOCAL_TEMP_FOLDER>"  # 예: "C:/Users/<your-username>/Desktop/프로젝트_임시"
-=======
-    base-path: "C:/Users/junsu/OneDrive/Desktop/사진"
->>>>>>> origin/sjs0601:ballife/src/main/resources/application.yml
     url-prefix: /uploads
 
     #단계별로 스페이스 2칸
