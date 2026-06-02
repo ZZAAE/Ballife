@@ -1,10 +1,6 @@
 from typing import List
-<<<<<<< HEAD
 
-from fastapi import Body, FastAPI
-=======
 from fastapi import Body, FastAPI, File, UploadFile
->>>>>>> 3bfe167d6daa4196184b6d1a4aba7b2bfa97e17e
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
