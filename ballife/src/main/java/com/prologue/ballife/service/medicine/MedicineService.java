@@ -1,5 +1,6 @@
 package com.prologue.ballife.service.medicine;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.prologue.ballife.domain.medicine.Prescription;
+import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 import com.prologue.ballife.domain.medicine.UserMedicine;
+import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.repository.medicine.PrescriptionRepository;
 import com.prologue.ballife.repository.medicine.UserMedicineRepository;
+import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
 import com.prologue.ballife.web.dto.medicine.UserMedicineDto;
@@ -26,15 +30,22 @@ public class MedicineService {
 
     private final PrescriptionRepository prescriptionRepository;
     private final UserMedicineRepository userMedicineRepository;
+    private final UserRepository userRepository;
 
     // 처방전+약 등록
     @Transactional
     public PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse postMedicine(
+            Long userId,
             PrescriptionAndMedicineDto.CreateRequest request) {
-
+        
+        User user = userRepository.getReferenceById(userId);
         Prescription prescription = Prescription.builder()
+                .user(user)
                 .prescriptionName(request.getPrescriptionName())
-                .prescriptionDate(request.getPrescriptionDate())
+                .prescriptionDate(
+                    request.getPrescriptionDate() != null ? request.getPrescriptionDate() : LocalDate.now()
+                ) //임시로 현재 날짜 등록
+                .pCategory(Pcategory.MEDICINE)
                 .memo(request.getMemo())
                 .intakeIntervals(request.getIntakeIntervals())
                 .dosage(request.getDosage())
@@ -48,7 +59,7 @@ public class MedicineService {
 
             UserMedicine userMedicine = UserMedicine.builder()
                     .prescription(savedPrescription) // FK 연결
-                    .kdCode(u.getKdCode())
+                    .medicineName(u.getMedicineName())
                     .supplementId(u.getSupplementId())
                     .build();
 
@@ -109,7 +120,7 @@ public class MedicineService {
                 .orElseThrow(() -> new RuntimeException("처방전 없음"));
 
         res.setPrescription(prescription);
-        res.setKdCode(request.getKdCode());
+        res.setMedicineName(request.getMedicineName());
         res.setSupplementId(request.getSupplementId());
 
         return UserMedicineDto.UserMedicineResponse.from(res);

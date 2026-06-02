@@ -23,8 +23,8 @@ public class UserMedicine {
     @JoinColumn(name = "PRESCRIPTION_ID", nullable = false)
     private Prescription prescription;
 
-    @Column(name="KDCODE", nullable = false)
-    private String kdCode;
+    @Column(name="MEDICINE_NAME")
+    private String medicineName;
 
     @Column (name="SUPPLEMENT_ID")
     private Long supplementId;
