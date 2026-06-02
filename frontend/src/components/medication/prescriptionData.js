@@ -1,66 +1,65 @@
 // 처방 약 그룹 = 약 페이지 전체(처방 목록 · 복용 일정 · 이행률 · 주간 달력)의 단일 데이터 소스.
-// drugId 는 복용 일정 슬롯의 약 식별자와 연결된다 (bp = 혈압약, diabetes = 당뇨약).
-// 그룹의 medicines 가 모두 삭제되면(빈 그룹) 활성 그룹에서 제외되어 페이지 전체에서 사라진다.
+// 데이터는 백엔드 처방전(getPrescriptions + getUserMedicine)에서 받아 변환한다.
+// drugId 는 복용 일정 슬롯의 약 식별자와 연결된다 (presc-{prescriptionId}).
 const STORAGE_KEY = "prescriptionGroups";
 
-export const DEFAULT_PRESCRIPTION_GROUPS = [
-  {
-    id: 1,
-    groupName: "혈압약",
-    drugId: "bp",
-    dosage: "1정",
-    intakeTime: "2026-05-15 18:30",
-    medicines: [
-      {
-        id: 101,
-        name: "암로디핀정 5mg",
-        purpose: "혈압 조절",
-        dosageText: "1일 1회, 식후 복용",
-        imageType: "white",
-      },
-      {
-        id: 102,
-        name: "로사르탄정 50mg",
-        purpose: "혈압 안정화",
-        dosageText: "1일 1회, 아침 식후 복용",
-        imageType: "pink",
-      },
-    ],
-  },
-  {
-    id: 2,
-    groupName: "당뇨약",
-    drugId: "diabetes",
-    dosage: "3정",
-    intakeTime: "2026-05-15 18:30",
-    medicines: [
-      {
-        id: 201,
-        name: "다이아벡스정 500mg",
-        purpose: "혈당 강하제",
-        dosageText: "1일 2회, 식사 직후 복용",
-        imageType: "whiteBlue",
-      },
-      {
-        id: 202,
-        name: "자누비아정 100mg",
-        purpose: "인슐린 분비 조절",
-        dosageText: "1일 1회, 식사와 관계없이 복용",
-        imageType: "yellow",
-      },
-      {
-        id: 203,
-        name: "아마릴정 2mg",
-        purpose: "인슐린 분비 촉진",
-        dosageText: "1일 1회, 아침 식전 또는 직후",
-        imageType: "green",
-      },
-    ],
-  },
+// 더미 데이터 제거 — 실제 데이터는 백엔드에서 받아온다.
+export const DEFAULT_PRESCRIPTION_GROUPS = [];
+
+// 복용 시간대 → 일정 슬롯 정의. keyword 는 백엔드 intakeIntervals("아침,점심,저녁") 매칭용.
+export const SCHEDULE_SLOTS = [
+  { id: "morning", label: "아침", time: "08:00", keyword: "아침" },
+  { id: "lunch", label: "점심", time: "13:00", keyword: "점심" },
+  { id: "dinner", label: "저녁", time: "19:00", keyword: "저녁" },
+  { id: "bedtime", label: "취침전", time: "22:00", keyword: "취침전" },
 ];
 
-const cloneGroups = (groups) =>
-  groups.map((g) => ({ ...g, medicines: g.medicines.map((m) => ({ ...m })) }));
+// 백엔드 처방전 목록(약 목록 포함) → 약 페이지용 그룹 구조로 변환
+export const mapPrescriptionsToGroups = (prescriptions) =>
+  (prescriptions || []).map((p) => ({
+    id: p.prescriptionId,
+    prescriptionId: p.prescriptionId,
+    groupName: p.prescriptionName || "이름 없음",
+    drugId: `presc-${p.prescriptionId}`,
+    dosage: p.dosage || "-",
+    intakeTime: p.prescriptionDate || "",
+    // 관리 시작일 = 처방전 등록일 (이 날짜부터 복용 일정/달력에 반영)
+    startDate: p.prescriptionDate || null,
+    intakeIntervals: p.intakeIntervals || "",
+    memo: p.memo || "",
+    medicines: (p.medicines || []).map((m) => ({
+      id: m.userMedicationId,
+      name: m.medicineName || "이름 없음",
+      purpose: "",
+      dosageText: p.dosage || "",
+      imageType: "white",
+    })),
+  }));
+
+// 그룹들의 복용 시간대를 기준으로 특정 날짜(dateKey)의 복용 일정 슬롯을 만든다.
+// 각 슬롯에는 그 시간대를 포함하고, 등록일(startDate)이 dateKey 이전인 그룹만 들어간다.
+// (dateKey 를 주지 않으면 날짜 제한 없이 모든 그룹을 포함)
+export const buildSchedulesFromGroups = (groups, dateKey) => {
+  const list = Array.isArray(groups) ? groups : [];
+  return SCHEDULE_SLOTS.map((slot) => {
+    const drugs = list
+      .filter(
+        (g) =>
+          g.medicines.length > 0 &&
+          (g.intakeIntervals || "").includes(slot.keyword) &&
+          (!dateKey || !g.startDate || g.startDate <= dateKey),
+      )
+      .map((g) => ({ id: g.drugId, name: g.groupName, taken: false }));
+    return {
+      id: slot.id,
+      label: slot.label,
+      time: slot.time,
+      name: `${slot.label} 복용약`,
+      note: "",
+      drugs,
+    };
+  }).filter((s) => s.drugs.length > 0);
+};
 
 export const loadPrescriptionGroups = () => {
   try {
@@ -70,9 +69,9 @@ export const loadPrescriptionGroups = () => {
       if (Array.isArray(parsed)) return parsed;
     }
   } catch {
-    // 무시하고 기본 데이터 사용
+    // 무시
   }
-  return cloneGroups(DEFAULT_PRESCRIPTION_GROUPS);
+  return [];
 };
 
 export const savePrescriptionGroups = (groups) => {
