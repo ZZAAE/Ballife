@@ -6,6 +6,11 @@ import mealApi from "../../api/mealApi";
 import userApi from "../../api/userApi";
 import userConfigApi from "../../api/userConfigApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+import medicineApi from "../../api/medicineApi";
+import {
+  mapPrescriptionsToGroups,
+  buildSchedulesFromGroups,
+} from "../../components/medication/prescriptionData";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
 import Card from "../../components/mainpage/card.jsx";
@@ -49,13 +54,11 @@ const readMedicationSchedules = (dateKey) => {
   }
 };
 
-const buildMedicineData = () => {
-  const todayKey = formatToday();
-  const schedules = readMedicationSchedules(todayKey);
-
+// 복용 일정 배열 → 메인 복약알림용 데이터(오늘 남은 개수 + 약 목록)
+const computeMedicineData = (schedules) => {
   let todayRemaining = 0;
   const itemSet = new Set();
-  schedules.forEach((s) => {
+  (schedules || []).forEach((s) => {
     (s.drugs || []).forEach((d) => {
       itemSet.add(d.name);
       if (!d.taken) todayRemaining += 1;
@@ -67,6 +70,23 @@ const buildMedicineData = () => {
 
   return { todayRemaining, groups };
 };
+
+// localStorage 에 저장된 오늘 복용 기록 기반 (약 페이지 방문 후 갱신됨)
+const buildMedicineData = () => computeMedicineData(readMedicationSchedules(formatToday()));
+
+// 저장된 복용 여부(taken)를 슬롯/약 id 기준으로 기준 일정에 병합
+const mergeTakenState = (base, saved) =>
+  base.map((slot) => {
+    const ss = (saved || []).find((s) => s.id === slot.id);
+    if (!ss || !Array.isArray(ss.drugs)) return slot;
+    return {
+      ...slot,
+      drugs: slot.drugs.map((d) => {
+        const sd = ss.drugs.find((x) => x.id === d.id);
+        return sd ? { ...d, taken: !!sd.taken } : d;
+      }),
+    };
+  });
 
 const MainPage = () => {
   const { user } = useAuth();
@@ -189,6 +209,37 @@ const MainPage = () => {
 
     Promise.allSettled(tasks);
 
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // 로그인 직후 백엔드에서 처방전을 직접 불러와 복약알림을 바로 표시한다.
+  // (약 페이지를 방문해 localStorage 가 채워질 때까지 기다리지 않도록)
+  useEffect(() => {
+    if (!userId) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await medicineApi.getPrescriptions(userId);
+        const list = Array.isArray(data) ? data : [];
+        const withMeds = await Promise.all(
+          list.map((p) =>
+            medicineApi
+              .getUserMedicine(p.prescriptionId)
+              .then((r) => ({ ...p, medicines: r.data || [] }))
+              .catch(() => ({ ...p, medicines: [] }))
+          )
+        );
+        const todayKey = formatToday();
+        const groups = mapPrescriptionsToGroups(withMeds);
+        const base = buildSchedulesFromGroups(groups, todayKey);
+        const merged = mergeTakenState(base, readMedicationSchedules(todayKey));
+        if (!cancelled) setMedicineData(computeMedicineData(merged));
+      } catch {
+        // 실패 시 localStorage 기반 값 유지
+      }
+    })();
     return () => {
       cancelled = true;
     };
