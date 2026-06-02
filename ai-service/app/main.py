@@ -477,6 +477,7 @@ async def predict_food_endpoint(file: UploadFile = File(...)):
     except Exception as e:  # noqa: BLE001 - 어떤 실패든 known=False 로 폴백 유도
         return {"known": False, "food": None, "confidence": 0.0, "candidates": [], "error": str(e)}
 
+
 class MedicineList(BaseModel):
     medicines: List[str]
     
@@ -487,6 +488,7 @@ async def ocr_Str_Extraction(ocrStrList: List[str] = Body(...)):
     ocrChain = promptOcrParsing | llm_structured
     result = await ocrChain.ainvoke({"OCR_STR": ocrStrList})
     return result.medicines
+
 
 @app.on_event("startup")
 async def _warmup_model():
