@@ -59,7 +59,8 @@ class ConsultationQuestionGeneratorTest {
     private BloodPressureAnalysisResult bpWith(String status) {
         return new BloodPressureAnalysisResult(
                 128, 82, 1, status, "label",
-                115, 142, 70, 90);
+                115, 142, 70, 90,
+                List.of());
     }
 
     private BloodSugarAnalysisResult bsAllNull() {
@@ -67,7 +68,8 @@ class ConsultationQuestionGeneratorTest {
                 null, null, null,
                 null, null, null,
                 null, null, null,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null,
+                List.of(), List.of(), List.of());
     }
 
     private BloodSugarAnalysisResult bsWith(String fastingStatus, String postMealStatus) {
@@ -75,7 +77,8 @@ class ConsultationQuestionGeneratorTest {
                 100, fastingStatus, "label",
                 100, "NORMAL",     "label",
                 150, postMealStatus, "label",
-                90, 110, 90, 110, 130, 170);
+                90, 110, 90, 110, 130, 170,
+                List.of(), List.of(), List.of());
     }
 
     private BmiAnalysisResult bmiWith(String status) {

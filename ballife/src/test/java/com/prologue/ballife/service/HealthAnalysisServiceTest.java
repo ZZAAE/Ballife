@@ -838,4 +838,143 @@ class HealthAnalysisServiceTest {
             assertThat(res.recordingStats().medicationRate()).isEqualTo(0.0);
         }
     }
+
+    // ============================================================
+    //  E. 일별 빌드 — BloodPressureDaily / DailyValue (Step 17 Phase A)
+    // ============================================================
+    @Nested
+    @DisplayName("일별 빌드 (DailyBuild)")
+    class DailyBuild {
+
+        private BioValueRecord bpAt(int systolic, int diastolic, LocalDate date) {
+            return BioValueRecord.builder()
+                    .category("BloodPressure")
+                    .systolicBP(systolic)
+                    .diastolicBP(diastolic)
+                    .recordDate(date)
+                    .recordTime(LocalTime.NOON)
+                    .build();
+        }
+
+        private BioValueRecord bsAt(String suffix, int value, LocalDate date) {
+            return BioValueRecord.builder()
+                    .category("BloodSugar-" + suffix)
+                    .bloodSugar(value)
+                    .recordDate(date)
+                    .recordTime(LocalTime.NOON)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("같은 날 여러 측정 → 평균값으로 일별 1개 (혈압/혈당)")
+        void sameDate_multipleReadings_averaged() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            LocalDate today = LocalDate.now();
+
+            // 혈압 같은 날 2건: 120/80, 130/90 → 평균 125/85
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bpAt(120, 80, today),
+                        bpAt(130, 90, today)));
+
+            // 혈당 공복 같은 날 2건: 100, 120 → 평균 110
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bsAt("공복", 100, today),
+                        bsAt("공복", 120, today)));
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 혈압 일별 1건, 평균 125/85
+            assertThat(res.bloodPressure().dailyRecords()).hasSize(1);
+            assertThat(res.bloodPressure().dailyRecords().get(0).date()).isEqualTo(today);
+            assertThat(res.bloodPressure().dailyRecords().get(0).systolic()).isEqualTo(125.0);
+            assertThat(res.bloodPressure().dailyRecords().get(0).diastolic()).isEqualTo(85.0);
+
+            // 혈당 공복 일별 1건, 평균 110
+            assertThat(res.bloodSugar().dailyFasting()).hasSize(1);
+            assertThat(res.bloodSugar().dailyFasting().get(0).date()).isEqualTo(today);
+            assertThat(res.bloodSugar().dailyFasting().get(0).value()).isEqualTo(110.0);
+            // 식전/식후 측정 없음 → 빈 list
+            assertThat(res.bloodSugar().dailyPreMeal()).isEmpty();
+            assertThat(res.bloodSugar().dailyPostMeal()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("측정 없는 날 → 일별 list 에서 빠짐 (시간순 정렬)")
+        void missingDates_omittedFromList() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            LocalDate today = LocalDate.now();
+            LocalDate d2 = today.minusDays(2);  // 측정 있음
+            LocalDate d4 = today.minusDays(4);  // 측정 있음
+            // d1, d3, d5, d6 측정 없음 → list 에서 빠져야
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bpAt(125, 80, d4),   // 일부러 역순으로 stub
+                        bpAt(135, 85, d2)));
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 2건만, 시간순 (d4 → d2) 정렬
+            assertThat(res.bloodPressure().dailyRecords()).hasSize(2);
+            assertThat(res.bloodPressure().dailyRecords().get(0).date()).isEqualTo(d4);
+            assertThat(res.bloodPressure().dailyRecords().get(1).date()).isEqualTo(d2);
+        }
+
+        @Test
+        @DisplayName("혈당 3그룹 분리 — 그룹별로 일별 list 구성")
+        void bloodSugarGroups_separatedAndOrdered() {
+            Long userId = 1L;
+            stubUser(userId, 170.0, 65.0, null);
+            LocalDate today = LocalDate.now();
+            LocalDate d1 = today.minusDays(1);
+            LocalDate d3 = today.minusDays(3);
+
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodPressure"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+            // 공복 2일, 식전 1일, 식후 1일 — 그룹별로 분리되어야 함
+            when(bioValueRecordRepository.findByUserAndCategoryAndRecordDateBetween(
+                    any(User.class), eq("BloodSugar"),
+                    any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(
+                        bsAt("공복",     90,  d3),
+                        bsAt("공복",     95,  d1),
+                        bsAt("아침식전", 100, today),
+                        bsAt("저녁식후", 150, today)));
+
+            HealthAnalysisResponse res = service.analyzeWeekly(userId);
+
+            // 공복 2건, 시간순 (d3 → d1)
+            assertThat(res.bloodSugar().dailyFasting()).hasSize(2);
+            assertThat(res.bloodSugar().dailyFasting().get(0).date()).isEqualTo(d3);
+            assertThat(res.bloodSugar().dailyFasting().get(0).value()).isEqualTo(90.0);
+            assertThat(res.bloodSugar().dailyFasting().get(1).date()).isEqualTo(d1);
+            assertThat(res.bloodSugar().dailyFasting().get(1).value()).isEqualTo(95.0);
+
+            // 식전 1건
+            assertThat(res.bloodSugar().dailyPreMeal()).hasSize(1);
+            assertThat(res.bloodSugar().dailyPreMeal().get(0).value()).isEqualTo(100.0);
+
+            // 식후 1건
+            assertThat(res.bloodSugar().dailyPostMeal()).hasSize(1);
+            assertThat(res.bloodSugar().dailyPostMeal().get(0).value()).isEqualTo(150.0);
+        }
+    }
 }
