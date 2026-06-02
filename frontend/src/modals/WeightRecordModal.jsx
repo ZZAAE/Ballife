@@ -168,7 +168,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm px-4 py-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-y-auto rounded-[32px] bg-white p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
+      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-y-auto rounded-[32px] bg-white p-6 md:p-8 xl:p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
 
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
@@ -196,7 +196,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
                 type="text"
                 value={weight}
                 onChange={handleWeightChange}
-                className="w-[350px] text-[110px] leading-none font-bold text-slate-900 tracking-tighter text-center outline-none border-none bg-transparent focus:ring-0"
+                className="w-full max-w-[350px] text-[80px] md:text-[110px] leading-none font-bold text-slate-900 tracking-tighter text-center outline-none border-none bg-transparent focus:ring-0 xl:text-[110px]"
                 autoFocus
               />
               <span className="text-4xl font-bold text-slate-300">kg</span>

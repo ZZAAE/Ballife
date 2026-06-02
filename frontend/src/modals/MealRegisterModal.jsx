@@ -807,9 +807,8 @@ export default function MealRegisterModal({
         `}</style>
 
         <div
-          className="modal-card w-[1040px] bg-white rounded-3xl relative overflow-y-auto"
+          className="modal-card w-full max-w-[1040px] bg-white rounded-3xl relative overflow-y-auto px-5 pt-6 pb-6 md:px-10 md:pt-8 md:pb-6"
           style={{
-            padding: "32px 40px 24px",
             maxHeight: "calc(100vh - 40px)",
             boxShadow:
               "0 1px 2px rgba(15,19,32,0.04), 0 8px 24px rgba(15,19,32,0.06)",
@@ -972,10 +971,7 @@ export default function MealRegisterModal({
             )}
           </div>
 
-          <div
-            className="grid gap-6 mt-5"
-            style={{ gridTemplateColumns: "380px 1fr" }}
-          >
+          <div className="grid gap-6 mt-5 grid-cols-1 lg:grid-cols-[380px_1fr]">
             {/* LEFT COLUMN */}
             <div className="relative">
               <div

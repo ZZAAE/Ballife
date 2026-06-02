@@ -398,7 +398,7 @@ export default function MealPage() {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
+          <div className="mx-auto box-border max-w-[1280px] px-4 sm:px-6 py-8">
 
           {/* ── 페이지 타이틀 ─────────────────────────────────────────── */}
           <div className="mb-8">
@@ -563,7 +563,7 @@ export default function MealPage() {
             <h3 className="text-xl font-medium text-[#040d1b] mt-0 mb-6">
               오늘의 영양 성분 분석
             </h3>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+            <div className="grid grid-cols-1 gap-x-12 gap-y-6 sm:grid-cols-2">
               {nutritionSummary.map((n) => (
                 <div key={n.label} className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">

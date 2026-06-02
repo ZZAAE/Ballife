@@ -5,6 +5,9 @@ import riceImg from "../assets/rice.jpg";
 function MealDetailModal({ isOpen, onClose, mealData }) {
   if (!isOpen) return null;
 
+  // 영양 수치는 소수점 첫째 자리까지만 표시 (정수는 그대로)
+  const round1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
+
   const meal = mealData || {
     mealType: "점심 식사",
     foods: [
@@ -50,15 +53,15 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
       onClick={onClose}
     >
       <div
-        className="w-[672px] h-[572px] rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-[672px] h-[572px] max-h-[90vh] rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
-        <div className="flex-shrink-0 px-10 pt-7 pb-7">
+        <div className="flex-shrink-0 px-5 md:px-10 pt-7 pb-7">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-400 mb-1">식단 기록</p>
@@ -76,11 +79,11 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
         </div>
 
         {/* 음식 목록 */}
-        <div className="flex-1 overflow-y-auto px-10">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10">
           {meal.foods.map((food, index) => (
             <div
               key={food.id}
-              className={`flex gap-5 items-center w-[592px] h-[134px] ${
+              className={`flex gap-5 items-center w-full h-[134px] ${
                 index < meal.foods.length - 1 ? "border-b border-gray-100" : ""
               }`}
             >
@@ -98,26 +101,26 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
               </div>
 
               {/* 음식 정보 */}
-              <div className="flex-1 flex flex-col justify-center gap-2">
+              <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
                 <div className="flex items-center justify-between">
                   <p className="font-bold text-gray-900 text-lg leading-tight">
                     {food.name}
                   </p>
                   <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-500 text-white">
-                    {food.calories} kcal
+                    {round1(food.calories)} kcal
                   </span>
                 </div>
                 <div className="grid grid-cols-6 gap-1">
                   {[
-                    { label: "탄수화물", value: `${food.nutrition.carbs}g` },
-                    { label: "단백질", value: `${food.nutrition.protein}g` },
-                    { label: "지방", value: `${food.nutrition.fat}g` },
-                    { label: "당류", value: `${food.nutrition.sugar}g` },
+                    { label: "탄수화물", value: `${round1(food.nutrition.carbs)}g` },
+                    { label: "단백질", value: `${round1(food.nutrition.protein)}g` },
+                    { label: "지방", value: `${round1(food.nutrition.fat)}g` },
+                    { label: "당류", value: `${round1(food.nutrition.sugar)}g` },
                     {
                       label: "콜레스테롤",
-                      value: `${food.nutrition.cholesterol}mg`,
+                      value: `${round1(food.nutrition.cholesterol)}mg`,
                     },
-                    { label: "나트륨", value: `${food.nutrition.sodium}mg` },
+                    { label: "나트륨", value: `${round1(food.nutrition.sodium)}mg` },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -138,42 +141,42 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
         </div>
 
         {/* 합산 영양소 */}
-        <div className="flex-shrink-0 px-10 pt-4 pb-8 border-t border-gray-100">
+        <div className="flex-shrink-0 px-5 md:px-10 pt-4 pb-8 border-t border-gray-100">
           <div className="flex gap-2 justify-between mb-4">
             {[
               {
                 label: "탄수화물",
-                value: `${meal.totalNutrition.carbs}g`,
+                value: `${round1(meal.totalNutrition.carbs)}g`,
                 bgClass: "bg-slate-100",
                 textClass: "text-slate-400",
               },
               {
                 label: "단백질",
-                value: `${meal.totalNutrition.protein}g`,
+                value: `${round1(meal.totalNutrition.protein)}g`,
                 bgClass: "bg-cyan-50",
                 textClass: "text-cyan-500",
               },
               {
                 label: "지방",
-                value: `${meal.totalNutrition.fat}g`,
+                value: `${round1(meal.totalNutrition.fat)}g`,
                 bgClass: "bg-orange-50",
                 textClass: "text-orange-400",
               },
               {
                 label: "당류",
-                value: `${meal.totalNutrition.sugar}g`,
+                value: `${round1(meal.totalNutrition.sugar)}g`,
                 bgClass: "bg-pink-50",
                 textClass: "text-pink-400",
               },
               {
                 label: "콜레스테롤",
-                value: `${meal.totalNutrition.cholesterol}mg`,
+                value: `${round1(meal.totalNutrition.cholesterol)}mg`,
                 bgClass: "bg-indigo-50",
                 textClass: "text-indigo-400",
               },
               {
                 label: "나트륨",
-                value: `${meal.totalNutrition.sodium}mg`,
+                value: `${round1(meal.totalNutrition.sodium)}mg`,
                 bgClass: "bg-yellow-50",
                 textClass: "text-yellow-500",
               },
@@ -198,7 +201,7 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
               총 칼로리
             </span>
             <span className="text-2xl font-bold text-gray-900">
-              {meal.totalCalories} kcal
+              {round1(meal.totalCalories)} kcal
             </span>
           </div>
         </div>

@@ -104,7 +104,7 @@ WHO 서태평양 지역 및 대한비만학회(KSSO) 기준 체질량지수(BMI)
             <Stethoscope size={18} className="text-emerald-400" />
             <h3 className="font-semibold text-[14px]">약물 치료 (Pharmacology)</h3>
           </div>
-          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-2 gap-10 !p-8">
+          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 !p-6 md:!p-8">
             <div>
               <h4 className="font-bold text-[14px] mb-4 text-gray-900">
                 체중 감량 보조
@@ -142,7 +142,7 @@ WHO 서태평양 지역 및 대한비만학회(KSSO) 기준 체질량지수(BMI)
             </CautionBox>
           </div>
           <div className="md:col-span-2">
-            <ContentCard className="flex gap-8 !p-8 h-full items-center">
+            <ContentCard className="flex flex-col sm:flex-row gap-6 sm:gap-8 !p-6 md:!p-8 h-full items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <Dumbbell className="text-emerald-500" size={22} />
@@ -172,7 +172,7 @@ WHO 서태평양 지역 및 대한비만학회(KSSO) 기준 체질량지수(BMI)
                   </div>
                 </div>
               </div>
-              <div className="w-40 h-40 rounded-2xl overflow-hidden shrink-0">
+              <div className="w-40 h-40 max-w-full rounded-2xl overflow-hidden shrink-0">
                 <img
                   src="/path/to/your/exercise-image.jpg" // 실제 이미지 경로로 변경하세요.
                   alt="운동하는 여성"
