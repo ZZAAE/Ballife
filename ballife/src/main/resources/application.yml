@@ -22,6 +22,7 @@ spring:
       host: localhost #배포할때는 실제 서버 주소가 들어감
       port: 27017
       database: Ballife # 데이터베이스명
+      auto-index-creation: true # @Indexed(unique=true) 등 인덱스 자동 생성 (itemSeq 중복 저장 방지)
 
   security:
     jwt:

@@ -16,8 +16,7 @@ public class UserMedicineDto {
         @NotNull(message = "처방그룹을 선택해주세요")
         private Long prescriptionId;
 
-        @Max(value = 15, message = "KD코드는 13자 입니다")
-        private String kdCode;
+        private String medicineName;
 
         private Long supplementId;
 
@@ -33,8 +32,7 @@ public class UserMedicineDto {
         @NotNull(message = "처방그룹을 선택해주세요")
         private Long prescriptionId;
 
-        @Max(value = 15, message = "KD코드는 13자 입니다")
-        private String kdCode;
+        private String medicineName;
 
         private Long supplementId;
 
@@ -48,7 +46,7 @@ public class UserMedicineDto {
 
         private Long userMedicationId;
         private Long prescriptionId;
-        private String kdCode;
+        private String medicineName;
         private Long supplementId;
         
 
@@ -57,7 +55,7 @@ public class UserMedicineDto {
             return UserMedicineResponse.builder()
                     .prescriptionId(usermedicine.getPrescription().getPrescriptionId())
                     .userMedicationId(usermedicine.getUserMedicineId())
-                    .kdCode(usermedicine.getKdCode())
+                    .medicineName(usermedicine.getMedicineName())
                     .supplementId(usermedicine.getSupplementId())
                     .build();
         }

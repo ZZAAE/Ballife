@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +43,8 @@ public class MedicineApiService {
     @Value("${mfds.api.service-key}")
     private String serviceKey;
 
+    private List<String> splitTarget = new ArrayList<String>();
+    
     public Medicine findOrFetch(String itemName){
         Optional<Medicine> medicineItem = medicineRepository.findByItemName(itemName);
         if(medicineItem.isPresent()){
@@ -52,19 +55,46 @@ public class MedicineApiService {
         MedicineApiResponse.MediApiItem item = fetchByItemName(itemName)
                             .orElseThrow(() -> new MedicineNotFoundException(itemName));
 
+        // 조회 토큰(전처리로 잘린 이름)과 저장된 공식명이 달라 findByItemName 이 빗나가도,
+        // 식약처가 준 itemSeq 로 다시 확인해 이미 저장된 약이면 재사용한다 (중복 insert 방지).
+        Optional<Medicine> existing = medicineRepository.findByItemSeq(item.getItemSeq());
+        if (existing.isPresent()) {
+            log.info("itemSeq 캐시 히트: {} ({})", item.getItemName(), item.getItemSeq());
+            return existing.get();
+        }
+
         Medicine medicine = toEntity(item);
 
         try{
             return medicineRepository.save(medicine);
         } catch (DuplicateKeyException e){
+            // 병렬 처리 중 동시 저장된 경우 등 — itemSeq 유니크 인덱스가 막아주면 기존 문서를 반환
             return medicineRepository.findByItemSeq(item.getItemSeq())
                     .orElseThrow(()->e);
         }
     }
 
     public List<MedicineItemDto.MedicineItemResponse> findOrFetchList(List<String> itemList){
+        if(splitTarget.isEmpty()){
+            splitTarget.add("···");
+            splitTarget.add("mg");
+            splitTarget.add("밀리그람");
+            splitTarget.add("밀리그램");
+        }
+        List<String> preProcessStr = itemList;
+        ListIterator<String> it = preProcessStr.listIterator();
+        while(it.hasNext()){
+            String str = it.next();
+            for (String target: splitTarget){
+                if(str.contains(target)){
+                    int targetIdx = str.indexOf(target);
+                    str = str.substring(0, targetIdx);
+                }
+            }
+            it.set(str.trim());
+        }
         // 중복 제거 후 외부 API 호출을 병렬로 수행 (순차 시 토큰 수만큼 지연 누적 → 프론트 타임아웃)
-        List<MedicineItemDto.MedicineItemResponse> medicineList = itemList.parallelStream()
+        List<MedicineItemDto.MedicineItemResponse> medicineList = preProcessStr.parallelStream()
                 .distinct()
                 .map(item -> {
                     try {
