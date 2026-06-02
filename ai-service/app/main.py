@@ -1,4 +1,8 @@
+
 from fastapi import FastAPI, File, UploadFile
+from typing import List
+
+from fastapi import Body, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
@@ -481,3 +485,15 @@ async def predict_food_endpoint(file: UploadFile = File(...)):
 async def _warmup_model():
     # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
     asyncio.create_task(asyncio.to_thread(warmup_food_model))
+    return {"ok": True}
+
+class MedicineList(BaseModel):
+    medicines: List[str]
+    
+llm_structured = llm.with_structured_output(MedicineList)
+
+@app.post("/ocr")
+async def ocr_Str_Extraction(ocrStrList: List[str] = Body(...)):
+    ocrChain = promptOcrParsing | llm_structured
+    result = await ocrChain.ainvoke({"OCR_STR": ocrStrList})
+    return result.medicines
