@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import MedicationProgressCard from "../components/medication/MedicationProgressCard";
 import MedicationRecordCard from "../components/medication/MedicationRecordCard";
@@ -271,6 +271,29 @@ export default function MedicationPage() {
     );
   }, [todaySchedules, scheduleDate, todayKey, prescriptionGroups]);
 
+  // 주간 달력에 표시할 "과거 날짜의 실제 저장 일정" 모음.
+  // 오늘 저장된 복용 체크는 날짜가 지나면 그대로 과거 기록이 되므로,
+  // 복용 확인을 누르지 않은 슬롯은 달력에서 자동으로 미복용(miss)으로 굳는다.
+  const savedSchedulesByDate = useMemo(() => {
+    const map = {};
+    const base = new Date(todayKey + "T00:00:00");
+    for (let offset = -7; offset <= 0; offset++) {
+      const d = new Date(base);
+      d.setDate(d.getDate() + offset);
+      const key = formatDateKey(d);
+      try {
+        const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) map[key] = parsed;
+      } catch {
+        // 손상된 항목은 무시
+      }
+    }
+    return map;
+    // todaySchedules 가 바뀌면 오늘 분 localStorage 도 갱신되므로 의존성에 포함
+  }, [todayKey, todaySchedules]);
+
   // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
   const handleScheduleDateChange = (newDate) => {
     if (!newDate) return;
@@ -415,6 +438,7 @@ export default function MedicationPage() {
                 drugNames={prescriptionGroups.map((g) => g.groupName)}
                 prnRecords={savedRecords}
                 todayKey={todayKey}
+                savedSchedulesByDate={savedSchedulesByDate}
               />
             </div>
           </div>
