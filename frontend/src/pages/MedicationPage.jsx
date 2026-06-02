@@ -7,7 +7,6 @@ import PrescriptionListCard from "../components/medication/PrescriptionListCard"
 import SavedRecordsCard from "../components/medication/SavedRecordsCard";
 import TodayScheduleCard from "../components/medication/TodayScheduleCard";
 import WeeklyCalendarCard from "../components/medication/WeeklyCalendarCard";
-import { getDayStatus } from "../components/medication/medicationData";
 import {
   loadPrescriptionGroups,
   savePrescriptionGroups,
@@ -96,26 +95,12 @@ const cloneInitialSchedules = () =>
     drugs: s.drugs.map((d) => ({ ...d })),
   }));
 
-// 슬롯 상태(done/partial/miss/null)를 drugs 의 taken 상태로 변환
-// done = 전부 복용, partial = 일부만 복용, 그 외 = 미복용
-const buildSchedulesFromStatus = (statusMap) =>
-  INITIAL_TODAY_SCHEDULES.map((s) => {
-    const status = statusMap?.[s.id];
-    return {
-      ...s,
-      drugs: s.drugs.map((d, idx) => ({
-        ...d,
-        taken:
-          status === "done" ? true : status === "partial" ? idx === 0 : false,
-      })),
-    };
-  });
-
 // 선택한 날짜의 복용 일정 로드.
-// - 오늘: 사용자가 실제 체크한 내용(localStorage)을 사용 (없으면 기본 일정)
-// - 그 외 날짜: 주간 달력과 동일한 요일 기반 데모 데이터를 사용해 화면이 일치하도록 함
+// - 오늘/과거: 사용자가 실제 체크해 저장한 기록(localStorage)을 사용.
+//   기록이 없으면 전부 미복용(기본 일정) — 주간 달력이 미복용으로 굳히는 것과 동일.
+// - 미래: 아직 기록 없음 → 전부 미복용
 const loadSchedulesForDate = (dateKey, todayKey) => {
-  if (dateKey === todayKey) {
+  if (dateKey <= todayKey) {
     try {
       const raw = localStorage.getItem(SCHEDULE_STORAGE_PREFIX + dateKey);
       if (raw) {
@@ -129,9 +114,8 @@ const loadSchedulesForDate = (dateKey, todayKey) => {
     } catch {
       // 무시하고 기본 일정 사용
     }
-    return cloneInitialSchedules();
   }
-  return buildSchedulesFromStatus(getDayStatus(dateKey));
+  return cloneInitialSchedules();
 };
 
 export default function MedicationPage() {
@@ -260,10 +244,13 @@ export default function MedicationPage() {
   // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
   // 삭제된 약은 localStorage 에서도 제외 → RecordSummary 의 복용 상태 오판 방지
   useEffect(() => {
-    if (scheduleDate !== todayKey) return;
+    // 미래 날짜는 저장하지 않음 (오늘/과거의 복용 확인만 기록)
+    if (scheduleDate > todayKey) return;
+    const isPast = scheduleDate < todayKey;
     const filtered = todaySchedules.map((s) => ({
       ...s,
-      drugs: s.drugs.filter((d) => activeDrugIds.has(d.id)),
+      // 과거는 그 시점에 보던 약을 그대로 보존, 오늘은 활성 약만 저장
+      drugs: isPast ? s.drugs : s.drugs.filter((d) => activeDrugIds.has(d.id)),
     }));
     localStorage.setItem(
       SCHEDULE_STORAGE_PREFIX + scheduleDate,
@@ -290,9 +277,14 @@ export default function MedicationPage() {
         // 손상된 항목은 무시
       }
     }
+    // 지금 보고 있는 과거 날짜는 편집 중인 라이브 상태로 덮어써,
+    // TodayScheduleCard 의 복용/부분복용/미복용이 달력에 즉시 반영되게 한다.
+    if (scheduleDate < todayKey) {
+      map[scheduleDate] = todaySchedules;
+    }
     return map;
     // todaySchedules 가 바뀌면 오늘 분 localStorage 도 갱신되므로 의존성에 포함
-  }, [todayKey, todaySchedules]);
+  }, [todayKey, todaySchedules, scheduleDate]);
 
   // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
   const handleScheduleDateChange = (newDate) => {
