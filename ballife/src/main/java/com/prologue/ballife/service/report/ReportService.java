@@ -84,12 +84,14 @@ public class ReportService {
         try {
             List<String> questions = llmGenerator.generate(response);
             if (questions == null || questions.isEmpty()) {
-                log.info("LLM 이 빈 응답 반환, 룰 fallback 사용 userId={}", userId);
+                log.warn("LLM 이 빈 리스트 반환 → 룰 fallback 사용 userId={}", userId);
                 return ruleBasedGenerator.generate(response);
             }
+            log.info("LLM 질문 생성 완료 userId={}, count={}", userId, questions.size());
             return questions;
         } catch (Exception e) {
-            log.warn("LLM 호출 실패, 룰 fallback 사용 userId={}", userId, e);
+            log.warn("LLM 호출 실패 → 룰 fallback 사용 userId={}, type={}, msg={}",
+                    userId, e.getClass().getSimpleName(), e.getMessage(), e);
             return ruleBasedGenerator.generate(response);
         }
     }

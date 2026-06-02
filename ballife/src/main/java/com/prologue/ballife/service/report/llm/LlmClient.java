@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * OpenAI Chat Completions HTTP 클라이언트 (건강 보고서 질문 생성 전용).
@@ -20,19 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient;
  *   - HTTP 오류 / 타임아웃 / 그 외 모든 예외는 RuntimeException 으로 통일하여 던짐
  *
  * 설정 네임스페이스: openai.report.*  (팀원의 openai.* / openai.vision-* 와 분리)
- *   - openai.api-key                   : 공유 (Vision 과 동일 키 사용)
- *   - openai.report.model              : 보고서 질문 생성용 모델
- *   - openai.report.max-tokens         : 응답 최대 토큰
- *   - openai.report.timeout-seconds    : 호출 타임아웃 (초)
- *
- * WebClient 사용 (기존 VisionService 패턴 동일).
- * 동기 호출 — Mono.block() 으로 처리.
- *
- * 생성자 2개:
- *   - public  (운영) : Spring 의 @Autowired + @Value 기반 의존성 주입
- *   - package-private (테스트) : WebClient 직접 주입 → ExchangeFunction 으로 모킹
- *   다중 생성자라서 Spring 은 @Autowired 가 명시된 생성자를 선택.
  */
+@Slf4j
 @Component
 public class LlmClient {
 
@@ -51,6 +43,8 @@ public class LlmClient {
             @Value("${openai.report.max-tokens:1500}") int maxTokens,
             @Value("${openai.report.timeout-seconds:15}") int timeoutSeconds) {
         this(buildDefaultClient(apiKey), model, maxTokens, Duration.ofSeconds(timeoutSeconds));
+        log.info("LlmClient 초기화: model={}, maxTokens={}, timeout={}s, apiKeyConfigured={}",
+                model, maxTokens, timeoutSeconds, !"default".equals(apiKey));
     }
 
     /** 테스트 전용 — WebClient 직접 주입. */
@@ -86,15 +80,28 @@ public class LlmClient {
                 )
         );
 
+        log.info("OpenAI 호출 시작: path={}, model={}, sysLen={}, userLen={}",
+                OPENAI_CHAT_PATH, model, systemPrompt.length(), userPrompt.length());
+
         try {
-            return openAiClient.post()
+            String response = openAiClient.post()
                     .uri(OPENAI_CHAT_PATH)
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
                     .timeout(timeout)
                     .block();
+            log.info("OpenAI 호출 성공: responseLen={}", response == null ? 0 : response.length());
+            return response;
+        } catch (WebClientResponseException e) {
+            // HTTP status 있는 응답 — 401/429/500 등
+            log.warn("OpenAI HTTP 오류: status={}, body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("OpenAI 호출 실패 (HTTP " + e.getStatusCode() + ")", e);
         } catch (RuntimeException e) {
+            // 타임아웃 / 네트워크 / 기타
+            log.warn("OpenAI 호출 예외: type={}, msg={}",
+                    e.getClass().getSimpleName(), e.getMessage());
             throw new RuntimeException("OpenAI 호출 실패", e);
         }
     }

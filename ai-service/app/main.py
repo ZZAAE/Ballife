@@ -1,4 +1,6 @@
-from fastapi import FastAPI, File, UploadFile
+from typing import List
+
+from fastapi import Body, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
@@ -21,11 +23,12 @@ app = FastAPI()
 SPRING_API = "http://localhost:8080"
 
 # React 개발서버(포트 5173)에서 오는 요청 허용
+
 # cd ai-service
-
-# pip install virtualenv 최초 1회
+# 환경 설정이 안되어 있으면
+# pip install virtualenv
 # virtualenv .venv
-
+# ===============
 # .venv\Scripts\activate
 # pip install -r requirements.txt
 # uvicorn app.main:app --reload --port 8001 로 실행
@@ -36,6 +39,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 llm = ChatOpenAI(model="gpt-4o-mini")
 
@@ -119,6 +123,24 @@ prompt = ChatPromptTemplate.from_messages([
 
 [질문]
 {message}"""),
+])
+
+promptOcrParsing = ChatPromptTemplate.from_messages([
+    ("system", """당신은 의약품 상품명 추출 AI입니다.
+        아래 문자열에서 상품명 추출
+        
+        [문자열]
+        {OCR_STR}
+        
+        [답변 규칙]
+        -반환 형식은 JSON.
+        -예시 출력: ["타이레놀정500mg", "위더스세파클러캡슐250mg"].
+        -의약품 상품명 외에 다른 답변은 절대 하지 말것.
+        -의약품 이름은 상품명임.
+        -의약품 상품명이 아닌 상품에 들어가는 성분명은 제외.
+        -타이레놀정 500mg, 아세트아미노펜 500mg 두개가 있으면 아세트아미노펜 500mg은 제외.
+        """),
+    ("user", "해당 문자열에서 의약품 이름만 추출해서 JSON 배열로 반환해줘")
 ])
 
 chain = prompt | llm | StrOutputParser()
@@ -455,6 +477,18 @@ async def predict_food_endpoint(file: UploadFile = File(...)):
         return await asyncio.to_thread(predict_food, image_bytes)
     except Exception as e:  # noqa: BLE001 - 어떤 실패든 known=False 로 폴백 유도
         return {"known": False, "food": None, "confidence": 0.0, "candidates": [], "error": str(e)}
+
+
+class MedicineList(BaseModel):
+    medicines: List[str]
+    
+llm_structured = llm.with_structured_output(MedicineList)
+
+@app.post("/ocr")
+async def ocr_Str_Extraction(ocrStrList: List[str] = Body(...)):
+    ocrChain = promptOcrParsing | llm_structured
+    result = await ocrChain.ainvoke({"OCR_STR": ocrStrList})
+    return result.medicines
 
 
 @app.on_event("startup")
