@@ -28,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserConfigRepository userConfigRepository;
     private final PasswordEncoder passwordEncoder; // 12345 ->
+    private final UserMedalService userMedalService; // 포인트 적립 후 메달 자동 지급 연계
 
     // ====================
     // 회원가입
@@ -169,6 +170,29 @@ public class UserService {
 
         return UserDto.UserResponse.from(user);
 
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // 리워드 포인트 적립 (보유 포인트 point 와 누적 포인트 usePointCount 를 동일 양만큼 증가)
+    // ═══════════════════════════════════════════════════════════
+    @Transactional
+    @NonNull
+    public UserDto.UserResponse addPoint(@NonNull Long id, int amount) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+
+        long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
+        long currentCount = user.getUsePointCount() != null ? user.getUsePointCount() : 0L;
+
+        // 보유 포인트와 누적 포인트를 동일한 양만큼 증가
+        user.setPoint(currentPoint + amount);
+        user.setUsePointCount(currentCount + amount);
+
+        // 적립 직후 달성 조건을 충족한 메달 자동 지급 (같은 트랜잭션 내에서 갱신된 포인트 기준)
+        userMedalService.checkAndGrantMedals(id);
+
+        return UserDto.UserResponse.from(user);
     }
 
     // ═══════════════════════════════════════════════════════════
