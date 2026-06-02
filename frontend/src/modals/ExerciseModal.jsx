@@ -464,7 +464,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                     key={row.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4"
                   >
-                    <div className="flex items-end gap-2">
+                    <div className="flex flex-wrap items-end gap-2">
                       {activeTab === "anaerobic" ? (
                         <>
                           <div className="flex-[2] space-y-1">

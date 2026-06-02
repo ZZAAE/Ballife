@@ -1,5 +1,8 @@
 import { useMemo } from "react";
 
+// 영양 수치는 소수점 첫째 자리까지만 표시 (정수는 그대로)
+const round1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
+
 const MacroBadge = ({ label, value, unit = "g", bgColor, textColor }) => (
   <span
     className={`inline-flex min-w-[54px] items-center justify-center gap-[3px] rounded-full px-2 py-1 text-[11px] font-[600] ${bgColor} ${textColor}`}
@@ -86,7 +89,7 @@ const MealRecordCard = ({
               </span>
 
               <span className="ml-3 shrink-0 text-[16px] font-[600] text-[#5172dc]">
-                {item.kcal} kcal
+                {round1(item.kcal)} kcal
               </span>
             </div>
           ))}
@@ -107,42 +110,42 @@ const MealRecordCard = ({
             </span>
 
             <span className="text-[17px] font-[700] text-[#323232]">
-              {totals.kcal} kcal
+              {round1(totals.kcal)} kcal
             </span>
           </div>
 
           <div className="flex flex-wrap gap-1">
             <MacroBadge
               label="탄"
-              value={totals.carb}
+              value={round1(totals.carb)}
               bgColor="bg-slate-100"
               textColor="text-slate-400"
             />
 
             <MacroBadge
               label="단"
-              value={totals.protein}
+              value={round1(totals.protein)}
               bgColor="bg-cyan-50"
               textColor="text-cyan-500"
             />
 
             <MacroBadge
               label="지"
-              value={totals.fat}
+              value={round1(totals.fat)}
               bgColor="bg-orange-50"
               textColor="text-orange-400"
             />
 
             <MacroBadge
               label="당"
-              value={totals.sugar}
+              value={round1(totals.sugar)}
               bgColor="bg-pink-50"
               textColor="text-pink-400"
             />
 
             <MacroBadge
               label="콜"
-              value={totals.chol}
+              value={round1(totals.chol)}
               bgColor="bg-indigo-50"
               textColor="text-indigo-400"
               unit="mg"
@@ -150,7 +153,7 @@ const MealRecordCard = ({
 
             <MacroBadge
               label="나"
-              value={totals.na}
+              value={round1(totals.na)}
               bgColor="bg-yellow-50"
               textColor="text-yellow-500"
             />

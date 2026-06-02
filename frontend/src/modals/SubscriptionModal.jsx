@@ -33,11 +33,10 @@ const PLANS = [
     tagline: "가족과 함께 건강 관리",
     features: [
       { label: "건강 리포트", ready: true },
-      { label: "가족 건강 상태 공유", ready: true },
       { label: "부모님 혈당/혈압 확인", ready: true },
       { label: "가족 구성원 초대", ready: true },
-      { label: "복약 알림 공유", ready: false },
-      { label: "운동 현황 공유", ready: false },
+      { label: "복약 알림 공유", ready: true },
+      { label: "운동 현황 공유", ready: true },
     ],
   },
 ];
@@ -215,10 +214,6 @@ export default function SubscriptionModal({
               );
             })}
           </div>
-
-          <p className="mt-5 text-center text-[11px] text-[#94A3B8]">
-            * 데모 환경입니다. 실제 결제는 진행되지 않으며 즉시 구독이 활성화됩니다.
-          </p>
         </div>
 
         {/* 푸터 */}

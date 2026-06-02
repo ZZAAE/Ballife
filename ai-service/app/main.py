@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
@@ -11,6 +11,8 @@ import asyncio
 import json
 from collections import defaultdict
 from datetime import date
+
+from app.food_classifier import predict as predict_food, warmup as warmup_food_model
 
 load_dotenv()
 
@@ -126,6 +128,7 @@ class ChatRequest(BaseModel):
     userId: int
     token: str | None = None
     image: str | None = None  # 첨부 이미지 data URL (data:image/...;base64,...)
+    date: str | None = None   # 조회할 식단 날짜 (YYYY-MM-DD). 미지정 시 오늘 하루치만 조회
 
 class AnalyzeRequest(BaseModel):
     userId: int
@@ -142,19 +145,37 @@ def _safe_json(result):
     except ValueError:
         return {}
 
-async def fetch_user_health_data(user_id: int, token: str | None) -> dict:
+async def fetch_user_health_data(user_id: int, token: str | None, target_date: date) -> dict:
     headers = {"Authorization": f"Bearer {token}"} if token else {}
     async with httpx.AsyncClient() as client:
         results = await asyncio.gather(
             client.get(f"{SPRING_API}/api/bioValueRecords/search/{user_id}", headers=headers),
-            client.get(f"{SPRING_API}/api/meal?userId={user_id}", headers=headers),
+            # 식단은 요청한 날 하루치만 조회 (Meal 단위)
+            client.get(f"{SPRING_API}/api/meal/today",
+                       params={"userId": user_id, "date": target_date.isoformat()}, headers=headers),
             client.get(f"{SPRING_API}/api/users/{user_id}", headers=headers),
             return_exceptions=True
         )
+        bio = _safe_json(results[0])
+        meals = _safe_json(results[1])
+        user = _safe_json(results[2])
+
+        # 하루치 각 Meal 의 음식 항목(MealItem)을 Meal 단위로 병렬 조회해 붙임
+        meals = meals if isinstance(meals, list) else []
+        meals_with_id = [m for m in meals if isinstance(m, dict) and m.get("mealId") is not None]
+        item_results = await asyncio.gather(
+            *[client.get(f"{SPRING_API}/api/mealItem/byMeal/{m['mealId']}", headers=headers)
+              for m in meals_with_id],
+            return_exceptions=True
+        )
+        for m, res in zip(meals_with_id, item_results):
+            items = _safe_json(res)
+            m["items"] = items if isinstance(items, list) else []
+
     return {
-        "bio": _safe_json(results[0]),
-        "meals": _safe_json(results[1]),
-        "user": _safe_json(results[2]),
+        "bio": bio,
+        "meals": meals,
+        "user": user,
     }
 
 
@@ -222,8 +243,68 @@ def _recent(records, date_field):
     return out
 
 
-def summarize_health_data(raw: dict) -> str:
-    """전체 원시 데이터를 최근 RECENT_DAYS 일 요약 텍스트로 압축 (프롬프트 토큰 절감)."""
+# Meal.MealCategory(enum) → 한글 표기
+MEAL_CATEGORY_KR = {
+    "BREAKFAST": "아침",
+    "LUNCH": "점심",
+    "DINNER": "저녁",
+    "SNACK": "간식",
+}
+
+
+def _summarize_day_meals(meals, target_date) -> list[str]:
+    """요청한 날 하루치 식단을 Meal 단위로(각 끼니의 음식 항목 포함) 요약."""
+    meals = [m for m in (meals or []) if isinstance(m, dict)]
+    if not meals:
+        return [f"[{target_date} 식단] 기록 없음"]
+
+    # 끼니 시간순 정렬 (시간 없는 항목은 뒤로)
+    meals.sort(key=lambda m: str(m.get("mealTime") or "99:99"))
+
+    day_cal = 0
+    day_carb = day_sugar = day_sodium = day_protein = 0.0
+    meal_lines = []
+    for m in meals:
+        cat = MEAL_CATEGORY_KR.get(str(m.get("mealCategory")), str(m.get("mealCategory") or "기타"))
+        time_str = str(m.get("mealTime") or "")[:5]
+        head = f"- {cat}" + (f"({time_str})" if time_str else "")
+
+        items = [it for it in (m.get("items") or []) if isinstance(it, dict)]
+        if not items:
+            meal_lines.append(f"{head}: 등록된 음식 없음")
+            continue
+
+        food_parts = []
+        meal_cal = 0
+        for it in items:
+            name = it.get("foodName") or "음식"
+            grams = it.get("grams")
+            cal = it.get("calorie")
+            seg = name
+            if grams:
+                seg += f" {_fmt(grams)}g"
+            if cal is not None:
+                seg += f" {_fmt(cal)}kcal"
+                meal_cal += cal
+            food_parts.append(seg)
+            day_carb += it.get("carbohydrate") or 0
+            day_sugar += it.get("sugar") or 0
+            day_sodium += it.get("sodium") or 0
+            day_protein += it.get("protein") or 0
+        day_cal += meal_cal
+        meal_lines.append(f"{head}: " + ", ".join(food_parts) + f" (끼니 합계 {_fmt(meal_cal)}kcal)")
+
+    header = (
+        f"[{target_date} 식단] 총 {_fmt(day_cal)}kcal "
+        f"(탄수화물 {_fmt(day_carb)}g, 당 {_fmt(day_sugar)}g, "
+        f"단백질 {_fmt(day_protein)}g, 나트륨 {_fmt(day_sodium)}mg)"
+    )
+    return [header, *meal_lines]
+
+
+def summarize_health_data(raw: dict, target_date: date) -> str:
+    """전체 원시 데이터를 최근 RECENT_DAYS 일 요약 텍스트로 압축 (프롬프트 토큰 절감).
+    식단은 요청한 날(target_date) 하루치만 Meal 단위로 상세 요약."""
     lines = []
 
     # 1) 기본 정보
@@ -263,25 +344,18 @@ def summarize_health_data(raw: dict) -> str:
     else:
         lines.append(f"[최근 {RECENT_DAYS}일 생체 수치] 기록 없음")
 
-    # 3) 식단 (최근 N일) — 사진은 제외하고 카테고리별 건수만
-    meal_recent = _recent(raw.get("meals"), "mealDate")
-    if meal_recent:
-        cat_count = {}
-        for m in meal_recent:
-            c = str(m.get("mealCategory") or "기타")
-            cat_count[c] = cat_count.get(c, 0) + 1
-        cat_str = ", ".join(f"{k} {v}" for k, v in cat_count.items())
-        lines.append(f"[최근 {RECENT_DAYS}일 식단] 총 {len(meal_recent)}건 ({cat_str})")
-    else:
-        lines.append(f"[최근 {RECENT_DAYS}일 식단] 기록 없음")
+    # 3) 식단 — 요청한 날 하루치만 Meal 단위로 음식 항목까지 상세 요약
+    lines.extend(_summarize_day_meals(raw.get("meals"), target_date))
 
     return "\n".join(lines) if lines else "기록된 건강 데이터가 없습니다."
 
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
-    raw = await fetch_user_health_data(req.userId, req.token)
-    health_summary = summarize_health_data(raw)
+    # 식단 조회 날짜: 요청에 date 가 있으면 그 날, 없으면 오늘 하루치
+    target_date = _to_date(req.date) or date.today()
+    raw = await fetch_user_health_data(req.userId, req.token, target_date)
+    health_summary = summarize_health_data(raw, target_date)
 
     history = conversation_histories[req.userId]
 
@@ -367,3 +441,23 @@ async def clear_history(user_id: int):
     conversation_histories.pop(user_id, None)
     display_histories.pop(user_id, None)
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────
+# 음식 사진 → 자체 YOLO 모델 분류 (Spring이 1차로 호출)
+# 모델이 확신하면 known=True + 음식명 반환, 모르면 known=False (Spring이 OpenAI로 폴백)
+# ─────────────────────────────────────────────────────────────
+@app.post("/predict-food")
+async def predict_food_endpoint(file: UploadFile = File(...)):
+    image_bytes = await file.read()
+    try:
+        # YOLO 추론은 CPU 바운드라 별도 스레드에서 실행 (이벤트 루프 비차단)
+        return await asyncio.to_thread(predict_food, image_bytes)
+    except Exception as e:  # noqa: BLE001 - 어떤 실패든 known=False 로 폴백 유도
+        return {"known": False, "food": None, "confidence": 0.0, "candidates": [], "error": str(e)}
+
+
+@app.on_event("startup")
+async def _warmup_model():
+    # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
+    asyncio.create_task(asyncio.to_thread(warmup_food_model))

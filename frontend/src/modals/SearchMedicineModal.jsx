@@ -89,7 +89,7 @@ export default function SearchMedicineModal({
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4">
       <div className="w-full max-w-[760px] rounded-2xl bg-white shadow-2xl overflow-hidden">
         {/* 상단 */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 md:px-8 py-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <Search className="w-5 h-5 text-[#2563EB]" />
             <h2 className="text-[28px] font-semibold text-gray-800">검색</h2>
@@ -104,7 +104,7 @@ export default function SearchMedicineModal({
           </button>
         </div>
 
-        <div className="px-8 py-8">
+        <div className="px-5 md:px-8 py-8">
           {/* 검색 영역 */}
           <div className="mb-8">
             <label className="block text-[14px] font-semibold text-gray-600 mb-3">

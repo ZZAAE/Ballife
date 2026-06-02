@@ -15,6 +15,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import familyApi from "../../api/familyApi";
 import subscriptionApi from "../../api/subscriptionApi";
+import SubscriptionModal from "../../modals/SubscriptionModal";
 
 /* 항목별 공유 토글 한 줄 */
 function ConsentRow({ icon: Icon, label, value, onChange, disabled, badge }) {
@@ -25,7 +26,9 @@ function ConsentRow({ icon: Icon, label, value, onChange, disabled, badge }) {
           <Icon size={16} />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-[#0F172A]">{label}</span>
+          <span className="text-[13px] font-medium text-[#0F172A]">
+            {label}
+          </span>
           {badge && (
             <span className="rounded-full bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold text-[#94A3B8]">
               {badge}
@@ -53,20 +56,31 @@ function ConsentRow({ icon: Icon, label, value, onChange, disabled, badge }) {
 }
 
 /* 구성원 건강 카드 */
-function MemberCard({ card, isOwnerViewer, onRemove }) {
-  const bloodSugarText =
-    card.bloodSugar?.value != null
+function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
+  // 그룹 비활성(오너가 가족 플랜이 아닐 때) → 본인 외 모든 항목 비공개
+  const locked = !card.me && !groupActive;
+  const has = {
+    bloodSugar: !locked && card.bloodSugar?.value != null,
+    bloodPressure: !locked && card.bloodPressure?.systolic != null,
+    exercise: !locked && !!card.exercise?.exerciseName,
+    medication: !locked && card.medication?.total != null,
+  };
+  const bloodSugarText = locked
+    ? "비공개"
+    : has.bloodSugar
       ? `${card.bloodSugar.value} mg/dL`
       : !card.me && !card.consent?.shareBloodSugar
         ? "비공개"
         : "기록 없음";
-  const bloodPressureText =
-    card.bloodPressure?.systolic != null
+  const bloodPressureText = locked
+    ? "비공개"
+    : has.bloodPressure
       ? `${card.bloodPressure.systolic} / ${card.bloodPressure.diastolic}`
       : !card.me && !card.consent?.shareBloodPressure
         ? "비공개"
         : "기록 없음";
   const exerciseText = (() => {
+    if (locked) return "비공개";
     if (card.exercise?.exerciseName) {
       const kcal = card.exercise.burnedCalorie;
       return kcal != null
@@ -76,9 +90,18 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
     if (!card.me && !card.consent?.shareExercise) return "비공개";
     return "기록 없음";
   })();
+  const medicationText = (() => {
+    if (locked) return "비공개";
+    if (card.medication?.total != null) {
+      const { taken = 0, total } = card.medication;
+      return taken >= total ? "복용 완료" : `${taken}/${total} 복용`;
+    }
+    if (!card.me && !card.consent?.shareMedication) return "비공개";
+    return "기록 없음";
+  })();
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-[#F8FAFC] p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ece8f7] text-sm font-semibold text-gray-600">
@@ -116,46 +139,52 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-[#F8FAFC] px-4 py-3">
+        <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
             <Droplet size={12} /> 혈당
           </div>
           <p
             className={`text-[15px] font-bold ${
-              card.bloodSugar?.value != null
-                ? "text-[#0F172A]"
-                : "text-[#94A3B8]"
+              has.bloodSugar ? "text-[#0F172A]" : "text-[#94A3B8]"
             }`}
           >
             {bloodSugarText}
           </p>
         </div>
-        <div className="rounded-xl bg-[#F8FAFC] px-4 py-3">
+        <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
             <HeartPulse size={12} /> 혈압
           </div>
           <p
             className={`text-[15px] font-bold ${
-              card.bloodPressure?.systolic != null
-                ? "text-[#0F172A]"
-                : "text-[#94A3B8]"
+              has.bloodPressure ? "text-[#0F172A]" : "text-[#94A3B8]"
             }`}
           >
             {bloodPressureText}
           </p>
         </div>
-        <div className="col-span-2 rounded-xl bg-[#F8FAFC] px-4 py-3">
+        <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
-            <Dumbbell size={12} /> 운동 현황
+            <Dumbbell size={12} /> 최근 운동
           </div>
           <p
             className={`text-[15px] font-bold ${
-              card.exercise?.exerciseName
-                ? "text-[#0F172A]"
-                : "text-[#94A3B8]"
+              has.exercise ? "text-[#0F172A]" : "text-[#94A3B8]"
             }`}
           >
             {exerciseText}
+          </p>
+        </div>
+        <div className="rounded-xl bg-white px-4 py-3">
+          <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
+            <Pill size={12} /> 복약 현황
+          </div>
+          <p
+            className={`text-[15px] font-bold ${
+              has.medication ? "text-[#0F172A]" : "text-[#94A3B8]"
+            }`}
+          >
+            {medicationText}
           </p>
         </div>
       </div>
@@ -167,23 +196,33 @@ function MemberCard({ card, isOwnerViewer, onRemove }) {
    컴포넌트 안에 정의하면 렌더마다 새 함수가 되어 React 가 하위 트리를
    통째로 언마운트/재마운트하고, 입력창 포커스가 매 글자마다 풀린다. */
 function Shell({ children }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
           <div className="mx-auto box-border max-w-[1000px] px-6 py-8">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f1c33] text-white">
-                <Users size={20} />
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f1c33] text-white">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <h1 className="text-[24px] font-extrabold tracking-tight">
+                    가족 건강 관리
+                  </h1>
+                  <p className="text-sm text-[#64748B]">
+                    동의 기반으로 가족의 혈당·혈압을 함께 확인하세요.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-[24px] font-extrabold tracking-tight">
-                  가족 건강 관리
-                </h1>
-                <p className="text-sm text-[#64748B]">
-                  동의 기반으로 가족의 혈당·혈압을 함께 확인하세요.
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/member")}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-[13px] font-semibold text-gray-600 hover:bg-gray-100"
+              >
+                이전
+              </button>
             </div>
             {children}
           </div>
@@ -203,6 +242,7 @@ export default function FamilyPage() {
   const [loading, setLoading] = useState(true);
   const [codeInput, setCodeInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [subOpen, setSubOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     const [famRes, subRes] = await Promise.allSettled([
@@ -311,6 +351,21 @@ export default function FamilyPage() {
     );
   };
 
+  // 모달에서 플랜 결제 → 가족/구독 상태 갱신 (그룹 재활성화 반영)
+  const handleSubscribe = async (plan) => {
+    const { data } = await subscriptionApi.activate(plan);
+    await refresh();
+    toast.success("구독이 활성화되었습니다.");
+    return data;
+  };
+
+  const handleCancelSubscription = async () => {
+    const { data } = await subscriptionApi.cancel();
+    await refresh();
+    toast.success("구독을 해지했습니다.");
+    return data;
+  };
+
   if (loading) {
     return (
       <Shell>
@@ -323,9 +378,45 @@ export default function FamilyPage() {
 
   const inGroup = family?.inGroup;
   const isOwner = family?.role === "OWNER";
-  const canCreateGroup = subscription?.plan === "FAMILY" && subscription?.active;
+  const canCreateGroup =
+    subscription?.plan === "FAMILY" && subscription?.active;
   const consent = family?.myConsent ?? {};
-  const members = family?.members ?? [];
+  // TODO(임시): 레이아웃 확인용 더미 형제 2명 — 확인 후 제거
+  const DUMMY_SIBLINGS = [
+    {
+      userId: "dummy-bro-1",
+      nickname: "원준",
+      me: false,
+      role: "MEMBER",
+      bloodSugar: { value: 98 },
+      bloodPressure: { systolic: 118, diastolic: 76 },
+      exercise: { exerciseName: "러닝", burnedCalorie: 240 },
+      medication: { taken: 2, total: 2 },
+      consent: {
+        shareBloodSugar: true,
+        shareBloodPressure: true,
+        shareMedication: true,
+        shareExercise: true,
+      },
+    },
+    {
+      userId: "dummy-bro-2",
+      nickname: "초딩",
+      me: false,
+      role: "MEMBER",
+      bloodSugar: { value: 105 },
+      bloodPressure: { systolic: 122, diastolic: 80 },
+      exercise: { exerciseName: "수영", burnedCalorie: 310 },
+      medication: { taken: 1, total: 3 },
+      consent: {
+        shareBloodSugar: true,
+        shareBloodPressure: true,
+        shareMedication: true,
+        shareExercise: true,
+      },
+    },
+  ];
+  const members = [...(family?.members ?? []), ...DUMMY_SIBLINGS];
 
   // ── 그룹 미소속 ──
   if (!inGroup) {
@@ -336,7 +427,8 @@ export default function FamilyPage() {
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="text-[16px] font-bold">초대 코드로 합류</h2>
             <p className="mt-1 text-[13px] text-[#64748B]">
-              가족이 보내준 초대 코드를 입력하세요. 구독 없이도 합류할 수 있어요.
+              가족이 보내준 초대 코드를 입력하세요. 구독 없이도 합류할 수
+              있어요.
             </p>
             <div className="mt-4 flex gap-2">
               <input
@@ -398,8 +490,20 @@ export default function FamilyPage() {
   return (
     <Shell>
       {!family.groupActive && (
-        <div className="mb-5 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 text-[13px] font-medium text-[#9A3412]">
-          이 가족 그룹은 현재 비활성화 상태입니다. 오너의 가족 플랜이 만료되었어요.
+        <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 text-[13px] font-medium text-[#9A3412]">
+          <span>
+            이 가족 그룹은 현재 비활성화 상태입니다. 오너의 가족 플랜이
+            만료되었어요.
+          </span>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setSubOpen(true)}
+              className="shrink-0 rounded-lg bg-[#9A3412] px-3 py-2 text-[12px] font-semibold text-white hover:bg-[#7c2d10]"
+            >
+              구독 갱신
+            </button>
+          )}
         </div>
       )}
 
@@ -453,13 +557,14 @@ export default function FamilyPage() {
             )}
           </div>
 
-          {/* 내 공유 설정 (항목별 동의) */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          {/* 내 공유 설정 (항목별 동의) — flex-1 로 남은 높이를 채운다.
+              제목/설명은 위에 고정하고, 토글 목록만 남은 공간에서 세로 중앙(justify-center) */}
+          <div className="flex flex-1 flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h3 className="mb-1 text-[15px] font-bold">내 공유 설정</h3>
             <p className="mb-4 text-[12px] text-[#64748B]">
               동의한 항목만 가족에게 공개됩니다.
             </p>
-            <div className="space-y-2">
+            <div className="flex flex-1 flex-col justify-center gap-2">
               <ConsentRow
                 icon={Droplet}
                 label="혈당"
@@ -474,15 +579,13 @@ export default function FamilyPage() {
               />
               <ConsentRow
                 icon={Pill}
-                label="복약 알림"
-                value={false}
-                onChange={() => {}}
-                disabled
-                badge="준비 중"
+                label="복약 현황"
+                value={!!consent.shareMedication}
+                onChange={(v) => handleConsent("shareMedication", v)}
               />
               <ConsentRow
                 icon={Dumbbell}
-                label="운동 현황"
+                label="최근 운동"
                 value={!!consent.shareExercise}
                 onChange={(v) => handleConsent("shareExercise", v)}
               />
@@ -490,25 +593,32 @@ export default function FamilyPage() {
           </div>
         </div>
 
-        {/* 우측: 구성원 목록 */}
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[15px] font-bold">
-              가족 구성원 ({members.length})
-            </h3>
-          </div>
+        {/* 우측: 구성원 목록 — 헤더를 카드 안 상단에 두어 좌측 카드와 윗변을 맞춘다 */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-[15px] font-bold">
+            가족 구성원 ({members.length})
+          </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {members.map((card) => (
               <MemberCard
                 key={card.userId}
                 card={card}
                 isOwnerViewer={isOwner}
+                groupActive={family.groupActive}
                 onRemove={handleRemove}
               />
             ))}
           </div>
         </div>
       </div>
+
+      <SubscriptionModal
+        open={subOpen}
+        onClose={() => setSubOpen(false)}
+        onSubmit={handleSubscribe}
+        onCancel={handleCancelSubscription}
+        currentPlan={subscription?.plan ?? "NONE"}
+      />
     </Shell>
   );
 }

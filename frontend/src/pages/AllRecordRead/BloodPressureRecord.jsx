@@ -256,7 +256,7 @@ export default function BloodPressureRecord() {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
               혈압 기록 확인
             </h1>
