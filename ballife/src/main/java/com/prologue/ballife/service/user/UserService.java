@@ -43,9 +43,9 @@ public class UserService {
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateResourceException("닉네임", request.getNickname());
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new DuplicateResourceException("사용자명", request.getUsername());
-        }
+        // if (userRepository.existsByUsername(request.getUsername())) {
+        //     throw new DuplicateResourceException("사용자명", request.getUsername());
+        // }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("이메일", request.getEmail());
         }
