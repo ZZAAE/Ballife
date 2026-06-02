@@ -16,6 +16,7 @@ import mealApi from "../../api/mealApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import PrescriptionOcrTestModal from "../../modals/prescriptionOcrTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+import reportApi from "../../api/reportApi";
 
 const ML_PER_CUP = 200;
 
@@ -172,13 +173,47 @@ function UserInformation() {
     return next;
   };
 
-  // "건강 분석 보고서" 버튼 → public/reports 폴더에 있는 PDF 파일을 새 탭으로 연다.
-  // (파일명에 한글/공백이 있어 URL 인코딩 필요)
-  const handlePrintHealthReport = () => {
-    const url = `/reports/${encodeURIComponent("건강 분석 보고서.pdf")}`;
-    const win = window.open(url, "_blank");
-    if (!win) {
-      toast.error("팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.");
+  // "건강 분석 보고서" 버튼 → 백엔드 LLM 분석 보고서 PDF 다운로드.
+  // GET /api/health-analysis/report/monthly (JWT 인증, LLM 호출 ~5-15초 소요)
+  const [reportLoading, setReportLoading] = useState(false);
+
+  const handlePrintHealthReport = async () => {
+    if (reportLoading) return;
+    setReportLoading(true);
+    const toastId = toast.loading("건강 분석 보고서를 생성하고 있어요…");
+
+    try {
+      const response = await reportApi.downloadMonthlyReport();
+
+      // Content-Disposition 에서 파일명 추출 (백엔드가 yyyyMMdd 박아줌)
+      const cd = response.headers?.["content-disposition"] || "";
+      const match = cd.match(/filename="?([^";]+)"?/);
+      const filename = match
+        ? match[1]
+        : `ballife-report-monthly-${new Date()
+            .toISOString()
+            .slice(0, 10)
+            .replace(/-/g, "")}.pdf`;
+
+      // Blob 다운로드 트리거
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.dismiss(toastId);
+      toast.success("건강 분석 보고서 다운로드 완료");
+    } catch (e) {
+      toast.dismiss(toastId);
+      // api.js 응답 인터셉터가 401 처리 + 기본 에러 토스트 자동.
+      console.error("건강 분석 보고서 다운로드 실패:", e);
+    } finally {
+      setReportLoading(false);
     }
   };
 
@@ -575,9 +610,10 @@ function UserInformation() {
                       <button
                         type="button"
                         onClick={handlePrintHealthReport}
-                        className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                        disabled={reportLoading}
+                        className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        건강 분석 보고서
+                        {reportLoading ? "생성 중…" : "건강 분석 보고서"}
                       </button>
                     )}
                     <button
