@@ -16,11 +16,8 @@ import mealApi from "../../api/mealApi";
 import MedicineSearchTestModal from "../../modals/MedicineSearchTestModal";
 import PrescriptionOcrTestModal from "../../modals/prescriptionOcrTestModal";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
-<<<<<<< HEAD
 import reportApi from "../../api/reportApi";
-=======
 import medicineApi from "../../api/medicineApi";
->>>>>>> origin/jisoo0602
 
 const ML_PER_CUP = 200;
 

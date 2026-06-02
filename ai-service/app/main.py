@@ -1,3 +1,5 @@
+
+from fastapi import FastAPI, File, UploadFile
 from typing import List
 from fastapi import Body, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -478,6 +480,12 @@ async def predict_food_endpoint(file: UploadFile = File(...)):
         return {"known": False, "food": None, "confidence": 0.0, "candidates": [], "error": str(e)}
 
 
+@app.on_event("startup")
+async def _warmup_model():
+    # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
+    asyncio.create_task(asyncio.to_thread(warmup_food_model))
+    return {"ok": True}
+
 class MedicineList(BaseModel):
     medicines: List[str]
     
@@ -488,9 +496,3 @@ async def ocr_Str_Extraction(ocrStrList: List[str] = Body(...)):
     ocrChain = promptOcrParsing | llm_structured
     result = await ocrChain.ainvoke({"OCR_STR": ocrStrList})
     return result.medicines
-
-
-@app.on_event("startup")
-async def _warmup_model():
-    # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
-    asyncio.create_task(asyncio.to_thread(warmup_food_model))

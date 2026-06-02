@@ -79,3 +79,8 @@ storage:
 
     #단계별로 스페이스 2칸
     #탭 사용 금지
+
+NaverOcr:
+  api:
+    base-url: ${NAVER_OCR_BASE_URL:}
+    secret-key: ${NAVER_OCR_SECRET_KEY:}

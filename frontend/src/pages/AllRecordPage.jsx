@@ -20,7 +20,7 @@ import Plus from "../assets/Record/Plus.svg";
 import BloodsugarModal from "../modals/bloodsugarModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import MealRegisterModal from "../modals/MealRegisterModal";
-import WaterRecordModal from "../modals/WaterRecordModal";
+import WaterRecordModal from "../modals/waterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
@@ -588,7 +588,7 @@ function AllRecordPage() {
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
-        <div className="mx-auto box-border w-full max-w-[1280px] px-4 sm:px-6 pt-[87px] pb-8">
+        <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
