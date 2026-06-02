@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.prologue.ballife.domain.medicine.Prescription;
+import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 import com.prologue.ballife.domain.medicine.UserMedicine;
 
 import jakarta.validation.constraints.Max;
@@ -34,6 +35,8 @@ public class PrescriptionAndMedicineDto {
         private String intakeIntervals;
 
         private String dosage;
+
+        private Pcategory pCategory;
 
         private List<UserMedicineDto.CreateRequest> medicines;
 

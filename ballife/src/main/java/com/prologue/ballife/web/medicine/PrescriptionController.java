@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.prologue.ballife.security.CustomUserDetails;
 import com.prologue.ballife.service.medicine.MedicineService;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
@@ -33,8 +35,9 @@ public class PrescriptionController {
     @Operation(summary = "약 등록", description = "처방전별 약을 등록합니다.")
     @PostMapping("/register/medicine")
     public ResponseEntity<PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse> postMedicine(
+        @AuthenticationPrincipal CustomUserDetails principal,
         @Valid @RequestBody PrescriptionAndMedicineDto.CreateRequest request) {
-            PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse response = medicineService.postMedicine(request);
+            PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse response = medicineService.postMedicine(principal.getUserId(), request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
