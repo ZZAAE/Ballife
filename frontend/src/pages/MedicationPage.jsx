@@ -376,7 +376,7 @@ export default function MedicationPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A] overflow-x-hidden">
-      <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
+      <div className="mx-auto box-border w-full max-w-[1280px] px-4 sm:px-6 pt-[87px] pb-8">
         {/* 제목 영역 */}
         <section className="mb-8">
           <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">

@@ -335,8 +335,8 @@ export default function PostDetailPage() {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
-        <div className="mb-5 flex items-end justify-between gap-4">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[28px] font-semibold text-gray-700">
               <Link to="/boards" className="hover:text-blue-600">

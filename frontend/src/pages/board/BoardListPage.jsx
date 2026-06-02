@@ -92,7 +92,7 @@ function BoardListPage() {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
               커뮤니티
             </h1>
@@ -165,8 +165,8 @@ function BoardListPage() {
       </div>
 
       {/* 게시글 테이블 */}
-      <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        <table className="w-full table-fixed text-sm">
+      <div className="overflow-x-auto rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+        <table className="w-full min-w-[720px] table-fixed text-sm">
           <colgroup>
             <col className="w-[70px]" />
             <col className="w-[110px]" />
@@ -243,7 +243,7 @@ function BoardListPage() {
       </div>
 
       {/* 페이지네이션 */}
-      <div className="mt-6 flex items-center justify-center gap-2">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         {Array.from({ length: totalPages }, (_, i) => (
           <button
             key={i}

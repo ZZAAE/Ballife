@@ -2,6 +2,8 @@ package com.prologue.ballife.service.report;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -25,6 +27,7 @@ import com.prologue.ballife.analyzer.DiseaseProfileAnalysisResult;
 import com.prologue.ballife.analyzer.MedicationAnalysisResult;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.service.HealthAnalysisService;
+import com.prologue.ballife.service.report.llm.LlmQuestionGenerator;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.DiseaseSummary;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.Period;
@@ -38,16 +41,13 @@ import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.User;
  *   - HealthAnalysisService 의 응답을 Thymeleaf context 로 정확히 매핑
  *   - monthly.html 렌더링이 실제 데이터(채워진 / 일부 null)에서 깨지지 않음
  *   - HealthAnalysisService 의 예외는 그대로 전파
+ *   - LLM 빈 응답 / LLM 예외 시 룰 fallback 동작 (PDF 정상 생성)
  *
  * 셋업 메모:
- *   HealthAnalysisService 만 mock. SpringTemplateEngine / ReportPdfGenerator 는 실제 인스턴스
- *   사용 — monthly.html 의 Thymeleaf 표현식이 처음으로 실제 데이터로 렌더링되는 시점이라
- *   런타임 오류(표현식 / 변수 매핑) 를 여기서 잡는 게 목적.
- *
- *   SpringTemplateEngine 수동 셋업:
- *     - ClassLoaderTemplateResolver prefix "templates/" + suffix ".html" + mode HTML
- *     - #temporals.createNow() 는 thymeleaf-spring6 3.1+ core 통합이라 별도 dialect 추가 불필요.
- *     - Spring Boot 의 자동 빈 구성과 달라도 무방 — 단위 테스트는 명시적 셋업.
+ *   - HealthAnalysisService 와 LlmQuestionGenerator 는 @Mock (실제 호출/OpenAI 호출 차단)
+ *   - SpringTemplateEngine / ReportPdfGenerator / ConsultationQuestionGenerator 는
+ *     실제 인스턴스 사용 — 통합 무게 단위 테스트로 monthly.html 의 실제 렌더링 검증
+ *   - 각 테스트 별 stub 은 메서드 안에서 명시 (Mockito strict 모드의 UnnecessaryStubbingException 회피)
  */
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {
@@ -55,9 +55,11 @@ class ReportServiceTest {
     private static final String PDF_HEADER = "%PDF";
 
     @Mock HealthAnalysisService healthAnalysisService;
+    @Mock LlmQuestionGenerator llmGenerator;
 
     SpringTemplateEngine templateEngine;
     ReportPdfGenerator pdfGenerator;
+    ConsultationQuestionGenerator ruleBasedGenerator;
     ReportService reportService;
 
     @BeforeEach
@@ -71,17 +73,19 @@ class ReportServiceTest {
 
         templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(resolver);
-        // #temporals utility 는 thymeleaf-spring6 3.1+ 부터 core 통합 — Java8TimeDialect 추가 불필요.
 
         pdfGenerator = new ReportPdfGenerator();
-        reportService = new ReportService(healthAnalysisService, templateEngine, pdfGenerator);
+        ruleBasedGenerator = new ConsultationQuestionGenerator();
+
+        reportService = new ReportService(
+                healthAnalysisService, templateEngine, pdfGenerator,
+                llmGenerator, ruleBasedGenerator);
     }
 
     // ============================================================
     //  헬퍼 — HealthAnalysisResponse 빌더
     // ============================================================
 
-    /** 모든 필드가 채워진 정상 응답 (혈압/혈당/BMI/복약 모두 측정 있음). */
     private HealthAnalysisResponse buildFullResponse(Long userId) {
         return new HealthAnalysisResponse(
                 userId,
@@ -96,7 +100,7 @@ class ReportServiceTest {
                         95, 125, 95, 112, 145, 215),
                 new BmiAnalysisResult(25.8, "RISK", "비만"),
                 new MedicationAnalysisResult(30, 21, 70, "CAUTION", "다소 부족"),
-                new DiseaseProfileAnalysisResult(List.of()), // 챗봇용 풀스펙 — 보고서에선 user.diseases 사용
+                new DiseaseProfileAnalysisResult(List.of()),
                 new User("홍길동", 30, "남", 170.0, 75.0, List.of(
                         new DiseaseSummary("고혈압", "1기"),
                         new DiseaseSummary("당뇨",   "2형"))),
@@ -104,55 +108,51 @@ class ReportServiceTest {
         );
     }
 
-    /**
-     * 일부 필드 null 응답 — Q1/Q2/Q3 null 정책이 작동하는지 검증용.
-     *   - 혈압 측정 0건: BloodPressureAnalysisResult 모든 필드 null
-     *   - 혈당 공복만 측정, 식전/식후 null (Q1)
-     *   - 키/몸무게 없음: BMI 모든 필드 null
-     *   - 처방 없음: Medication 모든 필드 null
-     *   - 보유 질환 0개 (Q2)
-     *   - 측정 0건 게이지 (Q3)
-     */
     private HealthAnalysisResponse buildPartialNullResponse(Long userId) {
         return new HealthAnalysisResponse(
                 userId,
                 new Period("MONTHLY", LocalDate.of(2026, 5, 3), LocalDate.of(2026, 6, 1)),
                 new BloodPressureAnalysisResult(null, null, null, null, null, null, null, null, null),
                 new BloodSugarAnalysisResult(
-                        108, "CAUTION", "다소 높음",   // 공복만 측정
+                        108, "CAUTION", "다소 높음",
                         null, null, null,
                         null, null, null,
                         95, 125, null, null, null, null),
                 new BmiAnalysisResult(null, null, null),
                 new MedicationAnalysisResult(null, null, null, null, null),
                 new DiseaseProfileAnalysisResult(List.of()),
-                new User("김환자", null, null, null, null, List.of()), // 신고 질환 0
+                new User("김환자", null, null, null, null, List.of()),
                 new RecordingStats(0, 5, 0, 30, 0.0, 0.167, 0.0)
         );
     }
 
+    private static final List<String> STUB_LLM_QUESTIONS = List.of(
+            "수축기 평균 128에 대해 상담해 보세요.",
+            "식후혈당 관리법을 문의해 보세요.",
+            "체중 관리 방향에 대해 상담해 보세요."
+    );
+
     // ============================================================
-    //  A. 정상 렌더링
+    //  A. 정상 렌더링 (LLM 성공 경로 — 기존 FullData)
     // ============================================================
     @Nested
-    @DisplayName("정상 렌더링 (FullData)")
+    @DisplayName("정상 렌더링 — LLM 성공 (FullData)")
     class FullData {
 
         @Test
-        @DisplayName("모든 필드 채워진 응답 → PDF 바이너리 (헤더 %PDF, length > 0)")
-        void allFieldsFilled_rendersToValidPdf() {
-            // given
+        @DisplayName("모든 필드 채움 + LLM 정상 응답 → PDF 바이너리 (헤더 %PDF, length > 0)")
+        void allFieldsFilled_llmSuccess_rendersToValidPdf() {
             Long userId = 42L;
             when(healthAnalysisService.analyzeMonthly(userId))
                     .thenReturn(buildFullResponse(userId));
+            when(llmGenerator.generate(any())).thenReturn(STUB_LLM_QUESTIONS);
 
-            // when
             byte[] pdf = reportService.generateMonthlyReport(userId);
 
-            // then
             assertThat(pdf).isNotNull();
             assertThat(pdf.length).isGreaterThan(4);
             assertThat(new String(pdf, 0, 4)).isEqualTo(PDF_HEADER);
+            verify(llmGenerator).generate(any());
         }
     }
 
@@ -164,17 +164,15 @@ class ReportServiceTest {
     class NullPolicy {
 
         @Test
-        @DisplayName("혈압 0건 / 혈당 일부만 / BMI null / 복약 null / 질환 0개 / 게이지 0% — 깨지지 않고 PDF 생성")
+        @DisplayName("일부 필드 null + LLM 정상 응답 → 깨지지 않고 PDF 생성")
         void partialNullFields_renderWithoutError() {
-            // given
             Long userId = 42L;
             when(healthAnalysisService.analyzeMonthly(userId))
                     .thenReturn(buildPartialNullResponse(userId));
+            when(llmGenerator.generate(any())).thenReturn(STUB_LLM_QUESTIONS);
 
-            // when
             byte[] pdf = reportService.generateMonthlyReport(userId);
 
-            // then
             assertThat(pdf).isNotNull();
             assertThat(pdf.length).isGreaterThan(4);
             assertThat(new String(pdf, 0, 4)).isEqualTo(PDF_HEADER);
@@ -182,24 +180,64 @@ class ReportServiceTest {
     }
 
     // ============================================================
-    //  C. 예외 전파
+    //  C. 예외 전파 (HealthAnalysisService)
     // ============================================================
     @Nested
     @DisplayName("예외 전파 (ExceptionPropagation)")
     class ExceptionPropagation {
 
         @Test
-        @DisplayName("HealthAnalysisService 가 ResourceNotFoundException 던지면 그대로 전파")
+        @DisplayName("HealthAnalysisService 가 ResourceNotFoundException → 그대로 전파, LLM 호출 안 됨")
         void resourceNotFound_propagates() {
-            // given
             Long unknownUserId = 999L;
             when(healthAnalysisService.analyzeMonthly(unknownUserId))
                     .thenThrow(new ResourceNotFoundException("회원", unknownUserId));
 
-            // when / then
             assertThatThrownBy(() -> reportService.generateMonthlyReport(unknownUserId))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("회원");
+        }
+    }
+
+    // ============================================================
+    //  D. LLM Fallback — 빈 리스트 / 예외 모두 룰 기반으로 복구
+    // ============================================================
+    @Nested
+    @DisplayName("LLM Fallback (LlmFallback)")
+    class LlmFallback {
+
+        @Test
+        @DisplayName("LLM 이 빈 리스트 반환 → 룰 fallback 사용, PDF 정상 생성")
+        void llmReturnsEmpty_fallsBackToRuleBased() {
+            Long userId = 42L;
+            when(healthAnalysisService.analyzeMonthly(userId))
+                    .thenReturn(buildFullResponse(userId));
+            when(llmGenerator.generate(any())).thenReturn(List.of());
+
+            byte[] pdf = reportService.generateMonthlyReport(userId);
+
+            assertThat(pdf).isNotNull();
+            assertThat(pdf.length).isGreaterThan(4);
+            assertThat(new String(pdf, 0, 4)).isEqualTo(PDF_HEADER);
+            verify(llmGenerator).generate(any());
+            // ruleBasedGenerator 는 실제 인스턴스 — 룰 결과가 PDF 에 들어감
+        }
+
+        @Test
+        @DisplayName("LLM 이 RuntimeException → 룰 fallback 사용, PDF 정상 생성 (전파 X)")
+        void llmThrows_fallsBackToRuleBased() {
+            Long userId = 42L;
+            when(healthAnalysisService.analyzeMonthly(userId))
+                    .thenReturn(buildFullResponse(userId));
+            when(llmGenerator.generate(any()))
+                    .thenThrow(new RuntimeException("OpenAI 호출 실패"));
+
+            byte[] pdf = reportService.generateMonthlyReport(userId);
+
+            assertThat(pdf).isNotNull();
+            assertThat(pdf.length).isGreaterThan(4);
+            assertThat(new String(pdf, 0, 4)).isEqualTo(PDF_HEADER);
+            verify(llmGenerator).generate(any());
         }
     }
 }

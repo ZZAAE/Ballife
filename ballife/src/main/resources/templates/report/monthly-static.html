@@ -176,7 +176,7 @@
       background: #f0fdfa;
       color: #0f766e;
       border: 1px solid #99f6e4;
-      padding: 3px 11px;
+      padding: 5px 14px;
       border-radius: 9999px;
       font-size: 9pt;
       font-weight: 600;
@@ -288,9 +288,9 @@
      * ============================================================ */
     .chip {
       display: inline-block;
-      padding: 4px 12px;
+      padding: 6px 16px;
       border-radius: 9999px;
-      font-size: 8.5pt;
+      font-size: 9pt;
       font-weight: 700;
       letter-spacing: 0.2pt;
       white-space: nowrap;
@@ -339,6 +339,17 @@
       color: #64748b;
       font-size: 9.5pt;
       text-align: center;
+    }
+
+    .question-list {
+      padding-left: 22px;
+      margin: 0;
+    }
+    .question-list li {
+      padding: 5px 0;
+      font-size: 10.5pt;
+      line-height: 1.65;
+      color: #334155;
     }
 
     /* ============================================================
@@ -705,9 +716,11 @@
         </table>
       </div>
       <div class="section-body">
-        <div class="placeholder">
-          ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
-        </div>
+        <ol class="question-list">
+          <li>수축기 평균 128, 최고 142가 측정되었습니다. 혈압 관리 방향에 대해 상담해 보세요.</li>
+          <li>식후 혈당이 평균 168, 최고 215까지 올라간 패턴이 보입니다. 식사 후 혈당 관리법을 문의해 보세요.</li>
+          <li>BMI 25.8로 체중 관리가 필요한 구간입니다. 안전한 감량 방법을 상담해 보세요.</li>
+        </ol>
       </div>
     </div>
 

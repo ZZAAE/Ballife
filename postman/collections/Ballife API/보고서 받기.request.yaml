@@ -1,0 +1,5 @@
+$kind: http-request
+url: ""
+method: GET
+examples: .resources/보고서 받기.resources/examples
+order: 4469209876492343

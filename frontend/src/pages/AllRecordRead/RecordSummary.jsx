@@ -481,7 +481,7 @@ export default function RecordSummary() {
       <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
@@ -570,7 +570,7 @@ export default function RecordSummary() {
             />
           </div>
           {/* Charts Section */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 gap-4 mb-8 xl:grid-cols-2">
             {/* 혈당 Chart */}
             <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-4">

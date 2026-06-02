@@ -118,13 +118,13 @@ function PostEditPage() {
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
-            <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-              글 수정
-            </h1>
-            <p className="mb-8 text-sm text-gray-500">
-              건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
-            </p>
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
+          글 수정
+        </h1>
+        <p className="mb-8 text-sm text-gray-500">
+          건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
+        </p>
 
             <form onSubmit={handleSubmit} className="space-y-7">
               <div className="space-y-6">

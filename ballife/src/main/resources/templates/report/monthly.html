@@ -187,7 +187,7 @@
       background: #f0fdfa;
       color: #0f766e;
       border: 1px solid #99f6e4;
-      padding: 3px 11px;
+      padding: 5px 14px;
       border-radius: 9999px;
       font-size: 9pt;
       font-weight: 600;
@@ -296,9 +296,9 @@
 
     .chip {
       display: inline-block;
-      padding: 4px 12px;
+      padding: 6px 16px;
       border-radius: 9999px;
-      font-size: 8.5pt;
+      font-size: 9pt;
       font-weight: 700;
       letter-spacing: 0.2pt;
       white-space: nowrap;
@@ -340,6 +340,17 @@
       color: #64748b;
       font-size: 9.5pt;
       text-align: center;
+    }
+
+    .question-list {
+      padding-left: 22px;
+      margin: 0;
+    }
+    .question-list li {
+      padding: 5px 0;
+      font-size: 10.5pt;
+      line-height: 1.65;
+      color: #334155;
     }
 
     .footer-disclaimer {
@@ -696,8 +707,11 @@
         </table>
       </div>
       <div class="section-body">
-        <div class="placeholder">
-          ※ Step D-3 에서 LLM이 자동 생성한 질문 목록이 이 영역에 들어갑니다.
+        <ol class="question-list" th:if="${!questions.empty}">
+          <li th:each="q : ${questions}" th:text="${q}">샘플 질문</li>
+        </ol>
+        <div th:if="${questions.empty}" class="placeholder">
+          이번 기간 측정값이 전반적으로 안정적입니다. 정기 진료 시 평소 궁금했던 점을 상담해 보세요.
         </div>
       </div>
     </div>
