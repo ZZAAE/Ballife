@@ -1,7 +1,6 @@
 import { Check, Circle, Moon, Pill, Sun, Triangle, X } from "lucide-react";
 import { getCurrentWeekData } from "./medicationData";
 
-const DEFAULT_DRUGS = ["혈압약", "당뇨약"];
 
 const getScheduleStatus = (drugs) => {
   if (!drugs || drugs.length === 0) return null;
@@ -49,7 +48,7 @@ export default function WeeklyCalendarCard({
   todaySchedules,
   prnRecords = [],
   todayKey,
-  drugNames = DEFAULT_DRUGS,
+  drugNames = [],
   savedSchedulesByDate = {},
 }) {
   const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
@@ -74,7 +73,8 @@ export default function WeeklyCalendarCard({
     // 복용 확인을 안 눌러 기록이 없으면 미복용(miss)으로 굳힌다.
     if (cellDate && cellDate < todayKey) {
       const slot = getSavedSlot(item, rowKey, cellIndex);
-      return slot ? getPastStatus(slot.drugs) : "miss";
+      // 그날 복용할 약이 있었을 때만 판정. 등록 전(약 없음)이면 빈 칸(null).
+      return slot ? getPastStatus(slot.drugs) : null;
     }
     return item[rowKey];
   };
@@ -87,17 +87,7 @@ export default function WeeklyCalendarCard({
     }
     const slot = getSavedSlot(item, rowKey, cellIndex);
     if (slot) return slot.drugs.map((d) => ({ name: d.name, taken: d.taken }));
-    const cellDate = getCellDateKey(cellIndex);
-    if (cellDate && cellDate < todayKey) {
-      // 기록 없는 과거일 → 미복용. 표준 약 목록을 미복용 상태로 표시
-      return drugNames.map((name) => ({ name, taken: false }));
-    }
-    const status = item[rowKey];
-    if (!status || status === "null") return [];
-    return drugNames.map((name) => ({
-      name,
-      taken: status === "done",
-    }));
+    return [];
   };
 
   // 각 셀의 실제 날짜를 today 기준 인덱스 오프셋으로 계산
@@ -112,11 +102,12 @@ export default function WeeklyCalendarCard({
     return formatDateKey(d);
   };
 
-  // 과거 날짜에 실제 저장된 일정 슬롯을 찾는다 (오늘/미래는 대상 아님)
+  // 해당 날짜의 일정 슬롯을 찾는다 (오늘은 라이브 상태를 따로 쓰므로 제외).
+  // 과거: 저장된 복용 기록 / 미래: 등록일 이후 예정된 약.
   const getSavedSlot = (item, rowKey, cellIndex) => {
     if (item.today) return null;
     const cellDate = getCellDateKey(cellIndex);
-    if (!cellDate || cellDate >= todayKey) return null;
+    if (!cellDate || cellDate === todayKey) return null;
     const saved = savedSchedulesByDate[cellDate];
     if (!Array.isArray(saved)) return null;
     return saved.find((s) => s.id === rowKey) ?? null;

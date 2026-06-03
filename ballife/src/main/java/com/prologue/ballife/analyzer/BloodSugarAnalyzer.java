@@ -55,7 +55,10 @@ public class BloodSugarAnalyzer {
                 // min/max — 빈 리스트면 null
                 min(fastingValues),  max(fastingValues),
                 min(preMealValues),  max(preMealValues),
-                min(postMealValues), max(postMealValues)
+                min(postMealValues), max(postMealValues),
+
+                // 일별 list — Service 가 enrich (analyzer 는 빈 list)
+                List.of(), List.of(), List.of()
         );
     }
 

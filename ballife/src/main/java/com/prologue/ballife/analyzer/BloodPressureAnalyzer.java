@@ -31,17 +31,19 @@ public class BloodPressureAnalyzer {
         Integer minDia = min(diastolicValues);
         Integer maxDia = max(diastolicValues);
 
-        // 둘 중 하나라도 없으면 분류 불가 (grade/status/label만 null)
+        // 둘 중 하나라도 없으면 분류 불가 (grade/status/label만 null). dailyRecords 는 Service 가 enrich.
         if (avgSys == null || avgDia == null) {
             return new BloodPressureAnalysisResult(
                     avgSys, avgDia, null, null, null,
-                    minSys, maxSys, minDia, maxDia);
+                    minSys, maxSys, minDia, maxDia,
+                    List.of());
         }
 
         BloodPressureStandard.Grade grade = BloodPressureStandard.classify(avgSys, avgDia);
         return new BloodPressureAnalysisResult(
                 avgSys, avgDia, grade.grade, grade.status, grade.label,
-                minSys, maxSys, minDia, maxDia);
+                minSys, maxSys, minDia, maxDia,
+                List.of());
     }
 
     private Integer average(List<Integer> values) {

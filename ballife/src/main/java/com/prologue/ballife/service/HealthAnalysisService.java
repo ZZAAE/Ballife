@@ -5,8 +5,10 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,10 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
 import com.prologue.ballife.analyzer.BloodPressureAnalyzer;
+import com.prologue.ballife.analyzer.BloodPressureDaily;
 import com.prologue.ballife.analyzer.BloodSugarAnalysisResult;
 import com.prologue.ballife.analyzer.BloodSugarAnalyzer;
 import com.prologue.ballife.analyzer.BmiAnalysisResult;
 import com.prologue.ballife.analyzer.BmiAnalyzer;
+import com.prologue.ballife.analyzer.DailyValue;
 import com.prologue.ballife.analyzer.DiseaseProfileAnalysisResult;
 import com.prologue.ballife.analyzer.DiseaseProfileAnalyzer;
 import com.prologue.ballife.analyzer.MedicationAnalysisResult;
@@ -320,7 +324,38 @@ public class HealthAnalysisService {
             if (r.getSystolicBP()  != null) systolic.add(r.getSystolicBP());
             if (r.getDiastolicBP() != null) diastolic.add(r.getDiastolicBP());
         }
-        return bloodPressureAnalyzer.analyze(systolic, diastolic);
+
+        BloodPressureAnalysisResult base = bloodPressureAnalyzer.analyze(systolic, diastolic);
+        List<BloodPressureDaily> daily = buildBloodPressureDaily(records);
+
+        return new BloodPressureAnalysisResult(
+                base.avgSystolic(), base.avgDiastolic(), base.grade(), base.status(), base.label(),
+                base.minSystolic(), base.maxSystolic(), base.minDiastolic(), base.maxDiastolic(),
+                daily);
+    }
+
+    /**
+     * 혈압 records → 일별 평균(같은 날 여러 측정 → AVG) BloodPressureDaily list.
+     * 측정 없는 날은 group by 결과에 안 들어와 자연스럽게 생략.
+     * 시간 순 정렬 (date ASC).
+     */
+    private List<BloodPressureDaily> buildBloodPressureDaily(List<BioValueRecord> records) {
+        Map<LocalDate, List<BioValueRecord>> byDate = records.stream()
+                .filter(r -> r.getSystolicBP() != null)
+                .collect(Collectors.groupingBy(BioValueRecord::getRecordDate));
+
+        return byDate.entrySet().stream()
+                .map(e -> {
+                    double avgSys = e.getValue().stream()
+                            .mapToInt(BioValueRecord::getSystolicBP).average().orElse(0);
+                    Double avgDia = e.getValue().stream()
+                            .filter(r -> r.getDiastolicBP() != null)
+                            .mapToInt(BioValueRecord::getDiastolicBP).average().stream().boxed()
+                            .findFirst().orElse(null);
+                    return new BloodPressureDaily(e.getKey(), avgSys, avgDia);
+                })
+                .sorted(Comparator.comparing(BloodPressureDaily::date))
+                .toList();
     }
 
     // ─────────────────────────── 혈당 ───────────────────────────
@@ -342,6 +377,11 @@ public class HealthAnalysisService {
         List<Integer> preMeal  = new ArrayList<>();
         List<Integer> postMeal = new ArrayList<>();
 
+        // 일별 그룹별로도 별도 추적 (LLM 시계열 추론 입력)
+        List<BioValueRecord> fastingRecords  = new ArrayList<>();
+        List<BioValueRecord> preMealRecords  = new ArrayList<>();
+        List<BioValueRecord> postMealRecords = new ArrayList<>();
+
         for (BioValueRecord r : records) {
             Integer value = r.getBloodSugar();
             if (value == null) continue;
@@ -353,18 +393,52 @@ public class HealthAnalysisService {
 
             if (BS_SUFFIX_FASTING.equals(suffix)) {
                 fasting.add(value);
+                fastingRecords.add(r);
             } else if (BS_SUFFIX_BEDTIME.equals(suffix)) {
                 // 취침전은 분석 제외
                 continue;
             } else if (suffix.endsWith(BS_SUFFIX_POSTMEAL_TAIL)) {
                 postMeal.add(value);
+                postMealRecords.add(r);
             } else if (suffix.endsWith(BS_SUFFIX_PREMEAL_TAIL)) {
                 preMeal.add(value);
+                preMealRecords.add(r);
             }
             // 그 외 형식이면 무시
         }
 
-        return bloodSugarAnalyzer.analyze(fasting, preMeal, postMeal);
+        BloodSugarAnalysisResult base = bloodSugarAnalyzer.analyze(fasting, preMeal, postMeal);
+
+        List<DailyValue> dailyFasting  = buildBloodSugarDaily(fastingRecords);
+        List<DailyValue> dailyPreMeal  = buildBloodSugarDaily(preMealRecords);
+        List<DailyValue> dailyPostMeal = buildBloodSugarDaily(postMealRecords);
+
+        return new BloodSugarAnalysisResult(
+                base.fastingValue(),  base.fastingStatus(),  base.fastingLabel(),
+                base.preMealValue(),  base.preMealStatus(),  base.preMealLabel(),
+                base.postMealValue(), base.postMealStatus(), base.postMealLabel(),
+                base.fastingMin(),  base.fastingMax(),
+                base.preMealMin(),  base.preMealMax(),
+                base.postMealMin(), base.postMealMax(),
+                dailyFasting, dailyPreMeal, dailyPostMeal);
+    }
+
+    /**
+     * 혈당 그룹별 records → 일별 평균 DailyValue list.
+     * 측정 없는 날은 group by 결과에 안 들어와 자연스럽게 생략. 시간 순 정렬.
+     */
+    private List<DailyValue> buildBloodSugarDaily(List<BioValueRecord> records) {
+        Map<LocalDate, List<BioValueRecord>> byDate = records.stream()
+                .collect(Collectors.groupingBy(BioValueRecord::getRecordDate));
+
+        return byDate.entrySet().stream()
+                .map(e -> {
+                    double avg = e.getValue().stream()
+                            .mapToInt(BioValueRecord::getBloodSugar).average().orElse(0);
+                    return new DailyValue(e.getKey(), avg);
+                })
+                .sorted(Comparator.comparing(DailyValue::date))
+                .toList();
     }
 
     /**

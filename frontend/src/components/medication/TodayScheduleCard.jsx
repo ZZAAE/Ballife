@@ -66,7 +66,7 @@ export default function TodayScheduleCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="flex gap-4 overflow-x-auto pb-2">
         {schedules.map((schedule) => {
           const status = getStatus(schedule.drugs);
 
@@ -97,7 +97,10 @@ export default function TodayScheduleCard({
           }
 
           return (
-            <div key={schedule.id} className={`rounded-xl p-5 ${cardBorder}`}>
+            <div
+              key={schedule.id}
+              className={`w-[240px] flex-shrink-0 rounded-xl p-5 ${cardBorder}`}
+            >
               <div className="flex items-center gap-1.5 text-[12px] text-gray-400 mb-3">
                 <Sun className="w-3.5 h-3.5" /> {schedule.label} ({schedule.time})
               </div>

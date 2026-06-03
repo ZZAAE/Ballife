@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,7 +46,7 @@ public class PrescriptionController {
     //@Operation(summary = "처방전 조회")
 
     @Operation(summary = "처방전 약 목록 조회", description = "처방전별 약 목록을 조회합니다.")
-    @PostMapping("/{prescriptionId}")
+    @GetMapping("/prescriptions/{prescriptionId}/medicines")
     public ResponseEntity<List<UserMedicineDto.UserMedicineResponse>> getUserMedicine(
         @PathVariable Long prescriptionId) {
             return ResponseEntity.ok(medicineService.getUserMedicine(prescriptionId));
@@ -57,12 +59,35 @@ public class PrescriptionController {
             return ResponseEntity.ok(medicineService.getPrescription(userId));
     }
 
-    
-    // @Operation(summary = "처방전 수정", description = "등록된 처방전을 수정합니다.")
-    // @PostMapping("/{prescriptionId}/edit")
-    // public ResponseEntity<PrescriptionDto.PrescriptionResponse> putPrescription(
-    //     @PathVariable
-    // )h
+
+    @Operation(summary = "처방전 수정", description = "등록된 처방전을 수정합니다.")
+    @PutMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<PrescriptionDto.PrescriptionResponse> putPrescription(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId,
+        @Valid @RequestBody PrescriptionDto.UpdateRequest request) {
+            return ResponseEntity.ok(
+                medicineService.putPrescription(principal.getUserId(), prescriptionId, request));
+    }
+
+    @Operation(summary = "처방전+약 전체 수정", description = "처방전 정보와 약 목록을 함께 수정합니다.")
+    @PutMapping("/register/medicine/{prescriptionId}")
+    public ResponseEntity<PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse> putMedicine(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId,
+        @Valid @RequestBody PrescriptionAndMedicineDto.CreateRequest request) {
+            return ResponseEntity.ok(
+                medicineService.updateMedicine(principal.getUserId(), prescriptionId, request));
+    }
+
+    @Operation(summary = "처방전 삭제", description = "등록된 처방전을 삭제합니다.")
+    @DeleteMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<Void> deletePrescription(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId) {
+            medicineService.deletePrescription(principal.getUserId(), prescriptionId);
+            return ResponseEntity.noContent().build();
+    }
 
 
 }
