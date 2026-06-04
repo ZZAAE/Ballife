@@ -448,6 +448,8 @@
         </table>
       </div>
       <div class="section-body">
+        <img th:if="${bpChart != null and bpChart != ''}" th:src="${bpChart}" alt="혈압 추이"
+             style="display:block; width:100%; height:auto; margin: 4px 0 12px 0;"/>
         <table class="data">
           <thead>
             <tr>
@@ -505,6 +507,8 @@
         </table>
       </div>
       <div class="section-body">
+        <img th:if="${bsChart != null and bsChart != ''}" th:src="${bsChart}" alt="혈당 추이"
+             style="display:block; width:100%; height:auto; margin: 4px 0 12px 0;"/>
         <table class="data">
           <thead>
             <tr>

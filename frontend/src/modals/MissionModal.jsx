@@ -31,7 +31,6 @@ const MISSION_NOTES = {
 
 export default function MissionModal({ open, onClose, onClaimed }) {
   const [statusMap, setStatusMap] = useState({}); // code -> Status
-  const [point, setPoint] = useState(null);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(null); // 수령 중인 미션 code
 
@@ -41,7 +40,6 @@ export default function MissionModal({ open, onClose, onClaimed }) {
       map[m.code] = m;
     });
     setStatusMap(map);
-    setPoint(data?.point ?? 0);
   };
 
   useEffect(() => {
@@ -69,7 +67,6 @@ export default function MissionModal({ open, onClose, onClaimed }) {
     try {
       const { data } = await missionApi.claim(code);
       setStatusMap((prev) => ({ ...prev, [code]: data.mission }));
-      setPoint(data.point);
       toast.success(`미션 완료! +${data.reward}P`);
       onClaimed?.(data.point);
     } catch {
@@ -113,14 +110,6 @@ export default function MissionModal({ open, onClose, onClaimed }) {
           >
             <X size={18} className="text-gray-500" />
           </button>
-        </div>
-
-        {/* 보유 포인트 */}
-        <div className="mb-5 flex items-center justify-between rounded-xl bg-[#0f1c33] px-4 py-3 text-white">
-          <span className="text-[13px] font-medium text-white/80">보유 포인트</span>
-          <span className="text-lg font-bold tabular-nums">
-            {point == null ? "—" : Number(point).toLocaleString()} P
-          </span>
         </div>
 
         {loading ? (

@@ -60,6 +60,7 @@ class ReportServiceTest {
     SpringTemplateEngine templateEngine;
     ReportPdfGenerator pdfGenerator;
     ConsultationQuestionGenerator ruleBasedGenerator;
+    ReportChartRenderer chartRenderer;
     ReportService reportService;
 
     @BeforeEach
@@ -76,10 +77,11 @@ class ReportServiceTest {
 
         pdfGenerator = new ReportPdfGenerator();
         ruleBasedGenerator = new ConsultationQuestionGenerator();
+        chartRenderer = new ReportChartRenderer();
 
         reportService = new ReportService(
                 healthAnalysisService, templateEngine, pdfGenerator,
-                llmGenerator, ruleBasedGenerator);
+                llmGenerator, ruleBasedGenerator, chartRenderer);
     }
 
     // ============================================================
