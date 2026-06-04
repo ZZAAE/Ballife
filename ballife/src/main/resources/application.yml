@@ -58,7 +58,7 @@ springdoc:
 mfds:
   api:
     base-url: https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
-    service-key: ${MFDS_KEY:${FOOD_SAFETY_KEY:}} # 식약처 의약품 허가정보 API 인증키. MFDS_KEY 없으면 같은 data.go.kr 계정 키인 FOOD_SAFETY_KEY 를 재사용한다. ※ data.go.kr 에서 '의약품 허가정보 API' 를 같은 계정으로 활용신청해야 동작(미신청 시 403). 키가 비면 의약품 검색이 항상 실패한다.
+    service-key: ${MFDS_KEY:${MFDS_SERVICE_KEY:}} # 식약처 의약품 허가정보 API 인증키. MFDS_KEY 없으면 같은 data.go.kr 계정 키인 FOOD_SAFETY_KEY 를 재사용한다. ※ data.go.kr 에서 '의약품 허가정보 API' 를 같은 계정으로 활용신청해야 동작(미신청 시 403). 키가 비면 의약품 검색이 항상 실패한다.
 
 # 식약처 식품영양성분DB v2 (data.go.kr) — 음식 사진 분석 → 영양정보 조회
 foodsafety:
