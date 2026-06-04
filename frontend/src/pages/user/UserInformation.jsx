@@ -541,7 +541,7 @@ function UserInformation() {
                   <span>👤</span>
                 )}
               </div>
-              <div>
+              <div className="w-full sm:flex-1">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {profile.name}
                 </h2>
@@ -580,6 +580,14 @@ function UserInformation() {
                   >
                     🎯 미션
                   </button>
+
+                  {/* 보유 포인트 — 버튼 줄 맨 오른쪽 */}
+                  <div className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white">
+                    <span className="text-white/70">보유 포인트</span>
+                    <span className="tabular-nums">
+                      {Number(memberProfile?.point ?? 0).toLocaleString()} P
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
