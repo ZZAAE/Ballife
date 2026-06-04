@@ -32,7 +32,7 @@ spring:
       expiration: 86400000 #토큰 만료시간 (24시간 = 밀리초)
 
 openai:
-  api-key: ${OPENAI_API_KEY:default}
+  api-key: ${OPENAI_API_KEY:} # OpenAI API 키 (환경변수 OPENAI_API_KEY 사용)
   model: gpt-4o-mini # 모델버젼
   max-tokens: 1000 #응답 길이
   vision-detail: low
