@@ -32,7 +32,7 @@ spring:
       expiration: 86400000 #토큰 만료시간 (24시간 = 밀리초)
 
 openai:
-  api-key: ${OPENAI_API_KEY:}
+  api-key: ${OPENAI_API_KEY:default}
   model: gpt-4o-mini # 모델버젼
   max-tokens: 1000 #응답 길이
   vision-detail: low
@@ -58,14 +58,14 @@ springdoc:
 mfds:
   api:
     base-url: https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07
-    service-key: ${MFDS_SERVICE_KEY:}
+    service-key: ${MFDS_KEY:} # 식약처 의약품 허가 정보 API 인증키 (data.go.kr 발급, 디코딩 키 권장) — 환경변수 MFDS_KEY 사용
 
 # 식약처 식품영양성분DB v2 (data.go.kr) — 음식 사진 분석 → 영양정보 조회
 foodsafety:
   api:
     base-url: https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02
     operation: getFoodNtrCpntDbInq02 # v02 표준 작업명
-    service-key: ${FOOD_SAFETY_KEY:} # data.go.kr 발급 인증키 (디코딩 키 권장)
+    service-key: ${FOOD_SAFETY_KEY:} # data.go.kr 발급 인증키 (디코딩 키 권장) — 환경변수 FOOD_SAFETY_KEY 사용
 
 # 음식 사진 등 업로드 파일 로컬 저장 경로
 # - 운영 시 S3/CDN으로 교체 예정
