@@ -134,6 +134,22 @@ export default function SearchMedicineModal({
             </div>
 
             {error && <p className="mt-3 text-[13px] text-red-500">{error}</p>}
+
+            {/* 식약처 검색이 실패(키 미설정 등)하거나 결과가 없어도, 입력한 이름을 그대로 추가할 수 있게 한다 */}
+            {keyword.trim() && !loading && (
+              <button
+                type="button"
+                onClick={() =>
+                  onSelectMedicine?.({
+                    id: `manual-${keyword.trim()}`,
+                    name: keyword.trim(),
+                  })
+                }
+                className="mt-3 text-[13px] font-semibold text-[#2563EB] hover:underline"
+              >
+                검색 결과에 없나요? '{keyword.trim()}' 직접 추가하기
+              </button>
+            )}
           </div>
 
           {/* 복용 상세 정보 */}

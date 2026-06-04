@@ -130,7 +130,11 @@ export default function WeeklyCalendarCard({
             <div key={item.day} className="flex min-w-0 flex-col items-center">
               <span
                 className={`mb-1 text-[13px] font-semibold ${
-                  item.weekend ? "text-[#E64563]" : "text-gray-500"
+                  item.day === "SUN"
+                    ? "text-[#315BFF]"
+                    : item.weekend
+                    ? "text-[#E64563]"
+                    : "text-gray-500"
                 }`}
               >
                 {item.day}
@@ -138,7 +142,11 @@ export default function WeeklyCalendarCard({
 
               <span
                 className={`text-[15px] font-bold ${
-                  item.weekend ? "text-[#E64563]" : "text-gray-800"
+                  item.day === "SUN"
+                    ? "text-[#315BFF]"
+                    : item.weekend
+                    ? "text-[#E64563]"
+                    : "text-gray-800"
                 }`}
               >
                 {item.date}
