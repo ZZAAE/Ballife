@@ -74,8 +74,13 @@ foodsafety:
 storage:
   type: local
   local:
-    base-path: "C:/Users/dlaud/OneDrive/바탕 화면/프로젝트_임시저장_이미지"
+    base-path: "C:/Users/soldesk/Desktop/프로젝트_임시"
     url-prefix: /uploads
 
     #단계별로 스페이스 2칸
     #탭 사용 금지
+
+NaverOcr:
+  api:
+    base-url: ${NAVER_OCR_BASE_URL:}
+    secret-key: ${NAVER_OCR_SECRET_KEY:}
