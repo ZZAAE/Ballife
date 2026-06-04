@@ -36,6 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### 업로드된 파일 (로컬 저장소) ###
+uploads/
+
 ### 인증키있는 yml 파일 ###
 # (root .gitignore의 **/application.yml 와 이중 안전망.
 #  application-mock.yml, application.yml.example 등 다른 yml은 push 허용.)

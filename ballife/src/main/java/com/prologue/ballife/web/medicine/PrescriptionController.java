@@ -46,7 +46,7 @@ public class PrescriptionController {
     //@Operation(summary = "처방전 조회")
 
     @Operation(summary = "처방전 약 목록 조회", description = "처방전별 약 목록을 조회합니다.")
-    @PostMapping("/{prescriptionId}")
+    @GetMapping("/prescriptions/{prescriptionId}/medicines")
     public ResponseEntity<List<UserMedicineDto.UserMedicineResponse>> getUserMedicine(
         @PathVariable Long prescriptionId) {
             return ResponseEntity.ok(medicineService.getUserMedicine(prescriptionId));

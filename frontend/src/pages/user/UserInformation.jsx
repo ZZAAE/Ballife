@@ -3,6 +3,7 @@ import RoutineModal from "../../modals/RoutineModal";
 import TargetModal from "../../modals/TargetModal";
 import SubscriptionModal from "../../modals/SubscriptionModal";
 import UserMedalModal from "../../modals/UserMedalModal";
+import MissionModal from "../../modals/MissionModal";
 import medalApi from "../../api/medalApi";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -103,13 +104,14 @@ function MetricCard({
 
 function UserInformation() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
   const [isPreResisterModalOpen, SetPreResisterModalOpen] = useState(false);
   const [isRoutineModalOpen, setRoutineModalOpen] = useState(false);
   const [isTargetModalOpen, setTargetModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [isMedalModalOpen, setMedalModalOpen] = useState(false);
+  const [isMissionModalOpen, setMissionModalOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const [memberProfile, setMemberProfile] = useState(null);
   const [userConfig, setUserConfig] = useState(null);
@@ -159,6 +161,9 @@ function UserInformation() {
   useEffect(() => {
     loadMedicinesFromServer();
   }, [loadMedicinesFromServer]);
+
+  // 처방전 목록 전체에서 약 정보를 평탄화해 처방전 카드에 노출한다.
+  const savedMedicines = savedPrescriptions.flatMap((p) => p.medicines || []);
 
   // 모달에서 등록/수정이 끝나면 서버에서 최신 약 목록을 다시 불러온다.
   const handleMedicineSaved = () => {
@@ -570,10 +575,10 @@ function UserInformation() {
                   </button>
                   <button
                     type="button"
-                    onClick={logout}
-                    className="flex items-center gap-1 rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                    onClick={() => setMissionModalOpen(true)}
+                    className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
-                    ↩ 로그아웃
+                    🎯 미션
                   </button>
                 </div>
               </div>
@@ -690,32 +695,7 @@ function UserInformation() {
                         {profile.disease}
                       </dd>
                     </div>
-                    <div className="flex gap-8">
-                      <div>
-                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                          보유 포인트
-                        </dt>
-                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
-                          {memberProfile?.point != null
-                            ? Number(memberProfile.point).toLocaleString()
-                            : "0"}{" "}
-                          P
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                          누적 포인트
-                        </dt>
-                        <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
-                          {memberProfile?.usePointCount != null
-                            ? Number(
-                                memberProfile.usePointCount,
-                              ).toLocaleString()
-                            : "0"}{" "}
-                          P
-                        </dd>
-                      </div>
-                    </div>
+                   
                   </dl>
 
                   {/* 정상 혈당 */}
@@ -1050,6 +1030,16 @@ function UserInformation() {
         <UserMedalModal
           open={isMedalModalOpen}
           onClose={() => setMedalModalOpen(false)}
+        />
+
+        <MissionModal
+          open={isMissionModalOpen}
+          onClose={() => setMissionModalOpen(false)}
+          onClaimed={(newPoint) =>
+            setMemberProfile((prev) =>
+              prev ? { ...prev, point: newPoint } : prev,
+            )
+          }
         />
       </div>
     </div>
