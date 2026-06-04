@@ -16,7 +16,41 @@ const medicineApi = {
 
   // 처방전별 약 목록 조회
   getUserMedicine: (prescriptionId) => {
-    return api.post(`/${prescriptionId}`);
+    return api.get(`/prescriptions/${prescriptionId}/medicines`);
+  },
+
+  // 처방전 수정 (처방전 정보만)
+  updatePrescription: (prescriptionId, payload) => {
+    // payload: { prescriptionName, prescriptionDate, memo, intakeIntervals, dosage }
+    return api.put(`/prescriptions/${prescriptionId}`, payload);
+  },
+
+  // 처방전 + 약 전체 수정 (약 목록까지 교체)
+  updateMedicine: (prescriptionId, payload) => {
+    // payload: { prescriptionName, memo, intakeIntervals, medicines: [{ medicineName }], ... }
+    return api.put(`/register/medicine/${prescriptionId}`, payload);
+  },
+
+  // 처방전 삭제
+  deletePrescription: (prescriptionId) => {
+    return api.delete(`/prescriptions/${prescriptionId}`);
+  },
+
+  // 처방전 수정 (처방전 정보만)
+  updatePrescription: (prescriptionId, payload) => {
+    // payload: { prescriptionName, prescriptionDate, memo, intakeIntervals, dosage }
+    return api.put(`/prescriptions/${prescriptionId}`, payload);
+  },
+
+  // 처방전 + 약 전체 수정 (약 목록까지 교체)
+  updateMedicine: (prescriptionId, payload) => {
+    // payload: { prescriptionName, memo, intakeIntervals, medicines: [{ medicineName }], ... }
+    return api.put(`/register/medicine/${prescriptionId}`, payload);
+  },
+
+  // 처방전 삭제
+  deletePrescription: (prescriptionId) => {
+    return api.delete(`/prescriptions/${prescriptionId}`);
   },
 
   //OCR 스캔 (OCR + LLM + 식약처 조회로 시간이 걸려 타임아웃을 넉넉히 둔다)

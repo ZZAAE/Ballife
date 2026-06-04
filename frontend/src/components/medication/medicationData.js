@@ -1,12 +1,13 @@
-// 데모용 상태 (요일 기반) — 실제 데이터 연결 전 시각화용
+// 실제 복용 데이터(처방전 기반)로 채워지므로 요일 기반 더미는 모두 비활성(null).
+const EMPTY_STATUS = { morning: null, lunch: null, dinner: null };
 const STATUS_BY_DAY = {
-  MON: { morning: "done", lunch: "done", dinner: "done" },
-  TUE: { morning: "done", lunch: "miss", dinner: "done" },
-  WED: { morning: "done", lunch: "partial", dinner: "miss" },
-  THU: { morning: "done", lunch: "done", dinner: "partial" },
-  FRI: { morning: "done", lunch: "done", dinner: null },
-  SAT: { morning: null, lunch: null, dinner: null },
-  SUN: { morning: null, lunch: null, dinner: null },
+  MON: EMPTY_STATUS,
+  TUE: EMPTY_STATUS,
+  WED: EMPTY_STATUS,
+  THU: EMPTY_STATUS,
+  FRI: EMPTY_STATUS,
+  SAT: EMPTY_STATUS,
+  SUN: EMPTY_STATUS,
 };
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];

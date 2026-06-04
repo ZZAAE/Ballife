@@ -60,6 +60,7 @@ class ReportServiceTest {
     SpringTemplateEngine templateEngine;
     ReportPdfGenerator pdfGenerator;
     ConsultationQuestionGenerator ruleBasedGenerator;
+    ReportChartRenderer chartRenderer;
     ReportService reportService;
 
     @BeforeEach
@@ -76,10 +77,11 @@ class ReportServiceTest {
 
         pdfGenerator = new ReportPdfGenerator();
         ruleBasedGenerator = new ConsultationQuestionGenerator();
+        chartRenderer = new ReportChartRenderer();
 
         reportService = new ReportService(
                 healthAnalysisService, templateEngine, pdfGenerator,
-                llmGenerator, ruleBasedGenerator);
+                llmGenerator, ruleBasedGenerator, chartRenderer);
     }
 
     // ============================================================
@@ -92,12 +94,14 @@ class ReportServiceTest {
                 new Period("MONTHLY", LocalDate.of(2026, 5, 3), LocalDate.of(2026, 6, 1)),
                 new BloodPressureAnalysisResult(
                         128, 82, 1, "CAUTION", "다소 높음",
-                        115, 142, 70, 90),
+                        115, 142, 70, 90,
+                        List.of()),
                 new BloodSugarAnalysisResult(
                         108, "CAUTION", "다소 높음",
                         101, "CAUTION", "다소 높음",
                         168, "CAUTION", "다소 높음",
-                        95, 125, 95, 112, 145, 215),
+                        95, 125, 95, 112, 145, 215,
+                        List.of(), List.of(), List.of()),
                 new BmiAnalysisResult(25.8, "RISK", "비만"),
                 new MedicationAnalysisResult(30, 21, 70, "CAUTION", "다소 부족"),
                 new DiseaseProfileAnalysisResult(List.of()),
@@ -112,12 +116,14 @@ class ReportServiceTest {
         return new HealthAnalysisResponse(
                 userId,
                 new Period("MONTHLY", LocalDate.of(2026, 5, 3), LocalDate.of(2026, 6, 1)),
-                new BloodPressureAnalysisResult(null, null, null, null, null, null, null, null, null),
+                new BloodPressureAnalysisResult(null, null, null, null, null, null, null, null, null,
+                        List.of()),
                 new BloodSugarAnalysisResult(
                         108, "CAUTION", "다소 높음",
                         null, null, null,
                         null, null, null,
-                        95, 125, null, null, null, null),
+                        95, 125, null, null, null, null,
+                        List.of(), List.of(), List.of()),
                 new BmiAnalysisResult(null, null, null),
                 new MedicationAnalysisResult(null, null, null, null, null),
                 new DiseaseProfileAnalysisResult(List.of()),

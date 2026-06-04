@@ -52,6 +52,7 @@ public class ReportService {
     private final ReportPdfGenerator pdfGenerator;
     private final LlmQuestionGenerator llmGenerator;
     private final ConsultationQuestionGenerator ruleBasedGenerator;
+    private final ReportChartRenderer chartRenderer;
 
     /**
      * 월간(최근 30일) 건강 보고서 PDF 생성.
@@ -72,6 +73,14 @@ public class ReportService {
         context.setVariable("medication",     response.medication());
         context.setVariable("recordingStats", response.recordingStats());
         context.setVariable("questions",      questions);
+
+        // 시계열 라인 차트 (PNG base64 data URI). 측정 없으면 "" → 템플릿이 차트 숨김.
+        context.setVariable("bpChart",
+                chartRenderer.bloodPressureChart(response.bloodPressure(),
+                        response.period().startDate(), response.period().endDate()));
+        context.setVariable("bsChart",
+                chartRenderer.bloodSugarChart(response.bloodSugar(),
+                        response.period().startDate(), response.period().endDate()));
 
         String html = templateEngine.process(TEMPLATE_MONTHLY, context);
         return pdfGenerator.generate(html);
