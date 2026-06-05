@@ -42,7 +42,27 @@ ALTER TABLE post MODIFY COLUMN content   LONGTEXT NOT NULL;
 ALTER TABLE post MODIFY COLUMN image_url LONGTEXT NULL;
 
 -- ────────────────────────────────────────────────────────────────────
+-- 3) user_medicine_record : 옛 PK 컬럼 → user_medicine_record_id 로 통일
+--    엔티티 필드명이 recordId → userMedicineRecordId 로 변경되었으나
+--    Hibernate update 는 컬럼 RENAME 을 못해서 새 auto_increment 컬럼을
+--    ADD 시도 → "only one auto column" 에러로 막힘.
+--
+--    옛 컬럼명을 확인하고 (보통 record_id) 알맞은 블록만 실행하세요.
+--      SHOW CREATE TABLE user_medicine_record;
+-- ────────────────────────────────────────────────────────────────────
+
+-- 3-A. 옛 컬럼명이 record_id 인 경우 — 데이터 보존 RENAME
+-- ALTER TABLE user_medicine_record
+--     CHANGE COLUMN record_id user_medicine_record_id
+--     BIGINT NOT NULL AUTO_INCREMENT;
+
+-- 3-B. 데이터가 없거나 버려도 되는 개발 DB 라면 (가장 간단)
+-- DROP TABLE IF EXISTS user_medicine_record;
+-- → 다음 부트 시 Hibernate 가 새 스키마로 재생성합니다.
+
+-- ────────────────────────────────────────────────────────────────────
 -- 적용 확인 (선택)
 -- ────────────────────────────────────────────────────────────────────
--- DESCRIBE user_exercise;   -- exercise_type_id 가 varchar(24) NULL 이어야 함
--- DESCRIBE post;            -- content / image_url 이 longtext 여야 함
+-- DESCRIBE user_exercise;          -- exercise_type_id 가 varchar(24) NULL 이어야 함
+-- DESCRIBE post;                   -- content / image_url 이 longtext 여야 함
+-- DESCRIBE user_medicine_record;   -- user_medicine_record_id PK auto_increment 여야 함
