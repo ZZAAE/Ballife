@@ -8,7 +8,7 @@ import medalApi from "../../api/medalApi";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Crown } from "lucide-react";
+import { Crown, Pencil, Trash2, ChevronDown } from "lucide-react";
 import userApi from "../../api/userApi";
 import subscriptionApi from "../../api/subscriptionApi";
 import userConfigApi from "../../api/userConfigApi";
@@ -541,7 +541,7 @@ function UserInformation() {
                   <span>👤</span>
                 )}
               </div>
-              <div>
+              <div className="w-full sm:flex-1">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {profile.name}
                 </h2>
@@ -580,6 +580,14 @@ function UserInformation() {
                   >
                     🎯 미션
                   </button>
+
+                  {/* 보유 포인트 — 버튼 줄 맨 오른쪽 */}
+                  <div className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white">
+                    <span className="text-white/70">보유 포인트</span>
+                    <span className="tabular-nums">
+                      {Number(memberProfile?.point ?? 0).toLocaleString()} P
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -875,62 +883,134 @@ function UserInformation() {
                         💊 처방전 목록
                       </h3>
                     </div>
-                    <div className="flex flex-1 flex-col gap-3 min-h-[440px]">
-                      {/* 처방전 목록 */}
-                      <div className="flex flex-1 flex-col overflow-y-auto">
-                        {savedPrescriptions.length > 0 ? (
-                          <div className="flex flex-col gap-2">
-                            {savedPrescriptions.map((p) => {
-                              const selected =
-                                expandedPrescriptionId === p.prescriptionId;
-                              return (
-                                <div
-                                  key={p.prescriptionId}
-                                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
-                                    selected
-                                      ? "border-blue-400 bg-blue-50"
-                                      : "border-gray-200 bg-white"
-                                  }`}
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setExpandedPrescriptionId(p.prescriptionId)
-                                    }
-                                    className="flex-1 truncate text-left text-[13px] font-semibold text-gray-800"
-                                  >
+                    <div
+                      className={`flex flex-1 flex-col rounded-2xl bg-gray-100 p-4 min-h-[260px] max-h-[460px] overflow-y-auto ${
+                        savedPrescriptions.length > 0
+                          ? ""
+                          : "items-center justify-center"
+                      }`}
+                    >
+                      {savedPrescriptions.length > 0 ? (
+                        <div className="flex w-full flex-col gap-3">
+                          {savedPrescriptions.map((p) => {
+                            const expanded =
+                              expandedPrescriptionId === p.prescriptionId;
+                            const medicines = p.medicines || [];
+                            // "아침,점심,저녁" → ["아침","점심","저녁"]
+                            const intervals = (p.intakeIntervals || "")
+                              .split(",")
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            return (
+                              <div
+                                key={p.prescriptionId}
+                                className="rounded-xl border border-gray-200 bg-white p-4"
+                              >
+                                {/* 처방전 이름 + 수정/삭제 */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-sm font-bold text-gray-900 break-all">
                                     {p.prescriptionName || "이름 없음"}
-                                  </button>
-                                  <div className="flex shrink-0 gap-2">
+                                  </p>
+                                  <div className="flex flex-shrink-0 items-center gap-1">
                                     <button
                                       type="button"
                                       onClick={() => setEditingPrescription(p)}
-                                      className="text-xs font-semibold text-blue-500 hover:underline"
+                                      className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                      aria-label="처방전 수정"
                                     >
-                                      수정
+                                      <Pencil size={15} />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() =>
-                                        handleDeletePrescription(p.prescriptionId)
+                                        handleDeletePrescription(
+                                          p.prescriptionId,
+                                        )
                                       }
-                                      className="text-xs font-semibold text-red-500 hover:underline"
+                                      className="rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                      aria-label="처방전 삭제"
                                     >
-                                      삭제
+                                      <Trash2 size={15} />
                                     </button>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="flex flex-1 items-center justify-center">
-                            <p className="text-xs text-gray-400">
-                              등록된 처방전이 없습니다.
-                            </p>
-                          </div>
-                        )}
-                      </div>
+
+                                {/* 복용 시간대 배지 (이름 아래) */}
+                                {intervals.length > 0 && (
+                                  <div className="mt-2 flex flex-wrap gap-1">
+                                    {intervals.map((t) => (
+                                      <span
+                                        key={t}
+                                        className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600"
+                                      >
+                                        {t}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* 메모 (입력된 경우만) */}
+                                {p.memo && (
+                                  <p className="mt-1 text-xs text-gray-500 break-words">
+                                    {p.memo}
+                                  </p>
+                                )}
+
+                                {/* 약 목록 보기 토글 버튼 */}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedPrescriptionId((prev) =>
+                                      prev === p.prescriptionId
+                                        ? null
+                                        : p.prescriptionId,
+                                    )
+                                  }
+                                  className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-500 hover:underline"
+                                >
+                                  약 목록 {medicines.length}개
+                                  <ChevronDown
+                                    size={14}
+                                    className={`transition-transform ${
+                                      expanded ? "rotate-180" : ""
+                                    }`}
+                                  />
+                                </button>
+
+                                {/* 펼쳤을 때만 저장된 약 이름 표시 */}
+                                {expanded && (
+                                  <ul className="mt-2 flex flex-col gap-1 border-t border-gray-100 pt-2">
+                                    {medicines.length > 0 ? (
+                                      medicines.map((m, idx) => (
+                                        <li
+                                          key={m.userMedicationId ?? idx}
+                                          className="text-xs text-gray-700 break-words"
+                                        >
+                                          • {m.medicineName || "이름 없음"}
+                                        </li>
+                                      ))
+                                    ) : (
+                                      <li className="text-xs text-gray-400">
+                                        등록된 약이 없습니다.
+                                      </li>
+                                    )}
+                                  </ul>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-5xl">💊</div>
+                          <p className="text-xs text-gray-400">
+                            등록된 처방전이 없습니다
+                          </p>
+                          <p className="text-[10px] text-gray-300">
+                            아래 버튼으로 처방전을 등록하세요
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <button
                       className="mt-3 h-11 w-full rounded-xl bg-[#0f1c33] text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
