@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { AI_SERVICE_BASE_URL } from "../config/runtime";
 
 /* ---------- Avatars ---------- */
 const BotAvatar = ({ size = 20 }) => (
@@ -91,7 +92,7 @@ export default function BallChatbot() {
     (async () => {
       try {
         const res = await fetch(
-          `http://localhost:8001/chat/history/${userId}`
+          `${AI_SERVICE_BASE_URL}/chat/history/${userId}`
         );
         if (!res.ok) return;
         const data = await res.json();
@@ -235,7 +236,7 @@ export default function BallChatbot() {
     setIsWaiting(true);
 
     try {
-      const response = await fetch("http://localhost:8001/chat", {
+      const response = await fetch(`${AI_SERVICE_BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -291,7 +292,8 @@ export default function BallChatbot() {
         .ball-fab {
           position: fixed;
           right: 28px;
-          bottom: 28px;
+          /* 홈인디케이터(safe-area)만큼 띄움 — 미지원 기기/웹에선 env()=0 */
+          bottom: calc(28px + env(safe-area-inset-bottom));
           width: 75px;
           height: 75px;
           border-radius: 50%;
@@ -327,7 +329,7 @@ export default function BallChatbot() {
           display: flex;
           justify-content: flex-end;
           align-items: flex-end;
-          padding: 24px 28px 124px 28px;
+          padding: 24px 28px calc(124px + env(safe-area-inset-bottom)) 28px;
           z-index: 99;
           opacity: 0;
           pointer-events: none;

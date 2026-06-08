@@ -9,6 +9,34 @@ body {
   font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
+/* ── 하이브리드(Capacitor 웹뷰) 전역 처리 ─────────────────────────────
+   - overscroll-behavior: iOS 고무줄 바운스/당겨서 새로고침 억제
+   - tap-highlight: 모바일 탭 시 파란 하이라이트 박스 제거
+   - text-size-adjust: OS 폰트 확대 시 레이아웃이 임의로 깨지지 않도록 고정
+   레이아웃·색상·타이포(디자인 시스템)는 변경하지 않음. */
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* safe-area 유틸 (노치/홈인디케이터). viewport-fit=cover 와 함께 사용.
+   고정(fixed) 요소가 시스템 UI 와 겹치지 않도록 padding 으로 보정. */
+.safe-pt {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* 화면 하단 고정 요소(플로팅 버튼 등): 홈인디케이터 높이만큼 띄움 */
+.safe-bottom-offset {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
 /* 커스텀 유틸리티 클래스 */
 @layer components {
   /* 카드 스타일 */

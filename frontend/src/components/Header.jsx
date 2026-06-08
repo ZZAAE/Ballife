@@ -109,6 +109,11 @@ export default function Header() {
                   key={item.key}
                   className="dep1 relative"
                   onMouseEnter={() => setHoveredKey(item.key)}
+                  // 터치 기기는 hover 가 없어 드롭다운이 열리지 않으므로 탭으로 토글.
+                  // (네비게이션 로직은 그대로, 표시 상태 hoveredKey 만 조작)
+                  onClick={() =>
+                    setHoveredKey((k) => (k === item.key ? null : item.key))
+                  }
                 >
                   {canNavigate ? (
                     <Link to={item.path} className={titleClass}>

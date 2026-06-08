@@ -1,0 +1,19 @@
+{
+  "appId": "com.prologue.ballife",
+  "appName": "Ballife",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#F9FAFB",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "Keyboard": {
+      "resize": "native"
+    }
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

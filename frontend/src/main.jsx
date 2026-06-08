@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import "./index.css";
 import App from "./App.jsx";
+import { initAppRuntime } from "./native/appRuntime.js";
 
 /**
  * Unity WebGL(captureAllKeyboardInput)은 키보드 이벤트를 document/window 에 직접
@@ -85,3 +86,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       </AuthProvider>
     </BrowserRouter>
 );
+
+// 하이브리드 런타임 초기화(웹: 오프라인 감지 / 네이티브: 상태바·백버튼·스플래시 등).
+// 렌더 이후 호출해 첫 페인트를 막지 않는다.
+initAppRuntime();
