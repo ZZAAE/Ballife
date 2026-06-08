@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles, Gift } from "lucide-react";
+import { AI_BASE_URL } from "../../api/aiBase";
 
-const AI_SERVICE = "http://localhost:8001";
+const AI_SERVICE = AI_BASE_URL;
 
 export default function AIAnalysisCard({ className = "", metric, data, userId }) {
   const [rewardFloats, setRewardFloats] = useState([]);
