@@ -61,7 +61,7 @@ public class PetController {
         @Parameter(description = "유저 UUID") @PathVariable Long userId,
         @RequestBody PetAssetDto.CreateRequest body){
             petService.createPetAsset(userId, body);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "펫 에셋 조회", description = "유저 보유 펫 에셋 조회")

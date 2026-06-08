@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
+import { useAuth } from "../contexts/AuthContext";
+import petApi from "../api/petApi";
+import userApi from "../api/userApi";
 
 export default function PetPage() {
+    const { user } = useAuth();
+    const userId = user?.userId ?? null;
+
     const {
         unityProvider,
         sendMessage,
@@ -15,7 +21,7 @@ export default function PetPage() {
         streamingAssetsUrl: "/Unity/StreamingAssets",
     });
 
-    // 차후 MySQL 에서 불러올 펫 상태 (지금은 더미)
+    // 테스트용 더미 — fetch 성공 시 실데이터로 덮어쓰고, 실패하면 이 값이 그대로 남음
     const [petState, setPetState] = useState({
         equippedHat: 1002,
         equippedBG: 2001,
@@ -23,6 +29,7 @@ export default function PetPage() {
         ownedItemIds: [1001, 1002, 1007, 2001, 2003],
     });
 
+    const [loaded, setLoaded] = useState(false); // fetch 시도 완료 여부(성공/실패 무관)
     const [unityReady, setUnityReady] = useState(false);
     const queueRef = useRef([]); // ready 전 보낸 메시지 임시 보관
 
@@ -36,7 +43,44 @@ export default function PetPage() {
         }
     }, [unityReady, sendMessage]);
 
-    // Unity → React 수신
+    // ① 진입 시 펫 정보 + 보유 에셋 fetch (실패하면 더미 유지)
+    useEffect(() => {
+        if (!userId) {
+            setLoaded(true); // userId 없으면 더미로 진행
+            return undefined;
+        }
+        let cancelled = false;
+
+        (async () => {
+            try {
+                const [petRes, assetRes, memberRes] = await Promise.all([
+                    petApi.getPetInfo(userId),
+                    petApi.getAssetList(userId),
+                    userApi.getMember(userId),       // point 는 회원정보(UserResponse)에서
+                ]);
+                if (cancelled) return;
+
+                const pet = petRes.data;        // { hat, house, backGround }
+                const assets = assetRes.data;   // [{ itemId }, ...]
+                const member = memberRes.data;  // { ..., point, ... }
+
+                setPetState({
+                    equippedHat: pet.hat,
+                    equippedBG: pet.backGround,
+                    points: member.point ?? 0,                 // null 이면 0
+                    ownedItemIds: (assets ?? []).map((a) => a.itemId),
+                });
+            } catch (e) {
+                console.error("펫 정보 로딩 실패 — 더미데이터로 진행:", e);
+            } finally {
+                if (!cancelled) setLoaded(true);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [userId]);
+
+    // ② Unity → React 수신
     useEffect(() => {
         const handleReady = () => setUnityReady(true);
 
@@ -49,7 +93,7 @@ export default function PetPage() {
                         const { equippedHat } = msg.payload;
                         setPetState((s) => ({ ...s, equippedHat }));
                         console.log("모자 변경:", msg.payload);
-                        // TODO: DB 연동 시 → userPetApi.updateEquip(equippedHat)
+                        petApi.updatePetInfo(userId, { hat: equippedHat })
                         break;
                     }
                     // Unity 가 새로 장착한 배경 아이템 ID 를 보냄
@@ -57,7 +101,7 @@ export default function PetPage() {
                         const { equippedBG } = msg.payload;
                         setPetState((s) => ({ ...s, equippedBG }));
                         console.log("배경 변경:", msg.payload);
-                        // TODO: DB 연동 시 → userPetApi.updateEquip(equippedBG)
+                        petApi.updatePetInfo(userId, { backGround: equippedBG })
                         break;
                     }
                     // Unity 가 갱신된 포인트 총량을 보냄
@@ -65,7 +109,21 @@ export default function PetPage() {
                         const { points } = msg.payload; // int
                         setPetState((s) => ({ ...s, points }));
                         console.log("포인트 변경:", msg.payload);
-                        // TODO: DB 연동 시 → userPetApi.updatePoints(points)
+                        // TODO: DB 연동 시 → 포인트 갱신 API
+                        break;
+                    }
+                    // Unity 에서 아이템 구매 처리 (포인트 차감 + 보유목록 추가)
+                    case "PURCHASE_ITEM": {
+                        const { remainPoint, purchasedItemId } = msg.payload;
+                        setPetState((prev) => ({
+                            ...prev,
+                            points: remainPoint,
+                            ownedItemIds: prev.ownedItemIds.includes(purchasedItemId)
+                                ? prev.ownedItemIds
+                                : [...prev.ownedItemIds, purchasedItemId],
+                        }));
+                        console.log("아이템 구매:", msg.payload);
+                        petApi.createAsset(userId, { itemId: purchasedItemId })
                         break;
                     }
                     case "PET_STATUS_CHANGED":
@@ -87,9 +145,9 @@ export default function PetPage() {
         };
     }, [addEventListener, removeEventListener]);
 
-    // ready 되는 순간: 큐 비우기 + 초기 데이터 1회 전송
+    // ③ Unity ready + 데이터 로딩 둘 다 끝났을 때만 INIT_PET 전송 (레이스 방지)
     useEffect(() => {
-        if (!unityReady) return;
+        if (!unityReady || !loaded) return;
 
         queueRef.current.forEach((json) =>
             sendMessage("ReactBrideController", "OnReactMessage", json)
@@ -99,7 +157,7 @@ export default function PetPage() {
         send("INIT_PET", petState);
         // petState 를 deps 에 넣으면 매번 재전송되므로 의도적으로 제외
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [unityReady, sendMessage, send]);
+    }, [unityReady, loaded, sendMessage, send]);
 
     return (
         <div className="h-[calc(100vh-48px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR']">

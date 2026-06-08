@@ -9,12 +9,12 @@ const petApi = {
         return api.get(`/pet/${userId}`);
     },
 
-    updatePetInnfo: (userId, payload) => {
+    updatePetInfo: (userId, payload) => {
         return api.put(`/pet/${userId}`, payload);
     },
 
-    createAsset: (userId) => {
-        return api.post(`/pet/asset/${userId}`);
+    createAsset: (userId, payload) => {
+        return api.post(`/pet/asset/${userId}`, payload);
     },
 
     getAssetList: (userId) => {

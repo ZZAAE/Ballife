@@ -19,7 +19,7 @@ public class Pet {
     private Long petId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "USER_ID", nullable = false, unique = true)
     private User user;
 
     @Column(name = "HAT")
