@@ -1,0 +1,18 @@
+# 가상환경 / 캐시 (이미지에 불필요, 용량 큼)
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# 로컬 비밀값 — 운영은 compose 환경변수로 주입
+.env
+
+# 사용 안 하는 스캐폴드 / VCS / 문서
+src/
+.git
+.gitignore
+*.md
+.DS_Store
+
+# model/best.pt 는 이미지에 포함되어야 하므로 제외하지 않음

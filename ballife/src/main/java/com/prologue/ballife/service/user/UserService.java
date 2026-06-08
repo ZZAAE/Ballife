@@ -196,6 +196,32 @@ public class UserService {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // 리워드 포인트 감소 (보유 포인트 point 만 차감, 누적 포인트 usePointCount 는 변경 없음)
+    // ═══════════════════════════════════════════════════════════
+    @Transactional
+    @NonNull
+    public UserDto.UserResponse deductPoint(@NonNull Long id, int amount) {
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException("차감 포인트는 0보다 커야 합니다.");
+        }
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+
+        long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
+
+        if (currentPoint < amount) {
+            throw new IllegalArgumentException("보유 포인트가 부족합니다. 보유: " + currentPoint + ", 차감 요청: " + amount);
+        }
+
+        // 보유 포인트만 차감 (누적 포인트는 변경하지 않음)
+        user.setPoint(currentPoint - amount);
+
+        return UserDto.UserResponse.from(user);
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // 회원 삭제
     // ═══════════════════════════════════════════════════════════
     @Transactional
