@@ -33,6 +33,11 @@ export default function PetPage() {
     const [unityReady, setUnityReady] = useState(false);
     const queueRef = useRef([]); // ready 전 보낸 메시지 임시 보관
 
+    // handleMessage 가 마운트 시점 1회만 구독돼 userId 를 클로저에 고정하므로,
+    // 항상 최신 userId 를 보도록 ref 로 동기화한다.
+    const userIdRef = useRef(userId);
+    userIdRef.current = userId;
+
     // React → Unity 전송 (ready 전이면 큐잉)
     const send = useCallback((type, payload) => {
         const json = JSON.stringify({ type, payload });
@@ -93,7 +98,8 @@ export default function PetPage() {
                         const { equippedHat } = msg.payload;
                         setPetState((s) => ({ ...s, equippedHat }));
                         console.log("모자 변경:", msg.payload);
-                        petApi.updatePetInfo(userId, { hat: equippedHat })
+                        petApi.updatePetInfo(userIdRef.current, { hat: equippedHat })
+                            .catch((e) => console.error("모자 저장 실패:", e));
                         break;
                     }
                     // Unity 가 새로 장착한 배경 아이템 ID 를 보냄
@@ -101,7 +107,8 @@ export default function PetPage() {
                         const { equippedBG } = msg.payload;
                         setPetState((s) => ({ ...s, equippedBG }));
                         console.log("배경 변경:", msg.payload);
-                        petApi.updatePetInfo(userId, { backGround: equippedBG })
+                        petApi.updatePetInfo(userIdRef.current, { backGround: equippedBG })
+                            .catch((e) => console.error("배경 저장 실패:", e));
                         break;
                     }
                     // Unity 가 갱신된 포인트 총량을 보냄
@@ -123,7 +130,8 @@ export default function PetPage() {
                                 : [...prev.ownedItemIds, purchasedItemId],
                         }));
                         console.log("아이템 구매:", msg.payload);
-                        petApi.createAsset(userId, { itemId: purchasedItemId })
+                        petApi.createAsset(userIdRef.current, { itemId: purchasedItemId })
+                            .catch((e) => console.error("아이템 구매 저장 실패:", e));
                         break;
                     }
                     case "PET_STATUS_CHANGED":
