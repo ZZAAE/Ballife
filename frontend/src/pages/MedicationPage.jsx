@@ -136,6 +136,9 @@ export default function MedicationPage() {
   const { user } = useAuth();
   const userId = resolveUserId(user);
   const [prescriptionGroups, setPrescriptionGroups] = useState([]);
+  // 처방전 최초 로드 완료 여부. 로드 전에는 일정 저장을 막아,
+  // 비동기 로드 직전의 "빈 일정"이 localStorage 의 기존 복용 체크를 덮어쓰는 것을 방지한다.
+  const [prescriptionsLoaded, setPrescriptionsLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -158,6 +161,9 @@ export default function MedicationPage() {
         if (!cancelled) setPrescriptionGroups(mapPrescriptionsToGroups(withMeds));
       } catch {
         if (!cancelled) setPrescriptionGroups([]);
+      } finally {
+        // 성공/실패와 무관하게 로드 시도가 끝나면 저장 허용
+        if (!cancelled) setPrescriptionsLoaded(true);
       }
     })();
     return () => {
@@ -219,6 +225,8 @@ export default function MedicationPage() {
   // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
   // 삭제된 약은 localStorage 에서도 제외 → RecordSummary 의 복용 상태 오판 방지
   useEffect(() => {
+    // 처방전 로드 전에는 저장 금지 — 로드 직전의 빈 일정이 기존 체크 기록을 덮어쓰는 것 방지
+    if (!prescriptionsLoaded) return;
     // 미래 날짜는 저장하지 않음 (오늘/과거의 복용 확인만 기록)
     if (scheduleDate > todayKey) return;
     const isPast = scheduleDate < todayKey;
@@ -231,7 +239,7 @@ export default function MedicationPage() {
       SCHEDULE_STORAGE_PREFIX + scheduleDate,
       JSON.stringify(filtered)
     );
-  }, [todaySchedules, scheduleDate, todayKey, prescriptionGroups]);
+  }, [todaySchedules, scheduleDate, todayKey, prescriptionGroups, prescriptionsLoaded]);
 
   // 주간 달력에 표시할 "과거 날짜의 실제 저장 일정" 모음.
   // 오늘 저장된 복용 체크는 날짜가 지나면 그대로 과거 기록이 되므로,

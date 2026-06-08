@@ -6,6 +6,9 @@ import postApi from "../../api/boardApi";
 import commentApi from "../../api/commentApi";
 import { useAuth } from "../../contexts/AuthContext";
 
+/** 페이지 내 모든 버튼 공통 크기/모양 — 색상만 버튼별로 덧붙인다. */
+const BTN_BASE = "rounded-lg px-4 py-2 text-sm font-semibold transition";
+
 function CommentBlock({
   comment,
   user,
@@ -53,7 +56,7 @@ function CommentBlock({
               <button
                 type="button"
                 onClick={() => onUpVote(comment.id)}
-                className={`rounded-md border px-3 py-1 text-[11px] font-semibold transition ${
+                className={`${BTN_BASE} border ${
                   comment.liked
                     ? "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
                     : "border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50"
@@ -65,7 +68,7 @@ function CommentBlock({
                 <button
                   type="button"
                   onClick={onReplyStart}
-                  className="rounded-md border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                  className={`${BTN_BASE} border border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50`}
                 >
                   답글
                 </button>
@@ -82,7 +85,7 @@ function CommentBlock({
             <button
               type="button"
               onClick={() => onDelete(comment.id)}
-              className="rounded-md border border-[#efc7c7] bg-[#fff6f6] px-3 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
+              className={`${BTN_BASE} border border-[#efc7c7] bg-[#fff6f6] text-[#c24141] hover:bg-[#feecec]`}
             >
               삭제
             </button>
@@ -362,7 +365,7 @@ export default function PostDetailPage() {
             <button
               type="button"
               onClick={() => navigate(`/posts/${post.postId ?? post.id}/edit`)}
-              className="rounded-[10px] border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+              className={`${BTN_BASE} border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50`}
             >
               수정
             </button>
@@ -382,7 +385,7 @@ export default function PostDetailPage() {
                     );
                   }
                 }}
-                className="rounded-[10px] border border-[#efc7c7] bg-[#fff6f6] px-5 py-2.5 text-sm font-semibold text-[#c24141] shadow-sm transition hover:bg-[#feecec]"
+                className={`${BTN_BASE} border border-[#efc7c7] bg-[#fff6f6] text-[#c24141] shadow-sm hover:bg-[#feecec]`}
               >
                 삭제
               </button>
@@ -454,7 +457,7 @@ export default function PostDetailPage() {
                     );
                   }
                 }}
-                className={`rounded-[10px] border px-4 py-2 text-sm font-semibold transition ${
+                className={`${BTN_BASE} border ${
                   liked
                     ? "border-[#e05252] bg-[#e05252] text-white hover:bg-[#c93f3f]"
                     : "border-[#d9dde3] bg-[#f8fafc] text-gray-600 hover:bg-[#f1f5f9]"
@@ -499,7 +502,7 @@ export default function PostDetailPage() {
                 <button
                   type="button"
                   onClick={handleCommentSubmit}
-                  className="rounded bg-gray-500 px-3 py-1 text-[11px] font-semibold text-white hover:bg-gray-600"
+                  className={`${BTN_BASE} bg-gray-500 text-white hover:bg-gray-600`}
                 >
                   등록
                 </button>
@@ -541,14 +544,14 @@ export default function PostDetailPage() {
                             <button
                               type="button"
                               onClick={handleReplyCancel}
-                              className="rounded border border-[#d9dde3] bg-white px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                              className={`${BTN_BASE} border border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50`}
                             >
                               취소
                             </button>
                             <button
                               type="button"
                               onClick={() => handleReplySubmit(comment.id)}
-                              className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
+                              className={`${BTN_BASE} bg-[#0F172A] text-white hover:bg-[#1E293B]`}
                             >
                               등록
                             </button>
@@ -584,7 +587,7 @@ export default function PostDetailPage() {
           <Link to="/boards">
             <button
               type="button"
-              className="rounded-[10px] border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+              className={`${BTN_BASE} border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50`}
             >
               나가기
             </button>
