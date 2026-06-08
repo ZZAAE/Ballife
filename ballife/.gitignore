@@ -42,5 +42,5 @@ uploads/
 ### 인증키있는 yml 파일 ###
 # (root .gitignore의 **/application.yml 와 이중 안전망.
 #  application-mock.yml, application.yml.example 등 다른 yml은 push 허용.)
-application-local.yml
-*.yml
+**/application-local.yml
+**/*.yml
