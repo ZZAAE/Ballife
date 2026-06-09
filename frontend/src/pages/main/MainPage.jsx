@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import newsApi from "../../api/newsApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
@@ -312,7 +312,14 @@ const MainPage = () => {
     };
   }, []);
 
-  const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
+  const {
+    unityProvider,
+    isLoaded,
+    loadingProgression,
+    sendMessage,
+    addEventListener,
+    removeEventListener,
+  } = useUnityContext({
     loaderUrl: "/Unity/Build.loader.js",
     dataUrl: "/Unity/Build.data",
     frameworkUrl: "/Unity/Build.framework.js",
@@ -320,6 +327,37 @@ const MainPage = () => {
     streamingAssetsUrl: "/Unity/StreamingAssets",
   });
   const loadingPercent = Math.round(loadingProgression * 100);
+
+  // Unity 통신 — ready 전 메시지는 큐잉 후 ready 시점에 일괄 전송
+  const [unityReady, setUnityReady] = useState(false);
+  const queueRef = useRef([]);
+
+  const send = useCallback((type, payload) => {
+    const json = JSON.stringify({ type, payload });
+    if (unityReady) {
+      sendMessage("ReactBrideController", "OnReactMessage", json);
+    } else {
+      queueRef.current.push(json);
+    }
+  }, [unityReady, sendMessage]);
+
+  // Unity → React: ready 신호 수신
+  useEffect(() => {
+    const handleReady = () => setUnityReady(true);
+    addEventListener("unityReady", handleReady);
+    return () => removeEventListener("unityReady", handleReady);
+  }, [addEventListener, removeEventListener]);
+
+  // ready 되는 순간: 큐 비우고 PREVIEW 메시지 전송
+  useEffect(() => {
+    if (!unityReady) return;
+    queueRef.current.forEach((json) =>
+      sendMessage("ReactBrideController", "OnReactMessage", json)
+    );
+    queueRef.current = [];
+
+    send("PREVIEW", null);
+  }, [unityReady, sendMessage, send]);
 
   const bloodPressureChartData = useMemo(() => {
     if (!bloodPressureRecords.length) return [];

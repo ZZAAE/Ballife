@@ -1,0 +1,13 @@
+# [front-server] 프론트엔드(nginx)만 — 유일한 공개 진입점
+# 사용: front-server 에 이 파일 + .env 두고  docker compose pull && docker compose up -d
+name: ballife-front
+services:
+  frontend:
+    image: ${IMAGE_PREFIX}/frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      # 다른 서버 주소 (.env 에서 주입) — nginx 가 여기로 프록시
+      BACKEND_ADDR: ${BACKEND_ADDR}   # 백엔드서버IP:8080  (예: 10.0.0.2:8080)
+      AI_ADDR: ${AI_ADDR}             # AI서버IP:8001       (예: 10.0.0.3:8001)

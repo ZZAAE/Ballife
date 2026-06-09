@@ -1,0 +1,99 @@
+# ============================================================
+# Ballife 배포 워크플로
+#   1) 3개 이미지(frontend/backend/ai-service)를 빌드해 GHCR에 푸시
+#   2) 서버에 SSH 접속 → docker compose pull && up -d
+#
+# 필요한 GitHub Secrets:
+#   GABIA_HOST      배포 서버 IP/도메인
+#   GABIA_USER      SSH 사용자
+#   GABIA_SSH_KEY   SSH 개인키(PEM 내용 전체)
+#   GABIA_SSH_PORT  SSH 포트 (가비아는 22 가 아닐 수 있음)
+#   GHCR_PAT        (선택) 서버에서 GHCR 이미지 pull용 토큰(read:packages). 패키지를 public 으로 두면 불필요.
+# 참고: 서버의 배포 경로는 아래 deploy 스텝의 `cd ~/ballife` 를 실제 경로로 수정.
+#       GABIA_KNOWN_HOSTS 는 appleboy/ssh-action 에선 사용하지 않음(없어도 됨).
+# ============================================================
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: frontend
+            context: ./frontend
+            build_args: |
+              VITE_API_BASE_URL=/api
+              VITE_AI_BASE_URL=/ai
+          - name: backend
+            context: ./ballife
+            build_args: ""
+          - name: ai-service
+            context: ./ai-service
+            build_args: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 소유자명 소문자화(GHCR 요구)
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: GHCR 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 빌드 & 푸시 — ${{ matrix.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ matrix.name }}:latest
+            ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ matrix.name }}:${{ github.sha }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: SSH 배포 (가비아 서버에서 compose pull & up)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.GABIA_HOST }}
+          username: ${{ secrets.GABIA_USER }}
+          key: ${{ secrets.GABIA_SSH_KEY }}
+          port: ${{ secrets.GABIA_SSH_PORT }}
+          script: |
+            set -e
+            # ▼▼ 서버에서 docker-compose.yml + .env 가 있는 경로로 수정하세요 ▼▼
+            cd ~/ballife
+            # ▲▲ (예: /home/계정/ballife) ▲▲
+
+            # GHCR 패키지가 private 이면 토큰으로 로그인. public 으로 바꿨다면 이 if 블록은 지워도 됨.
+            if [ -n "${{ secrets.GHCR_PAT }}" ]; then
+              echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            fi
+
+            export IMAGE_PREFIX="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+            export IMAGE_TAG="${{ github.sha }}"
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
