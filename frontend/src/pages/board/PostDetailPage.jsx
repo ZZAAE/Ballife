@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import postApi from "../../api/boardApi";
 import commentApi from "../../api/commentApi";
@@ -19,6 +20,7 @@ function CommentBlock({
   showReplyButton = false,
   isReply = false,
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={`rounded-md border border-[#eceff3] px-4 py-4 ${
@@ -34,7 +36,8 @@ function CommentBlock({
                 : "bg-[#ffe2d7] text-[#9b5b43]"
             }`}
           >
-            {comment.author?.[0] || (isReply ? "답" : "댓")}
+            {comment.author?.[0] ||
+              (isReply ? t("postDetailPage.replyInitial") : t("postDetailPage.commentInitial"))}
           </div>
           <div>
             <p className="text-[13px] font-semibold text-gray-800">
@@ -62,7 +65,7 @@ function CommentBlock({
                     : "border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                {comment.liked ? "♥" : "♡"} 추천 {comment.upVote ?? 0}
+                {comment.liked ? "♥" : "♡"} {t("postDetailPage.upVote")} {comment.upVote ?? 0}
               </button>
               {showReplyButton && (
                 <button
@@ -70,7 +73,7 @@ function CommentBlock({
                   onClick={onReplyStart}
                   className={`${BTN_BASE} border border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50`}
                 >
-                  답글
+                  {t("postDetailPage.reply")}
                 </button>
               )}
             </div>
@@ -87,7 +90,7 @@ function CommentBlock({
               onClick={() => onDelete(comment.id)}
               className={`${BTN_BASE} border border-[#efc7c7] bg-[#fff6f6] text-[#c24141] hover:bg-[#feecec]`}
             >
-              삭제
+              {t("postDetailPage.delete")}
             </button>
           )}
         </div>
@@ -108,6 +111,7 @@ function normalizeContentHtml(content) {
 }
 
 export default function PostDetailPage() {
+  const { t } = useTranslation();
   const { postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -121,20 +125,20 @@ export default function PostDetailPage() {
   const [replyDraft, setReplyDraft] = useState("");
 
   const categories = [
-    { value: "", label: "게시판을 선택" },
-    { value: "GENERAL", label: "자유게시판" },
-    { value: "HYPERLIPIDEMIA", label: "고지혈증" },
-    { value: "HYPERTENSION", label: "고혈압" },
-    { value: "OSTEOPOROSIS", label: "골다공증" },
-    { value: "DIABETES", label: "당뇨" },
-    { value: "OBESITY", label: "비만" },
-    { value: "GOUT", label: "통풍" },
-    { value: "QNA", label: "질문" },
+    { value: "", label: t("postDetailPage.category.select") },
+    { value: "GENERAL", label: t("postDetailPage.category.general") },
+    { value: "HYPERLIPIDEMIA", label: t("postDetailPage.category.hyperlipidemia") },
+    { value: "HYPERTENSION", label: t("postDetailPage.category.hypertension") },
+    { value: "OSTEOPOROSIS", label: t("postDetailPage.category.osteoporosis") },
+    { value: "DIABETES", label: t("postDetailPage.category.diabetes") },
+    { value: "OBESITY", label: t("postDetailPage.category.obesity") },
+    { value: "GOUT", label: t("postDetailPage.category.gout") },
+    { value: "QNA", label: t("postDetailPage.category.qna") },
   ];
 
   const normalizeComment = (raw) => ({
     id: raw.id,
-    author: raw.userNickname ?? "익명",
+    author: raw.userNickname ?? t("postDetailPage.anonymous"),
     userId: raw.userId,
     medalIcon: raw.userMedalIcon ?? null,
     content: raw.content,
@@ -199,7 +203,7 @@ export default function PostDetailPage() {
     }
   }, [user?.userId]);
 
-  if (loading) return <div className="p-8 text-center">로딩 중...</div>;
+  if (loading) return <div className="p-8 text-center">{t("postDetailPage.loading")}</div>;
   if (!post) return null;
 
   const comments = commentState;
@@ -221,11 +225,11 @@ export default function PostDetailPage() {
 
   const handleCommentSubmit = async () => {
     if (!commentDraft.trim()) {
-      toast.error("댓글 내용을 입력해주세요.");
+      toast.error(t("postDetailPage.toast.commentRequired"));
       return;
     }
     if (!user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postDetailPage.toast.loginRequired"));
       return;
     }
     try {
@@ -235,19 +239,19 @@ export default function PostDetailPage() {
       });
       setCommentDraft("");
       await fetchComments();
-      toast.success("댓글이 등록되었습니다.");
+      toast.success(t("postDetailPage.toast.commentCreated"));
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.errors?.[0]?.defaultMessage ||
-          "댓글 등록에 실패했습니다.",
+          t("postDetailPage.toast.commentCreateFailed"),
       );
     }
   };
 
   const handleCommentUpVote = async (commentId) => {
     if (!user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postDetailPage.toast.loginRequired"));
       return;
     }
     try {
@@ -260,11 +264,13 @@ export default function PostDetailPage() {
         ),
       );
       toast.success(
-        data.liked ? "댓글을 추천했습니다." : "추천을 취소했습니다.",
+        data.liked
+          ? t("postDetailPage.toast.commentUpVoted")
+          : t("postDetailPage.toast.upVoteCanceled"),
       );
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "댓글 추천에 실패했습니다.",
+        error.response?.data?.message || t("postDetailPage.toast.commentUpVoteFailed"),
       );
     }
   };
@@ -281,11 +287,11 @@ export default function PostDetailPage() {
 
   const handleReplySubmit = async (parentCommentId) => {
     if (!replyDraft.trim()) {
-      toast.error("답글 내용을 입력해주세요.");
+      toast.error(t("postDetailPage.toast.replyRequired"));
       return;
     }
     if (!user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postDetailPage.toast.loginRequired"));
       return;
     }
     try {
@@ -297,12 +303,12 @@ export default function PostDetailPage() {
       setReplyTo(null);
       setReplyDraft("");
       await fetchComments();
-      toast.success("답글이 등록되었습니다.");
+      toast.success(t("postDetailPage.toast.replyCreated"));
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.errors?.[0]?.defaultMessage ||
-          "답글 등록에 실패했습니다.",
+          t("postDetailPage.toast.replyCreateFailed"),
       );
     }
   };
@@ -319,17 +325,17 @@ export default function PostDetailPage() {
 
   const handleCommentDelete = async (commentId) => {
     if (!user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postDetailPage.toast.loginRequired"));
       return;
     }
-    if (!window.confirm("이 댓글을 삭제할까요?")) return;
+    if (!window.confirm(t("postDetailPage.confirm.deleteComment"))) return;
     try {
       await commentApi.deleteComment(user.userId, commentId);
       await fetchComments();
-      toast.success("댓글이 삭제되었습니다.");
+      toast.success(t("postDetailPage.toast.commentDeleted"));
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "댓글 삭제에 실패했습니다.",
+        error.response?.data?.message || t("postDetailPage.toast.commentDeleteFailed"),
       );
     }
   };
@@ -343,7 +349,7 @@ export default function PostDetailPage() {
           <div>
             <p className="text-[28px] font-semibold text-gray-700">
               <Link to="/boards" className="hover:text-blue-600">
-                커뮤니티
+                {t("postDetailPage.community")}
               </Link>
               <span className="px-1 text-gray-400">&gt;</span>
               <Link
@@ -357,7 +363,7 @@ export default function PostDetailPage() {
               </Link>
             </p>
             <p className="mt-1 text-[15px] text-gray-500">
-              건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
+              {t("postDetailPage.subtitle")}
             </p>
           </div>
 
@@ -367,27 +373,27 @@ export default function PostDetailPage() {
               onClick={() => navigate(`/posts/${post.postId ?? post.id}/edit`)}
               className={`${BTN_BASE} border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50`}
             >
-              수정
+              {t("postDetailPage.edit")}
             </button>
             {user?.userId === post.userId && (
               <button
                 type="button"
                 onClick={async () => {
-                  if (!window.confirm("이 글을 삭제할까요?")) return;
+                  if (!window.confirm(t("postDetailPage.confirm.deletePost"))) return;
                   try {
                     await postApi.deletePost(user.userId, post.postId ?? post.id);
-                    toast.success("게시글이 삭제되었습니다.");
+                    toast.success(t("postDetailPage.toast.postDeleted"));
                     navigate("/boards");
                   } catch (error) {
                     toast.error(
                       error.response?.data?.message ||
-                        "게시글 삭제에 실패했습니다.",
+                        t("postDetailPage.toast.postDeleteFailed"),
                     );
                   }
                 }}
                 className={`${BTN_BASE} border border-[#efc7c7] bg-[#fff6f6] text-[#c24141] shadow-sm hover:bg-[#feecec]`}
               >
-                삭제
+                {t("postDetailPage.delete")}
               </button>
             )}
           </div>
@@ -401,7 +407,7 @@ export default function PostDetailPage() {
 
             <div className="mt-4 flex items-center gap-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ece8f7] text-[11px] font-semibold text-gray-600">
-                {post.userNickname?.[0] || "익"}
+                {post.userNickname?.[0] || t("postDetailPage.anonymousInitial")}
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-gray-400">
@@ -416,7 +422,7 @@ export default function PostDetailPage() {
                   {post.userNickname}
                 </span>
                 {post.createdAt && <span>{formatDate(post.createdAt)}</span>}
-                <span>조회 {post.viewCount ?? 0}</span>
+                <span>{t("postDetailPage.viewCount", { count: post.viewCount ?? 0 })}</span>
               </div>
             </div>
 
@@ -429,7 +435,7 @@ export default function PostDetailPage() {
               <div className="mt-7">
                 <img
                   src={post.imageUrl}
-                  alt="게시글 이미지"
+                  alt={t("postDetailPage.postImageAlt")}
                   className="h-[220px] w-[150px] rounded-sm border border-gray-200 object-cover shadow-sm"
                 />
               </div>
@@ -440,7 +446,7 @@ export default function PostDetailPage() {
                 type="button"
                 onClick={async () => {
                   if (!user?.userId) {
-                    toast.error("로그인이 필요합니다.");
+                    toast.error(t("postDetailPage.toast.loginRequired"));
                     return;
                   }
                   try {
@@ -448,12 +454,14 @@ export default function PostDetailPage() {
                     setUpVote(data.upVote);
                     setLiked(data.liked);
                     toast.success(
-                      data.liked ? "추천되었습니다." : "추천을 취소했습니다.",
+                      data.liked
+                        ? t("postDetailPage.toast.postUpVoted")
+                        : t("postDetailPage.toast.upVoteCanceled"),
                     );
                   } catch (error) {
                     toast.error(
                       error.response?.data?.message ||
-                        "추천에 실패했습니다.",
+                        t("postDetailPage.toast.postUpVoteFailed"),
                     );
                   }
                 }}
@@ -463,7 +471,7 @@ export default function PostDetailPage() {
                     : "border-[#d9dde3] bg-[#f8fafc] text-gray-600 hover:bg-[#f1f5f9]"
                 }`}
               >
-                {liked ? "♥" : "♡"} 추천 {displayedUpVote}
+                {liked ? "♥" : "♡"} {t("postDetailPage.upVote")} {displayedUpVote}
               </button>
             </div>
           </div>
@@ -471,7 +479,7 @@ export default function PostDetailPage() {
 
         <section className="mt-4 overflow-hidden rounded-md border border-[#d9dde3] bg-white shadow-sm">
           <div className="border-b border-[#eceff3] px-7 py-4 text-[15px] font-semibold text-gray-800 sm:px-8">
-            {comments.length}개의 댓글
+            {t("postDetailPage.commentCount", { count: comments.length })}
           </div>
 
           <div className="px-7 py-5 sm:px-8">
@@ -479,17 +487,17 @@ export default function PostDetailPage() {
               <div className="px-4 py-4">
                 <div className="mb-3 flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ffe2d7] text-[11px] font-semibold text-[#9b5b43]">
-                    글
+                    {t("postDetailPage.writerInitial")}
                   </div>
                   <span className="text-[13px] font-semibold text-gray-700">
-                    {user?.nickname || user?.username || "콩콩이식사"}
+                    {user?.nickname || user?.username || t("postDetailPage.defaultNickname")}
                   </span>
                 </div>
 
                 <textarea
                   value={commentDraft}
                   onChange={(event) => setCommentDraft(event.target.value)}
-                  placeholder="댓글을 입력해 주세요. 서로 존중하는 표현을 사용해 주세요."
+                  placeholder={t("postDetailPage.commentPlaceholder")}
                   className="h-[88px] w-full resize-none border-0 p-0 text-[13px] leading-6 text-gray-700 outline-none placeholder:text-gray-300"
                   maxLength={200}
                 />
@@ -504,7 +512,7 @@ export default function PostDetailPage() {
                   onClick={handleCommentSubmit}
                   className={`${BTN_BASE} bg-gray-500 text-white hover:bg-gray-600`}
                 >
-                  등록
+                  {t("postDetailPage.submit")}
                 </button>
               </div>
             </div>
@@ -531,7 +539,7 @@ export default function PostDetailPage() {
                           <textarea
                             value={replyDraft}
                             onChange={(e) => setReplyDraft(e.target.value)}
-                            placeholder="답글을 입력해 주세요."
+                            placeholder={t("postDetailPage.replyPlaceholder")}
                             className="h-[64px] w-full resize-none border-0 p-0 text-[13px] leading-6 text-gray-700 outline-none placeholder:text-gray-300"
                             maxLength={200}
                           />
@@ -546,14 +554,14 @@ export default function PostDetailPage() {
                               onClick={handleReplyCancel}
                               className={`${BTN_BASE} border border-[#d9dde3] bg-white text-gray-600 hover:bg-gray-50`}
                             >
-                              취소
+                              {t("postDetailPage.cancel")}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleReplySubmit(comment.id)}
                               className={`${BTN_BASE} bg-[#0F172A] text-white hover:bg-[#1E293B]`}
                             >
-                              등록
+                              {t("postDetailPage.submit")}
                             </button>
                           </div>
                         </div>
@@ -589,7 +597,7 @@ export default function PostDetailPage() {
               type="button"
               className={`${BTN_BASE} border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50`}
             >
-              나가기
+              {t("postDetailPage.exit")}
             </button>
           </Link>
         </div>

@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.prologue.ballife.domain.subscription.SubscriptionPlan;
 import com.prologue.ballife.domain.subscription.SubscriptionStatus;
 import com.prologue.ballife.domain.subscription.UserSubscription;
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.subscription.UserSubscriptionRepository;
@@ -31,6 +32,7 @@ public class SubscriptionService {
     private final UserSubscriptionRepository userSubscriptionRepository;
     private final UserRepository userRepository;
     private final FamilyService familyService;
+    private final MessageResolver messages;
 
     public SubscriptionDto.StatusResponse getStatus(Long userId) {
         boolean familyMemberAccess = familyService.isInActiveGroup(userId);
@@ -73,10 +75,11 @@ public class SubscriptionService {
     @Transactional
     public SubscriptionDto.StatusResponse activate(Long userId, SubscriptionPlan plan) {
         if (plan == null || plan == SubscriptionPlan.NONE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효한 플랜을 선택해주세요.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messages.get("business.subscription.invalidPlan"));
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         List<UserSubscription> currentActives =
                 userSubscriptionRepository.findByUser_UserIdAndStatus(userId, SubscriptionStatus.ACTIVE);
@@ -111,7 +114,8 @@ public class SubscriptionService {
         UserSubscription active = userSubscriptionRepository
                 .findFirstByUser_UserIdAndStatusOrderByStartedAtDesc(userId, SubscriptionStatus.ACTIVE)
                 .filter(UserSubscription::isActive)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "활성 구독이 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        messages.get("business.subscription.noActiveSubscription")));
 
         boolean wasFamily = active.getPlan() == SubscriptionPlan.FAMILY;
         active.cancel();

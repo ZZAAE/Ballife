@@ -14,6 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.prologue.ballife.config.MessageResolver;
+
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,10 +38,13 @@ public class LocalStorageService implements StorageService {
 
     private final Path basePath;
     private final String urlPrefix;
+    private final MessageResolver messages;
 
     public LocalStorageService(
             @Value("${storage.local.base-path}") String basePath,
-            @Value("${storage.local.url-prefix:/uploads}") String urlPrefix) {
+            @Value("${storage.local.url-prefix:/uploads}") String urlPrefix,
+            MessageResolver messages) {
+        this.messages = messages;
         this.basePath = Paths.get(basePath).toAbsolutePath().normalize();
         // urlPrefix 끝의 슬래시 제거 (중복 방지)
         this.urlPrefix = urlPrefix.endsWith("/")
@@ -60,16 +65,16 @@ public class LocalStorageService implements StorageService {
     @Override
     public String save(MultipartFile file, String subDir) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어 있습니다.");
+            throw new IllegalArgumentException(messages.get("business.storage.emptyFile"));
         }
         // MIME / 확장자 검증
         String mime = file.getContentType();
         if (mime == null || !ALLOWED_MIME.contains(mime.toLowerCase())) {
-            throw new IllegalArgumentException("허용되지 않은 파일 타입: " + mime);
+            throw new IllegalArgumentException(messages.get("business.storage.invalidMimeType", mime));
         }
         String ext = extractExt(file.getOriginalFilename());
         if (!ALLOWED_EXT.contains(ext)) {
-            throw new IllegalArgumentException("허용되지 않은 확장자: " + ext);
+            throw new IllegalArgumentException(messages.get("business.storage.invalidExtension", ext));
         }
 
         // {sub}/{yyyy/MM/dd}/{uuid}.{ext}
@@ -81,7 +86,7 @@ public class LocalStorageService implements StorageService {
         Path absolute = basePath.resolve(relative).normalize();
         // path traversal 방지
         if (!absolute.startsWith(basePath)) {
-            throw new IllegalArgumentException("잘못된 경로");
+            throw new IllegalArgumentException(messages.get("business.storage.invalidPath"));
         }
 
         try {

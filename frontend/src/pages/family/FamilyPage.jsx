@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
   Users,
@@ -57,6 +58,7 @@ function ConsentRow({ icon: Icon, label, value, onChange, disabled, badge }) {
 
 /* 구성원 건강 카드 */
 function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
+  const { t } = useTranslation();
   // 그룹 비활성(오너가 가족 플랜이 아닐 때) → 본인 외 모든 항목 비공개
   const locked = !card.me && !groupActive;
   const has = {
@@ -66,38 +68,44 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
     medication: !locked && card.medication?.total != null,
   };
   const bloodSugarText = locked
-    ? "비공개"
+    ? t("familyPage.private")
     : has.bloodSugar
-      ? `${card.bloodSugar.value} mg/dL`
+      ? t("familyPage.bloodSugarValue", { value: card.bloodSugar.value })
       : !card.me && !card.consent?.shareBloodSugar
-        ? "비공개"
-        : "기록 없음";
+        ? t("familyPage.private")
+        : t("familyPage.noRecord");
   const bloodPressureText = locked
-    ? "비공개"
+    ? t("familyPage.private")
     : has.bloodPressure
       ? `${card.bloodPressure.systolic} / ${card.bloodPressure.diastolic}`
       : !card.me && !card.consent?.shareBloodPressure
-        ? "비공개"
-        : "기록 없음";
+        ? t("familyPage.private")
+        : t("familyPage.noRecord");
   const exerciseText = (() => {
-    if (locked) return "비공개";
+    if (locked) return t("familyPage.private");
     if (card.exercise?.exerciseName) {
       const kcal = card.exercise.burnedCalorie;
       return kcal != null
-        ? `${card.exercise.exerciseName} · ${kcal} kcal`
+        ? t("familyPage.exerciseValue", {
+            name: card.exercise.exerciseName,
+            kcal,
+          })
         : card.exercise.exerciseName;
     }
-    if (!card.me && !card.consent?.shareExercise) return "비공개";
-    return "기록 없음";
+    if (!card.me && !card.consent?.shareExercise) return t("familyPage.private");
+    return t("familyPage.noRecord");
   })();
   const medicationText = (() => {
-    if (locked) return "비공개";
+    if (locked) return t("familyPage.private");
     if (card.medication?.total != null) {
       const { taken = 0, total } = card.medication;
-      return taken >= total ? "복용 완료" : `${taken}/${total} 복용`;
+      return taken >= total
+        ? t("familyPage.medicationDone")
+        : t("familyPage.medicationProgress", { taken, total });
     }
-    if (!card.me && !card.consent?.shareMedication) return "비공개";
-    return "기록 없음";
+    if (!card.me && !card.consent?.shareMedication)
+      return t("familyPage.private");
+    return t("familyPage.noRecord");
   })();
 
   return (
@@ -105,14 +113,14 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ece8f7] text-sm font-semibold text-gray-600">
-            {card.nickname?.[0] || "회"}
+            {card.nickname?.[0] || t("familyPage.avatarFallback")}
           </div>
           <div>
             <p className="text-[14px] font-semibold text-[#0F172A]">
               {card.nickname}
               {card.me && (
                 <span className="ml-2 text-[11px] font-medium text-[#3B82F6]">
-                  나
+                  {t("familyPage.me")}
                 </span>
               )}
             </p>
@@ -123,7 +131,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
                   : "bg-[#F1F5F9] text-[#64748B]"
               }`}
             >
-              {card.role === "OWNER" ? "오너" : "구성원"}
+              {card.role === "OWNER" ? t("familyPage.roleOwner") : t("familyPage.roleMember")}
             </span>
           </div>
         </div>
@@ -133,7 +141,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
             onClick={() => onRemove(card.userId, card.nickname)}
             className="flex items-center gap-1 rounded-lg border border-[#efc7c7] bg-[#fff6f6] px-2.5 py-1 text-[11px] font-semibold text-[#c24141] hover:bg-[#feecec]"
           >
-            <UserMinus size={12} /> 추방
+            <UserMinus size={12} /> {t("familyPage.kick")}
           </button>
         )}
       </div>
@@ -141,7 +149,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
-            <Droplet size={12} /> 혈당
+            <Droplet size={12} /> {t("familyPage.bloodSugar")}
           </div>
           <p
             className={`text-[15px] font-bold ${
@@ -153,7 +161,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
         </div>
         <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
-            <HeartPulse size={12} /> 혈압
+            <HeartPulse size={12} /> {t("familyPage.bloodPressure")}
           </div>
           <p
             className={`text-[15px] font-bold ${
@@ -165,7 +173,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
         </div>
         <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
-            <Dumbbell size={12} /> 최근 운동
+            <Dumbbell size={12} /> {t("familyPage.recentExercise")}
           </div>
           <p
             className={`text-[15px] font-bold ${
@@ -177,7 +185,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
         </div>
         <div className="rounded-xl bg-white px-4 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] text-[#64748B]">
-            <Pill size={12} /> 복약 현황
+            <Pill size={12} /> {t("familyPage.medicationStatus")}
           </div>
           <p
             className={`text-[15px] font-bold ${
@@ -197,6 +205,7 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
    통째로 언마운트/재마운트하고, 입력창 포커스가 매 글자마다 풀린다. */
 function Shell({ children }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
@@ -209,10 +218,10 @@ function Shell({ children }) {
                 </div>
                 <div>
                   <h1 className="text-[24px] font-extrabold tracking-tight">
-                    가족 건강 관리
+                    {t("familyPage.headerTitle")}
                   </h1>
                   <p className="text-sm text-[#64748B]">
-                    동의 기반으로 가족의 혈당·혈압을 함께 확인하세요.
+                    {t("familyPage.headerSubtitle")}
                   </p>
                 </div>
               </div>
@@ -221,7 +230,7 @@ function Shell({ children }) {
                 onClick={() => navigate("/member")}
                 className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-[13px] font-semibold text-gray-600 hover:bg-gray-100"
               >
-                이전
+                {t("familyPage.back")}
               </button>
             </div>
             {children}
@@ -234,6 +243,7 @@ function Shell({ children }) {
 
 export default function FamilyPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
 
@@ -271,7 +281,7 @@ export default function FamilyPage() {
 
   const handleJoin = async () => {
     if (!codeInput.trim()) {
-      toast.error("초대 코드를 입력해주세요.");
+      toast.error(t("familyPage.toast.codeRequired"));
       return;
     }
     setBusy(true);
@@ -279,7 +289,7 @@ export default function FamilyPage() {
       const { data } = await familyApi.join(codeInput.trim());
       setFamily(data);
       setCodeInput("");
-      toast.success("가족 그룹에 합류했습니다.");
+      toast.success(t("familyPage.toast.joined"));
     } catch {
       /* 인터셉터 토스트 */
     } finally {
@@ -292,7 +302,7 @@ export default function FamilyPage() {
     try {
       const { data } = await familyApi.createGroup();
       setFamily(data);
-      toast.success("가족 그룹이 만들어졌습니다.");
+      toast.success(t("familyPage.toast.groupCreated"));
     } catch {
       /* noop */
     } finally {
@@ -305,7 +315,7 @@ export default function FamilyPage() {
     try {
       await familyApi.rotateInviteCode();
       await refresh();
-      toast.success("초대 코드를 재발급했습니다.");
+      toast.success(t("familyPage.toast.codeRotated"));
     } catch {
       /* noop */
     } finally {
@@ -323,22 +333,22 @@ export default function FamilyPage() {
   };
 
   const handleLeave = async () => {
-    if (!window.confirm("가족 그룹에서 나가시겠어요?")) return;
+    if (!window.confirm(t("familyPage.confirm.leave"))) return;
     try {
       await familyApi.leave();
       await refresh();
-      toast.success("그룹에서 나갔습니다.");
+      toast.success(t("familyPage.toast.left"));
     } catch {
       /* noop */
     }
   };
 
   const handleRemove = async (targetUserId, nickname) => {
-    if (!window.confirm(`${nickname}님을 그룹에서 제거할까요?`)) return;
+    if (!window.confirm(t("familyPage.confirm.remove", { nickname }))) return;
     try {
       await familyApi.removeMember(targetUserId);
       await refresh();
-      toast.success("구성원을 제거했습니다.");
+      toast.success(t("familyPage.toast.removed"));
     } catch {
       /* noop */
     }
@@ -346,8 +356,8 @@ export default function FamilyPage() {
 
   const copyCode = (code) => {
     navigator.clipboard?.writeText(code).then(
-      () => toast.success("초대 코드를 복사했습니다."),
-      () => toast.error("복사에 실패했습니다."),
+      () => toast.success(t("familyPage.toast.codeCopied")),
+      () => toast.error(t("familyPage.toast.copyFailed")),
     );
   };
 
@@ -355,14 +365,14 @@ export default function FamilyPage() {
   const handleSubscribe = async (plan) => {
     const { data } = await subscriptionApi.activate(plan);
     await refresh();
-    toast.success("구독이 활성화되었습니다.");
+    toast.success(t("familyPage.toast.subscribed"));
     return data;
   };
 
   const handleCancelSubscription = async () => {
     const { data } = await subscriptionApi.cancel();
     await refresh();
-    toast.success("구독을 해지했습니다.");
+    toast.success(t("familyPage.toast.subscriptionCancelled"));
     return data;
   };
 
@@ -370,7 +380,7 @@ export default function FamilyPage() {
     return (
       <Shell>
         <div className="rounded-2xl bg-white p-16 text-center text-sm text-[#64748B] shadow-sm">
-          불러오는 중...
+          {t("familyPage.loading")}
         </div>
       </Shell>
     );
@@ -425,16 +435,15 @@ export default function FamilyPage() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {/* 초대 코드로 합류 */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="text-[16px] font-bold">초대 코드로 합류</h2>
+            <h2 className="text-[16px] font-bold">{t("familyPage.joinTitle")}</h2>
             <p className="mt-1 text-[13px] text-[#64748B]">
-              가족이 보내준 초대 코드를 입력하세요. 구독 없이도 합류할 수
-              있어요.
+              {t("familyPage.joinDescription")}
             </p>
             <div className="mt-4 flex gap-2">
               <input
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-                placeholder="예: AB3D9K2P"
+                placeholder={t("familyPage.codePlaceholder")}
                 maxLength={12}
                 className="h-11 flex-1 rounded-xl border border-[#CBD5E1] bg-white px-4 text-sm tracking-widest outline-none focus:border-[#0f1c33]"
               />
@@ -444,18 +453,18 @@ export default function FamilyPage() {
                 onClick={handleJoin}
                 className="h-11 rounded-xl bg-[#0f1c33] px-5 text-sm font-semibold text-white hover:bg-[#1a2d4d] disabled:opacity-50"
               >
-                합류
+                {t("familyPage.join")}
               </button>
             </div>
           </div>
 
           {/* 그룹 만들기 / 업셀 */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="text-[16px] font-bold">내 가족 그룹 만들기</h2>
+            <h2 className="text-[16px] font-bold">{t("familyPage.createTitle")}</h2>
             {canCreateGroup ? (
               <>
                 <p className="mt-1 text-[13px] text-[#64748B]">
-                  가족 플랜 이용 중입니다. 그룹을 만들고 구성원을 초대하세요.
+                  {t("familyPage.createDescriptionActive")}
                 </p>
                 <button
                   type="button"
@@ -463,20 +472,20 @@ export default function FamilyPage() {
                   onClick={handleCreateGroup}
                   className="mt-4 h-11 rounded-xl bg-[#0f1c33] px-5 text-sm font-semibold text-white hover:bg-[#1a2d4d] disabled:opacity-50"
                 >
-                  가족 그룹 만들기
+                  {t("familyPage.createGroup")}
                 </button>
               </>
             ) : (
               <>
                 <p className="mt-1 text-[13px] text-[#64748B]">
-                  가족 그룹을 만들려면 가족 플랜 구독이 필요합니다.
+                  {t("familyPage.createDescriptionUpsell")}
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate("/member")}
                   className="mt-4 h-11 rounded-xl border border-gray-300 px-5 text-sm font-semibold text-gray-700 hover:bg-gray-100"
                 >
-                  구독하러 가기
+                  {t("familyPage.goSubscribe")}
                 </button>
               </>
             )}
@@ -492,8 +501,7 @@ export default function FamilyPage() {
       {!family.groupActive && (
         <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 text-[13px] font-medium text-[#9A3412]">
           <span>
-            이 가족 그룹은 현재 비활성화 상태입니다. 오너의 가족 플랜이
-            만료되었어요.
+            {t("familyPage.inactiveBanner")}
           </span>
           {isOwner && (
             <button
@@ -501,7 +509,7 @@ export default function FamilyPage() {
               onClick={() => setSubOpen(true)}
               className="shrink-0 rounded-lg bg-[#9A3412] px-3 py-2 text-[12px] font-semibold text-white hover:bg-[#7c2d10]"
             >
-              구독 갱신
+              {t("familyPage.renewSubscription")}
             </button>
           )}
         </div>
@@ -512,15 +520,15 @@ export default function FamilyPage() {
         <div className="flex flex-col gap-5">
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-              {family.groupName || "가족 그룹"}
+              {family.groupName || t("familyPage.groupNameFallback")}
             </p>
             <p className="mt-1 text-[14px] font-semibold">
-              오너 · {family.ownerNickname}
+              {t("familyPage.ownerLabel", { nickname: family.ownerNickname })}
             </p>
 
             {isOwner && family.inviteCode && (
               <div className="mt-4">
-                <p className="mb-1 text-[12px] text-[#64748B]">초대 코드</p>
+                <p className="mb-1 text-[12px] text-[#64748B]">{t("familyPage.inviteCode")}</p>
                 <div className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
                   <span className="flex-1 text-[18px] font-bold tracking-widest text-[#0F172A]">
                     {family.inviteCode}
@@ -529,7 +537,7 @@ export default function FamilyPage() {
                     type="button"
                     onClick={() => copyCode(family.inviteCode)}
                     className="rounded-lg p-1.5 text-[#475569] hover:bg-gray-200"
-                    title="복사"
+                    title={t("familyPage.copy")}
                   >
                     <Copy size={16} />
                   </button>
@@ -538,7 +546,7 @@ export default function FamilyPage() {
                     disabled={busy}
                     onClick={handleRotate}
                     className="rounded-lg p-1.5 text-[#475569] hover:bg-gray-200 disabled:opacity-50"
-                    title="재발급"
+                    title={t("familyPage.rotate")}
                   >
                     <RefreshCw size={16} />
                   </button>
@@ -552,7 +560,7 @@ export default function FamilyPage() {
                 onClick={handleLeave}
                 className="mt-4 flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-[12px] font-semibold text-gray-600 hover:bg-gray-100"
               >
-                <LogOut size={13} /> 그룹 나가기
+                <LogOut size={13} /> {t("familyPage.leaveGroup")}
               </button>
             )}
           </div>
@@ -560,32 +568,32 @@ export default function FamilyPage() {
           {/* 내 공유 설정 (항목별 동의) — flex-1 로 남은 높이를 채운다.
               제목/설명은 위에 고정하고, 토글 목록만 남은 공간에서 세로 중앙(justify-center) */}
           <div className="flex flex-1 flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h3 className="mb-1 text-[15px] font-bold">내 공유 설정</h3>
+            <h3 className="mb-1 text-[15px] font-bold">{t("familyPage.myShareSettings")}</h3>
             <p className="mb-4 text-[12px] text-[#64748B]">
-              동의한 항목만 가족에게 공개됩니다.
+              {t("familyPage.shareSettingsDescription")}
             </p>
             <div className="flex flex-1 flex-col justify-center gap-2">
               <ConsentRow
                 icon={Droplet}
-                label="혈당"
+                label={t("familyPage.bloodSugar")}
                 value={!!consent.shareBloodSugar}
                 onChange={(v) => handleConsent("shareBloodSugar", v)}
               />
               <ConsentRow
                 icon={HeartPulse}
-                label="혈압"
+                label={t("familyPage.bloodPressure")}
                 value={!!consent.shareBloodPressure}
                 onChange={(v) => handleConsent("shareBloodPressure", v)}
               />
               <ConsentRow
                 icon={Pill}
-                label="복약 현황"
+                label={t("familyPage.medicationStatus")}
                 value={!!consent.shareMedication}
                 onChange={(v) => handleConsent("shareMedication", v)}
               />
               <ConsentRow
                 icon={Dumbbell}
-                label="최근 운동"
+                label={t("familyPage.recentExercise")}
                 value={!!consent.shareExercise}
                 onChange={(v) => handleConsent("shareExercise", v)}
               />
@@ -596,7 +604,7 @@ export default function FamilyPage() {
         {/* 우측: 구성원 목록 — 헤더를 카드 안 상단에 두어 좌측 카드와 윗변을 맞춘다 */}
         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <h3 className="mb-4 text-[15px] font-bold">
-            가족 구성원 ({members.length})
+            {t("familyPage.membersTitle", { count: members.length })}
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {members.map((card) => (

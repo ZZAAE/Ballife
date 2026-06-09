@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
 import { CalendarDays, Check, Sun, Triangle, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { formatDate } from "../../utils/format";
 
 // YYYY-MM-DD -> "YYYY년 M월 D일"
 const formatScheduleDateLabel = (dateKey) => {
   const [y, m, d] = (dateKey ?? "").split("-");
   if (!y || !m || !d) return dateKey;
-  return `${y}년 ${Number(m)}월 ${Number(d)}일`;
+  return formatDate(dateKey);
 };
 
 const getStatus = (drugs) => {
@@ -24,6 +26,7 @@ export default function TodayScheduleCard({
   onToggleDrug,
   onToggleAllDrugs,
 }) {
+  const { t } = useTranslation();
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const dateInputRef = useRef(null);
 
@@ -44,7 +47,7 @@ export default function TodayScheduleCard({
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-[18px] font-bold text-gray-900">
-            {isToday ? "오늘의 복용 일정" : "복용 일정"}
+            {isToday ? t("todayScheduleCard.title.today") : t("todayScheduleCard.title.other")}
           </h2>
           <div className="relative">
             <input
@@ -81,19 +84,19 @@ export default function TodayScheduleCard({
             btnClass = "bg-gray-100 text-gray-900 hover:bg-gray-200";
             btnContent = (
               <>
-                <Check className="w-4 h-4" /> 복용 완료
+                <Check className="w-4 h-4" /> {t("todayScheduleCard.status.all")}
               </>
             );
           } else if (status === "partial") {
             btnClass = "bg-[#F2A35B] text-[#5A2E0E] hover:bg-[#E89249]";
             btnContent = (
               <>
-                <Triangle className="w-4 h-4" strokeWidth={2.4} /> 부분 복용
+                <Triangle className="w-4 h-4" strokeWidth={2.4} /> {t("todayScheduleCard.status.partial")}
               </>
             );
           } else {
             btnClass = "bg-[#1B1F2A] text-white hover:bg-[#2A2F3F]";
-            btnContent = "복용 확인";
+            btnContent = t("todayScheduleCard.status.none");
           }
 
           return (
@@ -151,7 +154,7 @@ export default function TodayScheduleCard({
                   type="button"
                   onClick={() => setOpenScheduleId(null)}
                   className="text-gray-400 hover:text-gray-700"
-                  aria-label="닫기"
+                  aria-label={t("todayScheduleCard.close")}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -163,7 +166,7 @@ export default function TodayScheduleCard({
                     className="h-4 w-4 accent-[#1B1F2A]"
                   />
                   <span className="text-[12px] font-semibold text-gray-700">
-                    전체 선택
+                    {t("todayScheduleCard.selectAll")}
                   </span>
                 </label>
               </div>
@@ -199,7 +202,7 @@ export default function TodayScheduleCard({
                 onClick={() => setOpenScheduleId(null)}
                 className="w-full h-[44px] rounded-lg bg-[#1B1F2A] text-white text-[14px] font-semibold hover:bg-[#2A2F3F] transition-colors"
               >
-                확인
+                {t("todayScheduleCard.confirm")}
               </button>
             </div>
           </div>

@@ -29,6 +29,7 @@ import com.prologue.ballife.analyzer.DiseaseProfileAnalysisResult;
 import com.prologue.ballife.analyzer.DiseaseProfileAnalyzer;
 import com.prologue.ballife.analyzer.MedicationAnalysisResult;
 import com.prologue.ballife.analyzer.MedicationAnalyzer;
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.daily.BioValueRecord;
 import com.prologue.ballife.domain.medicine.Prescription;
 import com.prologue.ballife.domain.medicine.UserMedicineRecord;
@@ -107,6 +108,7 @@ public class HealthAnalysisService {
     private final BmiAnalyzer            bmiAnalyzer;
     private final MedicationAnalyzer     medicationAnalyzer;
     private final DiseaseProfileAnalyzer diseaseProfileAnalyzer;
+    private final MessageResolver        messages;
 
     public HealthAnalysisService(
             UserRepository userRepository,
@@ -117,7 +119,8 @@ public class HealthAnalysisService {
             BloodSugarAnalyzer bloodSugarAnalyzer,
             BmiAnalyzer bmiAnalyzer,
             MedicationAnalyzer medicationAnalyzer,
-            DiseaseProfileAnalyzer diseaseProfileAnalyzer) {
+            DiseaseProfileAnalyzer diseaseProfileAnalyzer,
+            MessageResolver messages) {
         this.userRepository = userRepository;
         this.bioValueRecordRepository = bioValueRecordRepository;
         this.prescriptionRepository = prescriptionRepository;
@@ -127,6 +130,7 @@ public class HealthAnalysisService {
         this.bmiAnalyzer = bmiAnalyzer;
         this.medicationAnalyzer = medicationAnalyzer;
         this.diseaseProfileAnalyzer = diseaseProfileAnalyzer;
+        this.messages = messages;
     }
 
     // ============================================================
@@ -169,7 +173,8 @@ public class HealthAnalysisService {
 
         // 2. User 조회
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         HealthAnalysisResponse.Period period =
                 new HealthAnalysisResponse.Period(periodType, startDate, endDate);
@@ -293,20 +298,21 @@ public class HealthAnalysisService {
      */
     private void validatePeriod(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "기간이 누락되었습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    messages.get("analysis.period.missing"));
         }
         if (startDate.isAfter(endDate)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "시작일이 종료일보다 늦습니다.");
+                    messages.get("analysis.period.startAfterEnd"));
         }
         if (endDate.isAfter(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "종료일이 미래입니다.");
+                    messages.get("analysis.period.endFuture"));
         }
         long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
         if (days > PERIOD_MAX_DAYS) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "분석 기간은 최대 " + PERIOD_MAX_DAYS + "일입니다.");
+                    messages.get("analysis.period.tooLong", PERIOD_MAX_DAYS));
         }
     }
 

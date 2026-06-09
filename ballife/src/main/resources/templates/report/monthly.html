@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Ballife 월간 건강 보고서</title>
+  <title th:text="#{report.documentTitle}">Ballife 월간 건강 보고서</title>
 
   <!--
     Step 14 — Thymeleaf 변수화 버전 (monthly-static.html 디자인 그대로, 더미값만 ${...} 교체)
@@ -47,7 +47,7 @@
       margin: 18mm 16mm 20mm 16mm;
       @bottom-right {
         content: "Ballife  ·  page " counter(page) " / " counter(pages);
-        font-family: 'Noto Sans KR', sans-serif;
+        font-family: 'Noto Sans KR', 'Noto Sans SC', sans-serif;
         font-size: 8.5pt;
         color: #94a3b8;
       }
@@ -56,7 +56,7 @@
     * { box-sizing: border-box; }
 
     body {
-      font-family: 'Noto Sans KR', sans-serif;
+      font-family: 'Noto Sans KR', 'Noto Sans JP', 'Noto Sans SC', sans-serif;
       font-size: 10.5pt;
       color: #334155;
       line-height: 1.5;
@@ -374,7 +374,7 @@
     .footer-disclaimer strong { color: #64748b; font-weight: 600; }
   </style>
 </head>
-<body>
+<body th:style="${fontFamily} != null ? 'font-family: ' + ${fontFamily} + ';' : null">
   <div class="page">
 
     <!-- ============ 헤더 ============ -->
@@ -383,16 +383,16 @@
         <tr>
           <td>
             <div class="brand-eyebrow">BALLIFE HEALTH REPORT</div>
-            <h1 class="report-title">월간 건강 보고서</h1>
+            <h1 class="report-title" th:text="#{report.title}">월간 건강 보고서</h1>
           </td>
           <td class="report-meta">
             <div>
-              <span class="meta-key">분석 기간 </span>
+              <span class="meta-key" th:text="#{report.meta.period}">분석 기간 </span>
               <span class="meta-val" th:text="|${period.startDate} – ${period.endDate}|">2026-05-03 – 2026-06-01</span>
-              <span class="meta-key"> (<span th:text="${recordingStats.periodDays}">30</span>일)</span>
+              <span class="meta-key"> (<span th:text="${recordingStats.periodDays}">30</span><span th:text="#{report.meta.daysUnit}">일</span>)</span>
             </div>
             <div>
-              <span class="meta-key">생성일 </span>
+              <span class="meta-key" th:text="#{report.meta.generatedAt}">생성일 </span>
               <span class="meta-val" th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">2026-06-01</span>
             </div>
           </td>
@@ -415,7 +415,7 @@
                 <span th:each="d : ${user.diseases}" class="disease-tag"
                       th:text="${d.subtypeLabel != null ? d.label + ' · ' + d.subtypeLabel : d.label}">고혈압 · 1기</span>
               </th:block>
-              <span th:if="${#lists.isEmpty(user.diseases)}" class="disease-tag disease-tag-empty">신고된 질환 없음</span>
+              <span th:if="${#lists.isEmpty(user.diseases)}" class="disease-tag disease-tag-empty" th:text="#{report.user.noDiseases}">신고된 질환 없음</span>
             </td>
           </tr>
         </table>
@@ -424,13 +424,13 @@
           <table>
             <tr>
               <td>
-                <div class="vital-label">신장</div>
+                <div class="vital-label" th:text="#{report.user.height}">신장</div>
                 <div class="vital-value">
                   <span th:if="${user.height != null}" th:text="${user.height}">170</span><span th:if="${user.height == null}">—</span><span class="vu">cm</span>
                 </div>
               </td>
               <td>
-                <div class="vital-label">체중</div>
+                <div class="vital-label" th:text="#{report.user.weight}">체중</div>
                 <div class="vital-value">
                   <span th:if="${user.weight != null}" th:text="${user.weight}">75</span><span th:if="${user.weight == null}">—</span><span class="vu">kg</span>
                 </div>
@@ -452,27 +452,27 @@
       <div class="section-head">
         <table>
           <tr>
-            <td><h2 class="section-title"><span class="marker"></span>혈압</h2></td>
+            <td><h2 class="section-title"><span class="marker"></span><span th:text="#{report.section.bloodPressure}">혈압</span></h2></td>
             <td class="section-unit">mmHg</td>
           </tr>
         </table>
       </div>
       <div class="section-body">
-        <img th:if="${bpChart != null and bpChart != ''}" th:src="${bpChart}" alt="혈압 추이"
+        <img th:if="${bpChart != null and bpChart != ''}" th:src="${bpChart}" alt="혈압 추이" th:alt="#{report.chart.bloodPressure}"
              style="display:block; width:100%; height:auto; margin: 4px 0 12px 0;"/>
         <table class="data">
           <thead>
             <tr>
-              <th style="width: 24%;">항목</th>
-              <th class="num" style="width: 14%;">평균</th>
-              <th class="num" style="width: 14%;">최저</th>
-              <th class="num" style="width: 14%;">최고</th>
-              <th style="width: 34%; text-align: right;">상태</th>
+              <th style="width: 24%;" th:text="#{report.table.item}">항목</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.average}">평균</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.min}">최저</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.max}">최고</th>
+              <th style="width: 34%; text-align: right;" th:text="#{report.table.status}">상태</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td class="label-cell">수축기</td>
+              <td class="label-cell" th:text="#{report.table.systolic}">수축기</td>
               <td th:class="${bloodPressure.avgSystolic != null} ? 'num avg-cell' : 'na-cell'"
                   th:text="${bloodPressure.avgSystolic != null ? bloodPressure.avgSystolic : '—'}">128</td>
               <td th:class="${bloodPressure.minSystolic != null} ? 'min-cell' : 'na-cell'"
@@ -491,7 +491,7 @@
               </td>
             </tr>
             <tr>
-              <td class="label-cell">이완기</td>
+              <td class="label-cell" th:text="#{report.table.diastolic}">이완기</td>
               <td th:class="${bloodPressure.avgDiastolic != null} ? 'num avg-cell' : 'na-cell'"
                   th:text="${bloodPressure.avgDiastolic != null ? bloodPressure.avgDiastolic : '—'}">82</td>
               <td th:class="${bloodPressure.minDiastolic != null} ? 'min-cell' : 'na-cell'"
@@ -519,28 +519,28 @@
       <div class="section-head">
         <table>
           <tr>
-            <td><h2 class="section-title"><span class="marker"></span>혈당</h2></td>
+            <td><h2 class="section-title"><span class="marker"></span><span th:text="#{report.section.bloodSugar}">혈당</span></h2></td>
             <td class="section-unit">mg/dL</td>
           </tr>
         </table>
       </div>
       <div class="section-body">
-        <img th:if="${bsChart != null and bsChart != ''}" th:src="${bsChart}" alt="혈당 추이"
+        <img th:if="${bsChart != null and bsChart != ''}" th:src="${bsChart}" alt="혈당 추이" th:alt="#{report.chart.bloodSugar}"
              style="display:block; width:100%; height:auto; margin: 4px 0 12px 0;"/>
         <table class="data">
           <thead>
             <tr>
-              <th style="width: 24%;">항목</th>
-              <th class="num" style="width: 14%;">평균</th>
-              <th class="num" style="width: 14%;">최저</th>
-              <th class="num" style="width: 14%;">최고</th>
-              <th style="width: 34%; text-align: right;">상태</th>
+              <th style="width: 24%;" th:text="#{report.table.item}">항목</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.average}">평균</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.min}">최저</th>
+              <th class="num" style="width: 14%;" th:text="#{report.table.max}">최고</th>
+              <th style="width: 34%; text-align: right;" th:text="#{report.table.status}">상태</th>
             </tr>
           </thead>
           <tbody>
             <!-- 공복 -->
             <tr>
-              <td class="label-cell">공복</td>
+              <td class="label-cell" th:text="#{report.table.fasting}">공복</td>
               <td th:class="${bloodSugar.fastingValue != null} ? 'num avg-cell' : 'na-cell'"
                   th:text="${bloodSugar.fastingValue != null ? bloodSugar.fastingValue : '—'}">108</td>
               <td th:class="${bloodSugar.fastingMin != null} ? 'min-cell' : 'na-cell'"
@@ -560,7 +560,7 @@
             </tr>
             <!-- 식전 -->
             <tr>
-              <td class="label-cell">식전</td>
+              <td class="label-cell" th:text="#{report.table.preMeal}">식전</td>
               <td th:class="${bloodSugar.preMealValue != null} ? 'num avg-cell' : 'na-cell'"
                   th:text="${bloodSugar.preMealValue != null ? bloodSugar.preMealValue : '—'}">101</td>
               <td th:class="${bloodSugar.preMealMin != null} ? 'min-cell' : 'na-cell'"
@@ -580,7 +580,7 @@
             </tr>
             <!-- 식후 -->
             <tr>
-              <td class="label-cell">식후</td>
+              <td class="label-cell" th:text="#{report.table.postMeal}">식후</td>
               <td th:class="${bloodSugar.postMealValue != null} ? 'num avg-cell' : 'na-cell'"
                   th:text="${bloodSugar.postMealValue != null ? bloodSugar.postMealValue : '—'}">168</td>
               <td th:class="${bloodSugar.postMealMin != null} ? 'min-cell' : 'na-cell'"
@@ -608,8 +608,8 @@
       <div class="section-head">
         <table>
           <tr>
-            <td><h2 class="section-title"><span class="marker"></span>체중 · 복약</h2></td>
-            <td class="section-unit">최근 30일</td>
+            <td><h2 class="section-title"><span class="marker"></span><span th:text="#{report.section.weightMedication}">체중 · 복약</span></h2></td>
+            <td class="section-unit" th:text="#{report.section.unit.last30days}">최근 30일</td>
           </tr>
         </table>
       </div>
@@ -617,9 +617,9 @@
         <table class="data">
           <thead>
             <tr>
-              <th style="width: 40%;">항목</th>
-              <th class="num" style="width: 28%;">값</th>
-              <th style="width: 32%; text-align: right;">상태</th>
+              <th style="width: 40%;" th:text="#{report.table.item}">항목</th>
+              <th class="num" style="width: 28%;" th:text="#{report.table.value}">값</th>
+              <th style="width: 32%; text-align: right;" th:text="#{report.table.status}">상태</th>
             </tr>
           </thead>
           <tbody>
@@ -641,7 +641,7 @@
             </tr>
             <!-- 복약 이행률 -->
             <tr>
-              <td class="label-cell">복약 이행률</td>
+              <td class="label-cell" th:text="#{report.table.adherenceRate}">복약 이행률</td>
               <td th:class="${medication.scheduledCount != null} ? 'num avg-cell' : 'na-cell'">
                 <span th:if="${medication.scheduledCount != null}">
                   [[${medication.takenCount}]] / [[${medication.scheduledCount}]]<span class="au"> 회 · [[${medication.adherenceRate}]]%</span>
@@ -669,8 +669,8 @@
       <div class="section-head">
         <table>
           <tr>
-            <td><h2 class="section-title"><span class="marker"></span>측정 기록률</h2></td>
-            <td class="section-unit">최근 30일</td>
+            <td><h2 class="section-title"><span class="marker"></span><span th:text="#{report.section.recordingRate}">측정 기록률</span></h2></td>
+            <td class="section-unit" th:text="#{report.section.unit.last30days}">최근 30일</td>
           </tr>
         </table>
       </div>
@@ -678,18 +678,18 @@
         <table class="data">
           <thead>
             <tr>
-              <th style="width: 14%;">항목</th>
-              <th class="num" style="width: 24%; padding-right: 24px;">기록 일수</th>
-              <th style="width: 44%;">달성도</th>
-              <th class="num" style="width: 18%;">비율</th>
+              <th style="width: 14%;" th:text="#{report.table.item}">항목</th>
+              <th class="num" style="width: 24%; padding-right: 24px;" th:text="#{report.table.recordedDays}">기록 일수</th>
+              <th style="width: 44%;" th:text="#{report.table.achievement}">달성도</th>
+              <th class="num" style="width: 18%;" th:text="#{report.table.ratio}">비율</th>
             </tr>
           </thead>
           <tbody>
             <!-- 혈압 -->
             <tr>
-              <td class="label-cell">혈압</td>
+              <td class="label-cell" th:text="#{report.table.bloodPressure}">혈압</td>
               <td class="num" style="padding-right: 24px;">
-                <span th:text="${recordingStats.bloodPressureDays ?: 0}">23</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+                <span th:text="${recordingStats.bloodPressureDays ?: 0}">23</span> / <span th:text="${recordingStats.periodDays}">30</span> <span th:text="#{report.table.daysUnit}">일</span>
               </td>
               <td>
                 <table class="gauge-track">
@@ -703,9 +703,9 @@
             </tr>
             <!-- 혈당 -->
             <tr>
-              <td class="label-cell">혈당</td>
+              <td class="label-cell" th:text="#{report.table.bloodSugar}">혈당</td>
               <td class="num" style="padding-right: 24px;">
-                <span th:text="${recordingStats.bloodSugarDays ?: 0}">28</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+                <span th:text="${recordingStats.bloodSugarDays ?: 0}">28</span> / <span th:text="${recordingStats.periodDays}">30</span> <span th:text="#{report.table.daysUnit}">일</span>
               </td>
               <td>
                 <table class="gauge-track">
@@ -719,9 +719,9 @@
             </tr>
             <!-- 복약 -->
             <tr>
-              <td class="label-cell">복약</td>
+              <td class="label-cell" th:text="#{report.table.medication}">복약</td>
               <td class="num" style="padding-right: 24px;">
-                <span th:text="${recordingStats.medicationDays ?: 0}">25</span> / <span th:text="${recordingStats.periodDays}">30</span> 일
+                <span th:text="${recordingStats.medicationDays ?: 0}">25</span> / <span th:text="${recordingStats.periodDays}">30</span> <span th:text="#{report.table.daysUnit}">일</span>
               </td>
               <td>
                 <table class="gauge-track">
@@ -743,8 +743,8 @@
       <div class="section-head">
         <table>
           <tr>
-            <td><h2 class="section-title"><span class="marker"></span>다음 진료 시 질문</h2></td>
-            <td class="section-unit">AI 추천</td>
+            <td><h2 class="section-title"><span class="marker"></span><span th:text="#{report.section.questions}">다음 진료 시 질문</span></h2></td>
+            <td class="section-unit" th:text="#{report.section.unit.aiRecommended}">AI 추천</td>
           </tr>
         </table>
       </div>
@@ -752,7 +752,7 @@
         <ol class="question-list" th:if="${!questions.empty}">
           <li th:each="q : ${questions}" th:text="${q}">샘플 질문</li>
         </ol>
-        <div th:if="${questions.empty}" class="placeholder">
+        <div th:if="${questions.empty}" class="placeholder" th:text="#{report.questions.emptyPlaceholder}">
           이번 기간 측정값이 전반적으로 안정적입니다. 정기 진료 시 평소 궁금했던 점을 상담해 보세요.
         </div>
       </div>
@@ -760,8 +760,8 @@
 
     <!-- ============ 면책 푸터 ============ -->
     <div class="footer-disclaimer">
-      <strong>안내</strong>  본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며, 의학적 진단을 대체하지 않습니다.
-      측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다. 수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.
+      <strong th:text="#{report.footer.notice}">안내</strong>  <span th:text="#{report.footer.disclaimer}">본 보고서는 사용자가 입력한 측정값과 자기 신고 질환 정보를 바탕으로 자동 생성된 참고 자료이며, 의학적 진단을 대체하지 않습니다.
+      측정값에 이상이 보이거나 증상이 있는 경우 반드시 의료진과 상의하시기 바랍니다. 수치 판정은 측정 시점 · 측정 조건 · 개인차에 따라 달라질 수 있습니다.</span>
     </div>
 
   </div>

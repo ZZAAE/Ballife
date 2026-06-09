@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import com.prologue.ballife.support.TestMessages;
+
 /**
  * 혈당 분석기(BloodSugarAnalyzer) 단위 테스트.
  *
@@ -19,7 +21,7 @@ import java.util.List;
  */
 class BloodSugarAnalyzerTest {
 
-    private final BloodSugarAnalyzer analyzer = new BloodSugarAnalyzer();
+    private final BloodSugarAnalyzer analyzer = new BloodSugarAnalyzer(TestMessages.resolver());
 
     // ============================================================
     //  A. 빈/null 입력 처리

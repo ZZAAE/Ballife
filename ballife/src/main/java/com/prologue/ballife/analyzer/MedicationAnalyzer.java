@@ -1,5 +1,6 @@
 package com.prologue.ballife.analyzer;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.standard.MedicationStandard;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +9,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MedicationAnalyzer {
+
+    private final MessageResolver messages;
+
+    public MedicationAnalyzer(MessageResolver messages) {
+        this.messages = messages;
+    }
 
     /**
      * @param scheduledCount 예정 복약 수. 0 이하면 분석 불가 → 모든 필드 null
@@ -23,6 +30,6 @@ public class MedicationAnalyzer {
         MedicationStandard.Adherence ad = MedicationStandard.classify(rate);
 
         return new MedicationAnalysisResult(
-                scheduledCount, takenCount, rate, ad.status, ad.label);
+                scheduledCount, takenCount, rate, ad.status, messages.get(ad.code));
     }
 }

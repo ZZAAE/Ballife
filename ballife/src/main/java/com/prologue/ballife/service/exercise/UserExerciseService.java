@@ -12,6 +12,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.domain.exercise.UserExercise;
 import com.prologue.ballife.domain.exercise.UserExerciseDetail;
@@ -51,6 +52,7 @@ public class UserExerciseService {
     private final ExerciseTypeRepository exerciseTypeRepository;
     private final UserExerciseDetailService userExerciseDetailService;
     private final UserExerciseDetailRepository userExerciseDetailRepository;
+    private final MessageResolver messages;
 
     // 특정 날짜의 소모 칼로리 합산 (기록 없으면 0)
     @Transactional(readOnly = true)
@@ -139,7 +141,8 @@ public class UserExerciseService {
     public UserExerciseDto.Response createUserExercise(Long userId, UserExerciseDto.CreateRequest request) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("유저", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         ExerciseType exerciseType = resolveExerciseType(request.getExerciseTypeId());
 
@@ -179,7 +182,8 @@ public class UserExerciseService {
     public UserExerciseDto.Response updateUserExercise(Long userExerciseId, UserExerciseDto.UpdateRequest request) {
 
         UserExercise userExercise = userExerciseRepository.findById(userExerciseId)
-                .orElseThrow(() -> new ResourceNotFoundException("운동 기록", userExerciseId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.exercise"), userExerciseId)));
 
         ExerciseType exerciseType = resolveExerciseType(request.getExerciseTypeId());
 
@@ -223,7 +227,8 @@ public class UserExerciseService {
     public void deleteUserExercise(Long userExerciseId) {
 
         UserExercise userExercise = userExerciseRepository.findById(userExerciseId)
-                .orElseThrow(() -> new ResourceNotFoundException("운동 기록", userExerciseId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.exercise"), userExerciseId)));
 
         // MongoDB 상세 먼저 정리한 뒤 MySQL 본행을 실제 삭제
         userExerciseDetailService.deleteByUserExerciseId(userExerciseId);
@@ -342,20 +347,23 @@ public class UserExerciseService {
 
     private ExerciseType resolveExerciseType(String exerciseTypeKey) {
         if (exerciseTypeKey == null || exerciseTypeKey.isBlank()) {
-            throw new ResourceNotFoundException("운동 종류", exerciseTypeKey);
+            throw new ResourceNotFoundException(
+                    messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeKey));
         }
 
         // 1) ObjectId(24자 hex) 로 보이면 _id 조회
         if (exerciseTypeKey.length() == 24 && exerciseTypeKey.chars().allMatch(c -> isHexDigit((char) c))) {
             return exerciseTypeRepository.findById(exerciseTypeKey)
-                    .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeKey));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeKey)));
         }
 
         // 2) 영문 별칭이면 한글 운동명으로 변환
         String resolvedName = EXERCISE_TYPE_ALIASES.getOrDefault(exerciseTypeKey, exerciseTypeKey);
 
         return exerciseTypeRepository.findByExerciseName(resolvedName)
-                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeKey));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeKey)));
     }
 
     private static boolean isHexDigit(char c) {

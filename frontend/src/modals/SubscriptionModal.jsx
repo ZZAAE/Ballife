@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Crown, Users, X } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -12,31 +13,31 @@ import { Check, Crown, Users, X } from "lucide-react";
 const PLANS = [
   {
     key: "INDIVIDUAL",
-    name: "개인 플랜",
+    nameKey: "subscriptionModal.plan.individual.name",
     price: 4900,
     icon: Crown,
     accent: "#3B82F6",
     bg: "#EFF6FF",
-    tagline: "나의 건강을 더 깊이",
+    taglineKey: "subscriptionModal.plan.individual.tagline",
     features: [
-      { label: "건강 리포트", ready: true },
-      { label: "혈당·혈압·체중 요약", ready: true },
+      { labelKey: "subscriptionModal.feature.healthReport", ready: true },
+      { labelKey: "subscriptionModal.feature.bioSummary", ready: true },
     ],
   },
   {
     key: "FAMILY",
-    name: "가족 플랜",
+    nameKey: "subscriptionModal.plan.family.name",
     price: 9900,
     icon: Users,
     accent: "#0F172A",
     bg: "#F1F5F9",
-    tagline: "가족과 함께 건강 관리",
+    taglineKey: "subscriptionModal.plan.family.tagline",
     features: [
-      { label: "건강 리포트", ready: true },
-      { label: "부모님 혈당/혈압 확인", ready: true },
-      { label: "가족 구성원 초대", ready: true },
-      { label: "복약 알림 공유", ready: true },
-      { label: "운동 현황 공유", ready: true },
+      { labelKey: "subscriptionModal.feature.healthReport", ready: true },
+      { labelKey: "subscriptionModal.feature.parentBio", ready: true },
+      { labelKey: "subscriptionModal.feature.inviteFamily", ready: true },
+      { labelKey: "subscriptionModal.feature.shareMedication", ready: true },
+      { labelKey: "subscriptionModal.feature.shareExercise", ready: true },
     ],
   },
 ];
@@ -50,6 +51,7 @@ export default function SubscriptionModal({
   onCancel,
   currentPlan = "NONE",
 }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(
     currentPlan === "INDIVIDUAL" ? "FAMILY" : "INDIVIDUAL",
   );
@@ -68,14 +70,15 @@ export default function SubscriptionModal({
 
   const hasSubscription = currentPlan && currentPlan !== "NONE";
   const isSamePlan = selected === currentPlan;
-  const selectedName = PLANS.find((p) => p.key === selected)?.name;
+  const selectedPlanNameKey = PLANS.find((p) => p.key === selected)?.nameKey;
+  const selectedName = selectedPlanNameKey ? t(selectedPlanNameKey) : "";
   const primaryLabel = submitting
-    ? "처리 중..."
+    ? t("subscriptionModal.button.processing")
     : hasSubscription
       ? isSamePlan
-        ? "현재 이용 중인 플랜"
-        : `${selectedName}(으)로 변경`
-      : `${selectedName} 결제하기`;
+        ? t("subscriptionModal.button.currentPlan")
+        : t("subscriptionModal.button.changeTo", { plan: selectedName })
+      : t("subscriptionModal.button.pay", { plan: selectedName });
 
   const handleSubmit = async () => {
     if (!onSubmit || submitting || isSamePlan) return;
@@ -92,12 +95,7 @@ export default function SubscriptionModal({
 
   const handleCancel = async () => {
     if (!onCancel || cancelling) return;
-    if (
-      !window.confirm(
-        "구독을 해지하시겠어요?\n가족 플랜이라면 가족 건강 공유도 중단됩니다.",
-      )
-    )
-      return;
+    if (!window.confirm(t("subscriptionModal.confirm.cancel"))) return;
     setCancelling(true);
     try {
       await onCancel();
@@ -120,10 +118,10 @@ export default function SubscriptionModal({
             </div>
             <div>
               <h2 className="text-[18px] font-bold text-[#0F172A]">
-                가족 건강 관리 구독
+                {t("subscriptionModal.title")}
               </h2>
               <p className="text-[12px] text-[#64748B] mt-0.5">
-                플랜을 선택하고 시작하세요.
+                {t("subscriptionModal.subtitle")}
               </p>
             </div>
           </div>
@@ -131,7 +129,7 @@ export default function SubscriptionModal({
             type="button"
             onClick={onClose}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-            aria-label="닫기"
+            aria-label={t("subscriptionModal.close")}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -164,16 +162,16 @@ export default function SubscriptionModal({
                     </div>
                     {isCurrent && (
                       <span className="rounded-full bg-[#ECFDF5] px-2 py-0.5 text-[11px] font-semibold text-[#10B981]">
-                        현재 플랜
+                        {t("subscriptionModal.currentPlanBadge")}
                       </span>
                     )}
                   </div>
 
                   <p className="mt-4 text-[15px] font-bold text-[#0F172A]">
-                    {plan.name}
+                    {t(plan.nameKey)}
                   </p>
                   <p className="text-[11px] text-[#94A3B8] mt-0.5">
-                    {plan.tagline}
+                    {t(plan.taglineKey)}
                   </p>
 
                   <div className="mt-3 flex items-end gap-1">
@@ -181,14 +179,14 @@ export default function SubscriptionModal({
                       {won(plan.price)}
                     </span>
                     <span className="pb-1.5 text-[12px] text-[#64748B]">
-                      / 월
+                      {t("subscriptionModal.perMonth")}
                     </span>
                   </div>
 
                   <ul className="mt-4 space-y-2">
                     {plan.features.map((f) => (
                       <li
-                        key={f.label}
+                        key={f.labelKey}
                         className="flex items-center gap-2 text-[12.5px]"
                       >
                         <Check
@@ -200,11 +198,11 @@ export default function SubscriptionModal({
                             f.ready ? "text-[#475569]" : "text-[#94A3B8]"
                           }
                         >
-                          {f.label}
+                          {t(f.labelKey)}
                         </span>
                         {!f.ready && (
                           <span className="rounded-full bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-semibold text-[#94A3B8]">
-                            다음 단계
+                            {t("subscriptionModal.nextStep")}
                           </span>
                         )}
                       </li>
@@ -226,7 +224,9 @@ export default function SubscriptionModal({
                 onClick={handleCancel}
                 className="text-[13px] font-semibold text-[#c24141] hover:underline disabled:opacity-50"
               >
-                {cancelling ? "해지 중..." : "구독 해지"}
+                {cancelling
+                  ? t("subscriptionModal.button.cancelling")
+                  : t("subscriptionModal.button.cancelSubscription")}
               </button>
             )}
           </div>
@@ -236,7 +236,7 @@ export default function SubscriptionModal({
               onClick={onClose}
               className="h-11 px-5 rounded-[12px] bg-white border border-[#E5E7EB] text-[#0F172A] text-[13px] font-medium hover:bg-gray-50 transition"
             >
-              취소
+              {t("subscriptionModal.button.close")}
             </button>
             <button
               type="button"

@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN_KEY } from "./api";
+import i18n from "../i18n";
 
 const EXERCISE_API_BASE =
   (typeof import.meta !== "undefined" &&
@@ -11,6 +12,7 @@ async function request(path, options = {}) {
   const response = await fetch(`${EXERCISE_API_BASE}${path}`, {
     headers: {
       "Content-Type": "application/json",
+      "Accept-Language": i18n.language || "ko",
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(options.headers || {}),
     },
@@ -18,7 +20,7 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    let message = "운동 기록 요청에 실패했습니다.";
+    let message = i18n.t("errors.exerciseRequestFailed");
     try {
       const data = await response.json();
       message = data?.message || message;

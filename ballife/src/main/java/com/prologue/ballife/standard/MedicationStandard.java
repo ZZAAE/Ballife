@@ -18,15 +18,17 @@ public final class MedicationStandard {
 
     /** 복약 이행률 구간 */
     public enum Adherence {
-        LOW    ("RISK",    "많이 부족 (59% 이하)"),
-        MID    ("CAUTION", "다소 부족 (60-79%)"),
-        GOOD   ("NORMAL",  "양호 (80% 이상)");
+        LOW    ("RISK",    "많이 부족 (59% 이하)", "analysis.med.low"),
+        MID    ("CAUTION", "다소 부족 (60-79%)",   "analysis.med.mid"),
+        GOOD   ("NORMAL",  "양호 (80% 이상)",      "analysis.med.good");
 
         public final String status;
         public final String label;
-        Adherence(String status, String label) {
+        public final String code;
+        Adherence(String status, String label, String code) {
             this.status = status;
             this.label = label;
+            this.code = code;
         }
     }
 

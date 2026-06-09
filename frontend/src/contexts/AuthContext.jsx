@@ -7,6 +7,7 @@ import {
   useRef,
 } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { ACCESS_TOKEN_KEY, USER_KEY } from "../api/api";
 
 /** axios baseURL 과 동일하게 맞출 것 (폴링 대상: GET /api/health) */
@@ -28,6 +29,7 @@ const AuthContext = createContext(null);
  * 백엔드 role 문자열은 ROLE_USER / ROLE_ADMIN.
  */
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null); //로그인 사요자 정보
   const [loading, setLoading] = useState(true); //복원 완료 여부
 
@@ -163,7 +165,7 @@ export const AuthProvider = ({ children }) => {
             } else if (known !== instanceId) {
               localStorage.removeItem(SERVER_INSTANCE_KEY);
               logoutRef.current();
-              toast.error("서버가 재시작되어 로그아웃되었습니다.");
+              toast.error(t("authContext.toast.serverRestarted"));
             }
           }
           return;
@@ -175,7 +177,7 @@ export const AuthProvider = ({ children }) => {
       //강제 로그아웃 (서버 다운 지속)
       if (fails >= HEALTH_FAIL_LOGOUT) {
         logoutRef.current();
-        toast.error("서버에 연결할 수 없어 로그아웃되었습니다.");
+        toast.error(t("authContext.toast.serverUnreachable"));
       }
     };
     const id = setInterval(check, SERVER_HEALTH_MS); //주기적 실행

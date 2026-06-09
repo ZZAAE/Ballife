@@ -20,13 +20,13 @@ public class UserMedicineRecordDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
-        @NotNull(message = "기록할 약/영양제를 선택해주세요")
+        @NotNull(message = "{validation.userMedicineRecord.precriptionId.required}")
         private Long precriptionId;
 
-        @NotNull(message = "복용 날짜를 입력해주세요")
+        @NotNull(message = "{validation.userMedicineRecord.intakeDate.required}")
         private LocalDate intakeDate;
 
-        @NotNull(message = "복용 시간을 입력해주세요")
+        @NotNull(message = "{validation.userMedicineRecord.intakeTime.required}")
         private LocalTime intakeTime;
 
         private Long supplementId;
@@ -39,14 +39,14 @@ public class UserMedicineRecordDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest {
-        
-        @NotNull(message = "기록할 약/영양제를 선택해주세요")
+
+        @NotNull(message = "{validation.userMedicineRecord.precriptionId.required}")
         private Long precriptionId;
 
-        @NotNull(message = "복용 날짜를 입력해주세요")
+        @NotNull(message = "{validation.userMedicineRecord.intakeDate.required}")
         private LocalDate intakeDate;
 
-        @NotNull(message = "복용 시간을 입력해주세요")
+        @NotNull(message = "{validation.userMedicineRecord.intakeTime.required}")
         private LocalTime intakeTime;
 
         private Long supplementId;

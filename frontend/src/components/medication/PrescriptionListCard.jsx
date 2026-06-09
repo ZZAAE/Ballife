@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 const PAGE_SIZE = 3;
@@ -7,6 +8,7 @@ export default function PrescriptionListCard({
   prescriptions = [],
   onSelectGroup,
 }) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(prescriptions.length / PAGE_SIZE));
@@ -21,18 +23,18 @@ export default function PrescriptionListCard({
     <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
       <div className="px-4 md:px-8 pt-7 pb-5">
         <h2 className="text-[18px] sm:text-[20px] font-bold text-gray-900">
-          나의 처방 약 목록
+          {t("prescriptionListCard.title")}
         </h2>
       </div>
 
       <div className="bg-[#EAF3FF] border-y border-[#D6E6FF]">
         <div className="grid grid-cols-3 items-center py-4">
-          <div className="pl-4 md:pl-10 text-[14px] font-semibold text-gray-600">약 그룹</div>
+          <div className="pl-4 md:pl-10 text-[14px] font-semibold text-gray-600">{t("prescriptionListCard.columnGroup")}</div>
           <div className="px-2 md:px-6 text-[14px] font-semibold text-gray-600 text-center">
-            복용량
+            {t("prescriptionListCard.columnDosage")}
           </div>
           <div className="pr-4 md:pr-10 text-[14px] font-semibold text-gray-600 text-right">
-            복용일정
+            {t("prescriptionListCard.columnSchedule")}
           </div>
         </div>
       </div>
@@ -40,7 +42,7 @@ export default function PrescriptionListCard({
       <div className="py-2">
         {prescriptions.length === 0 && (
           <div className="py-10 text-center text-[15px] text-gray-400">
-            처방된 약이 없습니다.
+            {t("prescriptionListCard.empty")}
           </div>
         )}
         {pageItems.map((item, index) => (
@@ -80,7 +82,7 @@ export default function PrescriptionListCard({
             onClick={() => setPage((p) => Math.max(0, Math.min(p, totalPages - 1) - 1))}
             disabled={safePage === 0}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
-            aria-label="이전 페이지"
+            aria-label={t("prescriptionListCard.prevPage")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -107,7 +109,7 @@ export default function PrescriptionListCard({
             }
             disabled={safePage === totalPages - 1}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
-            aria-label="다음 페이지"
+            aria-label={t("prescriptionListCard.nextPage")}
           >
             <ChevronRight className="h-4 w-4" />
           </button>

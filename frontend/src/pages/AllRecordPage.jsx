@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { useAuth } from "../contexts/AuthContext";
 import { USER_KEY } from "../api/api";
 import bioValueRecordApi from "../api/bioValueRecordApi";
@@ -38,13 +40,14 @@ import {
 } from "../components/record/RecordResultCards";
 
 function PlusButton({ size = 52, onClick }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
       style={{ width: size, height: size }}
-      aria-label="기록 추가"
+      aria-label={t("allRecordPage.addRecord")}
     >
       <img src={Plus} alt="" className="h-[20px] w-[20px] object-contain" />
     </button>
@@ -52,12 +55,13 @@ function PlusButton({ size = 52, onClick }) {
 }
 
 function AddRecordBar({ onClick }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex h-[36px] w-full items-center justify-center rounded-[10px] bg-[#F1F5F9] transition hover:bg-[#E2E8F0]"
-      aria-label="기록 추가"
+      aria-label={t("allRecordPage.addRecord")}
     >
       <img
         src={Plus}
@@ -69,6 +73,7 @@ function AddRecordBar({ onClick }) {
 }
 
 function EmptyRecordArea({ recordTitle, onAddClick }) {
+  const { t } = useTranslation();
   return (
     <>
       <PlusButton size={50} onClick={onAddClick} />
@@ -78,7 +83,7 @@ function EmptyRecordArea({ recordTitle, onAddClick }) {
       </p>
 
       <p className="mt-[9px] text-[12px] font-medium leading-none text-[#64748B]">
-        아직 기록되지 않았습니다.
+        {t("allRecordPage.notRecordedYet")}
       </p>
     </>
   );
@@ -187,6 +192,7 @@ function MealPlaceholderIcon() {
 }
 
 function MealBox({ title, onClick }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -201,7 +207,7 @@ function MealBox({ title, onClick }) {
         </p>
 
         <p className="mt-[10px] text-[12px] font-medium leading-none text-[#64748B]">
-          아직 기록되지 않았습니다.
+          {t("allRecordPage.notRecordedYet")}
         </p>
       </div>
     </button>
@@ -252,11 +258,11 @@ const mapWaterRecord = (r) => ({
   amount: (r.waterIntakeCup ?? 0) * 200,
 });
 
-const MEAL_CATEGORY_LABEL = {
-  BREAKFAST: "아침 식사",
-  LUNCH: "점심 식사",
-  DINNER: "저녁 식사",
-  SNACK: "간식",
+const MEAL_CATEGORY_LABEL_KEY = {
+  BREAKFAST: "allRecordPage.meal.breakfast",
+  LUNCH: "allRecordPage.meal.lunch",
+  DINNER: "allRecordPage.meal.dinner",
+  SNACK: "allRecordPage.meal.snack",
 };
 
 const MEAL_CATEGORY_SLOT = {
@@ -272,7 +278,9 @@ const mapMealToCard = (meal, items) => ({
     mealId: meal.mealId,
     category: meal.mealCategory,
     time: meal.mealTime ? String(meal.mealTime).slice(0, 5) : "",
-    label: MEAL_CATEGORY_LABEL[meal.mealCategory] ?? "식사",
+    label: MEAL_CATEGORY_LABEL_KEY[meal.mealCategory]
+      ? i18n.t(MEAL_CATEGORY_LABEL_KEY[meal.mealCategory])
+      : i18n.t("allRecordPage.meal.default"),
     image: meal.mealPhoto,
     items: (items ?? []).map((it) => ({
       name: it.foodName,
@@ -296,6 +304,7 @@ const EMPTY_MEAL_RECORDS = {
 };
 
 function AllRecordPage() {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateInputValue(new Date()),
   );
@@ -524,10 +533,14 @@ function AllRecordPage() {
       setStoredExerciseSessions(hydrateExerciseSessions(records));
     } catch (error) {
       console.error("[AllRecordPage] fetchExercisesForDate failed:", error);
-      toast.error(`운동 기록 조회 실패: ${error.message || error}`);
+      toast.error(
+        t("allRecordPage.toast.exerciseFetchFailed", {
+          error: error.message || error,
+        }),
+      );
       setStoredExerciseSessions([]);
     }
-  }, [userId, selectedDate]);
+  }, [userId, selectedDate, t]);
 
   useEffect(() => {
     // selectedDate / userId 가 바뀔 때마다 bio/식단 카테고리 페치
@@ -592,10 +605,10 @@ function AllRecordPage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
-                전체 기록 관리
+                {t("allRecordPage.title")}
               </h1>
               <p className="mt-2 text-sm text-[#64748B]">
-                오늘 하루의 건강 기록을 한눈에 확인하세요.
+                {t("allRecordPage.subtitle")}
               </p>
             </div>
 
@@ -631,13 +644,13 @@ function AllRecordPage() {
           <div className="grid w-full max-w-full grid-cols-1 gap-x-[30px] gap-y-[22px] xl:grid-cols-2">
             <LargeRecordCard
               icon={Bp}
-              title="혈압"
+              title={t("allRecordPage.bloodPressure")}
               subText={
                 bloodPressureRecords.length > 0
-                  ? "최근 기록 있음"
-                  : "최근 기록 없음"
+                  ? t("allRecordPage.hasRecentRecord")
+                  : t("allRecordPage.noRecentRecord")
               }
-              recordTitle="혈압 기록"
+              recordTitle={t("allRecordPage.bloodPressureRecord")}
               color="#FF3B5F"
               onAddClick={() => setModalType("bp")}
               hasRecords={bloodPressureRecords.length > 0}
@@ -661,13 +674,13 @@ function AllRecordPage() {
 
             <LargeRecordCard
               icon={Blood}
-              title="혈당"
+              title={t("allRecordPage.bloodSugar")}
               subText={
                 bloodSugarRecords.length > 0
-                  ? "최근 기록 있음"
-                  : "최근 기록 없음"
+                  ? t("allRecordPage.hasRecentRecord")
+                  : t("allRecordPage.noRecentRecord")
               }
-              recordTitle="혈당 기록"
+              recordTitle={t("allRecordPage.bloodSugarRecord")}
               color="#FF8A2A"
               onAddClick={() => setModalType("blood")}
               hasRecords={bloodSugarRecords.length > 0}
@@ -692,8 +705,8 @@ function AllRecordPage() {
             <div className="grid min-w-0 grid-cols-1 gap-[18px] md:grid-cols-2">
               <SmallRecordCard
                 icon={Weight}
-                title="체중"
-                recordTitle="체중 기록"
+                title={t("allRecordPage.weight")}
+                recordTitle={t("allRecordPage.weightRecord")}
                 color="#2E86FF"
                 onAddClick={() => setModalType("weight")}
                 hasRecords={weightRecords.length > 0}
@@ -713,8 +726,8 @@ function AllRecordPage() {
 
               <SmallRecordCard
                 icon={Water}
-                title="수분 섭취"
-                recordTitle="섭취 기록"
+                title={t("allRecordPage.waterIntake")}
+                recordTitle={t("allRecordPage.waterIntakeRecord")}
                 color="#55D7DF"
                 onAddClick={() => setModalType("water")}
                 hasRecords={waterRecords.length > 0}
@@ -735,13 +748,13 @@ function AllRecordPage() {
 
             <LargeRecordCard
               icon={Excercise}
-              title="활동량 요약"
+              title={t("allRecordPage.activitySummary")}
               subText={
                 exerciseRecords.length > 0
-                  ? "오늘의 활동 있음"
-                  : "오늘의 활동 없음"
+                  ? t("allRecordPage.hasTodayActivity")
+                  : t("allRecordPage.noTodayActivity")
               }
-              recordTitle="운동 기록"
+              recordTitle={t("allRecordPage.exerciseRecord")}
               color="#20D36B"
               onAddClick={() => setModalType("exercise")}
               hasRecords={exerciseRecords.length > 0}
@@ -774,13 +787,13 @@ function AllRecordPage() {
 
               <div>
                 <p className="text-[14px] font-extrabold leading-none text-[#0F172A]">
-                  오늘의 식단
+                  {t("allRecordPage.todayMeal")}
                 </p>
 
                 <p className="mt-[8px] text-[11px] font-medium leading-none text-[#94A3B8]">
                   {Object.values(mealRecords).some((slot) => slot != null)
-                    ? "최근 기록 있음"
-                    : "식단 기록 대기 중"}
+                    ? t("allRecordPage.hasRecentRecord")
+                    : t("allRecordPage.mealWaiting")}
                 </p>
               </div>
             </div>
@@ -799,7 +812,7 @@ function AllRecordPage() {
                 />
               ) : (
                 <MealBox
-                  title="아침 식사"
+                  title={t("allRecordPage.meal.breakfast")}
                   onClick={() => handleEditMeal(null, "BREAKFAST")}
                 />
               )}
@@ -815,7 +828,7 @@ function AllRecordPage() {
                 />
               ) : (
                 <MealBox
-                  title="점심 식사"
+                  title={t("allRecordPage.meal.lunch")}
                   onClick={() => handleEditMeal(null, "LUNCH")}
                 />
               )}
@@ -831,7 +844,7 @@ function AllRecordPage() {
                 />
               ) : (
                 <MealBox
-                  title="저녁 식사"
+                  title={t("allRecordPage.meal.dinner")}
                   onClick={() => handleEditMeal(null, "DINNER")}
                 />
               )}
@@ -847,7 +860,7 @@ function AllRecordPage() {
                 />
               ) : (
                 <MealBox
-                  title="간식"
+                  title={t("allRecordPage.meal.snack")}
                   onClick={() => handleEditMeal(null, "SNACK")}
                 />
               )}

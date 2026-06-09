@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { Clock, Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -10,7 +11,7 @@ import {
 import {
   CARDIO_OPTIONS,
   STRENGTH_OPTIONS,
-  STAIR_INTENSITY_HINT,
+  getStairIntensityHint,
   aerobicMet,
   anaerobicMetByVolume,
   anaerobicVolume,
@@ -55,6 +56,7 @@ const todayDateStr = () => {
 };
 
 function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("anaerobic");
   const [anaerobicRows, setAnaerobicRows] = useState([]);
@@ -164,7 +166,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
   const validateRows = () => {
     if (currentRows.length === 0) {
-      return "운동 항목을 하나 이상 추가해 주세요.";
+      return t("exerciseModal.validation.atLeastOne");
     }
 
     if (activeTab === "aerobic") {
@@ -172,7 +174,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
         (row) => parseDurationToSeconds(row.durationText) <= 0,
       );
       if (hasInvalidDuration) {
-        return "유산소 운동 시간은 13분30초 또는 13:30 형식으로 입력해 주세요.";
+        return t("exerciseModal.validation.aerobicDuration");
       }
       return null;
     }
@@ -181,14 +183,14 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
       (row) => !(Number(row.exerciseSet) > 0 && Number(row.exerciseReps) > 0),
     );
     if (hasInvalidStrength) {
-      return "무산소 운동은 세트와 횟수를 모두 입력해 주세요.";
+      return t("exerciseModal.validation.anaerobicSetReps");
     }
 
     const hasInvalidStrengthDuration = currentRows.some(
       (row) => parseDurationToSeconds(row.durationText) <= 0,
     );
     if (hasInvalidStrengthDuration) {
-      return "무산소 운동 시간은 13분30초 또는 13:30 형식으로 입력해 주세요.";
+      return t("exerciseModal.validation.anaerobicDuration");
     }
 
     return null;
@@ -231,10 +233,10 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
   const handleDelete = async () => {
     if (!isEditMode || !editingRecord) return;
-    if (!window.confirm("이 운동 기록을 삭제할까요?")) return;
+    if (!window.confirm(t("exerciseModal.confirm.delete"))) return;
     const userId = resolveUserId(user);
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("exerciseModal.toast.loginRequired"));
       return;
     }
     const targetId = editingRecord.serverId ?? editingRecord.id;
@@ -245,10 +247,10 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
         new CustomEvent("exercise-records-updated", { detail: { userId } }),
       );
       onSaved?.();
-      toast.success("운동 기록이 삭제되었습니다.");
+      toast.success(t("exerciseModal.toast.deleted"));
       onClose();
     } catch (error) {
-      toast.error(error.message || "운동 기록 삭제에 실패했습니다.");
+      toast.error(error.message || t("exerciseModal.toast.deleteFailed"));
     } finally {
       setIsDeleting(false);
     }
@@ -257,7 +259,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
   const handleSubmit = async () => {
     const userId = resolveUserId(user);
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("exerciseModal.toast.loginRequired"));
       return;
     }
 
@@ -289,7 +291,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
           new CustomEvent("exercise-records-updated", { detail: { userId } }),
         );
         onSaved?.();
-        toast.success("운동 기록이 수정되었습니다.");
+        toast.success(t("exerciseModal.toast.updated"));
         onClose();
         return;
       }
@@ -310,14 +312,14 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
       );
 
       onSaved?.();
-      toast.success("운동 기록이 저장되었습니다.");
+      toast.success(t("exerciseModal.toast.saved"));
       onClose();
     } catch (error) {
       toast.error(
         error.message ||
           (isEditMode
-            ? "운동 기록 수정에 실패했습니다."
-            : "운동 기록 저장에 실패했습니다."),
+            ? t("exerciseModal.toast.updateFailed")
+            : t("exerciseModal.toast.saveFailed")),
       );
     } finally {
       setIsSaving(false);
@@ -342,19 +344,21 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                  {isEditMode ? "운동 기록 수정" : "운동 기록하기"}
+                  {isEditMode
+                    ? t("exerciseModal.title.edit")
+                    : t("exerciseModal.title.create")}
                 </h2>
                 <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
                   {isEditMode
-                    ? "선택한 운동 기록을 수정합니다."
-                    : "오늘의 노력을 정밀하게 기록하세요."}
+                    ? t("exerciseModal.subtitle.edit")
+                    : t("exerciseModal.subtitle.create")}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="닫기"
+                aria-label={t("exerciseModal.close")}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
               >
                 <X size={18} strokeWidth={2.2} />
@@ -374,7 +378,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                     : "text-[#64748B]"
                 } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
               >
-                무산소
+                {t("exerciseModal.tab.anaerobic")}
               </button>
 
               <button
@@ -386,7 +390,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                     : "text-[#64748B]"
                 } ${isEditMode ? "cursor-not-allowed opacity-60" : ""}`}
               >
-                유산소
+                {t("exerciseModal.tab.aerobic")}
               </button>
             </div>
           </div>
@@ -403,7 +407,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
               <div>
                 <p className="text-[11px] font-medium text-gray-500">
-                  예상 소모 칼로리
+                  {t("exerciseModal.expectedCalorie")}
                 </p>
                 <p className="text-xl font-bold text-gray-900">
                   {calculateExpectedCalorie()}
@@ -450,11 +454,11 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
             <div>
               <div className="mb-4 flex items-center justify-between">
                 <label className="text-xs font-medium text-gray-500">
-                  세트별 상세 기록
+                  {t("exerciseModal.setDetailLabel")}
                 </label>
 
                 <span className="rounded-md bg-blue-100 px-2 py-1 text-[10px] font-bold text-blue-600">
-                  기록 중
+                  {t("exerciseModal.recording")}
                 </span>
               </div>
 
@@ -469,7 +473,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                         <>
                           <div className="flex-[2] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              운동 종류
+                              {t("exerciseModal.field.exerciseType")}
                             </span>
                             <select
                               value={row.exerciseTypeId}
@@ -490,7 +494,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-1 space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              세트
+                              {t("exerciseModal.field.set")}
                             </span>
                             <select
                               value={row.exerciseSet}
@@ -511,7 +515,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[2] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              중량 (KG)
+                              {t("exerciseModal.field.weight")}
                             </span>
                             <input
                               type="number"
@@ -528,7 +532,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[2] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              횟수 (REPS)
+                              {t("exerciseModal.field.reps")}
                             </span>
                             <input
                               type="number"
@@ -545,11 +549,11 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[3] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              시간
+                              {t("exerciseModal.field.duration")}
                             </span>
                             <input
                               type="text"
-                              placeholder="13분30초"
+                              placeholder={t("exerciseModal.placeholder.duration")}
                               value={row.durationText}
                               onChange={(event) =>
                                 handleRowChange("anaerobic", row.id, {
@@ -564,7 +568,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                         <>
                           <div className="flex-[2] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              운동 종류
+                              {t("exerciseModal.field.exerciseType")}
                             </span>
                             <select
                               value={row.exerciseTypeId}
@@ -585,7 +589,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[3] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              킬로미터
+                              {t("exerciseModal.field.kilometer")}
                             </span>
                             <input
                               type="number"
@@ -603,11 +607,11 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[3] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              시간
+                              {t("exerciseModal.field.duration")}
                             </span>
                             <input
                               type="text"
-                              placeholder="13분30초"
+                              placeholder={t("exerciseModal.placeholder.duration")}
                               value={row.durationText}
                               onChange={(event) =>
                                 handleRowChange("aerobic", row.id, {
@@ -620,7 +624,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
 
                           <div className="flex-[2] space-y-1">
                             <span className="text-[10px] text-gray-400">
-                              강도
+                              {t("exerciseModal.field.intensity")}
                             </span>
                             <select
                               value={row.intensity}
@@ -631,9 +635,15 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                               }
                               className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm"
                             >
-                              <option value="낮음">낮음</option>
-                              <option value="보통">보통</option>
-                              <option value="높음">높음</option>
+                              <option value="낮음">
+                                {t("exerciseModal.intensity.low")}
+                              </option>
+                              <option value="보통">
+                                {t("exerciseModal.intensity.medium")}
+                              </option>
+                              <option value="높음">
+                                {t("exerciseModal.intensity.high")}
+                              </option>
                             </select>
                           </div>
                         </>
@@ -652,7 +662,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                     {activeTab === "aerobic" &&
                       row.exerciseTypeId === "stair" && (
                         <p className="mt-2 text-[11px] leading-relaxed text-gray-400">
-                          {STAIR_INTENSITY_HINT}
+                          {getStairIntensityHint()}
                         </p>
                       )}
                   </div>
@@ -666,7 +676,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-100 py-4 text-sm font-medium text-gray-500 transition-all hover:bg-gray-50"
                 >
                   <Plus size={18} />
-                  추가하기
+                  {t("exerciseModal.addItem")}
                 </button>
               )}
             </div>
@@ -683,7 +693,9 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                 disabled={isDeleting || isSaving}
                 className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isDeleting ? "삭제 중..." : "삭제"}
+                {isDeleting
+                  ? t("exerciseModal.button.deleting")
+                  : t("exerciseModal.button.delete")}
               </button>
               <button
                 type="button"
@@ -691,7 +703,9 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
                 disabled={isSaving || isDeleting || currentRows.length === 0}
                 className="flex-1 rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "저장 중..." : "수정 완료"}
+                {isSaving
+                  ? t("exerciseModal.button.saving")
+                  : t("exerciseModal.button.updateDone")}
               </button>
             </div>
           ) : (
@@ -702,8 +716,12 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) 
               className="w-full rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving
-                ? "저장 중..."
-                : `기록 저장 및 확인${currentRows.length > 0 ? ` (${currentRows.length})` : ""}`}
+                ? t("exerciseModal.button.saving")
+                : currentRows.length > 0
+                  ? t("exerciseModal.button.saveAndConfirmCount", {
+                      count: currentRows.length,
+                    })
+                  : t("exerciseModal.button.saveAndConfirm")}
             </button>
           )}
         </div>

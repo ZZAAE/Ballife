@@ -16,6 +16,12 @@ from collections import defaultdict
 from datetime import date
 
 from app.food_classifier import predict as predict_food, warmup as warmup_food_model
+from app.i18n import (
+    normalize_lang,
+    language_directive,
+    image_default_question,
+    no_reply,
+)
 
 load_dotenv()
 
@@ -167,6 +173,7 @@ class ChatRequest(BaseModel):
     date: str | None = (
         None  # 조회할 식단 날짜 (YYYY-MM-DD). 미지정 시 오늘 하루치만 조회
     )
+    lang: str = "ko"  # 응답 언어 ("ko"/"en"/"ja"/"zh-CN"). 미지정 시 ko
 
 
 class AnalyzeRequest(BaseModel):
@@ -174,6 +181,7 @@ class AnalyzeRequest(BaseModel):
     metric: str = ""  # "weight" | "bloodPressure" | "bloodSugar"
     data: dict = {}  # 페이지가 계산한 요약/추세 데이터
     token: str | None = None
+    lang: str = "ko"  # 응답 언어 ("ko"/"en"/"ja"/"zh-CN"). 미지정 시 ko
 
 
 def _safe_json(result):
@@ -411,6 +419,7 @@ def summarize_health_data(raw: dict, target_date: date) -> str:
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
+    lang = normalize_lang(req.lang)
     # 식단 조회 날짜: 요청에 date 가 있으면 그 날, 없으면 오늘 하루치
     target_date = _to_date(req.date) or date.today()
     raw = await fetch_user_health_data(req.userId, req.token, target_date)
@@ -418,10 +427,13 @@ async def chat(req: ChatRequest):
 
     history = conversation_histories[req.userId]
 
+    # 응답 언어 강제 지시를 시스템 프롬프트에 주입
+    system_prompt = SYSTEM_PROMPT + language_directive(lang)
+
     # 사용자가 텍스트 없이 이미지만 보낸 경우 기본 질문을 채움
     user_text = req.message.strip()
     if req.image and not user_text:
-        user_text = "이 사진을 분석해 주세요."
+        user_text = image_default_question(lang)
 
     if req.image:
         # 비전: 텍스트 + 이미지로 멀티모달 human 메시지 구성 후 LLM 직접 호출
@@ -434,17 +446,16 @@ async def chat(req: ChatRequest):
                 {"type": "image_url", "image_url": {"url": req.image}},
             ]
         )
-        messages = [SystemMessage(content=SYSTEM_PROMPT), *history, human_message]
-        response = await llm.ainvoke(messages)
-        result = response.content
+        messages = [SystemMessage(content=system_prompt), *history, human_message]
     else:
-        result = await chain.ainvoke(
-            {
-                "health_data": health_summary,
-                "history": history,
-                "message": user_text,
-            }
+        text_block = (
+            f"[사용자 건강 데이터 요약]\n{health_summary}\n\n[질문]\n{user_text}"
         )
+        messages = [SystemMessage(content=system_prompt), *history,
+                    HumanMessage(content=text_block)]
+
+    response = await llm.ainvoke(messages)
+    result = response.content or no_reply(lang)
 
     # LLM 문맥/표시용 기록에는 텍스트만 저장 (이미지는 재전송 비용 때문에 누적하지 않음)
     history_text = f"[사진] {user_text}" if req.image else user_text
@@ -482,6 +493,7 @@ async def analyze(req: AnalyzeRequest):
     if isinstance(trend, list) and len(trend) > 60:
         data["trend"] = trend[-60:]
 
+    lang = normalize_lang(req.lang)
     label = METRIC_LABELS.get(req.metric, req.metric or "건강 지표")
     text = (
         f"[분석 지표] {label}\n"
@@ -490,7 +502,7 @@ async def analyze(req: AnalyzeRequest):
 
     response = await llm.ainvoke(
         [
-            SystemMessage(content=ANALYSIS_PROMPT),
+            SystemMessage(content=ANALYSIS_PROMPT + language_directive(lang)),
             HumanMessage(content=text),
         ]
     )

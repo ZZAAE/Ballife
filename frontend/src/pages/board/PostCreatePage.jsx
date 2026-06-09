@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import postApi from "../../api/boardApi";
@@ -17,6 +18,7 @@ function createEmptyFormData() {
 
 function PostCreatePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   // 등록을 누르지 않고 나갔다 다시 들어오면 항상 빈 폼으로 시작한다 (임시저장/복원 없음)
@@ -25,21 +27,21 @@ function PostCreatePage() {
   // 비로그인 사용자는 작성 페이지 진입 차단
   useEffect(() => {
     if (!user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postCreatePage.toast.loginRequired"));
       navigate("/login", { replace: true });
     }
   }, [user?.userId, navigate]);
 
   const categories = [
-    { value: "", label: "게시판 선택" },
-    { value: "GENERAL", label: "자유게시판" },
-    { value: "HYPERLIPIDEMIA", label: "고지혈증" },
-    { value: "HYPERTENSION", label: "고혈압" },
-    { value: "OSTEOPOROSIS", label: "골다공증" },
-    { value: "DIABETES", label: "당뇨" },
-    { value: "OBESITY", label: "비만" },
-    { value: "GOUT", label: "통풍" },
-    { value: "QNA", label: "질문" },
+    { value: "", label: t("postCreatePage.category.placeholder") },
+    { value: "GENERAL", label: t("postCreatePage.category.general") },
+    { value: "HYPERLIPIDEMIA", label: t("postCreatePage.category.hyperlipidemia") },
+    { value: "HYPERTENSION", label: t("postCreatePage.category.hypertension") },
+    { value: "OSTEOPOROSIS", label: t("postCreatePage.category.osteoporosis") },
+    { value: "DIABETES", label: t("postCreatePage.category.diabetes") },
+    { value: "OBESITY", label: t("postCreatePage.category.obesity") },
+    { value: "GOUT", label: t("postCreatePage.category.gout") },
+    { value: "QNA", label: t("postCreatePage.category.qna") },
   ];
 
   const handleChange = (e) => {
@@ -58,35 +60,33 @@ function PostCreatePage() {
     e.preventDefault();
 
     if (!formData.category) {
-      toast.error("카테고리를 선택해주세요.");
+      toast.error(t("postCreatePage.toast.selectCategory"));
       return;
     }
 
     if (!formData.title.trim()) {
-      toast.error("제목을 입력해주세요.");
+      toast.error(t("postCreatePage.toast.enterTitle"));
       return;
     }
 
     if (isRichTextEmpty(formData.content)) {
-      toast.error("내용을 입력해주세요.");
+      toast.error(t("postCreatePage.toast.enterContent"));
       return;
     }
 
     if (!user?.userId) {
-      toast.error(
-        "로그인 정보에 id가 없습니다. 로그아웃 후 다시 로그인하세요.",
-      );
+      toast.error(t("postCreatePage.toast.missingLoginId"));
       return;
     }
 
     try {
       setLoading(true);
       const res = await postApi.createPost(user.userId, formData);
-      toast.success("등록되었습니다.");
+      toast.success(t("postCreatePage.toast.created"));
       navigate(`/posts/${res.data.id}`);
     } catch (error) {
       console.error("게시글 등록 실패:", error);
-      toast.error("게시글 등록 중 오류가 발생했습니다.");
+      toast.error(t("postCreatePage.toast.createFailed"));
     } finally {
       setLoading(false);
     }
@@ -98,10 +98,10 @@ function PostCreatePage() {
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-          게시판 글쓰기
+          {t("postCreatePage.title")}
         </h1>
         <p className="mb-8 text-sm text-gray-500">
-          건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
+          {t("postCreatePage.subtitle")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-7">
@@ -111,7 +111,7 @@ function PostCreatePage() {
                 htmlFor="category"
                 className="mb-2 block text-sm font-semibold text-gray-700"
               >
-                카테고리
+                {t("postCreatePage.label.category")}
               </label>
               <select
                 id="category"
@@ -139,7 +139,7 @@ function PostCreatePage() {
                 htmlFor="title"
                 className="mb-2 block text-sm font-semibold text-gray-700"
               >
-                제목
+                {t("postCreatePage.label.title")}
               </label>
               <input
                 id="title"
@@ -147,7 +147,7 @@ function PostCreatePage() {
                 type="text"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="포스트의 제목을 입력하세요"
+                placeholder={t("postCreatePage.placeholder.title")}
                 maxLength={120}
                 className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
               />
@@ -158,16 +158,16 @@ function PostCreatePage() {
                 htmlFor="content"
                 className="mb-2 block text-sm font-semibold text-gray-700"
               >
-                내용
+                {t("postCreatePage.label.content")}
               </label>
               <RichTextEditor
                 value={formData.content}
                 onChange={handleContentChange}
-                placeholder="내용을 입력하세요..."
+                placeholder={t("postCreatePage.placeholder.content")}
               />
               <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
                 <p className="mb-3 text-sm text-gray-400 lg:ml-6">
-                  툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
+                  {t("postCreatePage.imageHint")}
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <Button
@@ -176,14 +176,14 @@ function PostCreatePage() {
                     onClick={() => navigate(-1)}
                     className="rounded-[10px] border border-gray-200 !bg-white px-5 py-2.5 text-sm font-semibold !text-gray-700 shadow-sm transition hover:!bg-gray-50"
                   >
-                    나가기
+                    {t("postCreatePage.button.exit")}
                   </Button>
                   <Button
                     type="submit"
                     disabled={loading}
                     className="rounded-[10px] !bg-[#0F172A] px-6 py-2.5 text-sm font-semibold text-white transition hover:!bg-[#1E293B]"
                   >
-                    {loading ? "등록 중..." : "등록"}
+                    {loading ? t("postCreatePage.button.submitting") : t("postCreatePage.button.submit")}
                   </Button>
                 </div>
               </div>

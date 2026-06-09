@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * 재사용 가능한 입력 필드 컴포넌트
@@ -20,6 +21,7 @@ const Input = forwardRef(({
     className = '', //추가 css 코드
     ...props //그 외 나머지(onClick, ,disabled, onChange등등)
 },ref) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full">
       {/* 라벨: && label prop이 있을때만 렌더링 */}
@@ -40,10 +42,10 @@ const Input = forwardRef(({
 
         {/* 입력 필드 */}
         <select {...props}>
-              <option value="">-- 선택 --</option>
-              <option value="1">진행 전</option>
-              <option value="2">진행 중</option>
-              <option value="3">완료</option>
+              <option value="">{t('inputSelectBox.option.placeholder')}</option>
+              <option value="1">{t('inputSelectBox.option.beforeStart')}</option>
+              <option value="2">{t('inputSelectBox.option.inProgress')}</option>
+              <option value="3">{t('inputSelectBox.option.completed')}</option>
             </select>
       </div>
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Trash2, Upload, X } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -58,14 +59,17 @@ export default function PrescriptionRegisterModal({
   open,
   onClose,
   onSaved,
-  title = "아침 복약",
+  title,
   submitUrl = "/api/prescriptions",
 }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState(null);
   const [groupName, setGroupName] = useState("혈압약");
   const [memo, setMemo] = useState("");
   const [medicines, setMedicines] = useState(initialMedicines);
   const [submitting, setSubmitting] = useState(false);
+
+  const headerTitle = title ?? t("prescriptionRegisterModal.defaultTitle");
 
   if (!open) return null;
 
@@ -93,7 +97,7 @@ export default function PrescriptionRegisterModal({
 
   const handleSubmit = async () => {
     if (!groupName.trim()) {
-      alert("처방 그룹 이름을 입력해주세요.");
+      alert(t("prescriptionRegisterModal.alert.groupNameRequired"));
       return;
     }
 
@@ -118,7 +122,7 @@ export default function PrescriptionRegisterModal({
       onClose?.();
     } catch (err) {
       console.error("처방전 저장 실패:", err);
-      alert("저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      alert(t("prescriptionRegisterModal.alert.saveFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -145,13 +149,13 @@ export default function PrescriptionRegisterModal({
                 <path d="M12 9v6M9 12h6" />
               </svg>
             </span>
-            <h2 className="text-[17px] font-semibold text-gray-800">{title}</h2>
+            <h2 className="text-[17px] font-semibold text-gray-800">{headerTitle}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-            aria-label="닫기"
+            aria-label={t("prescriptionRegisterModal.close")}
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -161,14 +165,14 @@ export default function PrescriptionRegisterModal({
         <div className="px-7 pb-6 overflow-y-auto flex-1 space-y-5">
           {/* 약 처방 스캔 */}
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">약 처방 스캔</label>
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">{t("prescriptionRegisterModal.scanLabel")}</label>
             <div className="flex items-stretch gap-2">
               <div className="flex-1 h-11 px-4 rounded-xl bg-gray-100 flex items-center text-[13px] text-gray-500 truncate">
-                {file ? file.name : <span className="text-gray-400">파일 첨부</span>}
+                {file ? file.name : <span className="text-gray-400">{t("prescriptionRegisterModal.filePlaceholder")}</span>}
               </div>
               <label className="h-11 px-5 rounded-xl border border-[#2563EB]/30 text-[#2563EB] text-[13px] font-medium flex items-center gap-1.5 cursor-pointer hover:bg-blue-50 transition shrink-0">
                 <Upload className="w-3.5 h-3.5" />
-                업로드
+                {t("prescriptionRegisterModal.upload")}
                 <input
                   type="file"
                   accept="image/*,.pdf"
@@ -181,44 +185,44 @@ export default function PrescriptionRegisterModal({
 
           {/* 처방 그룹 이름 */}
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">처방 그룹 이름</label>
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">{t("prescriptionRegisterModal.groupNameLabel")}</label>
             <input
               type="text"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              placeholder="예: 혈압약"
+              placeholder={t("prescriptionRegisterModal.groupNamePlaceholder")}
               className="w-full h-11 px-4 rounded-xl bg-gray-100 text-[14px] font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition"
             />
           </div>
 
           {/* 메모 */}
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">메모</label>
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">{t("prescriptionRegisterModal.memoLabel")}</label>
             <input
               type="text"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              placeholder="메모 입력..."
+              placeholder={t("prescriptionRegisterModal.memoPlaceholder")}
               className="w-full h-11 px-4 rounded-xl bg-gray-100 text-[14px] text-gray-700 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition"
             />
           </div>
 
           {/* 복약 상세 정보 */}
           <div>
-            <label className="block text-[13px] font-medium text-gray-700 mb-2">복약 상세 정보</label>
+            <label className="block text-[13px] font-medium text-gray-700 mb-2">{t("prescriptionRegisterModal.detailLabel")}</label>
             <div className="rounded-xl border border-gray-100 overflow-hidden">
               {/* 테이블 헤더 */}
               <div className="grid grid-cols-[1fr_110px_40px] gap-3 px-4 py-2.5 text-[11px] font-medium text-gray-400 bg-gray-50 border-b border-gray-100">
-                <span>이름</span>
-                <span className="text-right">용량 (MG/PILL)</span>
-                <span className="text-center">관리</span>
+                <span>{t("prescriptionRegisterModal.column.name")}</span>
+                <span className="text-right">{t("prescriptionRegisterModal.column.dosage")}</span>
+                <span className="text-center">{t("prescriptionRegisterModal.column.manage")}</span>
               </div>
 
               {/* 약품 행 */}
               <div className="bg-white">
                 {medicines.length === 0 && (
                   <div className="px-4 py-8 text-center text-[13px] text-gray-400">
-                    아직 등록된 약품이 없습니다.
+                    {t("prescriptionRegisterModal.emptyList")}
                   </div>
                 )}
 
@@ -236,7 +240,7 @@ export default function PrescriptionRegisterModal({
                           type="text"
                           value={medicine.name}
                           onChange={(e) => handleMedicineChange(medicine.id, "name", e.target.value)}
-                          placeholder="약 이름"
+                          placeholder={t("prescriptionRegisterModal.medicineNamePlaceholder")}
                           className="block w-full text-[14px] font-semibold text-gray-800 bg-transparent outline-none placeholder:font-normal placeholder:text-gray-300"
                         />
                         <input
@@ -245,7 +249,7 @@ export default function PrescriptionRegisterModal({
                           onChange={(e) =>
                             handleMedicineChange(medicine.id, "category", e.target.value)
                           }
-                          placeholder="분류"
+                          placeholder={t("prescriptionRegisterModal.categoryPlaceholder")}
                           className="block w-full text-[11px] text-gray-400 bg-transparent outline-none placeholder:text-gray-300"
                         />
                       </div>
@@ -263,7 +267,7 @@ export default function PrescriptionRegisterModal({
                       type="button"
                       onClick={() => handleDelete(medicine.id)}
                       className="justify-self-center text-red-400 hover:text-red-500 transition"
-                      aria-label="행 삭제"
+                      aria-label={t("prescriptionRegisterModal.deleteRow")}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -277,7 +281,7 @@ export default function PrescriptionRegisterModal({
                   className="w-full py-3 flex items-center justify-center gap-1.5 text-[13px] text-[#2563EB] hover:bg-blue-50/50 transition border-t border-gray-100"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  행 추가하기
+                  {t("prescriptionRegisterModal.addRow")}
                 </button>
               </div>
             </div>
@@ -292,7 +296,7 @@ export default function PrescriptionRegisterModal({
             onClick={handleSubmit}
             className="h-10 px-6 rounded-xl bg-gray-900 text-white text-[13px] font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "저장 중..." : "저장하기"}
+            {submitting ? t("prescriptionRegisterModal.submitting") : t("prescriptionRegisterModal.submit")}
           </button>
         </div>
       </div>

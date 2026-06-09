@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import MedicationProgressCard from "../components/medication/MedicationProgressCard";
 import MedicationRecordCard from "../components/medication/MedicationRecordCard";
@@ -85,6 +86,7 @@ const loadSchedulesForDate = (dateKey, todayKey, groups) => {
 };
 
 export default function MedicationPage() {
+  const { t } = useTranslation();
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
   const [time, setTime] = useState(() => formatTimeNow());
@@ -105,7 +107,7 @@ export default function MedicationPage() {
 
   const handleSaveRecord = () => {
     if (!drugName.trim()) {
-      alert("약 이름을 입력해주세요.");
+      alert(t("medicationPage.alert.enterDrugName"));
       return;
     }
     const newRecord = {
@@ -361,11 +363,11 @@ export default function MedicationPage() {
         {/* 제목 영역 */}
         <section className="mb-8">
           <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-            약 복용 관리
+            {t("medicationPage.title")}
           </h1>
 
           <p className="mb-8 text-sm text-gray-500">
-            지난 복용 결과를 분석한 결과입니다.
+            {t("medicationPage.subtitle")}
           </p>
         </section>
 

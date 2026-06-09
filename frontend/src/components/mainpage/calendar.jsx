@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
 import { getExercisesInRange } from "../../api/exerciseApi";
 import { useAuth } from "../../contexts/AuthContext";
+import i18n from "../../i18n";
+import { formatDate, formatMonthDay, formatNumber } from "../../utils/format";
 
 const ML_PER_CUP = 200;
 const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
@@ -14,16 +17,16 @@ const toDateStr = (year, month, day) =>
 const sliceTime = (t) => (t ? String(t).slice(0, 5) : "");
 
 const MEAL_LABEL = {
-  BREAKFAST: "아침 식사",
-  LUNCH: "점심 식사",
-  DINNER: "저녁 식사",
-  SNACK: "간식",
+  BREAKFAST: () => i18n.t("mainCalendar.meal.breakfast"),
+  LUNCH: () => i18n.t("mainCalendar.meal.lunch"),
+  DINNER: () => i18n.t("mainCalendar.meal.dinner"),
+  SNACK: () => i18n.t("mainCalendar.meal.snack"),
 };
 
 const SCHEDULE_LABEL = {
-  morning: "아침 복약",
-  lunch: "점심 복약",
-  dinner: "저녁 복약",
+  morning: () => i18n.t("mainCalendar.medicationSlot.morning"),
+  lunch: () => i18n.t("mainCalendar.medicationSlot.lunch"),
+  dinner: () => i18n.t("mainCalendar.medicationSlot.dinner"),
 };
 
 const categoryDot = {
@@ -52,7 +55,7 @@ const buildBioItemsForDate = (records, dateStr) => {
           time,
           category: "혈당",
           color: "blue",
-          title: "혈당 체크",
+          title: i18n.t("mainCalendar.item.bloodSugarCheck"),
           value: String(r.bloodSugar),
           valueUnit: "mg/dL",
         };
@@ -67,7 +70,7 @@ const buildBioItemsForDate = (records, dateStr) => {
           time,
           category: "혈압",
           color: "purple",
-          title: "혈압 측정",
+          title: i18n.t("mainCalendar.item.bloodPressureCheck"),
           value: `${r.systolicBP}/${r.diastolicBP}`,
           valueUnit: "mmHg",
         };
@@ -78,7 +81,7 @@ const buildBioItemsForDate = (records, dateStr) => {
           time,
           category: "체중",
           color: "yellow",
-          title: "체중 측정",
+          title: i18n.t("mainCalendar.item.weightCheck"),
           value: `${r.weight}kg`,
         };
       }
@@ -89,7 +92,7 @@ const buildBioItemsForDate = (records, dateStr) => {
           time,
           category: "수분",
           color: "sky",
-          title: "수분 섭취",
+          title: i18n.t("mainCalendar.item.waterIntake"),
           value: `${ml}ml`,
         };
       }
@@ -110,8 +113,10 @@ const buildExerciseItemsForDate = (records, dateStr) => {
         time,
         category: "운동",
         color: "orange",
-        title: `운동 (${r.exerciseName ?? "운동"})`,
-        subtitle: minutes > 0 ? `${minutes}분` : undefined,
+        title: i18n.t("mainCalendar.item.exercise", {
+          name: r.exerciseName ?? i18n.t("mainCalendar.item.exerciseFallback"),
+        }),
+        subtitle: minutes > 0 ? i18n.t("mainCalendar.item.minutes", { count: minutes }) : undefined,
         value: r.burnedCalorie != null ? String(Math.round(r.burnedCalorie)) : undefined,
         valueUnit: r.burnedCalorie != null ? "kcal" : undefined,
       };
@@ -133,9 +138,9 @@ const buildMedicineItemsForDate = (dateStr) => {
         time: sliceTime(s.time) || "00:00",
         category: "복약",
         color: "green",
-        title: SCHEDULE_LABEL[s.id] || s.name || "복약",
+        title: SCHEDULE_LABEL[s.id]?.() || s.name || i18n.t("mainCalendar.item.medication"),
         subtitle: taken.map((d) => d.name).join(", "),
-        value: `${taken.length}건`,
+        value: i18n.t("mainCalendar.item.count", { count: taken.length }),
       });
     });
     return items;
@@ -159,8 +164,8 @@ const buildMealItemsForDate = (meals, mealItemsByMealId, dateStr) => {
         time: sliceTime(m.mealTime) || "00:00",
         category: "식단",
         color: "red",
-        title: MEAL_LABEL[m.mealCategory] ?? "식사",
-        value: totalKcal > 0 ? `${Math.round(totalKcal)} kcal` : undefined,
+        title: MEAL_LABEL[m.mealCategory]?.() ?? i18n.t("mainCalendar.item.meal"),
+        value: totalKcal > 0 ? `${formatNumber(Math.round(totalKcal))} kcal` : undefined,
       };
     });
 };
@@ -169,7 +174,16 @@ const sortByTime = (items) =>
   [...items].sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
 function Calendar() {
-  const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+  const { t } = useTranslation();
+  const weekdays = [
+    t("mainCalendar.weekdayShort.sun"),
+    t("mainCalendar.weekdayShort.mon"),
+    t("mainCalendar.weekdayShort.tue"),
+    t("mainCalendar.weekdayShort.wed"),
+    t("mainCalendar.weekdayShort.thu"),
+    t("mainCalendar.weekdayShort.fri"),
+    t("mainCalendar.weekdayShort.sat"),
+  ];
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id ?? null;
 
@@ -188,7 +202,7 @@ function Calendar() {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const monthTitle = `${year}년 ${month + 1}월`;
+  const monthTitle = formatDate(currentDate, { year: "numeric", month: "long" });
 
   const { daysInMonth, firstDayOfWeek, totalCells } = useMemo(() => {
     const firstDate = new Date(year, month, 1);
@@ -369,14 +383,22 @@ function Calendar() {
     if (!modalDate) return null;
     const dateStr = toDateStr(modalDate.year, modalDate.month, modalDate.day);
     const dateObj = new Date(modalDate.year, modalDate.month, modalDate.day);
-    const weekdayKor = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const weekdayKor = [
+      t("mainCalendar.weekdayLong.sun"),
+      t("mainCalendar.weekdayLong.mon"),
+      t("mainCalendar.weekdayLong.tue"),
+      t("mainCalendar.weekdayLong.wed"),
+      t("mainCalendar.weekdayLong.thu"),
+      t("mainCalendar.weekdayLong.fri"),
+      t("mainCalendar.weekdayLong.sat"),
+    ];
     const baseItems = baseItemsByDate[dateStr] || [];
     const mealItems = buildMealItemsForDate(modalMeals, modalMealItems, dateStr);
     const items = sortByTime([...baseItems, ...mealItems]);
     return {
-      month: `${modalDate.month + 1}월`,
+      month: t("mainCalendar.monthLabel", { month: modalDate.month + 1 }),
       day: weekdayKor[dateObj.getDay()],
-      date: `${modalDate.year}년 ${modalDate.month + 1}월 ${modalDate.day}일`,
+      date: formatDate(dateObj),
       items,
       loading: modalLoading,
     };
@@ -464,7 +486,7 @@ function Calendar() {
           <button
             type="button"
             onClick={() => moveMonth(-1)}
-            aria-label="이전 달"
+            aria-label={t("mainCalendar.aria.prevMonth")}
             className="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-md active:translate-y-0"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:-translate-x-0.5">
@@ -498,14 +520,14 @@ function Calendar() {
             {showMonthPicker && (
               <div
                 role="dialog"
-                aria-label="년/월 선택"
+                aria-label={t("mainCalendar.aria.yearMonthPicker")}
                 className="absolute left-1/2 top-full z-30 mt-2 w-[280px] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setPickerYear((y) => y - 1)}
-                    aria-label="이전 해"
+                    aria-label={t("mainCalendar.aria.prevYear")}
                     className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -513,12 +535,14 @@ function Calendar() {
                     </svg>
                   </button>
 
-                  <span className="text-sm font-bold text-slate-900">{pickerYear}년</span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {t("mainCalendar.yearLabel", { year: pickerYear })}
+                  </span>
 
                   <button
                     type="button"
                     onClick={() => setPickerYear((y) => y + 1)}
-                    aria-label="다음 해"
+                    aria-label={t("mainCalendar.aria.nextYear")}
                     className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -541,7 +565,7 @@ function Calendar() {
                             : "text-slate-700 hover:bg-slate-100"
                         }`}
                       >
-                        {m + 1}월
+                        {t("mainCalendar.monthLabel", { month: m + 1 })}
                       </button>
                     );
                   })}
@@ -553,7 +577,7 @@ function Calendar() {
           <button
             type="button"
             onClick={() => moveMonth(1)}
-            aria-label="다음 달"
+            aria-label={t("mainCalendar.aria.nextMonth")}
             className="group flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-md active:translate-y-0"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:translate-x-0.5">
@@ -587,14 +611,18 @@ function Calendar() {
           >
             <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-2">
               <p className="text-sm font-bold text-slate-900">
-                {currentDate.getMonth() + 1}월 {hoveredCell.day}일
+                {formatMonthDay(new Date(year, month, hoveredCell.day))}
               </p>
-              <span className="text-xs text-slate-400">{totalCount}건</span>
+              <span className="text-xs text-slate-400">
+                {t("mainCalendar.item.count", { count: totalCount })}
+              </span>
             </div>
 
             <div className="space-y-2">
               {previewItems.length === 0 ? (
-                <p className="py-2 text-center text-xs text-slate-400">기록 없음</p>
+                <p className="py-2 text-center text-xs text-slate-400">
+                  {t("mainCalendar.empty")}
+                </p>
               ) : (
                 previewItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
@@ -612,7 +640,9 @@ function Calendar() {
               )}
               {totalCount > previewItems.length && (
                 <p className="pt-1 text-[10px] text-slate-400">
-                  +{totalCount - previewItems.length}건 더 (클릭해서 보기)
+                  {t("mainCalendar.moreItems", {
+                    count: totalCount - previewItems.length,
+                  })}
                 </p>
               )}
             </div>

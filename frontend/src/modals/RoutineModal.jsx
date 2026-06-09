@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock, X, ChevronDown } from "lucide-react";
 
 const HOUR12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")); // "01" ~ "12"
@@ -32,6 +33,7 @@ const composeTime = (meridiem, hour12, minute) => {
 };
 
 function TimeSelect({ value, onChange }) {
+  const { t } = useTranslation();
   const { meridiem, hour12, minute } = parseTime(value);
 
   const selectClass =
@@ -45,13 +47,13 @@ function TimeSelect({ value, onChange }) {
           value={meridiem}
           onChange={(e) => onChange(composeTime(e.target.value, hour12, minute))}
           className={selectClass}
-          aria-label="오전/오후"
+          aria-label={t("routineModal.meridiemLabel")}
         >
           <option value="" disabled>
-            오전/오후
+            {t("routineModal.meridiemLabel")}
           </option>
-          <option value="AM">오전</option>
-          <option value="PM">오후</option>
+          <option value="AM">{t("routineModal.am")}</option>
+          <option value="PM">{t("routineModal.pm")}</option>
         </select>
         <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
@@ -61,14 +63,14 @@ function TimeSelect({ value, onChange }) {
           value={hour12}
           onChange={(e) => onChange(composeTime(meridiem, e.target.value, minute))}
           className={selectClass}
-          aria-label="시"
+          aria-label={t("routineModal.hourLabel")}
         >
           <option value="" disabled>
-            시
+            {t("routineModal.hourLabel")}
           </option>
           {HOUR12.map((h) => (
             <option key={h} value={h}>
-              {h}시
+              {t("routineModal.hourUnit", { value: h })}
             </option>
           ))}
         </select>
@@ -81,14 +83,14 @@ function TimeSelect({ value, onChange }) {
           value={minute}
           onChange={(e) => onChange(composeTime(meridiem, hour12, e.target.value))}
           className={selectClass}
-          aria-label="분"
+          aria-label={t("routineModal.minuteLabel")}
         >
           <option value="" disabled>
-            분
+            {t("routineModal.minuteLabel")}
           </option>
           {MINUTES.map((m) => (
             <option key={m} value={m}>
-              {m}분
+              {t("routineModal.minuteUnit", { value: m })}
             </option>
           ))}
         </select>
@@ -116,14 +118,32 @@ const DEFAULT_ROUTINE = [
   { label: "취침", time: "23:30" },
 ];
 
+// 루틴 라벨(식별·저장용 값) → i18n 표시 키.
+// label 값 자체는 React key / onChange 식별 / 백엔드 payload 에 그대로 쓰이므로 보존하고,
+// 화면 표시만 t()로 번역한다. (UserInformation 의 ROUTINE_LABEL_I18N_KEY 와 동일 매핑)
+const ROUTINE_LABEL_I18N_KEY = {
+  기상: "userInformation.routine.wakeup",
+  아침: "userInformation.routine.breakfast",
+  점심: "userInformation.routine.lunch",
+  저녁: "userInformation.routine.dinner",
+  취침: "userInformation.routine.bedtime",
+};
+
 export default function RoutineModal({
   open,
   onClose,
   onSubmit,
   onSaved,
   initialRoutine,
-  title = "하루 생활 루틴 수정",
+  title,
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("routineModal.title");
+
+  // 한글 라벨은 보존하고 표시만 번역 (매핑에 없으면 원본 라벨 그대로)
+  const routineLabel = (label) =>
+    ROUTINE_LABEL_I18N_KEY[label] ? t(ROUTINE_LABEL_I18N_KEY[label]) : label;
+
   const buildRoutine = (source) =>
     source && source.length > 0
       ? source.map((r) => ({
@@ -168,7 +188,7 @@ export default function RoutineModal({
       onClose?.();
     } catch (err) {
       console.error("루틴 저장 실패:", err);
-      alert("저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      alert(t("routineModal.saveError"));
     } finally {
       setSubmitting(false);
     }
@@ -183,13 +203,13 @@ export default function RoutineModal({
             <span className="text-[#2563EB]">
               <Clock className="w-5 h-5" />
             </span>
-            <h2 className="text-[17px] font-semibold text-gray-800">{title}</h2>
+            <h2 className="text-[17px] font-semibold text-gray-800">{resolvedTitle}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-            aria-label="닫기"
+            aria-label={t("routineModal.close")}
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -199,13 +219,13 @@ export default function RoutineModal({
         <div className="px-7 pb-6 overflow-y-auto flex-1 space-y-5">
           {/* 안내 */}
           <p className="text-[13px] text-[#64748B] leading-relaxed">
-            매일의 생활 시간을 입력해 주세요. 입력한 시간을 기준으로 알림과 추천 시점이 조정됩니다.
+            {t("routineModal.description")}
           </p>
 
           {/* 루틴 목록 */}
           <div>
             <label className="block text-[13px] font-medium text-gray-700 mb-2">
-              생활 시간 설정
+              {t("routineModal.scheduleLabel")}
             </label>
             <div className="rounded-xl border border-gray-100 overflow-hidden">
               {routine.map((item, idx) => (
@@ -216,7 +236,7 @@ export default function RoutineModal({
                   }`}
                 >
                   <span className="text-[14px] font-medium text-gray-800">
-                    {item.label}
+                    {routineLabel(item.label)}
                   </span>
                   <TimeSelect
                     value={item.time}
@@ -237,7 +257,7 @@ export default function RoutineModal({
             onClick={handleSubmit}
             className="h-10 px-6 rounded-xl bg-gray-900 text-white text-[13px] font-medium hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "저장 중..." : "저장하기"}
+            {submitting ? t("routineModal.saving") : t("routineModal.save")}
           </button>
         </div>
       </div>

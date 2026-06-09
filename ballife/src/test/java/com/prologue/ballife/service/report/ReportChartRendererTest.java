@@ -13,6 +13,7 @@ import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
 import com.prologue.ballife.analyzer.BloodPressureDaily;
 import com.prologue.ballife.analyzer.BloodSugarAnalysisResult;
 import com.prologue.ballife.analyzer.DailyValue;
+import com.prologue.ballife.support.TestMessages;
 
 /**
  * ReportChartRenderer 단위 테스트 — DB 불필요, 순수 렌더링 검증.
@@ -25,7 +26,7 @@ class ReportChartRendererTest {
     private static final LocalDate START = LocalDate.of(2026, 5, 3);
     private static final LocalDate END   = LocalDate.of(2026, 6, 1);
 
-    private final ReportChartRenderer renderer = new ReportChartRenderer();
+    private final ReportChartRenderer renderer = new ReportChartRenderer(TestMessages.resolver());
 
     @Test
     @DisplayName("혈압: null/빈 데이터면 빈 문자열")
