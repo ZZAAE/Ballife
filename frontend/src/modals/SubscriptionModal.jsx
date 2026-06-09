@@ -147,7 +147,7 @@ export default function SubscriptionModal({
                   type="button"
                   key={plan.key}
                   onClick={() => setSelected(plan.key)}
-                  className={`text-left bg-white rounded-[18px] border-2 p-5 transition ${
+                  className={`flex flex-col text-left bg-white rounded-[18px] border-2 p-5 transition ${
                     isSelected
                       ? "border-[#0F172A] shadow-[0_8px_24px_rgba(15,23,42,0.10)]"
                       : "border-[#E5E7EB] hover:border-[#CBD5E1]"

@@ -494,7 +494,7 @@ export default function PrescriptionOcrTestModal({
             padding: "14px 0",
             borderRadius: 12,
             border: "none",
-            backgroundColor: "#2563EB",
+            backgroundColor: "#0F172A",
             color: "#FFFFFF",
             fontSize: 15,
             fontWeight: 700,
