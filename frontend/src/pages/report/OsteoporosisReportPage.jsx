@@ -13,6 +13,7 @@ import {
   SectionHeader,
   ContentCard,
   RiskFactorCard,
+  DiagnosisCard,
   ReferenceFooter
 } from '../../components/report/DiseaseComponents';
 
@@ -59,9 +60,27 @@ export default function OsteoporosisReportPage() {
           subTitle={t('osteoporosisReportPage.diagnosis.subTitle')}
         />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-14">
-          <TScoreCard label={t('osteoporosisReportPage.diagnosis.normal.label')} score="T-score ≥ -1.0" color="bg-emerald-500" desc={t('osteoporosisReportPage.diagnosis.normal.desc')} />
-          <TScoreCard label={t('osteoporosisReportPage.diagnosis.osteopenia.label')} score="-2.5 < T < -1.0" color="bg-orange-400" desc={t('osteoporosisReportPage.diagnosis.osteopenia.desc')} />
-          <TScoreCard label={t('osteoporosisReportPage.diagnosis.osteoporosis.label')} score="T-score ≤ -2.5" color="bg-rose-500" desc={t('osteoporosisReportPage.diagnosis.osteoporosis.desc')} />
+          <DiagnosisCard
+            icon={ShieldPlus}
+            title="정상"
+            subTitle="T-score ≥ -1.0"
+            desc="골밀도가 젊은 성인 평균과 비교해 안정적인 상태로, 예방적 생활습관 유지가 권장됩니다."
+            color="border-emerald-500"
+          />
+          <DiagnosisCard
+            icon={Activity}
+            title="골감소증"
+            subTitle="-2.5 < T < -1.0"
+            desc="골량이 감소된 단계로, 골다공증 진행을 막기 위한 칼슘·비타민 D 섭취와 운동 강화가 필요합니다."
+            color="border-orange-400"
+          />
+          <DiagnosisCard
+            icon={AlertTriangle}
+            title="골다공증"
+            subTitle="T-score ≤ -2.5"
+            desc="WHO 진단 기준에 해당하며, 비스포스포네이트 등 적극적인 약물 치료가 필요한 단계입니다."
+            color="border-rose-500"
+          />
         </div>
 
         {/* 관리 가이드라인 */}
@@ -154,17 +173,6 @@ export default function OsteoporosisReportPage() {
   );
 }
 
-
-function TScoreCard({ label, score, color, desc }) {
-  return (
-    <ContentCard className="relative pt-8 overflow-hidden border-none shadow-sm">
-      <div className={`absolute top-0 left-0 w-1.5 h-full ${color}`} />
-      <span className="text-[12px] font-bold text-gray-400">{label}</span>
-      <h4 className={`text-2xl font-black mt-1 mb-4 ${color.replace('bg-', 'text-')}`}>{score}</h4>
-      <p className="text-[12px] text-gray-500 leading-relaxed">{desc}</p>
-    </ContentCard>
-  );
-}
 
 function HabitItem({ icon, title, desc }) {
   return (

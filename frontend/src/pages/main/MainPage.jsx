@@ -381,19 +381,25 @@ const MainPage = () => {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [bloodPressureRecords]);
 
+  // 혈당 추이 — 식전/식후 두 줄로 분리 (날짜별로 식전·식후 각각 평균)
   const bloodSugarChartData = useMemo(() => {
     if (!bloodSugarRecords.length) return [];
-    const byDate = new Map();
+    const byDate = new Map(); // date -> { before: [], after: [] }
     bloodSugarRecords.forEach((r) => {
       const date = String(r?.recordDate || "").slice(5, 10);
       if (!date || r.bloodSugar == null) return;
-      if (!byDate.has(date)) byDate.set(date, []);
-      byDate.get(date).push(Number(r.bloodSugar));
+      if (!byDate.has(date)) byDate.set(date, { before: [], after: [] });
+      // 카테고리 접미사가 "식후"면 식후, 그 외(공복·취침전·식전)는 식전
+      const isAfterMeal = String(r.category || "").endsWith("식후");
+      byDate.get(date)[isAfterMeal ? "after" : "before"].push(Number(r.bloodSugar));
     });
+    const avg = (arr) =>
+      arr.length ? Math.round(arr.reduce((s, x) => s + x, 0) / arr.length) : null;
     return Array.from(byDate.entries())
-      .map(([date, arr]) => ({
+      .map(([date, { before, after }]) => ({
         date,
-        glucose: Math.round(arr.reduce((s, x) => s + x, 0) / arr.length),
+        before: avg(before),
+        after: avg(after),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [bloodSugarRecords]);
@@ -485,15 +491,22 @@ const MainPage = () => {
         accent: "#D40000",
         data: bloodSugarChartData,
         legends: [
-          { label: t("mainPage.chart.bloodSugar"), color: "#D40000" },
+          { label: "식전", color: "#D40000" },
+          { label: "식후", color: "#F59E0B" },
         ],
         unit: "mg/dL",
         areas: [
           {
-            key: "glucose",
-            name: t("mainPage.chart.bloodSugar"),
+            key: "before",
+            name: "식전",
             stroke: "#D40000",
-            gradientId: "glucoseGrad",
+            gradientId: "glucoseBeforeGrad",
+          },
+          {
+            key: "after",
+            name: "식후",
+            stroke: "#F59E0B",
+            gradientId: "glucoseAfterGrad",
           },
         ],
         references: bloodSugarReferences,
@@ -825,9 +838,13 @@ const MainPage = () => {
                           <stop offset="0%" stopColor="#F59874" stopOpacity={0.1} />
                           <stop offset="100%" stopColor="#F59874" stopOpacity={0} />
                         </linearGradient>
-                        <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="glucoseBeforeGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#D40000" stopOpacity={0.12} />
                           <stop offset="100%" stopColor="#D40000" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="glucoseAfterGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#434335" stopOpacity={0.12} />
@@ -862,6 +879,7 @@ const MainPage = () => {
                           name={area.name}
                           stroke={area.stroke}
                           strokeWidth={3}
+                          connectNulls
                           fill={`url(#${area.gradientId})`}
                           dot={{ r: 3, fill: "#fff", stroke: area.stroke, strokeWidth: 2 }}
                           activeDot={{ r: 7, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
