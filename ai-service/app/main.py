@@ -16,6 +16,7 @@ from collections import defaultdict
 from datetime import date
 
 from app.food_classifier import predict as predict_food, warmup as warmup_food_model
+from app.rag import build_vectorstore, retrieve
 from app.i18n import (
     normalize_lang,
     language_directive,
@@ -444,10 +445,17 @@ async def chat(req: ChatRequest):
     if req.image and not user_text:
         user_text = image_default_question(lang)
 
+    # RAG: 질문과 관련된 성인병 진단수치 문서 청크 검색
+    rag_context = retrieve(user_text) if user_text else ""
+    rag_section = (
+        f"\n\n[성인병 진단수치 참고자료]\n{rag_context}" if rag_context else ""
+    )
+
     if req.image:
         # 비전: 텍스트 + 이미지로 멀티모달 human 메시지 구성 후 LLM 직접 호출
         text_block = (
-            f"[사용자 건강 데이터 요약]\n{health_summary}\n\n[질문]\n{user_text}"
+            f"[사용자 건강 데이터 요약]\n{health_summary}"
+            f"{rag_section}\n\n[질문]\n{user_text}"
         )
         human_message = HumanMessage(
             content=[
@@ -458,7 +466,8 @@ async def chat(req: ChatRequest):
         messages = [SystemMessage(content=system_prompt), *history, human_message]
     else:
         text_block = (
-            f"[사용자 건강 데이터 요약]\n{health_summary}\n\n[질문]\n{user_text}"
+            f"[사용자 건강 데이터 요약]\n{health_summary}"
+            f"{rag_section}\n\n[질문]\n{user_text}"
         )
         messages = [SystemMessage(content=system_prompt), *history,
                     HumanMessage(content=text_block)]
@@ -573,8 +582,9 @@ async def predict_food_endpoint(file: UploadFile = File(...)):
 
 @app.on_event("startup")
 async def _warmup_model():
-    # 서버 기동 시 모델을 백그라운드로 미리 로드 (첫 요청 지연 제거). 실패해도 서버는 정상 기동.
+    # 서버 기동 시 모델 & RAG 벡터 DB를 백그라운드로 미리 로드. 실패해도 서버는 정상 기동.
     asyncio.create_task(asyncio.to_thread(warmup_food_model))
+    asyncio.create_task(asyncio.to_thread(build_vectorstore))
     return {"ok": True}
 
 class MedicineList(BaseModel):
