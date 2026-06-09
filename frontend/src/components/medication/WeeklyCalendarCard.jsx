@@ -11,7 +11,13 @@ const getScheduleStatus = (drugs) => {
   return "partial";
 };
 
-// 시간 문자열(HH:MM)을 아침/점심/저녁 슬롯으로 매핑. 시간이 없으면 morning으로 기본
+const STATUS_LABEL = {
+  done: "복용 완료",
+  partial: "부분 복용",
+  miss: "미복용",
+};
+
+// 시간 문자열(HH:MM)을 아침/점심/저녁/취침전 슬롯으로 매핑. 시간이 없으면 morning으로 기본
 const getTimeSlot = (timeStr) => {
   if (!timeStr) return "morning";
   const [hh] = timeStr.split(":");
@@ -19,7 +25,8 @@ const getTimeSlot = (timeStr) => {
   if (Number.isNaN(h)) return "morning";
   if (h < 11) return "morning";
   if (h < 17) return "lunch";
-  return "dinner";
+  if (h < 22) return "dinner";
+  return "bedtime";
 };
 
 const formatDateKey = (date) => {
@@ -56,9 +63,10 @@ export default function WeeklyCalendarCard({
   };
 
   const rows = [
-    { key: "morning", label: t("weeklyCalendarCard.rows.morning"), icon: Sun },
-    { key: "lunch", label: t("weeklyCalendarCard.rows.lunch"), icon: Sun },
-    { key: "dinner", label: t("weeklyCalendarCard.rows.dinner"), icon: Moon },
+    { key: "morning", label: "아침 (08:00)", icon: Sun },
+    { key: "lunch", label: "점심 (13:00)", icon: Sun },
+    { key: "dinner", label: "저녁 (21:00)", icon: Moon },
+    { key: "bedtime", label: "취침전 (23:00)", icon: Moon },
   ];
 
   const todayStatusMap = todaySchedules
@@ -124,7 +132,7 @@ export default function WeeklyCalendarCard({
   };
 
   return (
-    <div className="flex-1 min-w-0 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-5">
+    <div className="flex-1 min-w-0 bg-white p-4 lg:p-5">
       <div className="w-full min-w-0">
         {/* 상단 날짜 헤더 */}
         <div className="mb-6 grid grid-cols-7 items-start gap-1">
@@ -249,7 +257,7 @@ export default function WeeklyCalendarCard({
         </div>
 
         {/* 범례 */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-gray-200 pt-6 text-[13px] text-gray-600 sm:gap-x-12">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-gray-200 pt-4 text-[13px] text-gray-600 sm:gap-x-12">
           <div className="flex items-center gap-2">
             <MedicationStatusIcon status="done" size="sm" />
             <span>{t("weeklyCalendarCard.status.done")}</span>

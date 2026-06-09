@@ -374,7 +374,7 @@ export default function MedicationPage() {
         {/* 상단 카드 영역 */}
         <section className="grid grid-cols-1 2xl:grid-cols-[390px_minmax(0,1fr)] gap-8">
           {/* 왼쪽 영역 */}
-          <div className="w-full min-w-0 flex flex-col gap-8">
+          <div className="w-full min-w-0 min-h-0 flex flex-col gap-8">
             <MedicationProgressCard schedules={displaySchedules} />
 
             <MedicationRecordCard
@@ -406,7 +406,7 @@ export default function MedicationPage() {
               onToggleDrug={handleToggleDrug}
               onToggleAllDrugs={handleToggleAllDrugs}
             />
-            <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)] rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
               <MemoCard memoList={memoList} />
               <WeeklyCalendarCard
                 todaySchedules={weekDisplaySchedules}

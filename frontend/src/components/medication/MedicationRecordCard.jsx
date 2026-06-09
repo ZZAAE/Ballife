@@ -102,14 +102,14 @@ export default function MedicationRecordCard({
           <button
             type="button"
             onClick={openSearchModal}
-            className="flex-1 h-[42px] sm:h-[44px] bg-white text-[#1B1F2A] rounded-xl text-[13px] sm:text-[14px] font-bold hover:bg-gray-100 transition-colors"
+            className="flex-1 h-[38px] sm:h-[40px] bg-white text-[#1B1F2A] rounded-lg text-[13px] sm:text-[14px] font-bold hover:bg-gray-100 transition-colors"
           >
-            {t("medicationRecordCard.addMedicine")}
+            약 검색하기
           </button>
           <button
             type="button"
             onClick={onSaveRecord}
-            className="flex-1 h-[42px] sm:h-[44px] bg-primary-600 text-white rounded-xl text-[13px] sm:text-[14px] font-bold hover:bg-primary-700 transition-colors"
+            className="flex-1 h-[38px] sm:h-[40px] bg-primary-600 text-white rounded-lg text-[13px] sm:text-[14px] font-bold hover:bg-primary-700 transition-colors"
           >
             {t("medicationRecordCard.save")}
           </button>
