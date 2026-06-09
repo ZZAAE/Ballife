@@ -9,6 +9,7 @@ python-dotenv>=1.0.0
 langchain>=0.3.0
 # RAG — PDF 로드 / 벡터 DB
 langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
 pypdf>=4.0.0
 faiss-cpu>=1.8.0
 # 음식 사진 분류용 자체 YOLO 모델 추론 (CPU 추론으로 충분, torch/Pillow 자동 포함)
