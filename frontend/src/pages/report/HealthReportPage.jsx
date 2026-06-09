@@ -22,6 +22,9 @@ const contentOf = (res) =>
 const avg = (nums) =>
   nums.length ? Math.round(nums.reduce((s, n) => s + n, 0) / nums.length) : null;
 
+// 비정상/테스트용 이상치(예: 99999999)가 차트 Y축을 망가뜨리지 않도록 현실적인 체중만 사용
+const isRealisticWeight = (w) => Number.isFinite(w) && w > 0 && w < 1000;
+
 const CHART_TABS = [
   { key: "bloodSugar", label: "혈당" },
   { key: "bloodPressure", label: "혈압" },
@@ -116,15 +119,22 @@ export default function HealthReportPage() {
     [bloodSugar],
   );
 
-  // 최근 14건 혈당 추이 (오래된→최신)
+  // 최근 14건 혈당 추이 — 식전/식후 두 줄로 분리 (혈압 차트처럼 두 계열로 표시)
+  // 각 기록은 식전 또는 식후 한쪽 값만 채우고 나머지는 null → 라인은 connectNulls 로 이어 그린다.
   const sugarTrend = useMemo(() => {
     return bloodSugar
       .filter((r) => r.bloodSugar != null)
       .slice(0, 14)
-      .map((r) => ({
-        date: String(r.recordDate || "").slice(5),
-        value: Number(r.bloodSugar),
-      }))
+      .map((r) => {
+        // 카테고리 접미사가 "식후"면 식후, 그 외(공복·취침전·식전)는 식전으로 본다.
+        const isAfterMeal = String(r.category || "").endsWith("식후");
+        const value = Number(r.bloodSugar);
+        return {
+          date: String(r.recordDate || "").slice(5),
+          before: isAfterMeal ? null : value,
+          after: isAfterMeal ? value : null,
+        };
+      })
       .reverse();
   }, [bloodSugar]);
 
@@ -144,7 +154,7 @@ export default function HealthReportPage() {
   // 최근 14건 체중 추이 (오래된→최신)
   const weightTrend = useMemo(() => {
     return weight
-      .filter((r) => r.weight != null)
+      .filter((r) => r.weight != null && isRealisticWeight(Number(r.weight)))
       .slice(0, 14)
       .map((r) => ({
         date: String(r.recordDate || "").slice(5),
@@ -158,7 +168,7 @@ export default function HealthReportPage() {
     if (!heightCm) return [];
     const h = heightCm / 100;
     return weight
-      .filter((r) => r.weight != null)
+      .filter((r) => r.weight != null && isRealisticWeight(Number(r.weight)))
       .slice(0, 14)
       .map((r) => ({
         date: String(r.recordDate || "").slice(5),
@@ -172,7 +182,10 @@ export default function HealthReportPage() {
       title: "최근 혈당 추이",
       data: sugarTrend,
       empty: "혈당 기록이 없습니다.",
-      lines: [{ key: "value", name: "혈당", color: "#16a34a" }],
+      lines: [
+        { key: "before", name: "식전", color: "#16a34a" },
+        { key: "after", name: "식후", color: "#F59E0B" },
+      ],
     },
     bloodPressure: {
       title: "최근 혈압 추이",
@@ -197,6 +210,19 @@ export default function HealthReportPage() {
     },
   };
   const activeView = chartViews[chartTab] ?? chartViews.bloodSugar;
+
+  // Y축 도메인은 이상치(예: 99999999)를 제외한 실제 값에서 계산한다.
+  // 문자열 도메인("dataMax + 10")은 데이터에 이상치가 섞이면 축 눈금이 거대해지므로 숫자로 직접 산출.
+  const yValues = activeView.data
+    .flatMap((d) => activeView.lines.map((ln) => d[ln.key]))
+    .filter((v) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) < 100000);
+  const yDomain =
+    yValues.length > 0
+      ? [
+          Math.floor(Math.min(...yValues) - 10),
+          Math.ceil(Math.max(...yValues) + 10),
+        ]
+      : [0, 10];
 
   const Shell = ({ children }) => (
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
@@ -347,7 +373,9 @@ export default function HealthReportPage() {
                   tickLine={false}
                 />
                 <YAxis
-                  domain={["dataMin - 10", "dataMax + 10"]}
+                  domain={yDomain}
+                  allowDataOverflow
+                  tickFormatter={(v) => String(Math.round(Number(v) * 10) / 10)}
                   tick={{ fontSize: 11, fill: "#9ca3af" }}
                   axisLine={false}
                   tickLine={false}
@@ -370,6 +398,7 @@ export default function HealthReportPage() {
                     name={ln.name}
                     stroke={ln.color}
                     strokeWidth={2}
+                    connectNulls
                     dot={{ r: 3, fill: ln.color, stroke: "#fff", strokeWidth: 2 }}
                     activeDot={{ r: 6 }}
                   />

@@ -477,7 +477,7 @@ export default function RecordSummary() {
   })();
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-noto-sans max-w-[1920px] mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] font-noto-sans">
       <div className="flex pt-[55px]">
         {/* Main Content */}
         <main className="flex-1">

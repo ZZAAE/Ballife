@@ -45,10 +45,10 @@ const MealRecordCard = ({
     <button
       type="button"
       onClick={onClick}
-      className={`block overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
+      className={`flex flex-col overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
     >
       <div
-        className="relative h-[180px]"
+        className="relative h-[180px] shrink-0"
         style={{
           background: image
             ? undefined
