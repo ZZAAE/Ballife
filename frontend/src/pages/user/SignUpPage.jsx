@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import authApi from "../../api/authApi";
+import petApi from "../../api/petApi";
 
 const EMAIL_DOMAINS = [
   "naver.com",

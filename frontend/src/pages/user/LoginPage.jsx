@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import toast from 'react-hot-toast';
 import authApi from '../../api/authApi';
+import petApi from '../../api/petApi';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -41,6 +42,12 @@ function LoginPage() {
             login(response.data);
             // localStorage.setItem('token', response.data.token);
             // localStorage.setItem('user', JSON.stringify(response.data));
+
+            // 펫이 없으면 생성 (백엔드가 멱등 처리 — 이미 있으면 무시).
+            // 펫은 부가 기능이라 실패해도 로그인 흐름은 막지 않는다.
+            await petApi.createPet(response.data.userId)
+                .catch((err) => console.error('펫 등록 실패:', err));
+
             toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`);
             const from = typeof location.state?.from === 'string' ? location.state.from : '/';
             navigate(from, { replace: true });

@@ -93,18 +93,18 @@ export default function PetPage() {
             try {
                 const msg = JSON.parse(json);
                 switch (msg.type) {
-                    // Unity 가 새로 장착한 모자 아이템 ID 를 보냄
+                    // Unity 가 새로 장착한 모자 아이템 ID 를 보냄 (payload 는 숫자 ID 그 자체)
                     case "HAT_CHANGED": {
-                        const { equippedHat } = msg.payload;
+                        const equippedHat = msg.payload;
                         setPetState((s) => ({ ...s, equippedHat }));
                         console.log("모자 변경:", msg.payload);
                         petApi.updatePetInfo(userIdRef.current, { hat: equippedHat })
                             .catch((e) => console.error("모자 저장 실패:", e));
                         break;
                     }
-                    // Unity 가 새로 장착한 배경 아이템 ID 를 보냄
+                    // Unity 가 새로 장착한 배경 아이템 ID 를 보냄 (payload 는 숫자 ID 그 자체)
                     case "BG_CHANGED": {
-                        const { equippedBG } = msg.payload;
+                        const equippedBG = msg.payload;
                         setPetState((s) => ({ ...s, equippedBG }));
                         console.log("배경 변경:", msg.payload);
                         petApi.updatePetInfo(userIdRef.current, { backGround: equippedBG })
@@ -121,10 +121,11 @@ export default function PetPage() {
                     }
                     // Unity 에서 아이템 구매 처리 (포인트 차감 + 보유목록 추가)
                     case "PURCHASE_ITEM": {
-                        const { remainPoint, purchasedItemId } = msg.payload;
+                        // Unity payload: { purchasedItemId, deductedPoint(차감액) }
+                        const { deductedPoint, purchasedItemId } = msg.payload;
                         setPetState((prev) => ({
                             ...prev,
-                            points: remainPoint,
+                            points: prev.points - deductedPoint,   // 차감액을 보유 포인트에서 뺌
                             ownedItemIds: prev.ownedItemIds.includes(purchasedItemId)
                                 ? prev.ownedItemIds
                                 : [...prev.ownedItemIds, purchasedItemId],
@@ -132,6 +133,8 @@ export default function PetPage() {
                         console.log("아이템 구매:", msg.payload);
                         petApi.createAsset(userIdRef.current, { itemId: purchasedItemId })
                             .catch((e) => console.error("아이템 구매 저장 실패:", e));
+                        userApi.deductPoint(userIdRef.current, deductedPoint)
+                            .catch((e) => console.error("포인트 차감 저장 실패:", e));
                         break;
                     }
                     case "PET_STATUS_CHANGED":

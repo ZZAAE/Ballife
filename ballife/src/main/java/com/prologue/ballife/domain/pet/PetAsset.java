@@ -7,7 +7,10 @@ import lombok.*;
 
 
 @Entity
-@Table(name= "PET_ASSET")
+@Table(name = "PET_ASSET",
+       uniqueConstraints = @UniqueConstraint(
+           name = "uk_pet_asset_user_item",
+           columnNames = {"USER_ID", "ITEM_ID"}))   // 한 유저가 같은 아이템 중복 보유 불가
 @Getter
 @Setter
 @NoArgsConstructor

@@ -4,7 +4,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom"; // 페이지 
 import toast from 'react-hot-toast';
 import Button from '../../components/Button';
 import authApi from "../../api/authApi";
-
+import petApi from "../../api/petApi";
 
 const diseaseFields = [
 	{ name: 'hyperlipidemia', label: '고지혈증 보유 여부',
@@ -95,7 +95,7 @@ function DiseasePage() {
 				height: singUpFormData.height,
 				diseaseIndex: diseaseIndex
 			});
-
+			await petApi.createPet(response.data.userId);
 			toast.success('회원가입이 완료 되었습니다!');
 			console.log('disease form data', formData);
 			navigate("/login"); // <Link to = "/login">로그인</Link>

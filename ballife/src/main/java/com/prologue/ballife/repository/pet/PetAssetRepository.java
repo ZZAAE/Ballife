@@ -10,4 +10,7 @@ import com.prologue.ballife.domain.user.User;
 public interface PetAssetRepository extends JpaRepository<PetAsset, Long> {
 
     List<PetAsset> findByUser(User user);
+
+    // 같은 유저가 같은 아이템을 이미 보유했는지 — 중복 저장 방지용
+    boolean existsByUser_UserIdAndItemId(Long userId, Long itemId);
 }

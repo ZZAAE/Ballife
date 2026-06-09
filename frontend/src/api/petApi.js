@@ -21,3 +21,5 @@ const petApi = {
         return api.get(`/pet/asset/${userId}`);
     }
 }
+
+export default petApi;

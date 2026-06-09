@@ -30,6 +30,10 @@ public class PetService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
 
+        if (petRepository.findByUser(user).isPresent()) {
+            return;
+        }
+
         Pet pet = Pet.builder()
                      .user(user)
                      .build();
@@ -68,6 +72,11 @@ public class PetService {
     public void createPetAsset(Long userId, PetAssetDto.CreateRequest request){
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+
+        // 이미 보유한 아이템이면 저장하지 않음 (멱등 — 중복 클릭/재시도 방어)
+        if (petAssetRepository.existsByUser_UserIdAndItemId(userId, request.getItemId())) {
+            return;
+        }
 
         PetAsset petAsset = PetAsset.builder()
                      .user(user)
