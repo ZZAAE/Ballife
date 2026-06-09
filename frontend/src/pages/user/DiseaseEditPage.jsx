@@ -130,7 +130,14 @@ function DiseaseEditPage() {
                     name={field.name}
                     value={formData[field.name]}
                     onChange={handleChange}
-                    className="h-12 rounded-xl border border-[#CBD5E1] bg-white px-4 text-sm outline-none transition focus:border-[#0F172A]"
+                    className="h-12 appearance-none rounded-xl border border-[#CBD5E1] bg-white pl-4 pr-11 text-sm outline-none transition focus:border-[#0F172A]"
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 16px center",
+                      backgroundSize: "16px",
+                    }}
                   >
                     {field.options.map((option) => (
                       <option key={option.value} value={option.value}>

@@ -444,7 +444,7 @@ export default function MealPage() {
                   <span className="text-[36px] font-semibold text-[#040d1b]">
                     {totalCal.toLocaleString()}
                   </span>
-                  <span className="text-[12px] font-semibold text-slate-400 uppercase">
+                  <span className="text-[12px] font-semibold text-slate-400">
                     / {targetCal.toLocaleString()} kcal
                   </span>
                 </div>

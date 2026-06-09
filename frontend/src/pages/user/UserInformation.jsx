@@ -77,7 +77,7 @@ function MetricCard({
 }) {
   return (
     <div
-      className="flex min-h-[150px] flex-col justify-between rounded-2xl border border-gray-100 p-5 shadow-sm"
+      className="flex min-h-[150px] flex-col rounded-2xl border border-gray-100 p-5 shadow-sm"
       style={{ backgroundColor: bgColor || "#ffffff" }}
     >
       <div className="flex items-center justify-between text-xs text-gray-500">
@@ -96,8 +96,12 @@ function MetricCard({
         <span className="text-3xl font-bold text-gray-900">{value}</span>
         <span className="mb-1 text-sm text-gray-500">{unit}</span>
       </div>
-      {progress !== undefined && <ProgressBar progress={progress} />}
-      {sub && <p className="mt-2 text-[11px] text-gray-400">{sub}</p>}
+      {(progress !== undefined || sub) && (
+        <div className="mt-auto">
+          {progress !== undefined && <ProgressBar progress={progress} />}
+          {sub && <p className="mt-2 text-[11px] text-gray-400">{sub}</p>}
+        </div>
+      )}
     </div>
   );
 }
@@ -428,7 +432,7 @@ function UserInformation() {
       : undefined;
   const waterSub = goals.water
     ? `${formatNumber(waterCurrentMl)} ml / ${formatNumber(waterTargetMl)} ml`
-    : undefined;
+    : "-- ml / -- ml";
 
   const routine = ROUTINE_FIELDS.map((f) => ({
     label: f.label,
@@ -626,28 +630,29 @@ function UserInformation() {
                   )}
 
                   <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/member/family")}
+                      className="flex-1 whitespace-nowrap text-center rounded-lg border border-gray-300 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                      가족 관리
+                    </button>
                     {subscription?.reportAccess && (
                       <button
                         type="button"
                         onClick={handlePrintHealthReport}
                         disabled={reportLoading}
-                        className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 whitespace-nowrap text-center rounded-lg border border-gray-300 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {reportLoading ? "생성 중…" : "건강 분석 보고서"}
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => navigate("/member/family")}
-                      className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
-                    >
-                      가족 관리
-                    </button>
+                    <div className="basis-full h-0" />
                     {subPlan === "NONE" ? (
                       <button
                         type="button"
                         onClick={() => setSubscriptionModalOpen(true)}
-                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                        className="flex-1 text-center rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       >
                         구독하기
                       </button>
@@ -655,7 +660,7 @@ function UserInformation() {
                       <button
                         type="button"
                         onClick={() => setSubscriptionModalOpen(true)}
-                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                        className="flex-1 text-center rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       >
                         구독 관리
                       </button>

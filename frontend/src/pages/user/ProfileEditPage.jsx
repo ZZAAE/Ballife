@@ -231,13 +231,20 @@ function ProfileEditPage() {
                       프로필 사진
                     </p>
                     <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                      JPG, PNG, WEBP 이미지를 올릴 수 있습니다. 사진은 이
-                      브라우저에서 바로 반영됩니다.
+                      JPG, PNG, WEBP 이미지를 올릴 수 있습니다. 
+                      사진은 이 브라우저에서 바로 반영됩니다.
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-[#0F172A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1E293B]">
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRemoveProfileImage}
+                    className="inline-flex h-9 w-28 items-center justify-center rounded-xl border border-[#CBD5E1] px-4 text-sm font-semibold text-[#475569] transition hover:bg-white"
+                  >
+                    기본 이미지
+                  </button>
+                  <label className="inline-flex h-9 w-28 cursor-pointer items-center justify-center rounded-xl bg-[#0F172A] px-4 text-sm font-semibold text-white transition hover:bg-[#1E293B]">
                     사진 선택
                     <input
                       type="file"
@@ -246,13 +253,6 @@ function ProfileEditPage() {
                       className="hidden"
                     />
                   </label>
-                  <button
-                    type="button"
-                    onClick={handleRemoveProfileImage}
-                    className="rounded-xl border border-[#CBD5E1] px-4 py-2 text-sm font-semibold text-[#475569] transition hover:bg-white"
-                  >
-                    기본 이미지
-                  </button>
                 </div>
               </div>
             </div>
