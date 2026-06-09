@@ -7,6 +7,7 @@ import MissionModal from "../../modals/MissionModal";
 import medalApi from "../../api/medalApi";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { Crown, Pencil, Trash2, ChevronDown } from "lucide-react";
 import userApi from "../../api/userApi";
@@ -32,6 +33,8 @@ import {
   formatDiseaseSummary,
   loadCachedMemberProfile,
 } from "../../utils/userProfile";
+import { SCHEDULE_SLOTS } from "../../components/medication/prescriptionData";
+import { translateTexts } from "../../utils/aiTranslate";
 
 const ROUTINE_FIELDS = [
   { label: "기상", key: "wakeupTime" },
@@ -77,7 +80,7 @@ function MetricCard({
 }) {
   return (
     <div
-      className="flex min-h-[150px] flex-col justify-between rounded-2xl border border-gray-100 p-5 shadow-sm"
+      className="flex min-h-[150px] flex-col rounded-2xl border border-gray-100 p-5 shadow-sm"
       style={{ backgroundColor: bgColor || "#ffffff" }}
     >
       <div className="flex items-center justify-between text-xs text-gray-500">
@@ -96,13 +99,42 @@ function MetricCard({
         <span className="text-3xl font-bold text-gray-900">{value}</span>
         <span className="mb-1 text-sm text-gray-500">{unit}</span>
       </div>
-      {progress !== undefined && <ProgressBar progress={progress} />}
-      {sub && <p className="mt-2 text-[11px] text-gray-400">{sub}</p>}
+      {(progress !== undefined || sub) && (
+        <div className="mt-auto">
+          {progress !== undefined && <ProgressBar progress={progress} />}
+          {sub && <p className="mt-2 text-[11px] text-gray-400">{sub}</p>}
+        </div>
+      )}
     </div>
   );
 }
 
+// 루틴 라벨(저장/비교용 값) → i18n 표시 키 매핑.
+// label 값 자체는 ROUTINE_LABEL_TO_KEY 조회와 백엔드 저장에 쓰이므로 보존하고,
+// 화면 표시만 t()로 번역한다.
+const ROUTINE_LABEL_I18N_KEY = {
+  기상: "userInformation.routine.wakeup",
+  아침: "userInformation.routine.breakfast",
+  점심: "userInformation.routine.lunch",
+  저녁: "userInformation.routine.dinner",
+  취침: "userInformation.routine.bedtime",
+};
+
+// 성별 저장값(한글) → 표시용 i18n 키. 저장값 자체는 보존하고 표시만 번역.
+const GENDER_I18N_KEY = {
+  남성: "profileEditPage.gender.male",
+  여성: "profileEditPage.gender.female",
+};
+
+// 복용 시간대 키워드(백엔드 한글 저장: 아침/점심/저녁/취침전) → 약 페이지 슬롯 id.
+// 표시는 t(`medication.slot.${id}`) 로 번역(매칭 안 되는 값은 원문 그대로).
+const INTERVAL_KEYWORD_TO_SLOT_ID = SCHEDULE_SLOTS.reduce((acc, s) => {
+  acc[s.keyword] = s.id;
+  return acc;
+}, {});
+
 function UserInformation() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
@@ -121,6 +153,8 @@ function UserInformation() {
   const [savedPrescriptions, setSavedPrescriptions] = useState([]);
   const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
   const [editingPrescription, setEditingPrescription] = useState(null);
+  // 처방 이름/메모(사용자 입력 한글) → 현재 언어 번역 맵 { 원문: 번역문 }
+  const [txMap, setTxMap] = useState({});
   const [trackedUserId, setTrackedUserId] = useState(userId);
 
   // 계정이 바뀌는 순간(렌더 중) 이전 사용자의 잔여 정보를 즉시 비운다.
@@ -162,6 +196,32 @@ function UserInformation() {
     loadMedicinesFromServer();
   }, [loadMedicinesFromServer]);
 
+  // 처방 이름/메모(사용자 입력 한글)를 현재 언어로 즉석 번역해 표시.
+  // ko 거나 처방이 없으면 번역하지 않음. 언어 변경 시 다시 번역.
+  useEffect(() => {
+    const lang = i18n.language;
+    if (!lang || lang === "ko" || savedPrescriptions.length === 0) {
+      setTxMap({});
+      return;
+    }
+    const texts = [];
+    savedPrescriptions.forEach((p) => {
+      if (p.prescriptionName) texts.push(p.prescriptionName);
+      if (p.memo) texts.push(p.memo);
+    });
+    if (texts.length === 0) {
+      setTxMap({});
+      return;
+    }
+    let cancelled = false;
+    translateTexts(texts, lang).then((m) => {
+      if (!cancelled) setTxMap(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [savedPrescriptions, i18n.language]);
+
   // 처방전 목록 전체에서 약 정보를 평탄화해 처방전 카드에 노출한다.
   const savedMedicines = savedPrescriptions.flatMap((p) => p.medicines || []);
 
@@ -172,10 +232,10 @@ function UserInformation() {
 
   // 처방전 삭제
   const handleDeletePrescription = async (prescriptionId) => {
-    if (!window.confirm("이 처방전을 삭제할까요?")) return;
+    if (!window.confirm(t("userInformation.confirm.deletePrescription"))) return;
     try {
       await medicineApi.deletePrescription(prescriptionId);
-      toast.success("처방전이 삭제되었습니다.");
+      toast.success(t("userInformation.toast.prescriptionDeleted"));
       if (expandedPrescriptionId === prescriptionId) {
         setExpandedPrescriptionId(null);
       }
@@ -192,7 +252,7 @@ function UserInformation() {
   const handlePrintHealthReport = async () => {
     if (reportLoading) return;
     setReportLoading(true);
-    const toastId = toast.loading("건강 분석 보고서를 생성하고 있어요…");
+    const toastId = toast.loading(t("userInformation.toast.reportGenerating"));
 
     try {
       const response = await reportApi.downloadMonthlyReport();
@@ -219,7 +279,7 @@ function UserInformation() {
       window.URL.revokeObjectURL(url);
 
       toast.dismiss(toastId);
-      toast.success("건강 분석 보고서 다운로드 완료");
+      toast.success(t("userInformation.toast.reportDownloaded"));
     } catch (e) {
       toast.dismiss(toastId);
       // api.js 응답 인터셉터가 401 처리 + 기본 에러 토스트 자동.
@@ -250,7 +310,7 @@ function UserInformation() {
           profileImage: cached.profileImage ?? data.profileImage ?? null,
         });
       } catch (error) {
-        toast.error("회원 정보를 불러오지 못했습니다.");
+        toast.error(t("userInformation.toast.memberLoadFailed"));
       }
     };
 
@@ -259,7 +319,7 @@ function UserInformation() {
         const { data } = await userConfigApi.getUserConfig(userId);
         setUserConfig(data);
       } catch (error) {
-        toast.error("목표/루틴 정보를 불러오지 못했습니다.");
+        toast.error(t("userInformation.toast.configLoadFailed"));
       }
     };
 
@@ -400,7 +460,9 @@ function UserInformation() {
             100,
         )
       : undefined;
-  const weightSub = currentWeight ? `현재 체중 ${currentWeight}kg` : undefined;
+  const weightSub = currentWeight
+    ? t("userInformation.metric.currentWeight", { weight: currentWeight })
+    : undefined;
 
   const calorieOutProgress =
     goals.calorieOut && todayBurnedCalorie != null
@@ -408,17 +470,27 @@ function UserInformation() {
       : undefined;
   const calorieOutSub =
     todayBurnedCalorie != null && goals.calorieOut
-      ? `현재 소모 칼로리 ${formatNumber(todayBurnedCalorie)}kcal / ${formatNumber(goals.calorieOut)}kcal 달성`
+      ? t("userInformation.metric.calorieOutWithGoal", {
+          current: formatNumber(todayBurnedCalorie),
+          goal: formatNumber(goals.calorieOut),
+        })
       : todayBurnedCalorie != null
-        ? `현재 소모 칼로리 ${formatNumber(todayBurnedCalorie)}kcal`
+        ? t("userInformation.metric.calorieOut", {
+            current: formatNumber(todayBurnedCalorie),
+          })
         : undefined;
   const calorieInProgress =
     goals.calorieIn && todayIntakeCalorie != null
       ? Math.min(100, Math.round((todayIntakeCalorie / goals.calorieIn) * 100))
       : undefined;
   const calorieInSub = goals.calorieIn
-    ? `현재 섭취 칼로리 ${formatNumber(Math.round(todayIntakeCalorie))}kcal / ${formatNumber(goals.calorieIn)}kcal 달성`
-    : `현재 섭취 칼로리 ${formatNumber(Math.round(todayIntakeCalorie))}kcal`;
+    ? t("userInformation.metric.calorieInWithGoal", {
+        current: formatNumber(Math.round(todayIntakeCalorie)),
+        goal: formatNumber(goals.calorieIn),
+      })
+    : t("userInformation.metric.calorieIn", {
+        current: formatNumber(Math.round(todayIntakeCalorie)),
+      });
 
   const waterCurrentMl = todayWaterCup * ML_PER_CUP;
   const waterTargetMl = goals.water ? goals.water * ML_PER_CUP : 0;
@@ -428,7 +500,7 @@ function UserInformation() {
       : undefined;
   const waterSub = goals.water
     ? `${formatNumber(waterCurrentMl)} ml / ${formatNumber(waterTargetMl)} ml`
-    : undefined;
+    : "-- ml / -- ml";
 
   const routine = ROUTINE_FIELDS.map((f) => ({
     label: f.label,
@@ -437,7 +509,7 @@ function UserInformation() {
 
   const handleSaveTargets = async (payload) => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("userInformation.toast.loginRequired"));
       throw new Error("missing userId");
     }
     const body = {
@@ -451,13 +523,13 @@ function UserInformation() {
     };
     const { data } = await userConfigApi.updateUserConfig(userId, body);
     setUserConfig(data);
-    toast.success("목표가 저장되었습니다.");
+    toast.success(t("userInformation.toast.targetsSaved"));
     return data;
   };
 
   const handleSaveRoutine = async (payload) => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("userInformation.toast.loginRequired"));
       throw new Error("missing userId");
     }
     const body = {};
@@ -467,35 +539,44 @@ function UserInformation() {
     });
     const { data } = await userConfigApi.updateUserConfig(userId, body);
     setUserConfig(data);
-    toast.success("루틴이 저장되었습니다.");
+    toast.success(t("userInformation.toast.routineSaved"));
     return data;
   };
 
   const handleSubscribe = async (plan) => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("userInformation.toast.loginRequired"));
       throw new Error("missing userId");
     }
     const { data } = await subscriptionApi.activate(plan);
     setSubscription(data);
-    toast.success("구독이 활성화되었습니다.");
+    toast.success(t("userInformation.toast.subscriptionActivated"));
     return data;
   };
 
   const handleCancelSubscription = async () => {
     const { data } = await subscriptionApi.cancel();
     setSubscription(data);
-    toast.success("구독을 해지했습니다.");
+    toast.success(t("userInformation.toast.subscriptionCancelled"));
     return data;
   };
 
   const subPlan = subscription?.plan ?? "NONE";
   const subBadge =
     subPlan === "FAMILY"
-      ? { label: "가족 플랜", cls: "bg-[#0f1c33] text-white" }
+      ? {
+          label: t("userInformation.subscription.familyPlan"),
+          cls: "bg-[#0f1c33] text-white",
+        }
       : subPlan === "INDIVIDUAL"
-        ? { label: "개인 플랜", cls: "bg-[#EFF6FF] text-[#3B82F6]" }
-        : { label: "무료", cls: "bg-[#F1F5F9] text-[#64748B]" };
+        ? {
+            label: t("userInformation.subscription.individualPlan"),
+            cls: "bg-[#EFF6FF] text-[#3B82F6]",
+          }
+        : {
+            label: t("userInformation.subscription.free"),
+            cls: "bg-[#F1F5F9] text-[#64748B]",
+          };
   const subExpiry = subscription?.expiresAt
     ? new Date(subscription.expiresAt).toLocaleDateString()
     : null;
@@ -507,14 +588,14 @@ function UserInformation() {
           <main className="min-w-0 flex-1">
             <div className="mx-auto box-border max-w-[1280px] px-6 py-20 text-center">
               <p className="text-base text-[#64748B]">
-                로그인이 필요한 페이지입니다.
+                {t("userInformation.loginRequiredPage")}
               </p>
               <button
                 type="button"
                 onClick={() => navigate("/login")}
                 className="mt-4 rounded-lg bg-[#0f1c33] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
               >
-                로그인 하러 가기
+                {t("userInformation.goToLogin")}
               </button>
             </div>
           </main>
@@ -534,7 +615,7 @@ function UserInformation() {
                 {profile.profileImage ? (
                   <img
                     src={profile.profileImage}
-                    alt="프로필 사진"
+                    alt={t("userInformation.profileImageAlt")}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -552,14 +633,14 @@ function UserInformation() {
                     onClick={() => navigate("/member/edit/profile")}
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
-                    프로필 수정
+                    {t("userInformation.editProfile")}
                   </button>
                   <button
                     type="button"
                     onClick={() => navigate("/member/edit/disease")}
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
-                    보유 질환 수정
+                    {t("userInformation.editDisease")}
                   </button>
                   <button
                     type="button"
@@ -571,21 +652,27 @@ function UserInformation() {
                     }}
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
-                    🏅 메달
+                    {t("userInformation.medal")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setMissionModalOpen(true)}
                     className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                   >
-                    🎯 미션
+                    {t("userInformation.mission")}
                   </button>
 
                   {/* 보유 포인트 — 버튼 줄 맨 오른쪽 */}
                   <div className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white">
-                    <span className="text-white/70">보유 포인트</span>
+                    <span className="text-white/70">
+                      {t("userInformation.points")}
+                    </span>
                     <span className="tabular-nums">
-                      {Number(memberProfile?.point ?? 0).toLocaleString()} P
+                      {t("userInformation.pointsValue", {
+                        value: Number(
+                          memberProfile?.point ?? 0,
+                        ).toLocaleString(),
+                      })}
                     </span>
                   </div>
                 </div>
@@ -603,7 +690,7 @@ function UserInformation() {
                         <Crown size={16} />
                       </div>
                       <h3 className="text-[15px] font-bold tracking-tight text-[#0F172A]">
-                        구독
+                        {t("userInformation.subscription.title")}
                       </h3>
                     </div>
                     <span
@@ -615,49 +702,56 @@ function UserInformation() {
 
                   {subscription?.active ? (
                     <p className="text-[13px] text-[#64748B]">
-                      {subscription.planName} 이용 중
-                      {subExpiry && ` · ${subExpiry}까지`}
+                      {t("userInformation.subscription.activePlan", {
+                        plan: subscription.planName,
+                      })}
+                      {subExpiry &&
+                        t("userInformation.subscription.expiryUntil", {
+                          date: subExpiry,
+                        })}
                     </p>
                   ) : (
                     <p className="text-[13px] text-[#64748B]">
-                      플랜을 구독하고 건강 리포트와 가족 건강 공유를 이용해
-                      보세요.
+                      {t("userInformation.subscription.promo")}
                     </p>
                   )}
 
                   <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/member/family")}
+                      className="flex-1 whitespace-nowrap text-center rounded-lg border border-gray-300 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                      가족 관리
+                    </button>
                     {subscription?.reportAccess && (
                       <button
                         type="button"
                         onClick={handlePrintHealthReport}
                         disabled={reportLoading}
-                        className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 whitespace-nowrap text-center rounded-lg border border-gray-300 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {reportLoading ? "생성 중…" : "건강 분석 보고서"}
+                        {reportLoading
+                          ? t("userInformation.subscription.generating")
+                          : t("userInformation.subscription.healthReportBtn")}
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => navigate("/member/family")}
-                      className="rounded-lg border border-gray-300 px-4 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
-                    >
-                      가족 관리
-                    </button>
+                    <div className="basis-full h-0" />
                     {subPlan === "NONE" ? (
                       <button
                         type="button"
                         onClick={() => setSubscriptionModalOpen(true)}
-                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                        className="flex-1 text-center rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       >
-                        구독하기
+                        {t("userInformation.subscription.subscribe")}
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setSubscriptionModalOpen(true)}
-                        className="rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
+                        className="flex-1 text-center rounded-lg bg-[#0f1c33] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       >
-                        구독 관리
+                        {t("userInformation.subscription.manage")}
                       </button>
                     )}
                   </div>
@@ -666,12 +760,12 @@ function UserInformation() {
                 {/* 회원 정보 카드 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
-                    회원 정보
+                    {t("userInformation.memberInfo.title")}
                   </h3>
                   <dl className="space-y-4">
                     <div>
                       <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                        이메일 주소
+                        {t("userInformation.memberInfo.email")}
                       </dt>
                       <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] break-all">
                         {profile.email}
@@ -680,7 +774,7 @@ function UserInformation() {
                     <div className="flex gap-8">
                       <div>
                         <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                          생년월일
+                          {t("userInformation.memberInfo.birthDate")}
                         </dt>
                         <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {profile.birth}
@@ -688,16 +782,18 @@ function UserInformation() {
                       </div>
                       <div>
                         <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                          성별
+                          {t("userInformation.memberInfo.gender")}
                         </dt>
                         <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A]">
-                          {profile.gender}
+                          {GENDER_I18N_KEY[profile.gender]
+                            ? t(GENDER_I18N_KEY[profile.gender])
+                            : profile.gender}
                         </dd>
                       </div>
                     </div>
                     <div>
                       <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                        질환
+                        {t("userInformation.memberInfo.disease")}
                       </dt>
                       <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A]">
                         {profile.disease}
@@ -709,11 +805,13 @@ function UserInformation() {
                   {/* 정상 혈당 */}
                   <div className="mt-5 border-t border-gray-100 pt-5">
                     <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                      정상 혈당
+                      {t("userInformation.normalBloodSugar.title")}
                     </p>
                     <dl className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">공복</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          {t("userInformation.normalBloodSugar.fasting")}
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.fasting)}
                           {normalBloodSugar.fasting != null && (
@@ -725,7 +823,7 @@ function UserInformation() {
                       </div>
                       <div className="flex items-center justify-between">
                         <dt className="text-[13px] text-[#475569]">
-                          식사 1시간
+                          {t("userInformation.normalBloodSugar.afterMeal1h")}
                         </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal1h)}
@@ -738,7 +836,7 @@ function UserInformation() {
                       </div>
                       <div className="flex items-center justify-between">
                         <dt className="text-[13px] text-[#475569]">
-                          식사 2시간
+                          {t("userInformation.normalBloodSugar.afterMeal2h")}
                         </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodSugar.afterMeal2h)}
@@ -755,11 +853,13 @@ function UserInformation() {
                   {/* 정상 혈압 */}
                   <div className="mt-5 border-t border-gray-100 pt-5">
                     <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                      정상 혈압
+                      {t("userInformation.normalBloodPressure.title")}
                     </p>
                     <dl className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">수축기</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          {t("userInformation.normalBloodPressure.systolic")}
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodPressure.systolic)}
                           {normalBloodPressure.systolic != null && (
@@ -770,7 +870,9 @@ function UserInformation() {
                         </dd>
                       </div>
                       <div className="flex items-center justify-between">
-                        <dt className="text-[13px] text-[#475569]">이완기</dt>
+                        <dt className="text-[13px] text-[#475569]">
+                          {t("userInformation.normalBloodPressure.diastolic")}
+                        </dt>
                         <dd className="text-[13.5px] font-semibold text-[#0F172A] tabular-nums">
                           {fallback(normalBloodPressure.diastolic)}
                           {normalBloodPressure.diastolic != null && (
@@ -787,10 +889,10 @@ function UserInformation() {
                 {/* 건강 리포트 */}
                 <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
                   <h3 className="mb-4 text-[15px] font-bold tracking-tight text-[#0F172A]">
-                    건강 리포트
+                    {t("userInformation.healthReport.title")}
                   </h3>
                   <p className="mb-4 text-[13px] text-[#64748B]">
-                    나의 최근 건강 지표를 한눈에 확인하세요.
+                    {t("userInformation.healthReport.subtitle")}
                   </p>
 
                   {recentReports.length > 0 && (
@@ -822,7 +924,7 @@ function UserInformation() {
                     onClick={() => navigate("/report/health")}
                     className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#0f1c33] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#1a2d4d]"
                   >
-                    건강 리포트 보기
+                    {t("userInformation.healthReport.viewBtn")}
                     <span aria-hidden>›</span>
                   </button>
                 </div>
@@ -833,8 +935,8 @@ function UserInformation() {
                 {/* 목표 지표 2×2 */}
                 <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
                   <MetricCard
-                    label="목표 체중"
-                    badge="수정"
+                    label={t("userInformation.metric.targetWeight")}
+                    badge={t("userInformation.metric.editBadge")}
                     value={goals.weight ?? "—"}
                     unit="kg"
                     progress={weightProgress}
@@ -843,18 +945,18 @@ function UserInformation() {
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
-                    label="목표 음수량"
-                    badge="수정"
+                    label={t("userInformation.metric.targetWater")}
+                    badge={t("userInformation.metric.editBadge")}
                     value={goals.water ?? "—"}
-                    unit="잔"
+                    unit={t("userInformation.metric.cupUnit")}
                     progress={waterProgress}
                     sub={waterSub}
                     bgColor="#E4E9ED"
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
-                    label="목표 섭취 칼로리"
-                    badge="수정"
+                    label={t("userInformation.metric.targetCalorieIn")}
+                    badge={t("userInformation.metric.editBadge")}
                     value={formatNumber(goals.calorieIn)}
                     unit="kcal"
                     progress={calorieInProgress}
@@ -863,8 +965,8 @@ function UserInformation() {
                     onBadgeClick={() => setTargetModalOpen(true)}
                   />
                   <MetricCard
-                    label="목표 소모 칼로리"
-                    badge="수정"
+                    label={t("userInformation.metric.targetCalorieOut")}
+                    badge={t("userInformation.metric.editBadge")}
                     value={formatNumber(goals.calorieOut)}
                     unit="kcal"
                     progress={calorieOutProgress}
@@ -880,7 +982,7 @@ function UserInformation() {
                   <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-gray-800">
-                        💊 처방전 목록
+                        {t("userInformation.prescription.title")}
                       </h3>
                     </div>
                     <div
@@ -909,14 +1011,19 @@ function UserInformation() {
                                 {/* 처방전 이름 + 수정/삭제 */}
                                 <div className="flex items-start justify-between gap-2">
                                   <p className="text-sm font-bold text-gray-900 break-all">
-                                    {p.prescriptionName || "이름 없음"}
+                                    {p.prescriptionName
+                                      ? txMap[p.prescriptionName] ||
+                                        p.prescriptionName
+                                      : t("userInformation.prescription.noName")}
                                   </p>
                                   <div className="flex flex-shrink-0 items-center gap-1">
                                     <button
                                       type="button"
                                       onClick={() => setEditingPrescription(p)}
                                       className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                                      aria-label="처방전 수정"
+                                      aria-label={t(
+                                        "userInformation.prescription.editAria",
+                                      )}
                                     >
                                       <Pencil size={15} />
                                     </button>
@@ -928,31 +1035,39 @@ function UserInformation() {
                                         )
                                       }
                                       className="rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                                      aria-label="처방전 삭제"
+                                      aria-label={t(
+                                        "userInformation.prescription.deleteAria",
+                                      )}
                                     >
                                       <Trash2 size={15} />
                                     </button>
                                   </div>
                                 </div>
 
-                                {/* 복용 시간대 배지 (이름 아래) */}
+                                {/* 복용 시간대 배지 (이름 아래) — 한글 키워드를 현재 언어로 표시 */}
                                 {intervals.length > 0 && (
                                   <div className="mt-2 flex flex-wrap gap-1">
-                                    {intervals.map((t) => (
-                                      <span
-                                        key={t}
-                                        className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600"
-                                      >
-                                        {t}
-                                      </span>
-                                    ))}
+                                    {intervals.map((iv) => {
+                                      const slotId =
+                                        INTERVAL_KEYWORD_TO_SLOT_ID[iv];
+                                      return (
+                                        <span
+                                          key={iv}
+                                          className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600"
+                                        >
+                                          {slotId
+                                            ? t(`medication.slot.${slotId}`)
+                                            : iv}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 )}
 
-                                {/* 메모 (입력된 경우만) */}
+                                {/* 메모 (입력된 경우만) — 사용자 입력값을 현재 언어로 번역 표시 */}
                                 {p.memo && (
                                   <p className="mt-1 text-xs text-gray-500 break-words">
-                                    {p.memo}
+                                    {txMap[p.memo] || p.memo}
                                   </p>
                                 )}
 
@@ -968,7 +1083,9 @@ function UserInformation() {
                                   }
                                   className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-500 hover:underline"
                                 >
-                                  약 목록 {medicines.length}개
+                                  {t("userInformation.prescription.medicineCount", {
+                                    count: medicines.length,
+                                  })}
                                   <ChevronDown
                                     size={14}
                                     className={`transition-transform ${
@@ -986,12 +1103,18 @@ function UserInformation() {
                                           key={m.userMedicationId ?? idx}
                                           className="text-xs text-gray-700 break-words"
                                         >
-                                          • {m.medicineName || "이름 없음"}
+                                          •{" "}
+                                          {m.medicineName ||
+                                            t(
+                                              "userInformation.prescription.noName",
+                                            )}
                                         </li>
                                       ))
                                     ) : (
                                       <li className="text-xs text-gray-400">
-                                        등록된 약이 없습니다.
+                                        {t(
+                                          "userInformation.prescription.noMedicines",
+                                        )}
                                       </li>
                                     )}
                                   </ul>
@@ -1004,10 +1127,10 @@ function UserInformation() {
                         <div className="flex flex-col items-center gap-2">
                           <div className="text-5xl">💊</div>
                           <p className="text-xs text-gray-400">
-                            등록된 처방전이 없습니다
+                            {t("userInformation.prescription.emptyTitle")}
                           </p>
                           <p className="text-[10px] text-gray-300">
-                            아래 버튼으로 처방전을 등록하세요
+                            {t("userInformation.prescription.emptyHint")}
                           </p>
                         </div>
                       )}
@@ -1016,7 +1139,7 @@ function UserInformation() {
                       className="mt-3 h-11 w-full rounded-xl bg-[#0f1c33] text-sm font-semibold text-white hover:bg-[#1a2d4d] transition-colors"
                       onClick={() => SetPreResisterModalOpen(true)}
                     >
-                      처방전 업로드
+                      {t("userInformation.prescription.uploadBtn")}
                     </button>
                   </div>
 
@@ -1024,13 +1147,13 @@ function UserInformation() {
                   <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div className="mb-2 flex items-center justify-between">
                       <h3 className="text-sm font-bold text-gray-800">
-                        하루 생활 루틴
+                        {t("userInformation.routine.title")}
                       </h3>
                       <button
                         className="text-xs text-blue-500 hover:underline"
                         onClick={() => setRoutineModalOpen(true)}
                       >
-                        루틴 수정
+                        {t("userInformation.routine.edit")}
                       </button>
                     </div>
                     <div className="flex flex-1 flex-col justify-between">
@@ -1040,7 +1163,9 @@ function UserInformation() {
                           className="flex items-center justify-between border-b border-gray-100 py-3 last:border-0"
                         >
                           <span className="text-sm text-gray-600">
-                            {item.label}
+                            {ROUTINE_LABEL_I18N_KEY[item.label]
+                              ? t(ROUTINE_LABEL_I18N_KEY[item.label])
+                              : item.label}
                           </span>
                           <span className="text-sm font-semibold text-gray-800">
                             {item.time}

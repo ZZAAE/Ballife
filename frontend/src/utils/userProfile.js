@@ -1,60 +1,62 @@
+import i18n from "../i18n";
+
+// 질환 선택 옵션. value 는 백엔드 저장/매칭용 안정 코드(절대 변경 금지),
+// label/summary 는 표시용이라 현재 언어로 lazy 해석(getter)한다.
+// → option.label 을 읽는 기존 소비 컴포넌트는 수정 없이 번역값을 받는다.
+function diseaseOption(name, value, key) {
+  return {
+    value,
+    get label() {
+      return i18n.t(value === "NONE" ? "disease.none" : `disease.${name}.${key}`);
+    },
+  };
+}
+
+function diseaseField(name, options) {
+  return {
+    name,
+    get label() {
+      return i18n.t(`disease.${name}.field`);
+    },
+    get summary() {
+      return i18n.t(`disease.${name}.summary`);
+    },
+    options,
+  };
+}
+
 export const DISEASE_FIELDS = [
-  {
-    name: "hyperlipidemia",
-    label: "고지혈증 보유 여부",
-    summary: "고지혈증",
-    options: [
-      { value: 'NONE', label: '해당 없음' },
-      { value: 'type1', label: '고콜레스테롤혈증' },
-      { value: 'type2', label: '고LDL콜레스테롤혈증' },
-			{ value: 'type3', label: '고중성지방혈증' },
-      { value: 'type4', label: '저HDL콜레스테롤혈증' }
-    ],
-  },
-  {
-    name: "hypertension",
-    label: "고혈압 보유 여부",
-    summary: "고혈압",
-    options: [
-      { value: 'NONE', label: '해당 없음' },
-      { value: 'type1', label: '고혈압 전단계' },
-      { value: 'type2', label: '1기' },
-			{ value: 'type3', label: '2기' },
-    ],
-  },
-  {
-    name: "osteoporosis",
-    label: "골다공증 보유 여부",
-    summary: "골다공증",
-    options: [
-      { value: "NONE", label: "해당 없음" },
-      { value: "osteopenia", label: "골감소증" },
-      { value: "osteoporosis", label: "골다공증" },
-    ],
-  },
-  {
-    name: "diabetes",
-    label: "당뇨 보유 여부",
-    summary: "당뇨",
-    options: [
-      { value: 'NONE', label: '해당 없음' },
-      { value: 'type1', label: '1형' },
-      { value: 'type2', label: '2형' },
-      { value: 'GESTATIONAL', label: '임신성' }
-    ],
-  },
-  {
-    name: "gout",
-    label: "통풍 보유 여부",
-    summary: "통풍",
-    options: [
-      { value: 'NONE', label: '해당 없음' },
-      { value: 'ASYMPTOMATIC', label: '고요산혈증' },
-      { value: 'ACUTE', label: '급성' },
-      { value: 'INTERMITTENT', label: '간헐기' },
-      { value: 'CHRONIC', label: '만성' },
-    ],
-  },
+  diseaseField("hyperlipidemia", [
+    diseaseOption("hyperlipidemia", "NONE", "none"),
+    diseaseOption("hyperlipidemia", "type1", "type1"),
+    diseaseOption("hyperlipidemia", "type2", "type2"),
+    diseaseOption("hyperlipidemia", "type3", "type3"),
+    diseaseOption("hyperlipidemia", "type4", "type4"),
+  ]),
+  diseaseField("hypertension", [
+    diseaseOption("hypertension", "NONE", "none"),
+    diseaseOption("hypertension", "type1", "type1"),
+    diseaseOption("hypertension", "type2", "type2"),
+    diseaseOption("hypertension", "type3", "type3"),
+  ]),
+  diseaseField("osteoporosis", [
+    diseaseOption("osteoporosis", "NONE", "none"),
+    diseaseOption("osteoporosis", "osteopenia", "osteopenia"),
+    diseaseOption("osteoporosis", "osteoporosis", "osteoporosis"),
+  ]),
+  diseaseField("diabetes", [
+    diseaseOption("diabetes", "NONE", "none"),
+    diseaseOption("diabetes", "type1", "type1"),
+    diseaseOption("diabetes", "type2", "type2"),
+    diseaseOption("diabetes", "GESTATIONAL", "gestational"),
+  ]),
+  diseaseField("gout", [
+    diseaseOption("gout", "NONE", "none"),
+    diseaseOption("gout", "ASYMPTOMATIC", "asymptomatic"),
+    diseaseOption("gout", "ACUTE", "acute"),
+    diseaseOption("gout", "INTERMITTENT", "intermittent"),
+    diseaseOption("gout", "CHRONIC", "chronic"),
+  ]),
 ];
 
 export const MEMBER_PROFILE_STORAGE_KEY = "ballife.memberProfileDraft";
@@ -126,14 +128,14 @@ export function formatDiseaseSummary(diseaseIndex) {
     }
 
     const option = field.options.find((item) => item.value === selectedValue);
-    if (!option || option.label === "해당 없음") {
+    if (!option || option.value === "NONE") {
       return [field.summary];
     }
 
     return [`${field.summary} (${option.label})`];
   });
 
-  return selected.length > 0 ? selected.join(", ") : "없음";
+  return selected.length > 0 ? selected.join(", ") : i18n.t("disease.summaryNone");
 }
 
 export function loadCachedMemberProfile() {

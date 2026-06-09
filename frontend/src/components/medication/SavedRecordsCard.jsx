@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Calendar, Clock, Pill, Trash2 } from "lucide-react";
 
 export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) {
+  const { t } = useTranslation();
   const [viewDate, setViewDate] = useState(todayKey || "");
   const dateInputRef = useRef(null);
 
@@ -21,7 +23,10 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
     if (!dateKey) return "";
     const [y, m, d] = dateKey.split("-");
     if (!y || !m || !d) return dateKey;
-    return `${parseInt(m, 10)}월 ${parseInt(d, 10)}일`;
+    return t("savedRecordsCard.viewLabel", {
+      month: parseInt(m, 10),
+      day: parseInt(d, 10),
+    });
   };
 
   return (
@@ -31,7 +36,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
           <div className="flex items-center gap-2">
             <Pill className="w-4 h-4 text-[#2563EB]" />
             <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900">
-              상비약
+              {t("savedRecordsCard.title")}
             </h3>
           </div>
           {viewDate && (
@@ -46,7 +51,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
           )}
         </div>
         <span className="text-[12px] font-semibold text-gray-500">
-          {filtered.length}건
+          {t("savedRecordsCard.count", { count: filtered.length })}
         </span>
       </div>
 
@@ -65,8 +70,8 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
       {filtered.length === 0 ? (
         <p className="flex-1 flex items-center justify-center text-[13px] text-gray-400 text-center">
           {isToday
-            ? "오늘 기록된 상비약이 없습니다."
-            : "해당 날짜에 기록된 상비약이 없습니다."}
+            ? t("savedRecordsCard.emptyToday")
+            : t("savedRecordsCard.emptyOtherDay")}
         </p>
       ) : (
         <ul className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-1 max-h-[100px]">
@@ -102,7 +107,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
                 type="button"
                 onClick={() => onDeleteRecord(r.id)}
                 className="text-gray-400 hover:text-red-500 transition-colors"
-                aria-label="삭제"
+                aria-label={t("savedRecordsCard.deleteAria")}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

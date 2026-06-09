@@ -20,7 +20,7 @@ public class FamilyDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class JoinRequest {
-        @NotBlank(message = "초대 코드를 입력해주세요")
+        @NotBlank(message = "{validation.family.inviteCode.required}")
         private String inviteCode;
     }
 

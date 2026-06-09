@@ -31,6 +31,16 @@ public class ReportPdfGenerator {
     private static final String FONT_REGULAR_PATH = "/fonts/NotoSansKR-Regular.ttf";
     private static final String FONT_BOLD_PATH    = "/fonts/NotoSansKR-Bold.ttf";
 
+    // 간체 중국어 글리프 폴백 (Noto Sans KR 에는 简体 전용 글자가 없음).
+    // CSS font-family 스택의 'Noto Sans SC' 로 누락 글리프가 폴백된다. 한글 이름은 KR 폰트가 담당.
+    private static final String FONT_SC_FAMILY = "Noto Sans SC";
+    private static final String FONT_SC_PATH   = "/fonts/NotoSansSC-Regular.ttf";
+
+    // 일본어 한자 자형(일본식) 폰트. 일본어 로케일에서 'Noto Sans JP' 를 1순위로 두면
+    // KR/SC 와 공유되는 한자도 일본식 자형으로 렌더된다. 한글 이름은 KR 폴백.
+    private static final String FONT_JP_FAMILY = "Noto Sans JP";
+    private static final String FONT_JP_PATH   = "/fonts/NotoSansJP-Regular.ttf";
+
     /**
      * HTML 을 PDF byte[] 로 변환.
      *
@@ -49,8 +59,16 @@ public class ReportPdfGenerator {
             builder.useFastMode();
 
             // 한글 폰트 등록 (Regular / Bold 분리해서 등록해야 font-weight: bold; 가 동작)
-            registerFont(builder, FONT_REGULAR_PATH, 400);
-            registerFont(builder, FONT_BOLD_PATH,    700);
+            registerFont(builder, FONT_FAMILY, FONT_REGULAR_PATH, 400);
+            registerFont(builder, FONT_FAMILY, FONT_BOLD_PATH,    700);
+
+            // 간체 중국어 폴백 폰트 (있을 때만). 400/700 모두 같은 Regular 파일로 등록 → 굵게여도 글리프는 렌더.
+            registerFontIfPresent(builder, FONT_SC_FAMILY, FONT_SC_PATH, 400);
+            registerFontIfPresent(builder, FONT_SC_FAMILY, FONT_SC_PATH, 700);
+
+            // 일본어 폰트 (있을 때만). 일본어 로케일에서 CSS 스택의 1순위로 사용된다.
+            registerFontIfPresent(builder, FONT_JP_FAMILY, FONT_JP_PATH, 400);
+            registerFontIfPresent(builder, FONT_JP_FAMILY, FONT_JP_PATH, 700);
 
             // HTML → PDF 변환
             builder.withHtmlContent(html, null);
@@ -67,7 +85,7 @@ public class ReportPdfGenerator {
      * 클래스패스의 ttf 파일을 PdfRendererBuilder 에 폰트로 등록.
      * - subset=true : 사용한 글자만 임베드 (PDF 크기 절감)
      */
-    private void registerFont(PdfRendererBuilder builder, String classpath, int weight) {
+    private void registerFont(PdfRendererBuilder builder, String family, String classpath, int weight) {
         builder.useFont(
                 () -> {
                     try {
@@ -76,10 +94,16 @@ public class ReportPdfGenerator {
                         throw new IllegalStateException("폰트 로드 실패: " + classpath, e);
                     }
                 },
-                FONT_FAMILY,
+                family,
                 weight,
                 BaseRendererBuilder.FontStyle.NORMAL,
                 true
         );
+    }
+
+    /** 선택적 폰트(폴백) 등록 — 클래스패스에 없으면 조용히 건너뛴다(보고서 생성은 계속). */
+    private void registerFontIfPresent(PdfRendererBuilder builder, String family, String classpath, int weight) {
+        if (!new ClassPathResource(classpath).exists()) return;
+        registerFont(builder, family, classpath, weight);
     }
 }

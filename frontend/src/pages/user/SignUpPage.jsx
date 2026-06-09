@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import authApi from "../../api/authApi";
 import petApi from "../../api/petApi";
@@ -17,6 +18,7 @@ const EMAIL_DOMAINS = [
 
 function SignUpPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     loginId: "",
@@ -73,11 +75,11 @@ function SignUpPage() {
 
   const handleCheckLoginId = async () => {
     if (!formData.loginId) {
-      setErrors((prev) => ({ ...prev, loginId: "아이디를 입력해주세요." }));
+      setErrors((prev) => ({ ...prev, loginId: t("signUpPage.errors.loginIdRequired") }));
       return;
     }
     if (formData.loginId.length < 5) {
-      setErrors((prev) => ({ ...prev, loginId: "아이디는 5자 이상이어야 합니다." }));
+      setErrors((prev) => ({ ...prev, loginId: t("signUpPage.errors.loginIdMinLength") }));
       return;
     }
     setCheckingLoginId(true);
@@ -100,7 +102,7 @@ function SignUpPage() {
       setLoginIdStatus(available ? "available" : "taken");
     } catch (error) {
       console.error("아이디 중복 확인 실패:", error);
-      toast.error("중복 확인에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      toast.error(t("signUpPage.toast.checkFailed"));
       setLoginIdStatus("idle");
     } finally {
       setCheckingLoginId(false);
@@ -144,56 +146,56 @@ function SignUpPage() {
     setIsCustomDomain(false);
     setErrors({});
     setLoginIdStatus("available"); // 중복확인 통과 처리
-    toast.success("테스트 데이터 자동 입력 완료");
+    toast.success(t("signUpPage.toast.autoFillDone"));
   };
 
   const validate = () => {
     const newErrors = {};
 
     if (!formData.loginId) {
-      newErrors.loginId = "아이디를 입력해주세요.";
+      newErrors.loginId = t("signUpPage.errors.loginIdRequired");
     } else if (formData.loginId.length < 5) {
-      newErrors.loginId = "아이디는 5자 이상이어야 합니다.";
+      newErrors.loginId = t("signUpPage.errors.loginIdMinLength");
     } else if (loginIdStatus !== "available") {
-      newErrors.loginId = "아이디 중복 확인을 완료해주세요.";
+      newErrors.loginId = t("signUpPage.errors.loginIdCheckRequired");
     }
 
     if (!formData.password) {
-      newErrors.password = "비밀번호를 입력해주세요.";
+      newErrors.password = t("signUpPage.errors.passwordRequired");
     } else if (formData.password.length < 6) {
-      newErrors.password = "비밀번호는 6자 이상이어야 합니다.";
+      newErrors.password = t("signUpPage.errors.passwordMinLength");
     }
 
     if (!formData.passwordConfirm) {
-      newErrors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
+      newErrors.passwordConfirm = t("signUpPage.errors.passwordConfirmRequired");
     } else if (formData.password !== formData.passwordConfirm) {
-      newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+      newErrors.passwordConfirm = t("signUpPage.errors.passwordMismatch");
     }
 
     if (!emailLocal || !emailDomain) {
-      newErrors.email = "이메일을 입력해주세요.";
+      newErrors.email = t("signUpPage.errors.emailRequired");
     } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(`${emailLocal}@${emailDomain}`)) {
-      newErrors.email = "올바른 이메일 형식이 아닙니다.";
+      newErrors.email = t("signUpPage.errors.emailInvalid");
     }
 
     if (!formData.birthDate) {
-      newErrors.birthDate = "생년월일을 입력해주세요.";
+      newErrors.birthDate = t("signUpPage.errors.birthDateRequired");
     }
 
     if (!formData.gender || formData.gender === "") {
-      newErrors.gender = "성별을 선택해주세요.";
+      newErrors.gender = t("signUpPage.errors.genderRequired");
     }
 
     if (!formData.weight) {
-      newErrors.weight = "몸무게를 입력해주세요.";
+      newErrors.weight = t("signUpPage.errors.weightRequired");
     } else if (formData.weight <= 0) {
-      newErrors.weight = "0 이상의 숫자를 입력해주세요.";
+      newErrors.weight = t("signUpPage.errors.positiveNumber");
     }
 
     if (!formData.height) {
-      newErrors.height = "키를 입력해주세요.";
+      newErrors.height = t("signUpPage.errors.heightRequired");
     } else if (formData.height <= 0) {
-      newErrors.height = "0 이상의 숫자를 입력해주세요.";
+      newErrors.height = t("signUpPage.errors.positiveNumber");
     }
 
     setErrors(newErrors);
@@ -254,7 +256,7 @@ function SignUpPage() {
 
         {/* 타이틀 */}
         <h1 className="text-2xl font-medium text-center text-gray-900 mb-8 tracking-tight">
-          회원가입
+          {t("signUpPage.title")}
         </h1>
 
         {/* 개발용 임시 자동입력 버튼 (배포 전 삭제) */}
@@ -263,21 +265,21 @@ function SignUpPage() {
           onClick={handleAutoFill}
           className="w-full h-10 mb-4 rounded border border-dashed border-orange-400 text-orange-600 text-xs font-medium hover:bg-orange-50 transition"
         >
-          [DEV] 테스트 데이터 자동 입력
+          {t("signUpPage.devAutoFill")}
         </button>
 
         <form onSubmit={handleSubmit} noValidate>
 
           {/* 아이디 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">아이디</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.loginId")}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 name="loginId"
                 value={formData.loginId}
                 onChange={handleChange}
-                placeholder="아이디를 입력해주세요."
+                placeholder={t("signUpPage.placeholders.loginId")}
                 autoComplete="username"
                 className={`${inputClass("loginId")} flex-1`}
               />
@@ -287,27 +289,27 @@ function SignUpPage() {
                 disabled={checkingLoginId}
                 className="h-12 px-4 rounded bg-gray-800 text-white text-sm font-medium hover:bg-black transition disabled:opacity-60 whitespace-nowrap"
               >
-                {checkingLoginId ? "확인 중..." : "중복 확인"}
+                {checkingLoginId ? t("signUpPage.checkingDuplicate") : t("signUpPage.checkDuplicate")}
               </button>
             </div>
             {errors.loginId && <p className="mt-1 text-xs text-red-500 pl-1">{errors.loginId}</p>}
             {!errors.loginId && loginIdStatus === "available" && (
-              <p className="mt-1 text-xs text-green-600 pl-1">사용 가능한 아이디입니다.</p>
+              <p className="mt-1 text-xs text-green-600 pl-1">{t("signUpPage.loginIdAvailable")}</p>
             )}
             {!errors.loginId && loginIdStatus === "taken" && (
-              <p className="mt-1 text-xs text-red-500 pl-1">이미 사용 중인 아이디입니다.</p>
+              <p className="mt-1 text-xs text-red-500 pl-1">{t("signUpPage.loginIdTaken")}</p>
             )}
           </div>
 
           {/* 비밀번호 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">비밀번호</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.password")}</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="6자 이상의 영문, 숫자 조합으로 입력해주세요."
+              placeholder={t("signUpPage.placeholders.password")}
               autoComplete="new-password"
               className={inputClass("password")}
             />
@@ -316,13 +318,13 @@ function SignUpPage() {
 
           {/* 비밀번호 확인 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">비밀번호 확인</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.passwordConfirm")}</label>
             <input
               type="password"
               name="passwordConfirm"
               value={formData.passwordConfirm}
               onChange={handleChange}
-              placeholder="비밀번호를 한 번 더 입력해주세요."
+              placeholder={t("signUpPage.placeholders.passwordConfirm")}
               autoComplete="new-password"
               className={inputClass("passwordConfirm")}
             />
@@ -331,20 +333,20 @@ function SignUpPage() {
 
           {/* 이름 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">사용자 이름</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.username")}</label>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="이름을 입력해주세요."
+              placeholder={t("signUpPage.placeholders.username")}
               className={inputClass("username")}
             />
           </div>
 
           {/* 이메일 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">본인 확인 이메일</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.email")}</label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -369,18 +371,18 @@ function SignUpPage() {
               onChange={handleDomainSelect}
               className="mt-2 w-full h-12 px-3 bg-gray-100 rounded text-sm text-gray-800 outline-none border border-transparent focus:bg-white focus:border-gray-300"
             >
-              <option value="">이메일 선택</option>
+              <option value="">{t("signUpPage.selectEmailDomain")}</option>
               {EMAIL_DOMAINS.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
-              <option value="__custom__">직접 입력</option>
+              <option value="__custom__">{t("signUpPage.customDomain")}</option>
             </select>
             {errors.email && <p className="mt-1 text-xs text-red-500 pl-1">{errors.email}</p>}
           </div>
 
           {/* 생년월일 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">생년월일</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.birthDate")}</label>
             <input
               type="date"
               name="birthDate"
@@ -393,38 +395,41 @@ function SignUpPage() {
 
           {/* 닉네임 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">닉네임 <span className="text-gray-400 font-normal">(선택)</span></label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.nickname")} <span className="text-gray-400 font-normal">{t("signUpPage.optional")}</span></label>
             <input
               type="text"
               name="nickname"
               value={formData.nickname}
               onChange={handleChange}
-              placeholder="표시될 이름을 입력해주세요."
+              placeholder={t("signUpPage.placeholders.nickname")}
               className={inputClass("nickname")}
             />
           </div>
 
           {/* 성별 */}
           <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-800 mb-1">성별</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.gender")}</label>
             <div className={`flex p-1 bg-gray-100 rounded-lg ${errors.gender ? "ring-1 ring-red-400" : ""}`}>
-              {["남성", "여성"].map((g) => (
+              {[
+                { value: "남성", label: t("signUpPage.genderMale") },
+                { value: "여성", label: t("signUpPage.genderFemale") },
+              ].map((g) => (
                 <button
-                  key={g}
+                  key={g.value}
                   type="button"
                   onClick={() => {
-                    setFormData((prev) => ({ ...prev, gender: g }));
+                    setFormData((prev) => ({ ...prev, gender: g.value }));
                     setErrors((prev) => ({ ...prev, gender: "" }));
                   }}
                   className={`
                     flex-1 h-10 text-sm font-medium rounded-md transition-all duration-150
-                    ${formData.gender === g
+                    ${formData.gender === g.value
                       ? "bg-white text-blue-600 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
                     }
                   `}
                 >
-                  {g}
+                  {g.label}
                 </button>
               ))}
             </div>
@@ -434,7 +439,7 @@ function SignUpPage() {
           {/* 키 / 몸무게 — 나란히 */}
           <div className="flex gap-4 mb-6">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-800 mb-1">키</label>
+              <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.height")}</label>
               <input
                 type="number"
                 name="height"
@@ -448,7 +453,7 @@ function SignUpPage() {
               {errors.height && <p className="mt-1 text-xs text-red-500 pl-1">{errors.height}</p>}
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-800 mb-1">몸무게</label>
+              <label className="block text-sm font-medium text-gray-800 mb-1">{t("signUpPage.labels.weight")}</label>
               <input
                 type="number"
                 name="weight"
@@ -476,15 +481,15 @@ function SignUpPage() {
               disabled:opacity-60 disabled:cursor-not-allowed
             "
           >
-            {loading ? "가입 중..." : "회원가입"}
+            {loading ? t("signUpPage.submitting") : t("signUpPage.submit")}
           </button>
         </form>
 
         {/* 로그인 링크 */}
         <p className="text-center mt-5 text-sm text-gray-500">
-          이미 계정이 있으신가요?{" "}
+          {t("signUpPage.alreadyHaveAccount")}{" "}
           <Link to="/login" className="text-blue-600 hover:underline">
-            로그인
+            {t("signUpPage.login")}
           </Link>
         </p>
       </div>

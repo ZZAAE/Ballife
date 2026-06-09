@@ -18,17 +18,17 @@ public class ExerciseTypeDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
-        @NotBlank(message = "운동명은 필수입니다.")
+        @NotBlank(message = "{validation.exerciseType.exerciseName.required}")
         private String exerciseName;
 
-        @NotBlank(message = "운동 카테고리는 필수입니다. (유산소/무산소)")
+        @NotBlank(message = "{validation.exerciseType.exerciseCategory.required}")
         private String exerciseCategory;
 
-        @NotBlank(message = "칼로리 계산 단위는 필수입니다. (분당/회당)")
+        @NotBlank(message = "{validation.exerciseType.calorieUnit.required}")
         private String calorieUnit;
 
         // 무산소: 회당 칼로리. 유산소면 0 또는 null
-        @PositiveOrZero(message = "회당 칼로리는 0 이상이어야 합니다.")
+        @PositiveOrZero(message = "{validation.exerciseType.caloriePerUnit.positiveOrZero}")
         private Integer caloriePerUnit;
 
         // 유산소: MET 값. 무산소면 null

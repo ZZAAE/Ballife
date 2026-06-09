@@ -27,7 +27,7 @@ public class UserExerciseDetailDto {
         // 무산소: 무게 (kg)
         private Integer exerciseWeight;
 
-        @Size(max = 10, message = "운동 강도는 최대 10자까지 허용됩니다.")
+        @Size(max = 10, message = "{validation.userExerciseDetail.exerciseHard.size}")
         private String exerciseHard;
 
         // 유산소: 이동 거리 (km)
@@ -46,7 +46,7 @@ public class UserExerciseDetailDto {
         private Integer exerciseReps;
         private Integer exerciseWeight;
 
-        @Size(max = 10, message = "운동 강도는 최대 10자까지 허용됩니다.")
+        @Size(max = 10, message = "{validation.userExerciseDetail.exerciseHard.size}")
         private String exerciseHard;
 
         // 유산소: 이동 거리 (km)

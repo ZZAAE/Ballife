@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import Button from "../../components/Button";
+import Button from "../../components/button";
 import userApi from "../../api/userApi";
 import { useAuth } from "../../contexts/AuthContext";
 import {
@@ -15,6 +16,7 @@ import {
 
 function DiseaseEditPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ function DiseaseEditPage() {
         const { data } = await userApi.getMember(userId);
         setFormData(parseDiseaseIndex(data.diseaseIndex));
       } catch (error) {
-        toast.error("질환 정보를 불러오지 못했습니다.");
+        toast.error(t("diseaseEditPage.toast.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -63,7 +65,7 @@ function DiseaseEditPage() {
           ...loadCachedMemberProfile(),
           diseaseIndex: serializeDiseaseForm(formData),
         });
-        toast.success("질환 수정 화면 데모 값이 저장되었습니다.");
+        toast.success(t("diseaseEditPage.toast.demoSaved"));
         navigate("/member");
         return;
       }
@@ -72,11 +74,11 @@ function DiseaseEditPage() {
         diseaseIndex: serializeDiseaseForm(formData),
       });
       persistMemberProfile(data);
-      toast.success("보유 질환 정보가 수정되었습니다.");
+      toast.success(t("diseaseEditPage.toast.saved"));
       navigate("/member");
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "질환 정보 수정에 실패했습니다.",
+        error.response?.data?.message || t("diseaseEditPage.toast.saveFailed"),
       );
     } finally {
       setSaving(false);
@@ -89,18 +91,17 @@ function DiseaseEditPage() {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-[#64748B]">
-              {userId ? "보유 질환 수정" : "질환 편집 데모"}
+              {userId ? t("diseaseEditPage.eyebrow.member") : t("diseaseEditPage.eyebrow.demo")}
             </p>
             <h1 className="mt-2 text-[30px] font-extrabold tracking-[-0.04em] text-[#0F172A]">
-              질환 정보 편집
+              {t("diseaseEditPage.title")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#64748B]">
-              현재 보유 중인 만성 질환 상태를 선택해 업데이트하세요.
+              {t("diseaseEditPage.subtitle")}
             </p>
             {!userId && (
               <p className="mt-2 text-xs font-medium text-[#2563EB]">
-                로그인 없이도 화면 확인이 가능하며 저장값은 브라우저에만
-                보관됩니다.
+                {t("diseaseEditPage.demoNotice")}
               </p>
             )}
           </div>
@@ -109,13 +110,13 @@ function DiseaseEditPage() {
             onClick={() => navigate("/member")}
             className="rounded-full border border-[#CBD5E1] px-4 py-2 text-sm font-semibold text-[#475569] transition hover:bg-[#F8FAFC]"
           >
-            닫기
+            {t("diseaseEditPage.close")}
           </button>
         </div>
 
         {loading ? (
           <div className="rounded-2xl bg-[#F8FAFC] px-5 py-16 text-center text-sm font-medium text-[#64748B]">
-            질환 정보를 불러오는 중입니다.
+            {t("diseaseEditPage.loading")}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -130,7 +131,14 @@ function DiseaseEditPage() {
                     name={field.name}
                     value={formData[field.name]}
                     onChange={handleChange}
-                    className="h-12 rounded-xl border border-[#CBD5E1] bg-white px-4 text-sm outline-none transition focus:border-[#0F172A]"
+                    className="h-12 appearance-none rounded-xl border border-[#CBD5E1] bg-white pl-4 pr-11 text-sm outline-none transition focus:border-[#0F172A]"
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 16px center",
+                      backgroundSize: "16px",
+                    }}
                   >
                     {field.options.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -149,14 +157,14 @@ function DiseaseEditPage() {
                 className="!rounded-xl !px-5 !py-3 !text-sm"
                 onClick={() => navigate("/member")}
               >
-                취소
+                {t("diseaseEditPage.cancel")}
               </Button>
               <Button
                 type="submit"
                 className="!rounded-xl !bg-[#0F172A] !px-5 !py-3 !text-sm hover:!bg-[#1E293B]"
                 disabled={saving}
               >
-                {saving ? "저장 중..." : "저장하기"}
+                {saving ? t("diseaseEditPage.saving") : t("diseaseEditPage.submit")}
               </Button>
             </div>
           </form>

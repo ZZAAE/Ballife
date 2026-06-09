@@ -20,10 +20,10 @@ public class UserExerciseDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
-        @NotNull(message = "운동 종류 선택 필수입니다.")
+        @NotNull(message = "{validation.userExercise.exerciseTypeId.required}")
         private String exerciseTypeId; // MongoDB ObjectId (String)
 
-        @NotNull(message = "운동 수행 날짜는 필수입니다.")
+        @NotNull(message = "{validation.userExercise.exerciseDate.required}")
         private LocalDate exerciseDate;
 
         private LocalTime exerciseTime;
@@ -52,10 +52,10 @@ public class UserExerciseDto {
     @AllArgsConstructor
     public static class UpdateRequest {
 
-        @NotNull(message = "운동 종류 선택 필수입니다.")
+        @NotNull(message = "{validation.userExercise.exerciseTypeId.required}")
         private String exerciseTypeId; // MongoDB ObjectId (String)
 
-        @NotNull(message = "운동 수행 날짜는 필수입니다.")
+        @NotNull(message = "{validation.userExercise.exerciseDate.required}")
         private LocalDate exerciseDate;
 
         private LocalTime exerciseTime;

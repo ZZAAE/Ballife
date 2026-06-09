@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Sparkles, X } from "lucide-react";
 import toast from "react-hot-toast";
 import bioValueRecordApi from "../api/bioValueRecordApi";
@@ -23,6 +24,7 @@ const resolveUserId = (user) => {
 };
 
 function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null, recordDate }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -78,17 +80,17 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
 
   const handleSubmit = async () => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("bloodPressureRecordModal.toast.loginRequired"));
       return;
     }
     const s = parseInt(systolic, 10);
     const d = parseInt(diastolic, 10);
     if (!s || !d || s <= 0 || d <= 0) {
-      toast.error("수축기와 이완기 혈압을 모두 입력해주세요.");
+      toast.error(t("bloodPressureRecordModal.toast.enterBoth"));
       return;
     }
     if (s <= d) {
-      toast.error("수축기 혈압은 이완기 혈압보다 커야 합니다.");
+      toast.error(t("bloodPressureRecordModal.toast.systolicGreater"));
       return;
     }
 
@@ -114,7 +116,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           editingRecord.recordId,
           payload
         );
-        toast.success("혈압 기록이 수정되었습니다.");
+        toast.success(t("bloodPressureRecordModal.toast.updated"));
         onSaved?.(res.data);
       } else {
         const now = new Date();
@@ -129,7 +131,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           diastolicBP: d,
         };
         const res = await bioValueRecordApi.createBioValueRecord(userId, payload);
-        toast.success("혈압이 기록되었습니다.");
+        toast.success(t("bloodPressureRecordModal.toast.created"));
         onSaved?.(res.data);
       }
       setSystolic("");
@@ -144,12 +146,12 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
 
   const handleDelete = async () => {
     if (!isEditMode) return;
-    if (!window.confirm("이 혈압 기록을 삭제하시겠어요?")) return;
+    if (!window.confirm(t("bloodPressureRecordModal.confirm.delete"))) return;
 
     setDeleting(true);
     try {
       await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
-      toast.success("혈압 기록이 삭제되었습니다.");
+      toast.success(t("bloodPressureRecordModal.toast.deleted"));
       onSaved?.(null);
       onClose?.();
     } catch (err) {
@@ -166,52 +168,52 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
 
     if (!systolic && !diastolic) {
       return {
-        label: "값 입력 전",
+        label: t("bloodPressureRecordModal.status.empty.label"),
         badgeClass: "bg-[#F1F5F9] text-[#64748B]",
         markerClass: "left-[37.5%] border-[#94A3B8]",
-        comment: "수축기와 이완기 값을 입력하면 현재 혈압 상태를 확인할 수 있어요.",
-        tip: "측정 직후 바로 입력하면 기록 관리가 더 쉬워져요.",
+        comment: t("bloodPressureRecordModal.status.empty.comment"),
+        tip: t("bloodPressureRecordModal.status.empty.tip"),
       };
     }
 
     if ((systolic && s <= 90) || (diastolic && d <= 60)) {
       return {
-        label: "저혈압",
+        label: t("bloodPressureRecordModal.status.low.label"),
         badgeClass: "bg-[#EFF6FF] text-[#2563EB]",
         markerClass: "left-[12.5%] border-[#60A5FA]",
-        comment: "현재 혈압은 낮은 편으로 보여요.",
-        tip: "어지럼증이나 피로감이 있다면 충분한 휴식을 취하고 상태를 확인해보세요.",
+        comment: t("bloodPressureRecordModal.status.low.comment"),
+        tip: t("bloodPressureRecordModal.status.low.tip"),
       };
     }
 
     if ((systolic && s >= 140) || (diastolic && d >= 90)) {
       return {
-        label: "고혈압",
+        label: t("bloodPressureRecordModal.status.high.label"),
         badgeClass: "bg-[#FEF2F2] text-[#DC2626]",
         markerClass: "left-[87.5%] border-[#F87171]",
-        comment: "현재 혈압은 높은 편으로 보여요.",
-        tip: "반복적으로 높게 나온다면 생활습관을 점검하고 필요 시 전문의 상담을 고려해보세요.",
+        comment: t("bloodPressureRecordModal.status.high.comment"),
+        tip: t("bloodPressureRecordModal.status.high.tip"),
       };
     }
 
     if ((systolic && s >= 120) || (diastolic && d >= 80)) {
       return {
-        label: "주의 수치",
+        label: t("bloodPressureRecordModal.status.caution.label"),
         badgeClass: "bg-[#FFF7ED] text-[#EA580C]",
         markerClass: "left-[62.5%] border-[#FB923C]",
-        comment: "정상 범위보다 조금 높게 측정됐어요.",
-        tip: "짠 음식, 카페인, 스트레스 요인을 함께 체크해보면 좋아요.",
+        comment: t("bloodPressureRecordModal.status.caution.comment"),
+        tip: t("bloodPressureRecordModal.status.caution.tip"),
       };
     }
 
     return {
-      label: "정상 수치",
+      label: t("bloodPressureRecordModal.status.normal.label"),
       badgeClass: "bg-[#ECFDF3] text-[#16A34A]",
       markerClass: "left-[37.5%] border-[#22C55E]",
-      comment: "현재 혈압 흐름은 안정적인 편이에요.",
-      tip: "지금처럼 꾸준히 기록하면 변화 추이를 확인하기 쉬워져요.",
+      comment: t("bloodPressureRecordModal.status.normal.comment"),
+      tip: t("bloodPressureRecordModal.status.normal.tip"),
     };
-  }, [systolic, diastolic]);
+  }, [systolic, diastolic, t]);
 
   if (!isOpen) return null;
 
@@ -224,19 +226,21 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                {isEditMode ? "혈압 기록 수정" : "혈압 기록하기"}
+                {isEditMode
+                  ? t("bloodPressureRecordModal.title.edit")
+                  : t("bloodPressureRecordModal.title.create")}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
                 {isEditMode
-                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
-                  : "오늘의 혈압 상태를 간단하게 확인하고 기록해보세요."}
+                  ? t("bloodPressureRecordModal.subtitle.edit")
+                  : t("bloodPressureRecordModal.subtitle.create")}
               </p>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              aria-label="닫기"
+              aria-label={t("bloodPressureRecordModal.close")}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
             >
               <X size={18} strokeWidth={2.2} />
@@ -246,13 +250,13 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           {/* 안내 박스 */}
           <div className="mt-5 space-y-1.5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
             <p className="text-[13px] leading-relaxed text-[#64748B]">
-              정상 혈압: 수축기 120mmHg 미만, 이완기 80mmHg 미만
+              {t("bloodPressureRecordModal.info.normal")}
             </p>
             <p className="text-[13px] leading-relaxed text-[#64748B]">
-              고혈압: 수축기 140mmHg 이상 또는 이완기 90mmHg 이상
+              {t("bloodPressureRecordModal.info.high")}
             </p>
             <p className="text-[13px] leading-relaxed text-[#64748B]">
-              저혈압: 일반적으로 수축기 90mmHg 이하 또는 이완기 60mmHg 이하
+              {t("bloodPressureRecordModal.info.low")}
             </p>
           </div>
         </div>
@@ -273,7 +277,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
                       : "text-[#64748B]"
                   }`}
                 >
-                  {tab}
+                  {t(`bloodPressureRecordModal.tab.${tab}`)}
                 </button>
               ))}
             </div>
@@ -283,7 +287,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           <div className="pb-2 pt-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-[24px] border border-[#E2E8F0] bg-[#FCFDFE] px-5 py-6 text-center shadow-sm">
-                <p className="text-[14px] font-semibold text-[#94A3B8]">수축기</p>
+                <p className="text-[14px] font-semibold text-[#94A3B8]">{t("bloodPressureRecordModal.systolic")}</p>
 
                 <div className="mt-3 flex items-end justify-center gap-1">
                   <input
@@ -301,7 +305,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
               </div>
 
               <div className="rounded-[24px] border border-[#E2E8F0] bg-[#FCFDFE] px-5 py-6 text-center shadow-sm">
-                <p className="text-[14px] font-semibold text-[#94A3B8]">이완기</p>
+                <p className="text-[14px] font-semibold text-[#94A3B8]">{t("bloodPressureRecordModal.diastolic")}</p>
 
                 <div className="mt-3 flex items-end justify-center gap-1">
                   <input
@@ -323,7 +327,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
           {/* 혈압 상태 */}
           <div className="pt-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[15px] font-bold text-[#1E293B]">혈압 상태</span>
+              <span className="text-[15px] font-bold text-[#1E293B]">{t("bloodPressureRecordModal.statusHeading")}</span>
               <span
                 className={`rounded-full px-3 py-1 text-[12px] font-bold ${bpInfo.badgeClass}`}
               >
@@ -345,10 +349,10 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
             </div>
 
             <div className="mt-3 flex justify-between px-0.5 text-[11px] font-medium text-[#94A3B8]">
-              <span>저혈압</span>
-              <span>정상</span>
-              <span>주의</span>
-              <span>고혈압</span>
+              <span>{t("bloodPressureRecordModal.gauge.low")}</span>
+              <span>{t("bloodPressureRecordModal.gauge.normal")}</span>
+              <span>{t("bloodPressureRecordModal.gauge.caution")}</span>
+              <span>{t("bloodPressureRecordModal.gauge.high")}</span>
             </div>
           </div>
 
@@ -381,7 +385,9 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
                 disabled={submitting || deleting}
                 className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {deleting ? "삭제 중..." : "삭제"}
+                {deleting
+                  ? t("bloodPressureRecordModal.button.deleting")
+                  : t("bloodPressureRecordModal.button.delete")}
               </button>
             )}
             <button
@@ -391,10 +397,10 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
               className={`${isEditMode ? "flex-1" : "w-full"} rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {submitting
-                ? "저장 중..."
+                ? t("bloodPressureRecordModal.button.saving")
                 : isEditMode
-                ? "수정 저장"
-                : "기록 저장 및 확인"}
+                ? t("bloodPressureRecordModal.button.update")
+                : t("bloodPressureRecordModal.button.submit")}
             </button>
           </div>
         </div>

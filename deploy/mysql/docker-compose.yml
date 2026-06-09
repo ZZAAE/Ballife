@@ -1,0 +1,20 @@
+# [mysql-server] MySQL 만 (공식 이미지 — GHCR 불필요)
+name: ballife-mysql
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      # ⚠️ 보안: 방화벽에서 "backend-server IP" 에게만 3306 허용할 것 (외부 공개 금지)
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: project_ballife
+      MYSQL_USER: ${MYSQL_USER:-ballife}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:

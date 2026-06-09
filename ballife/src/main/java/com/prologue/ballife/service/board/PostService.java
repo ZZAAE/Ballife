@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.board.PostLike;
 import com.prologue.ballife.domain.user.User;
@@ -35,13 +36,14 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final MessageResolver messages;
     // 게시글작성,수정,삭제 | 전체게시글조회,카테고리별조회
 
     // 게시글 작성
     @Transactional
     public PostDto.PostResponse createPost(Long USER_ID, PostDto.CreateRequest request){
         User user = userRepository.findById(USER_ID)
-            .orElseThrow(() -> new ResourceNotFoundException("회원", USER_ID));
+            .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), USER_ID)));
 
         Post post = Post.builder()
             .userId(user)
@@ -92,7 +94,7 @@ public class PostService {
     // currentUserId 가 있으면 해당 사용자의 추천 여부(liked)를 함께 내려준다.
     public PostDto.PostResponse getPost(Long id, Long currentUserId) {
     Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("게시글", id));
+            .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), id)));
     boolean liked = currentUserId != null
             && postLikeRepository.existsByPost_PostIdAndUser_UserId(id, currentUserId);
     return PostDto.PostResponse.from(post, liked);
@@ -102,7 +104,7 @@ public class PostService {
     @Transactional
     public void recordView(Long id) {
     Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("게시글", id));
+            .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), id)));
     post.increaseViewCount();
 }
 
@@ -110,11 +112,11 @@ public class PostService {
     @Transactional
     public PostDto.PostResponse updatePost(Long postId, Long userId, PostDto.UpdateRequest request) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), postId)));
 
         if (!post.getUserId().getUserId().equals(userId)) {
             throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN, "본인 글만 수정할 수 있습니다.");
+            HttpStatus.FORBIDDEN, messages.get("business.post.notOwnerUpdate"));
         }
 
         post.setTitle(request.getTitle());
@@ -129,10 +131,10 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId, Long userId) {
     Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
+            .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), postId)));
     if (!post.getUserId().getUserId().equals(userId)) {
         throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.FORBIDDEN, "본인 글만 삭제할 수 있습니다.");
+                org.springframework.http.HttpStatus.FORBIDDEN, messages.get("business.post.notOwnerDelete"));
     }
     // FK 제약 순서대로 자식 데이터 일괄 삭제 → 마지막에 게시글 제거
     commentLikeRepository.deleteAllByPostId(postId);
@@ -149,9 +151,9 @@ public class PostService {
     @Transactional
     public PostDto.UpVoteResponse toggleUpvote(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), postId)));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         boolean alreadyLiked = postLikeRepository.existsByPost_PostIdAndUser_UserId(postId, userId);
         boolean liked;

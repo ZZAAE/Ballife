@@ -25,6 +25,9 @@ import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
 import com.prologue.ballife.analyzer.BloodPressureDaily;
 import com.prologue.ballife.analyzer.BloodSugarAnalysisResult;
 import com.prologue.ballife.analyzer.DailyValue;
+import com.prologue.ballife.config.MessageResolver;
+
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,19 +69,39 @@ public class ReportChartRenderer {
 
     private static final DateTimeFormatter X_FMT = DateTimeFormatter.ofPattern("M/d");
 
-    private final Font fontBase;
+    private final Font fontBase;     // Noto Sans KR (ko/en 및 기본)
+    private final Font fontScBase;   // Noto Sans SC (간체 중국어 범례용, 없으면 fontBase 로 폴백)
+    private final Font fontJpBase;   // Noto Sans JP (일본어 범례/한자 자형용, 없으면 fontBase 로 폴백)
+    private final MessageResolver messages;
 
-    public ReportChartRenderer() {
-        this.fontBase = loadFont();
+    public ReportChartRenderer(MessageResolver messages) {
+        this.messages = messages;
+        this.fontBase = loadFont("/fonts/NotoSansKR-Regular.ttf");
+        this.fontScBase = loadOptionalFont("/fonts/NotoSansSC-Regular.ttf", this.fontBase);
+        this.fontJpBase = loadOptionalFont("/fonts/NotoSansJP-Regular.ttf", this.fontBase);
     }
 
-    private Font loadFont() {
-        try (InputStream in = new ClassPathResource("/fonts/NotoSansKR-Regular.ttf").getInputStream()) {
+    private Font loadFont(String classpath) {
+        try (InputStream in = new ClassPathResource(classpath).getInputStream()) {
             return Font.createFont(Font.TRUETYPE_FONT, in);
         } catch (Exception e) {
             log.warn("차트 폰트 로드 실패 → 기본 폰트 사용: {}", e.getMessage());
             return new Font(Font.SANS_SERIF, Font.PLAIN, 12);
         }
+    }
+
+    /** 선택적 폰트 — 없으면 fallback 폰트를 그대로 사용. */
+    private Font loadOptionalFont(String classpath, Font fallback) {
+        if (!new ClassPathResource(classpath).exists()) return fallback;
+        return loadFont(classpath);
+    }
+
+    /** 요청 로케일별 범례 폰트: 일본어→JP, 간체 중국어→SC, 그 외→KR. (범례 글리프 깨짐/자형 보정) */
+    private Font baseFontForLocale() {
+        String lang = LocaleContextHolder.getLocale().getLanguage();
+        if ("ja".equals(lang)) return fontJpBase;
+        if ("zh".equals(lang)) return fontScBase;
+        return fontBase;
     }
 
     // ─────────────────────────── public API ───────────────────────────
@@ -87,8 +110,8 @@ public class ReportChartRenderer {
     public String bloodPressureChart(BloodPressureAnalysisResult bp, LocalDate start, LocalDate end) {
         if (bp == null) return "";
         List<Series> series = new ArrayList<>();
-        series.add(bpSeries(bp.dailyRecords(), true,  "수축기", C_SYS));
-        series.add(bpSeries(bp.dailyRecords(), false, "이완기", C_DIA));
+        series.add(bpSeries(bp.dailyRecords(), true,  messages.get("report.chart.systolic"), C_SYS));
+        series.add(bpSeries(bp.dailyRecords(), false, messages.get("report.chart.diastolic"), C_DIA));
         return render(series, start, end, "mmHg");
     }
 
@@ -96,9 +119,9 @@ public class ReportChartRenderer {
     public String bloodSugarChart(BloodSugarAnalysisResult bs, LocalDate start, LocalDate end) {
         if (bs == null) return "";
         List<Series> series = new ArrayList<>();
-        series.add(dvSeries(bs.dailyFasting(),  "공복", C_FAST));
-        series.add(dvSeries(bs.dailyPreMeal(),  "식전", C_PRE));
-        series.add(dvSeries(bs.dailyPostMeal(), "식후", C_POST));
+        series.add(dvSeries(bs.dailyFasting(),  messages.get("report.chart.fasting"), C_FAST));
+        series.add(dvSeries(bs.dailyPreMeal(),  messages.get("report.chart.preMeal"), C_PRE));
+        series.add(dvSeries(bs.dailyPostMeal(), messages.get("report.chart.postMeal"), C_POST));
         return render(series, start, end, "mg/dL");
     }
 
@@ -157,9 +180,10 @@ public class ReportChartRenderer {
             final int plotT = PAD_TOP,  plotB = H - PAD_BOTTOM;
             final int plotW = plotR - plotL, plotH = plotB - plotT;
 
-            final Font fAxis   = fontBase.deriveFont(Font.PLAIN, 15f);
-            final Font fLegend = fontBase.deriveFont(Font.PLAIN, 16f);
-            final Font fUnit   = fontBase.deriveFont(Font.PLAIN, 13f);
+            final Font base    = baseFontForLocale();
+            final Font fAxis   = base.deriveFont(Font.PLAIN, 15f);
+            final Font fLegend = base.deriveFont(Font.PLAIN, 16f);
+            final Font fUnit   = base.deriveFont(Font.PLAIN, 13f);
 
             // y 격자 + 값 라벨
             final int ticks = 4;

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 // 영양 수치는 소수점 첫째 자리까지만 표시 (정수는 그대로)
 const round1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
@@ -23,6 +24,7 @@ const MealRecordCard = ({
   className = "",
   onClick,
 }) => {
+  const { t } = useTranslation();
   const visibleItems = items.slice(0, 2);
   const hiddenCount = Math.max(items.length - 3, 0);
 
@@ -45,10 +47,10 @@ const MealRecordCard = ({
     <button
       type="button"
       onClick={onClick}
-      className={`block overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
+      className={`flex flex-col overflow-hidden rounded-[12px] border border-[#E8ECF1] bg-white text-left shadow-[0_4px_14px_rgba(15,23,42,0.06)] ${className}`}
     >
       <div
-        className="relative h-[180px]"
+        className="relative h-[180px] shrink-0"
         style={{
           background: image
             ? undefined
@@ -97,7 +99,7 @@ const MealRecordCard = ({
 
         {hiddenCount > 0 ? (
           <p className="mb-3 mt-1 text-[12px] font-[500] text-gray-400">
-            외 {hiddenCount}개
+            {t("mealRecordCard.hiddenCount", { count: hiddenCount })}
           </p>
         ) : (
           <div className="mb-3" />
@@ -106,7 +108,7 @@ const MealRecordCard = ({
         <div className="border-t border-gray-100 pt-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[13px] font-[800] text-[#363636]">
-              합계
+              {t("mealRecordCard.total")}
             </span>
 
             <span className="text-[17px] font-[700] text-[#323232]">
@@ -116,35 +118,35 @@ const MealRecordCard = ({
 
           <div className="flex flex-wrap gap-1">
             <MacroBadge
-              label="탄"
+              label={t("mealRecordCard.macro.carb")}
               value={round1(totals.carb)}
               bgColor="bg-slate-100"
               textColor="text-slate-400"
             />
 
             <MacroBadge
-              label="단"
+              label={t("mealRecordCard.macro.protein")}
               value={round1(totals.protein)}
               bgColor="bg-cyan-50"
               textColor="text-cyan-500"
             />
 
             <MacroBadge
-              label="지"
+              label={t("mealRecordCard.macro.fat")}
               value={round1(totals.fat)}
               bgColor="bg-orange-50"
               textColor="text-orange-400"
             />
 
             <MacroBadge
-              label="당"
+              label={t("mealRecordCard.macro.sugar")}
               value={round1(totals.sugar)}
               bgColor="bg-pink-50"
               textColor="text-pink-400"
             />
 
             <MacroBadge
-              label="콜"
+              label={t("mealRecordCard.macro.chol")}
               value={round1(totals.chol)}
               bgColor="bg-indigo-50"
               textColor="text-indigo-400"
@@ -152,7 +154,7 @@ const MealRecordCard = ({
             />
 
             <MacroBadge
-              label="나"
+              label={t("mealRecordCard.macro.na")}
               value={round1(totals.na)}
               bgColor="bg-yellow-50"
               textColor="text-yellow-500"

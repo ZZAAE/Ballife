@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { USER_KEY } from "../../api/api";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
@@ -62,6 +63,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function BloodSugarRecord() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -151,12 +153,12 @@ export default function BloodSugarRecord() {
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-            <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">혈당 기록 확인</h1>
-            <p className="mb-8 text-sm text-gray-500">지난 혈당 변화를 분석한 결과입니다.</p>
+            <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">{t("bloodSugarRecordPage.title")}</h1>
+            <p className="mb-8 text-sm text-gray-500">{t("bloodSugarRecordPage.subtitle")}</p>
 
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               <MetricCard className="ring-1 ring-rose-100 bg-gradient-to-br from-rose-50/40 to-white">
-                <span className="text-sm font-semibold text-rose-500">평균 혈당</span>
+                <span className="text-sm font-semibold text-rose-500">{t("bloodSugarRecordPage.avgBloodSugar")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-[44px] font-extrabold leading-none tracking-tight text-blue-500">
                     {loading ? "…" : (avgMealBefore ?? "--")}
@@ -169,12 +171,12 @@ export default function BloodSugarRecord() {
                 </div>
                 <div className="mt-auto inline-flex w-fit items-center gap-2 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 ring-1 ring-rose-100">
                   <span className="h-2 w-2 rounded-full bg-rose-400" />
-                  {filteredRecords.length > 0 ? `기간 내 ${filteredRecords.length}건 평균` : "기록 없음"}
+                  {filteredRecords.length > 0 ? t("bloodSugarRecordPage.periodAverage", { count: filteredRecords.length }) : t("bloodSugarRecordPage.noRecord")}
                 </div>
               </MetricCard>
 
               <MetricCard>
-                <span className="text-xs font-medium text-[#64748B]">최근 혈당</span>
+                <span className="text-xs font-medium text-[#64748B]">{t("bloodSugarRecordPage.recentBloodSugar")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-blue-500">
                     {loading ? "…" : (latestMealBefore?.bloodSugar ?? "--")}
@@ -185,18 +187,18 @@ export default function BloodSugarRecord() {
                   </span>
                   <span className="pb-1 text-sm text-[#64748B]">mg/dL</span>
                 </div>
-                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">식전 / 식후</p>
+                <p className="mt-auto py-1.5 text-xs font-semibold text-blue-600">{t("bloodSugarRecordPage.beforeAfterMeal")}</p>
               </MetricCard>
 
               <MetricCard>
-                <span className="text-xs font-medium text-[#64748B]">최근 공복 혈당</span>
+                <span className="text-xs font-medium text-[#64748B]">{t("bloodSugarRecordPage.recentFastingBloodSugar")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-green-500">
                     {loading ? "…" : (latestFasting?.bloodSugar ?? "--")}
                   </span>
                   <span className="pb-1 text-sm text-[#64748B]">mg/dL</span>
                 </div>
-                <p className="mt-auto py-1.5 text-xs font-semibold text-green-500">공복</p>
+                <p className="mt-auto py-1.5 text-xs font-semibold text-green-500">{t("bloodSugarRecordPage.fasting")}</p>
               </MetricCard>
             </div>
 
@@ -217,7 +219,7 @@ export default function BloodSugarRecord() {
               />
 
               <ChartSection
-                title="혈당 변화 추이"
+                title={t("bloodSugarRecordPage.chartTitle")}
                 startDate={pendingStart}
                 endDate={pendingEnd}
                 onStartDateChange={setPendingStart}
@@ -235,7 +237,7 @@ export default function BloodSugarRecord() {
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
-                      식전 · 식후
+                      {t("bloodSugarRecordPage.toggleMealtime")}
                     </button>
                     <button
                       type="button"
@@ -246,14 +248,14 @@ export default function BloodSugarRecord() {
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
-                      공복 · 취침전
+                      {t("bloodSugarRecordPage.toggleFasting")}
                     </button>
                   </div>
                 }
               >
                 {chartData.length === 0 ? (
                   <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                    해당 기간에 혈당 기록이 없습니다.
+                    {t("bloodSugarRecordPage.emptyChart")}
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -283,13 +285,13 @@ export default function BloodSugarRecord() {
                       <Tooltip content={<CustomTooltip />} />
                       {chartView === "mealtime" ? (
                         <>
-                          <Area type="monotone" dataKey="식전" name="식전" stroke="#3b82f6" strokeWidth={2.5} fill="url(#mealBeforeGrad)" dot={{ fill: "#fff", stroke: "#3b82f6", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
-                          <Area type="monotone" dataKey="식후" name="식후" stroke="#22c55e" strokeWidth={2.5} fill="url(#mealAfterGrad)" dot={{ fill: "#fff", stroke: "#22c55e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="식전" name={t("bloodSugarRecordPage.legend.beforeMeal")} stroke="#3b82f6" strokeWidth={2.5} fill="url(#mealBeforeGrad)" dot={{ fill: "#fff", stroke: "#3b82f6", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="식후" name={t("bloodSugarRecordPage.legend.afterMeal")} stroke="#22c55e" strokeWidth={2.5} fill="url(#mealAfterGrad)" dot={{ fill: "#fff", stroke: "#22c55e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
                         </>
                       ) : (
                         <>
-                          <Area type="monotone" dataKey="공복" name="공복" stroke="#f43f5e" strokeWidth={2.5} fill="url(#fastingGrad)" dot={{ fill: "#fff", stroke: "#f43f5e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
-                          <Area type="monotone" dataKey="취침전" name="취침전" stroke="#a855f7" strokeWidth={2.5} fill="url(#bedtimeGrad)" dot={{ fill: "#fff", stroke: "#a855f7", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="공복" name={t("bloodSugarRecordPage.legend.fasting")} stroke="#f43f5e" strokeWidth={2.5} fill="url(#fastingGrad)" dot={{ fill: "#fff", stroke: "#f43f5e", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
+                          <Area type="monotone" dataKey="취침전" name={t("bloodSugarRecordPage.legend.bedtime")} stroke="#a855f7" strokeWidth={2.5} fill="url(#bedtimeGrad)" dot={{ fill: "#fff", stroke: "#a855f7", strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} connectNulls={true} />
                         </>
                       )}
                     </AreaChart>

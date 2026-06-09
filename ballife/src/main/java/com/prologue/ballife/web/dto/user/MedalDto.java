@@ -18,15 +18,15 @@ public class MedalDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CreateRequest {
-        @NotBlank(message = "메달 이름을 입력해주세요")
-        @Size(max = 50, message = "메달 이름은 50자 이하여야 합니다")
+        @NotBlank(message = "{validation.medal.medalName.required}")
+        @Size(max = 50, message = "{validation.medal.medalName.size}")
         private String medalName;
 
-        @NotBlank(message = "메달 아이콘을 입력해주세요")
-        @Size(max = 256, message = "메달 아이콘 경로는 256자 이하여야 합니다")
+        @NotBlank(message = "{validation.medal.medalIcon.required}")
+        @Size(max = 256, message = "{validation.medal.medalIcon.size}")
         private String medalIcon;
 
-        @NotNull(message = "메달 가격을 입력해주세요")
+        @NotNull(message = "{validation.medal.medalPrice.required}")
         private Long medalPrice;
     }
 

@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import MealRecordCard from "../components/MealRecordCard";
 import MealDetailModal from "../modals/MealDetailModal";
 import mealApi from "../api/mealApi";
 import userConfigApi from "../api/userConfigApi";
 import { useAuth } from "../contexts/AuthContext";
 
-const MEAL_CATEGORY_LABEL = {
-  BREAKFAST: "아침",
-  LUNCH: "점심",
-  DINNER: "저녁",
-  SNACK: "간식",
+const MEAL_CATEGORY_LABEL_KEY = {
+  BREAKFAST: "mealPage.category.breakfast",
+  LUNCH: "mealPage.category.lunch",
+  DINNER: "mealPage.category.dinner",
+  SNACK: "mealPage.category.snack",
 };
 const MEAL_CATEGORY_ORDER = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
 
@@ -48,7 +50,7 @@ function buildMealData(meal) {
   if (!meal) return null;
   const sum = (key) => meal.items.reduce((s, i) => s + (i[key] || 0), 0);
   return {
-    mealType: `${meal.label} 식사`,
+    mealType: i18n.t("mealPage.mealType", { label: meal.label }),
     foods: meal.items.map((item, idx) => ({
       id: idx + 1,
       name: item.name,
@@ -125,14 +127,14 @@ const NUTRIENT_DEFS = [
   { key: "chol",    label: "콜레스테롤", type: "limit",   weight: 0.8 },
 ];
 
-const ADVICE_TEXT = {
-  kcal:    { low: "총 섭취 열량이 권장량보다 부족해요. 균형 잡힌 한 끼를 더 챙겨보세요.",      high: "총 섭취 열량이 권장량을 넘었어요. 다음 끼니의 양을 조절해보세요." },
-  carb:    { low: "탄수화물이 부족해요. 현미밥이나 통곡물로 보충해보세요.",                    high: "탄수화물을 다소 많이 드셨어요. 정제 탄수화물을 줄여보세요." },
-  protein: { low: "단백질이 부족해요. 닭가슴살·계란·두부 등으로 보충해보세요.",               high: "단백질이 권장량을 넘었어요. 신장에 부담이 없도록 조절해보세요." },
-  fat:     { low: "지방이 부족해요. 견과류·올리브유 등 건강한 지방을 더해보세요.",            high: "지방을 다소 많이 드셨어요. 튀김·기름진 음식을 줄여보세요." },
-  sugar:   { high: "당류를 권장량보다 많이 드셨어요. 단 음료와 디저트를 줄여보세요." },
-  na:      { high: "나트륨 섭취가 많아요. 국물·가공식품·짠 음식을 줄여보세요." },
-  chol:    { high: "콜레스테롤 섭취가 많아요. 기름진 육류·내장류를 조절해보세요." },
+const ADVICE_TEXT_KEY = {
+  kcal:    { low: "mealPage.advice.kcal.low",    high: "mealPage.advice.kcal.high" },
+  carb:    { low: "mealPage.advice.carb.low",    high: "mealPage.advice.carb.high" },
+  protein: { low: "mealPage.advice.protein.low", high: "mealPage.advice.protein.high" },
+  fat:     { low: "mealPage.advice.fat.low",     high: "mealPage.advice.fat.high" },
+  sugar:   { high: "mealPage.advice.sugar.high" },
+  na:      { high: "mealPage.advice.na.high" },
+  chol:    { high: "mealPage.advice.chol.high" },
 };
 
 function analyzeDailyNutrition(sums, targets) {
@@ -196,37 +198,40 @@ function analyzeDailyNutrition(sums, targets) {
   // ── 등급 ───────────────────────────────────────────────────────────────
   let statusLabel, scoreColor, headline;
   if (!hasData) {
-    statusLabel = "기록 없음";
+    statusLabel = i18n.t("mealPage.status.noRecord");
     scoreColor = "#94A3B8";
-    headline = "아직 기록된 식단이 없어요.";
+    headline = i18n.t("mealPage.headline.noRecord");
   } else if (score >= 85) {
-    statusLabel = "훌륭한 균형";
+    statusLabel = i18n.t("mealPage.status.excellent");
     scoreColor = "#10B981";
-    headline = "영양 성분이 아주 조화롭습니다.";
+    headline = i18n.t("mealPage.headline.excellent");
   } else if (score >= 70) {
-    statusLabel = "양호한 균형";
+    statusLabel = i18n.t("mealPage.status.good");
     scoreColor = "#22C55E";
-    headline = "전반적으로 균형 잡힌 식단이에요.";
+    headline = i18n.t("mealPage.headline.good");
   } else if (score >= 50) {
-    statusLabel = "보완 필요";
+    statusLabel = i18n.t("mealPage.status.needsWork");
     scoreColor = "#F59E0B";
-    headline = "영양 균형에 약간의 보완이 필요해요.";
+    headline = i18n.t("mealPage.headline.needsWork");
   } else {
-    statusLabel = "불균형 주의";
+    statusLabel = i18n.t("mealPage.status.imbalanced");
     scoreColor = "#EF4444";
-    headline = "영양 불균형이 감지되었어요.";
+    headline = i18n.t("mealPage.headline.imbalanced");
   }
 
   // ── 조언 문장 ───────────────────────────────────────────────────────────
   let advice;
   if (!hasData) {
-    advice = "전체 기록 관리 페이지에서 오늘의 식단을 등록하면 섭취 영양소를 분석해 점수와 맞춤 조언을 알려드려요.";
+    advice = i18n.t("mealPage.advice.noRecord");
   } else if (issues.length === 0) {
-    advice = "현재까지 섭취한 영양소 비율이 권장 가이드라인에 매우 근접해 있어요. 남은 하루도 지금처럼 균형 잡힌 식사를 이어가 보세요.";
+    advice = i18n.t("mealPage.advice.balanced");
   } else {
     advice = issues
       .slice(0, 2)
-      .map((i) => ADVICE_TEXT[i.key]?.[i.kind])
+      .map((i) => {
+        const adviceKey = ADVICE_TEXT_KEY[i.key]?.[i.kind];
+        return adviceKey ? i18n.t(adviceKey) : null;
+      })
       .filter(Boolean)
       .join(" ");
   }
@@ -239,24 +244,24 @@ function analyzeDailyNutrition(sums, targets) {
 
     // 칭찬 태그
     if (!issueKeys.has("protein") && ratioOf("protein") >= 0.85) {
-      tags.push({ text: "#단백질_충분", tone: "good" });
+      tags.push({ text: i18n.t("mealPage.tag.proteinEnough"), tone: "good" });
     }
-    if (ratioOf("sugar") <= 0.7) tags.push({ text: "#저당_식단", tone: "good" });
-    if (ratioOf("na") <= 0.7)    tags.push({ text: "#저염_식단", tone: "good" });
+    if (ratioOf("sugar") <= 0.7) tags.push({ text: i18n.t("mealPage.tag.lowSugar"), tone: "good" });
+    if (ratioOf("na") <= 0.7)    tags.push({ text: i18n.t("mealPage.tag.lowSodium"), tone: "good" });
 
     // 주의 태그 (문제 위주)
-    const WARN_TAG = {
-      sugar:   "#당_주의",
-      na:      "#나트륨_주의",
-      chol:    "#콜레스테롤_주의",
-      kcal:    "#열량_관리",
-      carb:    "#탄수화물_관리",
-      fat:     "#지방_관리",
-      protein: "#단백질_부족",
+    const WARN_TAG_KEY = {
+      sugar:   "mealPage.tag.sugarWarn",
+      na:      "mealPage.tag.sodiumWarn",
+      chol:    "mealPage.tag.cholWarn",
+      kcal:    "mealPage.tag.kcalManage",
+      carb:    "mealPage.tag.carbManage",
+      fat:     "mealPage.tag.fatManage",
+      protein: "mealPage.tag.proteinLow",
     };
     issues.forEach((i) => {
-      const text = WARN_TAG[i.key];
-      if (text) tags.push({ text, tone: "warn" });
+      const tagKey = WARN_TAG_KEY[i.key];
+      if (tagKey) tags.push({ text: i18n.t(tagKey), tone: "warn" });
     });
   }
 
@@ -273,6 +278,7 @@ function analyzeDailyNutrition(sums, targets) {
 
 // ── MealPage ──────────────────────────────────────────────────────────────
 export default function MealPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const [selectedMeal, setSelectedMeal] = useState(null);
@@ -333,7 +339,7 @@ export default function MealPage() {
           if (!groupedByCategory[cat]) {
             groupedByCategory[cat] = {
               id: cat,
-              label: MEAL_CATEGORY_LABEL[cat] || cat,
+              label: MEAL_CATEGORY_LABEL_KEY[cat] ? i18n.t(MEAL_CATEGORY_LABEL_KEY[cat]) : cat,
               time: (m.mealTime || "").slice(0, 5),
               image: m.mealPhoto || null,
               items: [],
@@ -371,12 +377,12 @@ export default function MealPage() {
   const achievement = targetCal > 0 ? Math.round((totalCal / targetCal) * 100) : 0;
 
   const nutritionSummary = [
-    { label: "탄수화물",    current: Math.round(sumKey("carb")),    target: nutritionTargets.carb,    unit: "g",  over: sumKey("carb")    > nutritionTargets.carb,    barClass: "bg-slate-400" },
-    { label: "단백질",      current: Math.round(sumKey("protein")), target: nutritionTargets.protein, unit: "g",  over: sumKey("protein") > nutritionTargets.protein, barClass: "bg-cyan-500" },
-    { label: "지방",        current: Math.round(sumKey("fat")),     target: nutritionTargets.fat,     unit: "g",  over: sumKey("fat")     > nutritionTargets.fat,     barClass: "bg-orange-400" },
-    { label: "당류",        current: Math.round(sumKey("sugar")),   target: nutritionTargets.sugar,   unit: "g",  over: sumKey("sugar")   > nutritionTargets.sugar,   barClass: "bg-pink-400" },
-    { label: "나트륨",      current: Math.round(sumKey("na")),      target: nutritionTargets.na,      unit: "mg", over: sumKey("na")      > nutritionTargets.na,      barClass: "bg-yellow-500" },
-    { label: "콜레스테롤",  current: Math.round(sumKey("chol")),    target: nutritionTargets.chol,    unit: "mg", over: sumKey("chol")    > nutritionTargets.chol,    barClass: "bg-indigo-400" },
+    { label: t("mealPage.nutrient.carb"),    current: Math.round(sumKey("carb")),    target: nutritionTargets.carb,    unit: "g",  over: sumKey("carb")    > nutritionTargets.carb,    barClass: "bg-slate-400" },
+    { label: t("mealPage.nutrient.protein"), current: Math.round(sumKey("protein")), target: nutritionTargets.protein, unit: "g",  over: sumKey("protein") > nutritionTargets.protein, barClass: "bg-cyan-500" },
+    { label: t("mealPage.nutrient.fat"),     current: Math.round(sumKey("fat")),     target: nutritionTargets.fat,     unit: "g",  over: sumKey("fat")     > nutritionTargets.fat,     barClass: "bg-orange-400" },
+    { label: t("mealPage.nutrient.sugar"),   current: Math.round(sumKey("sugar")),   target: nutritionTargets.sugar,   unit: "g",  over: sumKey("sugar")   > nutritionTargets.sugar,   barClass: "bg-pink-400" },
+    { label: t("mealPage.nutrient.na"),      current: Math.round(sumKey("na")),      target: nutritionTargets.na,      unit: "mg", over: sumKey("na")      > nutritionTargets.na,      barClass: "bg-yellow-500" },
+    { label: t("mealPage.nutrient.chol"),    current: Math.round(sumKey("chol")),    target: nutritionTargets.chol,    unit: "mg", over: sumKey("chol")    > nutritionTargets.chol,    barClass: "bg-indigo-400" },
   ];
 
   // 오늘 섭취한 영양소를 분석해 점수·조언·태그를 계산
@@ -405,10 +411,10 @@ export default function MealPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-                  식단 기록 확인
+                  {t("mealPage.title")}
                 </h1>
                 <p className="mb-8 text-sm text-gray-500">
-                  지난 식단 기록을 분석한 결과입니다.
+                  {t("mealPage.subtitle")}
                 </p>
               </div>
 
@@ -444,15 +450,15 @@ export default function MealPage() {
                   <span className="text-[36px] font-semibold text-[#040d1b]">
                     {totalCal.toLocaleString()}
                   </span>
-                  <span className="text-[12px] font-semibold text-slate-400 uppercase">
+                  <span className="text-[12px] font-semibold text-slate-400">
                     / {targetCal.toLocaleString()} kcal
                   </span>
                 </div>
               </div>
               <div className="flex gap-6 text-center">
                 {[
-                  { label: "잔여",   value: remaining,         color: "#171c1f" },
-                  { label: "달성률", value: `${achievement}%`, color: "#004bca" },
+                  { label: t("mealPage.summary.remaining"),   value: remaining,         color: "#171c1f" },
+                  { label: t("mealPage.summary.achievement"), value: `${achievement}%`, color: "#004bca" },
                 ].map((s) => (
                   <div key={s.label}>
                     <p className="text-[10px] font-medium text-slate-400 m-0">{s.label}</p>
@@ -470,7 +476,7 @@ export default function MealPage() {
                 <div className="relative w-40 h-40">
                   <DonutChart value={analysis.score} max={100} size={160} strokeWidth={10} color={analysis.scoreColor} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-[11px] font-medium text-[#45474c]">오늘의 식단 점수</span>
+                    <span className="text-[11px] font-medium text-[#45474c]">{t("mealPage.scoreLabel")}</span>
                     <span className="text-[40px] font-semibold text-[#040d1b]">
                       {analysis.hasData ? analysis.score : "–"}
                     </span>
@@ -509,7 +515,7 @@ export default function MealPage() {
 
           {/* ── 식단 카드 (MealRecordCard 사용) ───────────────────────── */}
           <h2 className="text-xl font-medium text-[#040d1b] mt-0 mb-4">
-            오늘의 식단 기록 확인
+            {t("mealPage.recordsHeading")}
           </h2>
           {meals.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 mb-9 sm:grid-cols-2 lg:grid-cols-4">
@@ -549,11 +555,11 @@ export default function MealPage() {
                 </svg>
               </div>
               <h3 className="mb-2 text-[16px] font-semibold text-[#0F172A]">
-                기록된 식단이 없습니다
+                {t("mealPage.empty.heading")}
               </h3>
               <p className="text-center text-[13px] leading-relaxed text-[#64748B]">
-                <span className="font-semibold text-[#475569]">전체 기록 관리</span> 페이지에서<br />
-                오늘의 식단을 등록해보세요.
+                <span className="font-semibold text-[#475569]">{t("mealPage.empty.linkLabel")}</span>{t("mealPage.empty.descSuffix")}<br />
+                {t("mealPage.empty.descLine2")}
               </p>
             </div>
           )}
@@ -561,7 +567,7 @@ export default function MealPage() {
           {/* ── 영양 성분 분석 ─────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl p-7">
             <h3 className="text-xl font-medium text-[#040d1b] mt-0 mb-6">
-              오늘의 영양 성분 분석
+              {t("mealPage.nutritionHeading")}
             </h3>
             <div className="grid grid-cols-1 gap-x-12 gap-y-6 sm:grid-cols-2">
               {nutritionSummary.map((n) => (

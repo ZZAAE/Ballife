@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import toast from 'react-hot-toast';
 import authApi from '../../api/authApi';
 import petApi from '../../api/petApi';
 
 function LoginPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
@@ -26,8 +28,8 @@ function LoginPage() {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.loginId) newErrors.loginId = '아이디를 입력해주세요.';
-        if (!formData.password) newErrors.password = '비밀번호를 입력해주세요.';
+        if (!formData.loginId) newErrors.loginId = t('loginPage.validation.loginIdRequired');
+        if (!formData.password) newErrors.password = t('loginPage.validation.passwordRequired');
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -48,12 +50,12 @@ function LoginPage() {
             await petApi.createPet(response.data.userId)
                 .catch((err) => console.error('펫 등록 실패:', err));
 
-            toast.success(`${response.data.nickname || response.data.username}님, 환영합니다!`);
+            toast.success(t('loginPage.toast.welcome', { name: response.data.nickname || response.data.username }));
             const from = typeof location.state?.from === 'string' ? location.state.from : '/';
             navigate(from, { replace: true });
         } catch (error) {
             console.error('로그인 실패:', error);
-            const msg = error?.response?.data?.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+            const msg = error?.response?.data?.message || t('loginPage.toast.loginFailed');
             toast.error(msg);   // 직접 띄우기
         }
         finally {
@@ -67,7 +69,7 @@ function LoginPage() {
 
                 {/* 타이틀 */}
                 <h1 className="text-2xl font-medium text-center text-gray-900 mb-8 tracking-tight">
-                    로그인
+                    {t('loginPage.title')}
                 </h1>
 
                 <form onSubmit={handleSubmit} noValidate>
@@ -79,7 +81,7 @@ function LoginPage() {
                             name="loginId"
                             value={formData.loginId}
                             onChange={handleChange}
-                            placeholder="아이디를 입력해주세요."
+                            placeholder={t('loginPage.loginIdPlaceholder')}
                             autoComplete="username"
                             className={`
                                 w-full h-12 px-4
@@ -104,7 +106,7 @@ function LoginPage() {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            placeholder="비밀번호를 입력해주세요."
+                            placeholder={t('loginPage.passwordPlaceholder')}
                             autoComplete="current-password"
                             className={`
                                 w-full h-12 px-4
@@ -135,18 +137,18 @@ function LoginPage() {
                             disabled:opacity-60 disabled:cursor-not-allowed
                         "
                     >
-                        {loading ? '로그인 중...' : '로그인'}
+                        {loading ? t('loginPage.submitting') : t('loginPage.submit')}
                     </button>
                 </form>
 
                 {/* 회원가입 링크 */}
                 <p className="text-center mt-5 text-sm text-gray-500">
-                    계정이 없으신가요?{' '}
+                    {t('loginPage.noAccount')}{' '}
                     <Link
                         to="/signup"
                         className="text-blue-600 hover:underline"
                     >
-                        회원가입
+                        {t('loginPage.signUp')}
                     </Link>
                 </p>
             </div>

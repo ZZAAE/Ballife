@@ -23,16 +23,16 @@ public class AlarmDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
-        @NotBlank(message = "알람 종류를 선택해주세요")
+        @NotBlank(message = "{validation.alarm.alarmCategory.required}")
         private String alarmCategory;
 
-        @NotNull(message = "알람 시간을 선택")
+        @NotNull(message = "{validation.alarm.time.required}")
         private LocalTime time;
 
-        @NotBlank (message = "알람 요일을 선택하여 주세요")
+        @NotBlank (message = "{validation.alarm.alarmDay.required}")
         private String alarmDay;
 
-        @NotNull(message = "처방그룹을 선택해주세요")
+        @NotNull(message = "{validation.alarm.prescriptionId.required}")
         private Long prescriptionId;
 
         private Long supplementId;  // 약품 카테고리가 '영양제'인 경우에만 사용
@@ -46,16 +46,16 @@ public class AlarmDto {
     @AllArgsConstructor
     public static class UpdateRequest {
 
-        @NotBlank(message = "알람 종류를 선택해주세요")
+        @NotBlank(message = "{validation.alarm.alarmCategory.required}")
         private String alarmCategory;
 
-        @NotNull(message = "알람 시간을 선택")
+        @NotNull(message = "{validation.alarm.time.required}")
         private LocalTime time;
 
-        @NotBlank (message = "알람 요일을 선택하여 주세요")
+        @NotBlank (message = "{validation.alarm.alarmDay.required}")
         private String alarmDay;
 
-        @NotNull(message = "처방그룹을 선택해주세요")
+        @NotNull(message = "{validation.alarm.prescriptionId.required}")
         private Long prescriptionId;
 
         private Long supplementId;  // 약품 카테고리가 '영양제'

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import postApi from "../../api/boardApi";
-import Button from "../../components/Button";
+import Button from "../../components/button";
 import RichTextEditor from "../../components/board/RichTextEditor";
 import { isRichTextEmpty } from "../../components/board/richTextEditorUtils";
 
@@ -19,6 +20,7 @@ function formatEditorContent(content) {
 function PostEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [bootLoading, setBootLoading] = useState(true);
   const [saving, setSaving] = useState(null);
@@ -28,20 +30,20 @@ function PostEditPage() {
     content: "",
   });
   const categories = [
-    { value: "GENERAL", label: "자유게시판" },
-    { value: "DIABETES", label: "당뇨" },
-    { value: "OBESITY", label: "비만" },
-    { value: "OSTEOPOROSIS", label: "골다공증" },
-    { value: "HYPERLIPIDEMIA", label: "고지혈증" },
-    { value: "HYPERTENSION", label: "고혈압" },
-    { value: "GOUT", label: "통풍" },
-    { value: "QNA", label: "질문" },
+    { value: "GENERAL", label: t("postEditPage.category.general") },
+    { value: "DIABETES", label: t("postEditPage.category.diabetes") },
+    { value: "OBESITY", label: t("postEditPage.category.obesity") },
+    { value: "OSTEOPOROSIS", label: t("postEditPage.category.osteoporosis") },
+    { value: "HYPERLIPIDEMIA", label: t("postEditPage.category.hyperlipidemia") },
+    { value: "HYPERTENSION", label: t("postEditPage.category.hypertension") },
+    { value: "GOUT", label: t("postEditPage.category.gout") },
+    { value: "QNA", label: t("postEditPage.category.qna") },
   ];
 
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated || !user?.userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("postEditPage.toast.loginRequired"));
       //navigate('/login', { replace: true, state: { from: `/posts/${id}/edit` } });
       return;
     }
@@ -52,7 +54,7 @@ function PostEditPage() {
         const res = await postApi.getPost(id);
         const p = res.data;
         if (user.userId !== p.userId) {
-          toast.error("본인 글만 수정할 수 있습니다.");
+          toast.error(t("postEditPage.toast.onlyOwnPost"));
           navigate(`/posts/${id}`, { replace: true });
           return;
         }
@@ -81,19 +83,17 @@ function PostEditPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || isRichTextEmpty(formData.content)) {
-      toast.error("제목과 내용을 입력하세요.");
+      toast.error(t("postEditPage.toast.titleContentRequired"));
       return;
     }
     if (!user?.userId) {
-      toast.error(
-        "로그인 정보에 id가 없습니다. 로그아웃 후 다시 로그인하세요.",
-      );
+      toast.error(t("postEditPage.toast.noUserId"));
       return;
     }
     try {
       setSaving(true);
       await postApi.updatePost(user.userId, id, formData);
-      toast.success("수정되었습니다.");
+      toast.success(t("postEditPage.toast.updated"));
       navigate(`/posts/${id}`);
     } catch (error) {
       console.error(error);
@@ -105,7 +105,7 @@ function PostEditPage() {
   if (authLoading || bootLoading) {
     return (
       <div className="flex justify-center items-center min-h-[320px]">
-        <p className="text-gray-500">확인 중...</p>
+        <p className="text-gray-500">{t("postEditPage.checking")}</p>
       </div>
     );
   }
@@ -120,10 +120,10 @@ function PostEditPage() {
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-          글 수정
+          {t("postEditPage.title")}
         </h1>
         <p className="mb-8 text-sm text-gray-500">
-          건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
+          {t("postEditPage.subtitle")}
         </p>
 
             <form onSubmit={handleSubmit} className="space-y-7">
@@ -133,7 +133,7 @@ function PostEditPage() {
                     htmlFor="category"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    카테고리
+                    {t("postEditPage.label.category")}
                   </label>
                   <select
                     id="category"
@@ -161,7 +161,7 @@ function PostEditPage() {
                     htmlFor="title"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    제목
+                    {t("postEditPage.label.title")}
                   </label>
                   <input
                     id="title"
@@ -169,7 +169,7 @@ function PostEditPage() {
                     type="text"
                     value={formData.title}
                     onChange={handleChange}
-                    placeholder="포스트의 제목을 입력하세요"
+                    placeholder={t("postEditPage.placeholder.title")}
                     maxLength={120}
                     className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
                   />
@@ -180,16 +180,16 @@ function PostEditPage() {
                     htmlFor="content"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    내용
+                    {t("postEditPage.label.content")}
                   </label>
                   <RichTextEditor
                     value={formData.content}
                     onChange={handleContentChange}
-                    placeholder="내용을 입력하세요..."
+                    placeholder={t("postEditPage.placeholder.content")}
                   />
                   <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
                     <p className="mb-3 text-sm text-gray-400 lg:ml-6">
-                      툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
+                      {t("postEditPage.imageHint")}
                     </p>
                     <div className="flex flex-wrap items-center gap-3">
                       <Button
@@ -198,14 +198,14 @@ function PostEditPage() {
                         onClick={() => navigate(-1)}
                         className="rounded-[10px] border border-gray-200 !bg-white px-5 py-2.5 text-sm font-semibold !text-gray-700 shadow-sm transition hover:!bg-gray-50"
                       >
-                        나가기
+                        {t("postEditPage.button.cancel")}
                       </Button>
                       <Button
                         type="submit"
                         disabled={saving}
                         className="rounded-[10px] !bg-[#0F172A] px-6 py-2.5 text-sm font-semibold text-white transition hover:!bg-[#1E293B]"
                       >
-                        {saving ? "수정 중..." : "수정"}
+                        {saving ? t("postEditPage.button.saving") : t("postEditPage.button.submit")}
                       </Button>
                     </div>
                   </div>
