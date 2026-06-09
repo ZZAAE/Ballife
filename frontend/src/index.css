@@ -41,6 +41,26 @@ body {
     margin: auto;
   }
 
+  /* 부드러운 스크롤바 (복약 알림 등 카드 내부 목록용) */
+  .scrollbar-soft {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(71, 85, 105, 0.35) transparent;
+  }
+  .scrollbar-soft::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-soft::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-soft::-webkit-scrollbar-thumb {
+    background-color: rgba(71, 85, 105, 0.3);
+    border-radius: 9999px;
+  }
+  .scrollbar-soft::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(71, 85, 105, 0.55);
+  }
+
 }
 
 /* 리워드 +1 떠오르는 애니메이션 */

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Pill } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import MealIcon from "../../assets/MainPageIcon/Meal.svg";
 import ExerciseIcon from "../../assets/MainPageIcon/Ex.svg";
 import WaterIcon from "../../assets/MainPageIcon/Water.svg";
@@ -28,26 +30,27 @@ const parseRange = (raw) => {
 };
 
 const getBloodSugarStatus = (value, normalRaw) => {
-    if (value == null) return { label: "기록 없음", color: "text-[#94A3B8]" };
+    if (value == null) return { label: i18n.t("mainCard.noRecord"), color: "text-[#94A3B8]" };
     const { min, max } = parseRange(normalRaw);
     const lo = min ?? 70;
     const hi = max ?? 99;
-    if (value > hi) return { label: "정상 범위 초과", color: "text-red-500" };
-    if (value < lo) return { label: "정상 범위 미만", color: "text-blue-500" };
-    return { label: "정상 범위", color: "text-emerald-600" };
+    if (value > hi) return { label: i18n.t("mainCard.status.overRange"), color: "text-red-500" };
+    if (value < lo) return { label: i18n.t("mainCard.status.underRange"), color: "text-blue-500" };
+    return { label: i18n.t("mainCard.status.normalRange"), color: "text-emerald-600" };
 };
 
 const getBloodPressureStatus = (systolic, diastolic, sysRaw, diaRaw) => {
     if (systolic == null || diastolic == null)
-        return { label: "수축기 / 이완기", color: "text-[#475569]" };
+        return { label: i18n.t("mainCard.systolicDiastolic"), color: "text-[#475569]" };
     const sysMax = parseRange(sysRaw).max ?? 120;
     const diaMax = parseRange(diaRaw).max ?? 80;
     if (systolic > sysMax || diastolic > diaMax)
-        return { label: "정상 범위 초과", color: "text-[#ED5934]" };
-    return { label: "정상 범위", color: "text-emerald-600" };
+        return { label: i18n.t("mainCard.status.overRange"), color: "text-[#ED5934]" };
+    return { label: i18n.t("mainCard.status.normalRange"), color: "text-emerald-600" };
 };
 
 const Card = ({ data = {} }) => {
+    const { t } = useTranslation();
     const {
         bloodSugar,            // { value, recordedAt }
         bloodPressure,         // { systolic, diastolic, recordedAt }
@@ -79,11 +82,11 @@ const Card = ({ data = {} }) => {
     const statusCards = [
         {
             link: "blood-sugar",
-            type: "혈당",
+            type: t("mainCard.type.bloodSugar"),
             value:
                 bloodSugar?.value != null
-                    ? `${bloodSugar.value} mg/dL`
-                    : "기록 없음",
+                    ? t("mainCard.value.bloodSugar", { value: bloodSugar.value })
+                    : t("mainCard.noRecord"),
             label: sugarStatus.label,
             color: "bg-white",
             labelColor: "text-black",
@@ -93,11 +96,11 @@ const Card = ({ data = {} }) => {
         },
         {
             link: "blood-pressure",
-            type: "혈압",
+            type: t("mainCard.type.bloodPressure"),
             value:
                 bloodPressure?.systolic != null && bloodPressure?.diastolic != null
                     ? `${bloodPressure.systolic} / ${bloodPressure.diastolic}`
-                    : "기록 없음",
+                    : t("mainCard.noRecord"),
             label: pressureStatus.label,
             color: "bg-[#FFEEE3]",
             labelColor: "text-black",
@@ -107,9 +110,9 @@ const Card = ({ data = {} }) => {
         },
         {
             link: "weight",
-            type: "체중",
-            value: weight?.value != null ? `${weight.value}kg` : "기록 없음",
-            label: weight?.value != null ? "최근 측정" : "측정 기록이 없습니다",
+            type: t("mainCard.type.weight"),
+            value: weight?.value != null ? t("mainCard.value.weight", { value: weight.value }) : t("mainCard.noRecord"),
+            label: weight?.value != null ? t("mainCard.label.recentMeasure") : t("mainCard.label.noMeasureRecord"),
             color: "bg-[#F0F0F0]",
             labelColor: "text-black",
             undercolor: "text-[#5E5E5E]",
@@ -121,12 +124,12 @@ const Card = ({ data = {} }) => {
     const actionCards = [
         {
             link: "meal",
-            type: "식단",
-            value: "오늘 식단 확인",
+            type: t("mainCard.type.meal"),
+            value: t("mainCard.value.checkMeal"),
             label:
                 todayMealKcal != null
-                    ? `총 섭취 칼로리 ${Math.round(todayMealKcal)}kcal`
-                    : "총 섭취 칼로리 0kcal",
+                    ? t("mainCard.label.totalIntakeKcal", { kcal: Math.round(todayMealKcal) })
+                    : t("mainCard.label.totalIntakeKcal", { kcal: 0 }),
             color: "bg-[#DAFFE7]",
             labelColor: "text-black",
             undercolor: "text-[#008039]",
@@ -135,12 +138,12 @@ const Card = ({ data = {} }) => {
         },
         {
             link: "exercise",
-            type: "운동",
-            value: "오늘 운동 확인",
+            type: t("mainCard.type.exercise"),
+            value: t("mainCard.value.checkExercise"),
             label:
                 todayBurnedKcal != null
-                    ? `소모 칼로리 ${Math.round(todayBurnedKcal)}kcal`
-                    : "소모 칼로리 0kcal",
+                    ? t("mainCard.label.burnedKcal", { kcal: Math.round(todayBurnedKcal) })
+                    : t("mainCard.label.burnedKcal", { kcal: 0 }),
             color: "bg-[#FFFEAF]",
             labelColor: "text-black",
             undercolor: "text-[#E8BA00]",
@@ -149,14 +152,14 @@ const Card = ({ data = {} }) => {
         },
         {
             link: "all",
-            type: "수분 섭취",
-            value: `총 ${waterMl}ml`,
+            type: t("mainCard.type.waterIntake"),
+            value: t("mainCard.value.totalMl", { ml: waterMl }),
             label:
                 waterRemainCups != null
                     ? waterRemainCups === 0
-                        ? "목표량 달성"
-                        : `목표량까지 ${waterRemainCups}컵`
-                    : "목표 미설정",
+                        ? t("mainCard.label.goalAchieved")
+                        : t("mainCard.label.remainCups", { count: waterRemainCups })
+                    : t("mainCard.label.goalNotSet"),
             color: "bg-[#D6F6FF]",
             labelColor: "text-black",
             undercolor: "text-[#2A3491]",
@@ -167,15 +170,15 @@ const Card = ({ data = {} }) => {
 
     const medicineCard = {
         link: "/medicine",
-        type: "복약 알림",
+        type: t("mainCard.type.medicineAlert"),
         value:
             medicine?.todayRemaining != null && medicine.todayRemaining > 0
-                ? `${medicine.todayRemaining}건 확인 필요`
-                : "복용 완료",
+                ? t("mainCard.value.checkNeeded", { count: medicine.todayRemaining })
+                : t("mainCard.value.doseComplete"),
         label:
             medicine?.todayRemaining != null && medicine.todayRemaining > 0
-                ? "오늘 먹어야 하는 약"
-                : "오늘 일정이 모두 완료되었습니다",
+                ? t("mainCard.label.todayMedicine")
+                : t("mainCard.label.allScheduleComplete"),
         color: "bg-[#C9C7C7]",
         labelColor: "text-black",
         undercolor: "text-black",
@@ -187,13 +190,13 @@ const Card = ({ data = {} }) => {
     const renderIcon = (type) => {
         switch (type) {
             case "tint":
-                return <img src={BloodSugarIcon} className="w-[50px] h-[50px] object-contain" alt="혈당 아이콘" />;
+                return <img src={BloodSugarIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.bloodSugar")} />;
             case "heart":
-                return <img src={BloodPressureIcon} className="w-[50px] h-[50px] object-contain" alt="혈압 아이콘" />;
+                return <img src={BloodPressureIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.bloodPressure")} />;
             case "chart-line":
-                return <img src={WeightIcon} className="w-[50px] h-[50px] object-contain" alt="체중 아이콘" />;
+                return <img src={WeightIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.weight")} />;
             case "pill":
-                return <img src={MedicineIcon} className="w-[50px] h-[50px] object-contain" alt="복약 아이콘" />;
+                return <img src={MedicineIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.medicine")} />;
             default:
                 return null;
         }
@@ -202,13 +205,13 @@ const Card = ({ data = {} }) => {
     const renderActionIcon = (type) => {
         switch (type) {
             case "meal":
-                return <img src={MealIcon} className="w-[50px] h-[50px] object-contain" alt="식단 아이콘" />;
+                return <img src={MealIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.meal")} />;
             case "exercise":
-                return <img src={ExerciseIcon} className="w-[50px] h-[50px] object-contain" alt="운동 아이콘" />;
+                return <img src={ExerciseIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.exercise")} />;
             case "water":
-                return <img src={WaterIcon} className="w-[50px] h-[50px] object-contain" alt="수분 아이콘" />;
+                return <img src={WaterIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.water")} />;
             case "supplement":
-                return <img src={SupplementIcon} className="w-[50px] h-[50px] object-contain" alt="영양제 아이콘" />;
+                return <img src={SupplementIcon} className="w-[50px] h-[50px] object-contain" alt={t("mainCard.alt.supplement")} />;
             default:
                 return null;
         }
@@ -248,10 +251,10 @@ const Card = ({ data = {} }) => {
                 </section>
             </div>
 
-            <section className="lg:h-full">
-                <Link to={`/check${medicineCard.link}`} className="block h-full">
-                    <div className={`${medicineCard.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex h-full min-h-[180px] lg:min-h-full flex-col gap-10 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
-                        <div className="flex items-start justify-between gap-4">
+            <section className="relative lg:h-full">
+                <Link to={`/check${medicineCard.link}`} className="block h-full lg:absolute lg:inset-0">
+                    <div className={`${medicineCard.color} p-6 rounded-2xl shadow-[0_4px_16px_rgba(15,23,42,0.04)] border border-slate-100 flex h-full min-h-[180px] flex-col gap-6 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(15,23,42,0.08)]`}>
+                        <div className="flex flex-shrink-0 items-start justify-between gap-4">
                             <div>
                                 <p className={`text-sm font-bold ${medicineCard.overcolor || "text-slate-400"} mb-1`}>{medicineCard.type}</p>
                                 <p className="text-xl font-bold">{medicineCard.value}</p>
@@ -260,9 +263,9 @@ const Card = ({ data = {} }) => {
                             <div className="flex-shrink-0">{renderIcon(medicineCard.icon)}</div>
                         </div>
 
-                        <div className="space-y-5">
+                        <div className="scrollbar-soft flex-1 min-h-0 max-h-[180px] lg:max-h-none space-y-5 overflow-y-auto pr-1.5">
                             {medicineGroups.length === 0 ? (
-                                <p className="text-xs text-[#475569]">등록된 처방 약이 없습니다.</p>
+                                <p className="text-xs text-[#475569]">{t("mainCard.noPrescription")}</p>
                             ) : (
                                 medicineGroups.map((group) => (
                                     <div key={group.name} className="space-y-3">

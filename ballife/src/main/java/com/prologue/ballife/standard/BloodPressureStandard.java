@@ -21,19 +21,22 @@ public final class BloodPressureStandard {
 
     /** 혈압 최종 등급 */
     public enum Grade {
-        G0(0, "NORMAL",  "정상 (120/80 미만)"),
-        G1(1, "CAUTION", "약간 높음 (120-129 / 80 미만)"),
-        G2(2, "CAUTION", "다소 높음 (130-139 또는 80-89)"),
-        G3(3, "RISK",    "높음 (140-159 또는 90-99)"),
-        G4(4, "RISK",    "많이 높음 (160 이상 또는 100 이상)");
+        G0(0, "NORMAL",  "정상 (120/80 미만)",            "analysis.bp.g0"),
+        G1(1, "CAUTION", "약간 높음 (120-129 / 80 미만)",  "analysis.bp.g1"),
+        G2(2, "CAUTION", "다소 높음 (130-139 또는 80-89)", "analysis.bp.g2"),
+        G3(3, "RISK",    "높음 (140-159 또는 90-99)",      "analysis.bp.g3"),
+        G4(4, "RISK",    "많이 높음 (160 이상 또는 100 이상)", "analysis.bp.g4");
 
         public final int grade;
         public final String status;
         public final String label;
-        Grade(int grade, String status, String label) {
+        /** i18n 메시지 코드 (MessageResolver 로 로케일별 해석) */
+        public final String code;
+        Grade(int grade, String status, String label, String code) {
             this.grade = grade;
             this.status = status;
             this.label = label;
+            this.code = code;
         }
 
         public static Grade of(int grade) {

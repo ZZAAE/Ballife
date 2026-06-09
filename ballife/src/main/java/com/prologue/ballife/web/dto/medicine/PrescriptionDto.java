@@ -20,15 +20,15 @@ public class PrescriptionDto {
     @AllArgsConstructor
     public static class CreateRequest{
 
-        @NotBlank(message = "처방그룹 이름을 입력하세요")
-        @Size(max = 30, message = "처방그룹 이름은 30자 이하여야 합니다")
+        @NotBlank(message = "{validation.prescription.prescriptionName.required}")
+        @Size(max = 30, message = "{validation.prescription.prescriptionName.size}")
         private String prescriptionName;
 
         private LocalDate prescriptionDate;
 
         private String memo;
 
-        @NotBlank(message = "복용 간격을 최소 하나 이상 선택해주세요")
+        @NotBlank(message = "{validation.prescription.intakeIntervals.required}")
         private String intakeIntervals;
 
         private String dosage;
@@ -42,8 +42,8 @@ public class PrescriptionDto {
     @AllArgsConstructor
     public static class UpdateRequest{
 
-        @NotBlank(message = "처방그룹 이름을 입력하세요")
-        @Size(max = 30, message = "처방그룹 이름은 30자 이하여야 합니다")
+        @NotBlank(message = "{validation.prescription.prescriptionName.required}")
+        @Size(max = 30, message = "{validation.prescription.prescriptionName.size}")
         private String prescriptionName;
 
         private LocalDate prescriptionDate;
@@ -52,7 +52,7 @@ public class PrescriptionDto {
 
         private String memo;
 
-        @NotBlank(message = "복용 간격을 최소 하나 이상 선택해주세요")
+        @NotBlank(message = "{validation.prescription.intakeIntervals.required}")
         private String intakeIntervals;
 
         private String dosage;

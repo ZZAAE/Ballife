@@ -1,0 +1,13 @@
+# [mongo-server] MongoDB 만 (공식 이미지 — GHCR 불필요)
+name: ballife-mongo
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      # ⚠️ 보안: 방화벽에서 "backend-server IP" 에게만 27017 허용할 것 (외부 공개 금지)
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  mongo_data:

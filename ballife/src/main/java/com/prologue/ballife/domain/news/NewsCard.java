@@ -1,6 +1,7 @@
 package com.prologue.ballife.domain.news;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,7 +27,8 @@ public class NewsCard {
 
     private String category;    // 전체 / 당뇨 / 고혈압 / 통풍 / 비만 / 골다공증 / 고지혈증
     private int seq;            // 카테고리 내 정렬 순서 (0~5)
-    private String title;       // 기사 제목
+    private String title;       // 기사 제목 (원문: 한국어)
+    private Map<String, String> titleI18n; // 언어코드(en/ja/zh-CN) -> 번역된 제목 (ko 는 title 사용)
     private String link;        // 원문 링크 (클릭 시 새 탭 이동)
     private String thumbnail;   // 썸네일 URL (없으면 null)
     private String summary;     // 본문 요약

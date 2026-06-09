@@ -18,7 +18,7 @@ public class UserMedalDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AcquireRequest {
-        @NotNull(message = "메달 ID를 입력해주세요")
+        @NotNull(message = "{validation.userMedal.medalId.required}")
         private Long medalId;
     }
 

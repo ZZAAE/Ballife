@@ -22,6 +22,11 @@ const userApi = {
     return api.post(`/users/${userId}/points`, null, { params: { amount } });
   },
 
+  //리워드 포인트 차감 (보유 포인트만 감소, 누적 포인트는 변경 없음)
+  deductPoint: (userId, amount) => {
+    return api.post(`/users/${userId}/points/deduct`, null, { params: { amount } });
+  },
+
   //회원 삭제
   deleteMember: (userId) => {
     return api.delete(`/users/${userId}`);

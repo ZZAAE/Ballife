@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import Button from "../../components/Button";
+import Button from "../../components/button";
 import userApi from "../../api/userApi";
 import { useAuth } from "../../contexts/AuthContext";
 import {
@@ -10,6 +11,7 @@ import {
 } from "../../utils/userProfile";
 
 function ProfileEditPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const userId = user?.userId ?? user?.id;
@@ -48,7 +50,7 @@ function ProfileEditPage() {
         });
         setProfileImage(loadCachedMemberProfile().profileImage ?? null);
       } catch {
-        toast.error("회원 정보를 불러오지 못했습니다.");
+        toast.error(t("profileEditPage.toast.loadFailed"));
       } finally {
         setMemberLoaded(true);
       }
@@ -72,12 +74,12 @@ function ProfileEditPage() {
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error("이미지 파일만 선택할 수 있습니다.");
+      toast.error(t("profileEditPage.toast.imageOnly"));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("프로필 사진은 10MB 이하만 업로드할 수 있습니다.");
+      toast.error(t("profileEditPage.toast.imageTooLarge"));
       return;
     }
 
@@ -101,7 +103,7 @@ function ProfileEditPage() {
         setProfileImage(dataUrl);
       };
       img.onerror = () => {
-        toast.error("이미지를 불러올 수 없습니다.");
+        toast.error(t("profileEditPage.toast.imageLoadFailed"));
       };
       img.src = src;
     };
@@ -138,7 +140,7 @@ function ProfileEditPage() {
           ...payload,
           profileImage,
         });
-        toast.success("프로필이 저장되었습니다.");
+        toast.success(t("profileEditPage.toast.profileSaved"));
         navigate("/member");
         return;
       }
@@ -148,7 +150,7 @@ function ProfileEditPage() {
         ...data,
         profileImage,
       });
-      toast.success("회원 정보가 수정되었습니다.");
+      toast.success(t("profileEditPage.toast.memberUpdated"));
       navigate("/member");
     } catch (error) {
       const serverMessage =
@@ -163,12 +165,12 @@ function ProfileEditPage() {
           ...previousProfile,
           profileImage,
         });
-        toast.success("프로필 사진은 이 브라우저에 저장되었습니다.");
+        toast.success(t("profileEditPage.toast.imageSavedLocally"));
         navigate("/member");
         return;
       }
 
-      toast.error(serverMessage || "회원 정보 수정에 실패했습니다.");
+      toast.error(serverMessage || t("profileEditPage.toast.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -182,18 +184,19 @@ function ProfileEditPage() {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-[#64748B]">
-              {userId ? "회원 정보 수정" : "프로필 편집 데모"}
+              {userId
+                ? t("profileEditPage.eyebrow.member")
+                : t("profileEditPage.eyebrow.demo")}
             </p>
             <h1 className="mt-2 text-[30px] font-extrabold tracking-[-0.04em] text-[#0F172A]">
-              프로필 수정
+              {t("profileEditPage.title")}
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#64748B]">
-              이름, 닉네임, 생년월일, 성별, 신체 정보를 수정할 수 있습니다.
+              {t("profileEditPage.description")}
             </p>
             {!userId && (
               <p className="mt-2 text-xs font-medium text-[#2563EB]">
-                로그인 없이도 화면 확인이 가능하며 저장값은 브라우저에만
-                보관됩니다.
+                {t("profileEditPage.demoNotice")}
               </p>
             )}
           </div>
@@ -202,13 +205,13 @@ function ProfileEditPage() {
             onClick={() => navigate("/member")}
             className="rounded-full border border-[#CBD5E1] px-4 py-2 text-sm font-semibold text-[#475569] transition hover:bg-[#F8FAFC]"
           >
-            닫기
+            {t("profileEditPage.close")}
           </button>
         </div>
 
         {loading ? (
           <div className="rounded-2xl bg-[#F8FAFC] px-5 py-16 text-center text-sm font-medium text-[#64748B]">
-            회원 정보를 불러오는 중입니다.
+            {t("profileEditPage.loading")}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -219,7 +222,7 @@ function ProfileEditPage() {
                     {profileImage ? (
                       <img
                         src={profileImage}
-                        alt="프로필 미리보기"
+                        alt={t("profileEditPage.imageAlt")}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -228,16 +231,23 @@ function ProfileEditPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[#0F172A]">
-                      프로필 사진
+                      {t("profileEditPage.imageLabel")}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-[#64748B]">
-                      JPG, PNG, WEBP 이미지를 올릴 수 있습니다. 사진은 이
-                      브라우저에서 바로 반영됩니다.
+                      JPG, PNG, WEBP 이미지를 올릴 수 있습니다. 
+                      사진은 이 브라우저에서 바로 반영됩니다.
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-[#0F172A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1E293B]">
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRemoveProfileImage}
+                    className="inline-flex h-9 w-28 items-center justify-center rounded-xl border border-[#CBD5E1] px-4 text-sm font-semibold text-[#475569] transition hover:bg-white"
+                  >
+                    기본 이미지
+                  </button>
+                  <label className="inline-flex h-9 w-28 cursor-pointer items-center justify-center rounded-xl bg-[#0F172A] px-4 text-sm font-semibold text-white transition hover:bg-[#1E293B]">
                     사진 선택
                     <input
                       type="file"
@@ -246,20 +256,13 @@ function ProfileEditPage() {
                       className="hidden"
                     />
                   </label>
-                  <button
-                    type="button"
-                    onClick={handleRemoveProfileImage}
-                    className="rounded-xl border border-[#CBD5E1] px-4 py-2 text-sm font-semibold text-[#475569] transition hover:bg-white"
-                  >
-                    기본 이미지
-                  </button>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                이메일
+                {t("profileEditPage.field.email")}
                 <input
                   value={formData.email}
                   readOnly
@@ -267,7 +270,7 @@ function ProfileEditPage() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                이름
+                {t("profileEditPage.field.username")}
                 <input
                   name="username"
                   value={formData.username}
@@ -276,7 +279,7 @@ function ProfileEditPage() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                닉네임
+                {t("profileEditPage.field.nickname")}
                 <input
                   name="nickname"
                   value={formData.nickname}
@@ -286,7 +289,7 @@ function ProfileEditPage() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                생년월일
+                {t("profileEditPage.field.birthDate")}
                 <input
                   type="date"
                   name="birthDate"
@@ -296,20 +299,20 @@ function ProfileEditPage() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                성별
+                {t("profileEditPage.field.gender")}
                 <select
                   name="gender"
                   value={formData.gender}
                   disabled
                   className="h-12 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 text-sm text-[#94A3B8] outline-none"
                 >
-                  <option value="">선택 안 함</option>
-                  <option value="남성">남성</option>
-                  <option value="여성">여성</option>
+                  <option value="">{t("profileEditPage.gender.none")}</option>
+                  <option value="남성">{t("profileEditPage.gender.male")}</option>
+                  <option value="여성">{t("profileEditPage.gender.female")}</option>
                 </select>
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                몸무게(kg)
+                {t("profileEditPage.field.weight")}
                 <input
                   type="number"
                   min="0"
@@ -321,7 +324,7 @@ function ProfileEditPage() {
                 />
               </label>
               <label className="flex flex-col gap-2 text-sm font-semibold text-[#1E293B]">
-                키(cm)
+                {t("profileEditPage.field.height")}
                 <input
                   type="number"
                   min="0"
@@ -341,14 +344,16 @@ function ProfileEditPage() {
                 className="!rounded-xl !px-5 !py-3 !text-sm"
                 onClick={() => navigate("/member")}
               >
-                취소
+                {t("profileEditPage.cancel")}
               </Button>
               <Button
                 type="submit"
                 className="!rounded-xl !bg-[#0F172A] !px-5 !py-3 !text-sm hover:!bg-[#1E293B]"
                 disabled={saving}
               >
-                {saving ? "저장 중..." : "저장하기"}
+                {saving
+                  ? t("profileEditPage.saving")
+                  : t("profileEditPage.save")}
               </Button>
             </div>
           </form>

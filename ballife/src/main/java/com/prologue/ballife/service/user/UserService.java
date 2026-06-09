@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.board.Post;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.domain.user.UserConfig;
@@ -29,6 +30,7 @@ public class UserService {
     private final UserConfigRepository userConfigRepository;
     private final PasswordEncoder passwordEncoder; // 12345 ->
     private final UserMedalService userMedalService; // 포인트 적립 후 메달 자동 지급 연계
+    private final MessageResolver messages;
 
     // ====================
     // 회원가입
@@ -39,16 +41,19 @@ public class UserService {
 
         // 1.중복체크
         if (userRepository.existsByLoginId(request.getLoginId())) {
-            throw new DuplicateResourceException("아이디", request.getLoginId());
+            throw new DuplicateResourceException(
+                    messages.get("error.duplicate", messages.get("resource.loginId"), request.getLoginId()));
         }
         if (userRepository.existsByNickname(request.getNickname())) {
-            throw new DuplicateResourceException("닉네임", request.getNickname());
+            throw new DuplicateResourceException(
+                    messages.get("error.duplicate", messages.get("resource.nickname"), request.getNickname()));
         }
         // if (userRepository.existsByUsername(request.getUsername())) {
         //     throw new DuplicateResourceException("사용자명", request.getUsername());
         // }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("이메일", request.getEmail());
+            throw new DuplicateResourceException(
+                    messages.get("error.duplicate", messages.get("resource.email"), request.getEmail()));
         }
 
         // 2.회원 생성(비밀번호 암호화도 진행)
@@ -86,11 +91,11 @@ public class UserService {
     public User login(UserDto.LoginRequest request) {
         // 1.사용저 조회(loginid 으로 회원 조회)
         User user = userRepository.findByLoginId(request.getLoginId())
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("business.user.userNotFound")));
 
         // 2.비밀번호 검증(amtches -> 입력한 평문,DB에 암호화된 비밀번호와 비교)
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException(messages.get("business.user.passwordMismatch"));
         }
 
         return user;
@@ -102,7 +107,8 @@ public class UserService {
     @NonNull
     public UserDto.UserResponse getUserById(@NonNull Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
         return UserDto.UserResponse.from(user);
     }
 
@@ -116,7 +122,8 @@ public class UserService {
     // ======================
     public UserDto.UserResponse getUserByLoginId(String loginId) {
         User user = userRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다" + loginId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("business.user.userNotFoundByLoginId", loginId)));
         return UserDto.UserResponse.from(user);
     }
 
@@ -137,7 +144,8 @@ public class UserService {
     @NonNull
     public UserDto.UserResponse updateUser(@NonNull Long id, UserDto.UpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), id)));
 
         // 이름 변경
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
@@ -147,7 +155,8 @@ public class UserService {
         // 닉네임 변경
         if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
             if (userRepository.existsByNickname(request.getNickname())) {
-                throw new DuplicateResourceException("닉네임", request.getNickname());
+                throw new DuplicateResourceException(
+                        messages.get("error.duplicate", messages.get("resource.nickname"), request.getNickname()));
             }
             user.setNickname(request.getNickname());
         }
@@ -180,7 +189,8 @@ public class UserService {
     public UserDto.UserResponse addPoint(@NonNull Long id, int amount) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), id)));
 
         long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
         long currentCount = user.getUsePointCount() != null ? user.getUsePointCount() : 0L;
@@ -196,12 +206,41 @@ public class UserService {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // 리워드 포인트 감소 (보유 포인트 point 만 차감, 누적 포인트 usePointCount 는 변경 없음)
+    // ═══════════════════════════════════════════════════════════
+    @Transactional
+    @NonNull
+    public UserDto.UserResponse deductPoint(@NonNull Long id, int amount) {
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException(messages.get("business.user.deductAmountNotPositive"));
+        }
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), id)));
+
+        long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
+
+        if (currentPoint < amount) {
+            throw new IllegalArgumentException(
+                    messages.get("business.user.insufficientPoint", currentPoint, amount));
+        }
+
+        // 보유 포인트만 차감 (누적 포인트는 변경하지 않음)
+        user.setPoint(currentPoint - amount);
+
+        return UserDto.UserResponse.from(user);
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // 회원 삭제
     // ═══════════════════════════════════════════════════════════
     @Transactional
     public void deleteUser(@NonNull Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), id)));
         userRepository.delete(user);
     }
 

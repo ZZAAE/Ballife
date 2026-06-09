@@ -3,6 +3,7 @@ package com.prologue.ballife.service.report.llm;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
@@ -67,7 +68,28 @@ public class PromptBuilder {
             "{\"questions\": [\"질문1\", \"질문2\"]}";
 
     public String buildSystemPrompt() {
-        return SYSTEM_PROMPT;
+        return SYSTEM_PROMPT + languageDirective();
+    }
+
+    /**
+     * 현재 요청 로케일이 한국어가 아니면, LLM 이 해당 언어로 질문을 작성하도록 강제하는 지시를 덧붙인다.
+     * (시스템 프롬프트의 "자연스러운 한국어 작성" / 한국어 종결 형식 규칙을 덮어쓴다.)
+     */
+    private String languageDirective() {
+        String lang = LocaleContextHolder.getLocale().getLanguage();
+        if (lang == null || lang.isEmpty() || "ko".equals(lang)) return "";
+        String name = switch (lang) {
+            case "en" -> "English";
+            case "ja" -> "Japanese (日本語)";
+            case "zh" -> "Simplified Chinese (简体中文)";
+            default -> "English";
+        };
+        return "\n\n[LANGUAGE OVERRIDE — HIGHEST PRIORITY]\n"
+                + "Write EVERY question ONLY in " + name + ". Ignore the earlier rule to write in Korean "
+                + "and the Korean sentence-ending format (~에 대해 상담해 보세요 등); instead use natural, "
+                + "polite phrasing in " + name + " that suggests asking the doctor. "
+                + "Keep all numeric values and units (mmHg, mg/dL, kcal) unchanged. "
+                + "Still output STRICT JSON only: {\"questions\": [...]}.";
     }
 
     public String buildUserPrompt(HealthAnalysisResponse data) {

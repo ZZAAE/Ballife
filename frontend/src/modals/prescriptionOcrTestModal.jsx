@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { X, ImagePlus, Loader2, Trash2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import medicineApi from "../api/medicineApi";
@@ -21,8 +22,17 @@ export default function PrescriptionOcrTestModal({
   onSaved,
   prescription = null,
 }) {
+  const { t } = useTranslation();
   const isEdit = !!prescription;
   const fileInputRef = useRef(null);
+
+  // 복용 시간대 표시 라벨 (저장/비교값은 INTAKE_OPTIONS 그대로 유지)
+  const intakeOptionLabels = {
+    아침: t("prescriptionOcrTestModal.intakeOption.morning"),
+    점심: t("prescriptionOcrTestModal.intakeOption.lunch"),
+    저녁: t("prescriptionOcrTestModal.intakeOption.dinner"),
+    취침전: t("prescriptionOcrTestModal.intakeOption.beforeSleep"),
+  };
 
   // 수정 모드면 기존 처방전 값으로 초기화한다.
   // (수정 인스턴스는 처방전마다 key 로 remount 되므로 초기값이 매번 갱신된다)
@@ -83,11 +93,11 @@ export default function PrescriptionOcrTestModal({
   // 등록 버튼
   const handleRegister = async () => {
     if (!prescriptionName.trim()) {
-      toast.error("처방전 이름을 비워둘 수 없습니다.");
+      toast.error(t("prescriptionOcrTestModal.toast.nameRequired"));
       return;
     }
     if (medicineNames.length === 0) {
-      toast.error("등록할 약이 없습니다.");
+      toast.error(t("prescriptionOcrTestModal.toast.noMedicine"));
       return;
     }
     // 백엔드 Prescription.intakeIntervals 는 "아침,점심,저녁" 형태의 콤마 문자열
@@ -104,10 +114,10 @@ export default function PrescriptionOcrTestModal({
     try {
       if (isEdit) {
         await medicineApi.updateMedicine(prescription.prescriptionId, payload);
-        toast.success("처방전이 수정되었습니다.");
+        toast.success(t("prescriptionOcrTestModal.toast.updated"));
       } else {
         await medicineApi.registerMedicine(payload);
-        toast.success("처방전이 등록되었습니다.");
+        toast.success(t("prescriptionOcrTestModal.toast.registered"));
       }
       // 부모(회원정보)가 서버에서 최신 목록을 다시 불러오도록 알린다.
       onSaved?.();
@@ -121,7 +131,7 @@ export default function PrescriptionOcrTestModal({
   const handleAddMedicine = (medicine) => {
     const name = typeof medicine === "string" ? medicine : medicine?.name;
     if (!name) {
-      toast.error("약 이름을 가져오지 못했습니다.");
+      toast.error(t("prescriptionOcrTestModal.toast.nameFetchFailed"));
       return;
     }
     const exists = medicineNames.includes(name);
@@ -129,9 +139,9 @@ export default function PrescriptionOcrTestModal({
     setMedicineNames((prev) => (prev.includes(name) ? prev : [name, ...prev]));
     setSearchOpen(false);
     if (exists) {
-      toast.error("이미 추가된 약입니다.");
+      toast.error(t("prescriptionOcrTestModal.toast.alreadyAdded"));
     } else {
-      toast.success(`'${name}' 추가됨`);
+      toast.success(t("prescriptionOcrTestModal.toast.added", { name }));
     }
   };
 
@@ -165,7 +175,7 @@ export default function PrescriptionOcrTestModal({
       setMedicineNames(names);
     } catch (err) {
       console.error("OCR 요청 실패", err);
-      setError("약이름을 가져오지 못했습니다. 다시 시도해 주세요.");
+      setError(t("prescriptionOcrTestModal.error.ocrFailed"));
     } finally {
       setLoading(false);
     }
@@ -201,10 +211,12 @@ export default function PrescriptionOcrTestModal({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ color: "#1B1F2A", fontSize: 22, fontWeight: 700 }}>
-              {isEdit ? "처방전 수정" : "처방전 등록"}
+              {isEdit
+                ? t("prescriptionOcrTestModal.title.edit")
+                : t("prescriptionOcrTestModal.title.register")}
             </span>
             <span style={{ color: "#94A3B8", fontSize: 14 }}>
-              처방전 이미지를 올리면 약 이름을 자동으로 추출해드려요.
+              {t("prescriptionOcrTestModal.subtitle")}
             </span>
           </div>
           <button
@@ -241,17 +253,17 @@ export default function PrescriptionOcrTestModal({
           {preview ? (
             <img
               src={preview}
-              alt="처방전 미리보기"
+              alt={t("prescriptionOcrTestModal.imagePreviewAlt")}
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           ) : (
             <>
               <ImagePlus size={40} style={{ color: "#94A3B8", marginBottom: 10 }} />
               <span style={{ color: "#64748B", fontSize: 15, fontWeight: 500 }}>
-                이미지 넣는 곳
+                {t("prescriptionOcrTestModal.imageDropTitle")}
               </span>
               <span style={{ color: "#A5B0C0", fontSize: 13, marginTop: 4 }}>
-                클릭해서 처방전 이미지를 선택하세요
+                {t("prescriptionOcrTestModal.imageDropHint")}
               </span>
             </>
           )}
@@ -275,13 +287,13 @@ export default function PrescriptionOcrTestModal({
         <div style={{ display: "flex", flexDirection: "column", gap: 12, flexShrink: 0 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ color: "#1B1F2A", fontSize: 14, fontWeight: 600 }}>
-              처방전 이름
+              {t("prescriptionOcrTestModal.label.prescriptionName")}
             </label>
             <input
               type="text"
               value={prescriptionName}
               onChange={(e) => setPrescriptionName(e.target.value)}
-              placeholder="예: 5월 정기 처방"
+              placeholder={t("prescriptionOcrTestModal.placeholder.prescriptionName")}
               style={{
                 width: "100%",
                 padding: "12px 14px",
@@ -297,12 +309,12 @@ export default function PrescriptionOcrTestModal({
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ color: "#1B1F2A", fontSize: 14, fontWeight: 600 }}>
-              메모
+              {t("prescriptionOcrTestModal.label.memo")}
             </label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              placeholder="처방전에 대한 간단한 메모를 남겨보세요."
+              placeholder={t("prescriptionOcrTestModal.placeholder.memo")}
               rows={2}
               style={{
                 width: "100%",
@@ -323,7 +335,7 @@ export default function PrescriptionOcrTestModal({
           {/* 복용 시간대 (가로 배치, 다중 선택) */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ color: "#1B1F2A", fontSize: 14, fontWeight: 600 }}>
-              복용 시간대
+              {t("prescriptionOcrTestModal.label.intakeTime")}
             </label>
             <div style={{ display: "flex", gap: 8 }}>
               {INTAKE_OPTIONS.map((option) => {
@@ -345,7 +357,7 @@ export default function PrescriptionOcrTestModal({
                       cursor: "pointer",
                     }}
                   >
-                    {option}
+                    {intakeOptionLabels[option] ?? option}
                   </button>
                 );
               })}
@@ -370,7 +382,7 @@ export default function PrescriptionOcrTestModal({
         >
           {/* 라벨 + 약 추가 버튼 + 상태 배지 */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ color: "#1B1F2A", fontSize: 15, fontWeight: 600 }}>약이름 목록</span>
+            <span style={{ color: "#1B1F2A", fontSize: 15, fontWeight: 600 }}>{t("prescriptionOcrTestModal.medicineListTitle")}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <button
                 type="button"
@@ -388,7 +400,7 @@ export default function PrescriptionOcrTestModal({
                   cursor: "pointer",
                 }}
               >
-                <Plus size={14} />약 추가
+                <Plus size={14} />{t("prescriptionOcrTestModal.addMedicine")}
               </button>
             </div>
           </div>
@@ -399,7 +411,7 @@ export default function PrescriptionOcrTestModal({
               style={{ flex: 1, gap: 8, color: "#94A3B8", fontSize: 14 }}
             >
               <Loader2 size={18} className="animate-spin" style={{ color: "#2563EB" }} />
-              약이름 추출 중...
+              {t("prescriptionOcrTestModal.extracting")}
             </div>
           ) : error ? (
             <div
@@ -443,7 +455,7 @@ export default function PrescriptionOcrTestModal({
                   <button
                     type="button"
                     onClick={() => handleRemoveMedicine(idx)}
-                    aria-label={`${name} 삭제`}
+                    aria-label={t("prescriptionOcrTestModal.removeMedicineAria", { name })}
                     className="flex items-center justify-center"
                     style={{
                       flexShrink: 0,
@@ -466,7 +478,7 @@ export default function PrescriptionOcrTestModal({
               className="flex items-center justify-center"
               style={{ flex: 1, color: "#A5B0C0", fontSize: 14 }}
             >
-              이미지를 넣으면 약이름이 표시됩니다.
+              {t("prescriptionOcrTestModal.emptyState")}
             </div>
           )}
         </div>
@@ -482,14 +494,16 @@ export default function PrescriptionOcrTestModal({
             padding: "14px 0",
             borderRadius: 12,
             border: "none",
-            backgroundColor: "#2563EB",
+            backgroundColor: "#0F172A",
             color: "#FFFFFF",
             fontSize: 15,
             fontWeight: 700,
             cursor: "pointer",
           }}
         >
-          {isEdit ? "수정" : "등록"}
+          {isEdit
+            ? t("prescriptionOcrTestModal.submit.edit")
+            : t("prescriptionOcrTestModal.submit.register")}
         </button>
       </div>
     </div>

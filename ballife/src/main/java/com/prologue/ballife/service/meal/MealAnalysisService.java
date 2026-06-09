@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.food.FoodNutrition;
 import com.prologue.ballife.web.dto.meal.MealAnalysisDto;
 
@@ -29,10 +30,11 @@ public class MealAnalysisService {
     private final FoodModelClient foodModelClient;
     private final VisionService visionService;
     private final FoodNutritionService nutritionService;
+    private final MessageResolver messages;
 
     public MealAnalysisDto.Response analyze(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("이미지 파일이 비어 있습니다.");
+            throw new IllegalArgumentException(messages.get("business.mealAnalysis.emptyImageFile"));
         }
 
         log.info("======================== [식단 사진 분석 시작] ========================");

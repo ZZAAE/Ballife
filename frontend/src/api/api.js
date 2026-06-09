@@ -1,5 +1,6 @@
 import axios from "axios";
 import toast from 'react-hot-toast'
+import i18n from "../i18n";
 
 export const ACCESS_TOKEN_KEY = 'accessToken';
 export const USER_KEY = 'loginUser';
@@ -49,6 +50,15 @@ api.interceptors.request.use(
         clearContentTypeForMultipart(config);
         setJsonIfNeeded(config);
 
+        // 선택된 언어를 백엔드에 전달 (Spring LocaleResolver 가 Accept-Language 로 해석)
+        const lang = i18n.language || "ko";
+        const h = config.headers;
+        if (h && typeof h.set === "function") {
+            h.set("Accept-Language", lang);
+        } else {
+            config.headers["Accept-Language"] = lang;
+        }
+
         const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
         if(accessToken){
             const h = config.headers;
@@ -68,7 +78,7 @@ api.interceptors.response.use(
     (response) => response,
 
     (error) => {
-        const message = error.response?.data?.message || '오류가 발생했습니다';
+        const message = error.response?.data?.message || i18n.t('errors.generic');
 
         toast.error(message);
 

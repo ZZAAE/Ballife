@@ -17,18 +17,20 @@ public final class BmiStandard {
 
     /** BMI 구간 */
     public enum Range {
-        UNDERWEIGHT       ("LOW",     "저체중 (18.5 미만)"),
-        NORMAL            ("NORMAL",  "정상 (18.5-22.9)"),
-        OVERWEIGHT        ("CAUTION", "과체중 (23.0-24.9)"),
-        OBESE             ("RISK",    "비만 (25.0-29.9)"),
-        SEVERELY_OBESE    ("RISK",    "고도 비만 (30.0-34.9)"),
-        MORBIDLY_OBESE    ("RISK",    "초고도 비만 (35.0 이상)");
+        UNDERWEIGHT       ("LOW",     "저체중 (18.5 미만)",    "analysis.bmi.underweight"),
+        NORMAL            ("NORMAL",  "정상 (18.5-22.9)",      "analysis.bmi.normal"),
+        OVERWEIGHT        ("CAUTION", "과체중 (23.0-24.9)",    "analysis.bmi.overweight"),
+        OBESE             ("RISK",    "비만 (25.0-29.9)",      "analysis.bmi.obese"),
+        SEVERELY_OBESE    ("RISK",    "고도 비만 (30.0-34.9)", "analysis.bmi.severelyObese"),
+        MORBIDLY_OBESE    ("RISK",    "초고도 비만 (35.0 이상)", "analysis.bmi.morbidlyObese");
 
         public final String status;
         public final String label;
-        Range(String status, String label) {
+        public final String code;
+        Range(String status, String label, String code) {
             this.status = status;
             this.label = label;
+            this.code = code;
         }
     }
 

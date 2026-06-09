@@ -23,37 +23,37 @@ public class UserDto {
     public static class SignUpRequest {
 
         // USER 테이블에서 키, 몸무게, 질병번호 제외
-        @NotBlank(message = "아이디를 입력해주세요")
-        @Size(min = 3, max = 50, message = "아이디는 3~50자여야 합니다")
+        @NotBlank(message = "{validation.user.loginId.required}")
+        @Size(min = 3, max = 50, message = "{validation.user.loginId.size}")
         private String loginId;
 
-        @NotBlank(message = "이름을 입력해주세요")
-        @Size(min = 2, max = 50, message = "이름은 50자 이하이어야 합니다")
+        @NotBlank(message = "{validation.user.username.required}")
+        @Size(min = 2, max = 50, message = "{validation.user.username.size}")
         private String username;
 
-        @NotBlank(message = "비밀번호를 입력해주세요")
-        @Size(min = 6, message = "비밀번호는 6자 이상이여야 합니다")
+        @NotBlank(message = "{validation.user.password.required}")
+        @Size(min = 6, message = "{validation.user.password.size}")
         private String password;
 
-        @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
+        @Size(max = 20, message = "{validation.user.nickname.size}")
         private String nickname;
 
-        @NotBlank(message = "이메일을 입력해주세요")
-        @Size(max = 30, message = "이메일은 30자 이하여야 합니다")
+        @NotBlank(message = "{validation.user.email.required}")
+        @Size(max = 30, message = "{validation.user.email.size}")
         private String email;
 
-        @NotNull(message = "생년월일을 입력하세요")
+        @NotNull(message = "{validation.user.birthDate.required}")
         private LocalDate birthDate;
 
-        @NotBlank(message = "성별을 입력해주세요")
+        @NotBlank(message = "{validation.user.gender.required}")
         private String gender;
 
-        @NotNull(message = "몸무게를 입력해주세요")
-        @DecimalMin(value = "0.1", message = "몸무게는 0보다 커야 합니다")
+        @NotNull(message = "{validation.user.weight.required}")
+        @DecimalMin(value = "0.1", message = "{validation.user.weight.min}")
         private Double weight;
 
-        @NotNull(message = "키를 입력해주세요")
-        @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
+        @NotNull(message = "{validation.user.height.required}")
+        @DecimalMin(value = "0.1", message = "{validation.user.height.min}")
         private Double height;
 
         private String diseaseIndex;
@@ -73,10 +73,10 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginRequest {
-        @NotBlank(message = "아이디를 입력해주세요")
+        @NotBlank(message = "{validation.user.loginId.required}")
         private String loginId;
 
-        @NotBlank(message = "비밀번호를 입력해주세요")
+        @NotBlank(message = "{validation.user.password.required}")
         private String password;
     }
 
@@ -176,18 +176,18 @@ public class UserDto {
     @AllArgsConstructor
     public static class UpdateRequest {
 
-        @Size(max = 20, message = "이름은 20자 이하여야 합니다")
+        @Size(max = 20, message = "{validation.user.username.size.update}")
         private String username;
 
-        @Size(max = 20, message = "닉네임은 20자 이하여야 합니다")
+        @Size(max = 20, message = "{validation.user.nickname.size}")
         private String nickname;
 
         private LocalDate birthDate;
 
-        @DecimalMin(value = "0.1", message = "몸무게는 0보다 커야 합니다")
+        @DecimalMin(value = "0.1", message = "{validation.user.weight.min}")
         private Double weight;
 
-        @DecimalMin(value = "0.1", message = "키는 0보다 커야 합니다")
+        @DecimalMin(value = "0.1", message = "{validation.user.height.min}")
         private Double height;
 
         private String gender;
@@ -200,8 +200,8 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdatePasswordRequest {
-        @NotBlank(message = "비밀번호를 입력해주세요")
-        @Size(min = 6, message = "비밀번호는 6자 이상이여야 합니다")
+        @NotBlank(message = "{validation.user.password.required}")
+        @Size(min = 6, message = "{validation.user.password.size}")
         private String password;
     }
 }

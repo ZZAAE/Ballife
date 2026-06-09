@@ -1,8 +1,10 @@
 import { CalendarDays } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // 차트 영역 컴포넌트
-// startDate, endDate는 사용자 입력으로 날짜 받아와서 나중에 수정 필요 할 수도? 
+// startDate, endDate는 사용자 입력으로 날짜 받아와서 나중에 수정 필요 할 수도?
 export default function ChartSection({ title, startDate, endDate, legends = [], children, chartClassName = "h-[320px]", onStartDateChange, onEndDateChange, onApply, headerExtra }) {
+  const { t } = useTranslation();
   const isInteractive = typeof onApply === "function";
   return (
     <div className={`mb-8 flex flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6 ${chartClassName}`}>
@@ -39,7 +41,7 @@ export default function ChartSection({ title, startDate, endDate, legends = [], 
             onClick={isInteractive ? onApply : undefined}
             className="rounded-[10px] bg-[#0F172A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
           >
-            적용
+            {t('chartSection.apply')}
           </button>
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748B]">
             {legends.map((legend) => (

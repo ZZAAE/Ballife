@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 /* ============================================================
  * HealthTimelineModal (v2)
@@ -92,13 +93,13 @@ const COLOR_THEME = {
 
 /* ---------- 2. 카테고리 정의 (상단 요약용) ---------- */
 const CATEGORIES = [
-  { key: "식단", color: "red" },
-  { key: "혈압", color: "purple" },
-  { key: "혈당", color: "blue" },
-  { key: "수분", color: "sky" },
-  { key: "복약", color: "green" },
-  { key: "운동", color: "orange" },
-  { key: "체중", color: "yellow" },
+  { key: "식단", labelKey: "category.diet", color: "red" },
+  { key: "혈압", labelKey: "category.bloodPressure", color: "purple" },
+  { key: "혈당", labelKey: "category.bloodSugar", color: "blue" },
+  { key: "수분", labelKey: "category.water", color: "sky" },
+  { key: "복약", labelKey: "category.medication", color: "green" },
+  { key: "운동", labelKey: "category.exercise", color: "orange" },
+  { key: "체중", labelKey: "category.weight", color: "yellow" },
 ];
 
 /* ---------- 3. 더미 데이터 ---------- */
@@ -263,12 +264,13 @@ const TimelineRow = ({ item, isLast }) => {
 
 /* ---------- 7. 상단 카테고리 요약 ---------- */
 const CategorySummary = ({ items }) => {
+  const { t: tr } = useTranslation();
   // color 값으로 기록 여부 판정 (subtitle보다 안전)
   const recordedColorSet = new Set(items.map((it) => it.color));
 
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-      <p className="mb-3 text-xs font-bold text-slate-500">오늘 기록한 항목</p>
+      <p className="mb-3 text-xs font-bold text-slate-500">{tr("dailyTimelineModal.recordedItems")}</p>
       <div className="flex flex-wrap gap-2">
         {CATEGORIES.map((cat) => {
           const isRecorded = recordedColorSet.has(cat.color);
@@ -288,7 +290,7 @@ const CategorySummary = ({ items }) => {
                   isRecorded ? t.dot : "bg-slate-200"
                 }`}
               />
-              {cat.key}
+              {tr(`dailyTimelineModal.${cat.labelKey}`)}
             </div>
           );
         })}
@@ -303,6 +305,7 @@ export default function HealthTimelineModal({
   onClose = () => {},
   data,
 }) {
+  const { t } = useTranslation();
   if (!isOpen || !data) return null;
 
   return (
@@ -324,7 +327,7 @@ export default function HealthTimelineModal({
           <button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="닫기"
+            aria-label={t("dailyTimelineModal.close")}
           >
             <Icons.Close className="h-5 w-5" />
           </button>
@@ -338,11 +341,13 @@ export default function HealthTimelineModal({
           {/* 타임라인 */}
           <div className="mt-6">
             <p className="mb-3 text-xs font-bold text-slate-500">
-              타임라인 ({(data.items || []).length}건)
+              {t("dailyTimelineModal.timelineCount", {
+                count: (data.items || []).length,
+              })}
             </p>
             {(data.items || []).length === 0 ? (
               <p className="py-12 text-center text-sm text-slate-400">
-                이 날에는 기록이 없습니다.
+                {t("dailyTimelineModal.empty")}
               </p>
             ) : (
               <div className="flex flex-col">

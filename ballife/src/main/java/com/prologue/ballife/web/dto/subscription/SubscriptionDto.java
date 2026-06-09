@@ -19,7 +19,7 @@ public class SubscriptionDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ActivateRequest {
-        @NotNull(message = "플랜을 선택해주세요")
+        @NotNull(message = "{validation.subscription.plan.required}")
         private SubscriptionPlan plan; // INDIVIDUAL / FAMILY
     }
 

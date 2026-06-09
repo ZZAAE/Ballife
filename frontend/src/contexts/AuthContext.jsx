@@ -7,6 +7,7 @@ import {
   useRef,
 } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { ACCESS_TOKEN_KEY, USER_KEY } from "../api/api";
 
 /** axios baseURL 과 동일하게 맞출 것 (폴링 대상: GET /api/health) */
@@ -18,6 +19,8 @@ const API_BASE =
 const SERVER_HEALTH_MS = 15_000;
 /** 연속 이 횟수만큼 실패 시에만 로그아웃 (순간 끊김 오탐 완화) */
 const HEALTH_FAIL_LOGOUT = 2; // 약 15 ~ 30초
+/** 서버 인스턴스 ID 보관 키 — 값이 바뀌면(서버 재시작) 로그아웃 */
+const SERVER_INSTANCE_KEY = "serverInstanceId";
 
 const AuthContext = createContext(null);
 
@@ -26,6 +29,7 @@ const AuthContext = createContext(null);
  * 백엔드 role 문자열은 ROLE_USER / ROLE_ADMIN.
  */
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null); //로그인 사요자 정보
   const [loading, setLoading] = useState(true); //복원 완료 여부
 
@@ -93,6 +97,9 @@ export const AuthProvider = ({ children }) => {
     if (accessToken != null && String(accessToken).trim() !== "") {
       localStorage.setItem(ACCESS_TOKEN_KEY, String(accessToken)); //인터셉터가 사용
     }
+    // 인스턴스 기준값 초기화 — 헬스 폴링이 현재 서버 인스턴스를 새로 기록하게 함
+    // (안 지우면 이전 인스턴스 ID와 비교돼 갓 로그인한 사용자가 바로 로그아웃될 수 있음)
+    localStorage.removeItem(SERVER_INSTANCE_KEY);
   }, []);
 
   const logout = useCallback(() => {
@@ -101,6 +108,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(ACCESS_TOKEN_KEY); //accessToken 키 삭제
     localStorage.removeItem("user"); // 혹시 남아있을수도 있는 최초 데이터 삭제
     localStorage.removeItem("token"); // 혹시 남아있을수도 있는 최초 데이터 삭제
+    localStorage.removeItem(SERVER_INSTANCE_KEY); //서버 인스턴스 기준값 정리
 
     // 회원 프로필 캐시도 비움 — 다른 계정 로그인 시 이전 정보가 잠깐 노출되는 것 방지
     localStorage.removeItem("ballife.memberProfileDraft");
@@ -127,42 +135,55 @@ export const AuthProvider = ({ children }) => {
   const logoutRef = useRef(logout);
   logoutRef.current = logout;
 
-  // 백엔드 /api/health 엔드포인트 미구현으로 인한 강제 로그아웃 버그 회피용 임시 비활성화
-  // 백엔드에 HealthController 추가 후 다시 활성화할 것
-  // useEffect(() => {
-  //     // 로그인 안되어 있으면 아무것도 안함
-  //     if (!user) {
-  //         return undefined;
-  //     }
-  //     //실패 회수
-  //     let fails = 0;
-  //
-  //     //헬스 체크 함수
-  //     const check = async () => {
-  //         try {
-  //             const res = await fetch(`${API_BASE}/health`, {
-  //                 method: 'GET',
-  //                 cache: 'no-store', //실제 서버에 물어봄
-  //                 credentials: 'omit', //살았니? 죽었니?
-  //             });
-  //             if (res.ok) {
-  //                 fails = 0; //살았으면 카운트 리셋
-  //                 return;
-  //             }
-  //             fails += 1; //죽었으면 카운트 증가
-  //         } catch {
-  //             fails += 1; //네트워크 에러
-  //         }
-  //         //강제 로그아웃
-  //         if (fails >= HEALTH_FAIL_LOGOUT) {
-  //             logoutRef.current();
-  //             toast.error('서버에 연결할 수 없어 로그아웃되었습니다.');
-  //         }
-  //     };
-  //     const id = setInterval(check, SERVER_HEALTH_MS); //주기적 실행
-  //     check(); //최초 즉시 1회 실행
-  //     return () => clearInterval(id); //로그아웃시 인터벌 정리
-  // }, [user]);
+  // 로그인 상태에서만: 서버(/api/health)가 연속으로 응답하지 않으면 자동 로그아웃
+  useEffect(() => {
+    // 로그인 안되어 있으면 아무것도 안함
+    if (!user) {
+      return undefined;
+    }
+    //실패 회수
+    let fails = 0;
+
+    //헬스 체크 함수
+    const check = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`, {
+          method: "GET",
+          cache: "no-store", //실제 서버에 물어봄
+          credentials: "omit", //살았니? 죽었니?
+        });
+        if (res.ok) {
+          fails = 0; //살았으면 카운트 리셋
+
+          // 서버 인스턴스 ID 비교 — 바뀌었으면 서버가 재시작된 것 → 로그아웃
+          const data = await res.json().catch(() => null);
+          const instanceId = data?.instanceId;
+          if (instanceId) {
+            const known = localStorage.getItem(SERVER_INSTANCE_KEY);
+            if (!known) {
+              localStorage.setItem(SERVER_INSTANCE_KEY, instanceId); //최초 기준값 기록
+            } else if (known !== instanceId) {
+              localStorage.removeItem(SERVER_INSTANCE_KEY);
+              logoutRef.current();
+              toast.error(t("authContext.toast.serverRestarted"));
+            }
+          }
+          return;
+        }
+        fails += 1; //죽었으면 카운트 증가
+      } catch {
+        fails += 1; //네트워크 에러
+      }
+      //강제 로그아웃 (서버 다운 지속)
+      if (fails >= HEALTH_FAIL_LOGOUT) {
+        logoutRef.current();
+        toast.error(t("authContext.toast.serverUnreachable"));
+      }
+    };
+    const id = setInterval(check, SERVER_HEALTH_MS); //주기적 실행
+    check(); //최초 즉시 1회 실행
+    return () => clearInterval(id); //로그아웃시 인터벌 정리
+  }, [user]);
 
   const isAuthenticated = !!user;
 

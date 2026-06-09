@@ -1,0 +1,17 @@
+# 빌드 컨텍스트 최소화
+build/
+bin/
+.gradle/
+.idea/
+*.iml
+
+# 로컬 비밀 설정 — 이미지에 절대 포함 금지 (운영은 application-prod.yml + 환경변수 사용)
+src/main/resources/application.yml
+
+# VCS / 문서 / OS
+.git
+.gitignore
+.gitattributes
+docs/
+*.md
+.DS_Store

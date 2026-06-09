@@ -1,4 +1,5 @@
 import { Check, Circle, Moon, Pill, Sun, Triangle, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { getCurrentWeekData } from "./medicationData";
 
 
@@ -8,12 +9,6 @@ const getScheduleStatus = (drugs) => {
   if (takenCount === 0) return null;
   if (takenCount === drugs.length) return "done";
   return "partial";
-};
-
-const STATUS_LABEL = {
-  done: "복용 완료",
-  partial: "부분 복용",
-  miss: "미복용",
 };
 
 // 시간 문자열(HH:MM)을 아침/점심/저녁 슬롯으로 매핑. 시간이 없으면 morning으로 기본
@@ -51,12 +46,19 @@ export default function WeeklyCalendarCard({
   drugNames = [],
   savedSchedulesByDate = {},
 }) {
+  const { t } = useTranslation();
   const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
 
+  const STATUS_LABEL = {
+    done: t("weeklyCalendarCard.status.done"),
+    partial: t("weeklyCalendarCard.status.partial"),
+    miss: t("weeklyCalendarCard.status.miss"),
+  };
+
   const rows = [
-    { key: "morning", label: "아침 (08:00)", icon: Sun },
-    { key: "lunch", label: "점심 (13:00)", icon: Sun },
-    { key: "dinner", label: "저녁 (21:00)", icon: Moon },
+    { key: "morning", label: t("weeklyCalendarCard.rows.morning"), icon: Sun },
+    { key: "lunch", label: t("weeklyCalendarCard.rows.lunch"), icon: Sun },
+    { key: "dinner", label: t("weeklyCalendarCard.rows.dinner"), icon: Moon },
   ];
 
   const todayStatusMap = todaySchedules
@@ -191,7 +193,7 @@ export default function WeeklyCalendarCard({
                         {hasContent && (
                           <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-[180px] -translate-x-1/2 rounded-xl bg-[#0F172A] px-3 py-2.5 text-[12px] text-white shadow-xl group-hover:block">
                             <p className="mb-1.5 text-[11px] font-bold text-gray-300">
-                              {item.day} {item.date}일 · {row.label.match(/^[^(]+/)?.[0].trim()}
+                              {item.day} {t("weeklyCalendarCard.dayUnit", { date: item.date })} · {row.label.match(/^[^(]+/)?.[0].trim()}
                               {status && (
                                 <span className="ml-1 font-normal text-gray-400">
                                   ({STATUS_LABEL[status] || ""})
@@ -222,7 +224,7 @@ export default function WeeklyCalendarCard({
                               <>
                                 <div className="my-2 border-t border-gray-700" />
                                 <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-amber-300">
-                                  <Pill className="h-3 w-3" strokeWidth={2.4} /> 상비약
+                                  <Pill className="h-3 w-3" strokeWidth={2.4} /> {t("weeklyCalendarCard.prnLabel")}
                                 </p>
                                 <ul className="space-y-1">
                                   {prn.map((name, i) => (
@@ -250,17 +252,17 @@ export default function WeeklyCalendarCard({
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-t border-gray-200 pt-6 text-[13px] text-gray-600 sm:gap-x-12">
           <div className="flex items-center gap-2">
             <MedicationStatusIcon status="done" size="sm" />
-            <span>복용 완료</span>
+            <span>{t("weeklyCalendarCard.status.done")}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <MedicationStatusIcon status="partial" size="sm" />
-            <span>부분 복용</span>
+            <span>{t("weeklyCalendarCard.status.partial")}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <MedicationStatusIcon status="miss" size="sm" />
-            <span>미복용</span>
+            <span>{t("weeklyCalendarCard.status.miss")}</span>
           </div>
         </div>
       </div>

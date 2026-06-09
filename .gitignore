@@ -1,7 +1,17 @@
 node_modules/
 
+<<<<<<< HEAD
 ### 인증키있는 yml 파일 ###
 # (root .gitignore의 **/application.yml 와 이중 안전망.
 #  application-mock.yml, application.yml.example 등 다른 yml은 push 허용.)
 **/application-local.yml
 **/*.yml
+=======
+# docker-compose 비밀값 (.env.example 은 허용)
+.env
+
+# application.yml만 차단 (어느 위치든). .example은 명시적 허용.
+# 신규 합류자는 application.yml.example을 복사해서 application.yml 만들고 본인 환경에 맞춰 수정.
+**/application.yml
+!**/application.yml.example
+>>>>>>> f1b23fd212f4f0447207f451fe49b8fbbef70ed2

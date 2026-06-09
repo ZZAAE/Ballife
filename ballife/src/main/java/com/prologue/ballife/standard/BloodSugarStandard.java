@@ -17,31 +17,35 @@ public final class BloodSugarStandard {
 
     /** 공복혈당 구간 (8시간 이상 공복 후 측정 기준) */
     public enum Fasting {
-        LOW    ("LOW",     "너무 낮음 (70 미만)"),
-        NORMAL ("NORMAL",  "정상 (70-99)"),
-        CAUTION("CAUTION", "다소 높음 (100-125)"),
-        RISK   ("RISK",    "많이 높음 (126 이상)");
+        LOW    ("LOW",     "너무 낮음 (70 미만)",  "analysis.bs.fasting.low"),
+        NORMAL ("NORMAL",  "정상 (70-99)",         "analysis.bs.fasting.normal"),
+        CAUTION("CAUTION", "다소 높음 (100-125)",  "analysis.bs.fasting.caution"),
+        RISK   ("RISK",    "많이 높음 (126 이상)", "analysis.bs.fasting.risk");
 
         public final String status;
         public final String label;
-        Fasting(String status, String label) {
+        public final String code;
+        Fasting(String status, String label, String code) {
             this.status = status;
             this.label = label;
+            this.code = code;
         }
     }
 
     /** 식후혈당 구간 (식후 2시간 경과 시점 측정 기준) */
     public enum PostMeal {
-        LOW    ("LOW",     "너무 낮음 (70 미만)"),
-        NORMAL ("NORMAL",  "정상 (70-139)"),
-        CAUTION("CAUTION", "다소 높음 (140-199)"),
-        RISK   ("RISK",    "많이 높음 (200 이상)");
+        LOW    ("LOW",     "너무 낮음 (70 미만)",  "analysis.bs.postMeal.low"),
+        NORMAL ("NORMAL",  "정상 (70-139)",        "analysis.bs.postMeal.normal"),
+        CAUTION("CAUTION", "다소 높음 (140-199)",  "analysis.bs.postMeal.caution"),
+        RISK   ("RISK",    "많이 높음 (200 이상)", "analysis.bs.postMeal.risk");
 
         public final String status;
         public final String label;
-        PostMeal(String status, String label) {
+        public final String code;
+        PostMeal(String status, String label, String code) {
             this.status = status;
             this.label = label;
+            this.code = code;
         }
     }
 

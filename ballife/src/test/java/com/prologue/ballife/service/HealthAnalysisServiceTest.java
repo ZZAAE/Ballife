@@ -61,16 +61,18 @@ class HealthAnalysisServiceTest {
     @BeforeEach
     void setUp() {
         // Analyzer 5개는 실제 @Component 객체로 주입 (mock 아님)
+        var messages = com.prologue.ballife.support.TestMessages.resolver();
         service = new HealthAnalysisService(
                 userRepository,
                 bioValueRecordRepository,
                 prescriptionRepository,
                 userMedicineRecordRepository,
-                new BloodPressureAnalyzer(),
-                new BloodSugarAnalyzer(),
-                new BmiAnalyzer(),
-                new MedicationAnalyzer(),
-                new DiseaseProfileAnalyzer()
+                new BloodPressureAnalyzer(messages),
+                new BloodSugarAnalyzer(messages),
+                new BmiAnalyzer(messages),
+                new MedicationAnalyzer(messages),
+                new DiseaseProfileAnalyzer(messages),
+                messages
         );
     }
 

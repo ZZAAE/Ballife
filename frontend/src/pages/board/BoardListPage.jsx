@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import boardApi from "../../api/boardApi";
 import { useAuth } from "../../contexts/AuthContext";
@@ -7,6 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 const PAGE_SIZE = 10;
 
 function BoardListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -56,14 +58,14 @@ function BoardListPage() {
 
   // 카테고리 한글화
   const categories = [
-    { value: "GENERAL", label: "자유" },
-    { value: "HYPERLIPIDEMIA", label: "고지혈증" },
-    { value: "HYPERTENSION", label: "고혈압" },
-    { value: "OSTEOPOROSIS", label: "골다공증" },
-    { value: "DIABETES", label: "당뇨" },
-    { value: "OBESITY", label: "비만" },
-    { value: "GOUT", label: "통풍" },
-    { value: "QNA", label: "질문" },
+    { value: "GENERAL", label: t("boardListPage.category.general") },
+    { value: "HYPERLIPIDEMIA", label: t("boardListPage.category.hyperlipidemia") },
+    { value: "HYPERTENSION", label: t("boardListPage.category.hypertension") },
+    { value: "OSTEOPOROSIS", label: t("boardListPage.category.osteoporosis") },
+    { value: "DIABETES", label: t("boardListPage.category.diabetes") },
+    { value: "OBESITY", label: t("boardListPage.category.obesity") },
+    { value: "GOUT", label: t("boardListPage.category.gout") },
+    { value: "QNA", label: t("boardListPage.category.qna") },
   ];
 
   // 작성일 포맷팅
@@ -85,7 +87,7 @@ function BoardListPage() {
 
   if (loading)
     return (
-      <div className="p-8 text-center text-gray-500 pt-[87px]">로딩 중...</div>
+      <div className="p-8 text-center text-gray-500 pt-[87px]">{t("boardListPage.loading")}</div>
     );
 
   return (
@@ -94,10 +96,10 @@ function BoardListPage() {
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-              커뮤니티
+              {t("boardListPage.title")}
             </h1>
             <p className="mb-8 text-sm text-gray-500">
-              건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
+              {t("boardListPage.subtitle")}
             </p>
 
       {/* 검색창 */}
@@ -106,7 +108,7 @@ function BoardListPage() {
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          placeholder="검색어를 입력하세요."
+          placeholder={t("boardListPage.searchPlaceholder")}
           className="w-72 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm outline-none placeholder:text-[#94A3B8] focus:border-[#94A3B8] focus:ring-2 focus:ring-slate-100"
         />
         <button
@@ -116,7 +118,7 @@ function BoardListPage() {
           }}
           className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
-          검색
+          {t("boardListPage.searchButton")}
         </button>
       </div>
 
@@ -133,34 +135,34 @@ function BoardListPage() {
             backgroundSize: "16px 16px",
           }}
         >
-          <option value="ALL">전체</option>
-          <option value="GENERAL">자유</option>
-          <option value="HYPERLIPIDEMIA">고지혈증</option>
-          <option value="HYPERTENSION">고혈압</option>
-          <option value="OSTEOPOROSIS">골다공증</option>
-          <option value="DIABETES">당뇨</option>
-          <option value="OBESITY">비만</option>
-          <option value="GOUT">통풍</option>
-          <option value="QNA">질문</option>
+          <option value="ALL">{t("boardListPage.category.all")}</option>
+          <option value="GENERAL">{t("boardListPage.category.general")}</option>
+          <option value="HYPERLIPIDEMIA">{t("boardListPage.category.hyperlipidemia")}</option>
+          <option value="HYPERTENSION">{t("boardListPage.category.hypertension")}</option>
+          <option value="OSTEOPOROSIS">{t("boardListPage.category.osteoporosis")}</option>
+          <option value="DIABETES">{t("boardListPage.category.diabetes")}</option>
+          <option value="OBESITY">{t("boardListPage.category.obesity")}</option>
+          <option value="GOUT">{t("boardListPage.category.gout")}</option>
+          <option value="QNA">{t("boardListPage.category.qna")}</option>
         </select>
 
         <button
           onClick={() => handleSortChange("recommend")}
           className={`${sort === "recommend" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
-          추천순
+          {t("boardListPage.sort.recommend")}
         </button>
         <button
           onClick={() => handleSortChange("views")}
           className={`${sort === "views" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
-          조회순
+          {t("boardListPage.sort.views")}
         </button>
         <button
           onClick={() => handleSortChange("latest")}
           className={`${sort === "latest" ? "font-semibold text-[#0F172A]" : "text-[#64748B]"}`}
         >
-          날짜순
+          {t("boardListPage.sort.latest")}
         </button>
       </div>
 
@@ -178,13 +180,13 @@ function BoardListPage() {
           </colgroup>
           <thead className="border-b border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]">
             <tr>
-              <th className="px-4 py-3 text-center font-medium">번호</th>
-              <th className="px-4 py-3 text-center font-medium">카테고리</th>
-              <th className="px-4 py-3 text-left font-medium">게시글 제목</th>
-              <th className="px-4 py-3 text-center font-medium">닉네임</th>
-              <th className="px-4 py-3 text-center font-medium">조회수</th>
-              <th className="px-4 py-3 text-center font-medium">추천수</th>
-              <th className="px-4 py-3 text-center font-medium">작성일</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.number")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.category")}</th>
+              <th className="px-4 py-3 text-left font-medium">{t("boardListPage.table.postTitle")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.nickname")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.viewCount")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.upVote")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.createdAt")}</th>
             </tr>
           </thead>
           <tbody>
@@ -234,7 +236,7 @@ function BoardListPage() {
                   colSpan="7"
                   className="px-4 py-10 text-center text-[#94A3B8]"
                 >
-                  게시글이 없습니다.
+                  {t("boardListPage.empty")}
                 </td>
               </tr>
             )}
@@ -265,7 +267,7 @@ function BoardListPage() {
           type="button"
           onClick={() => {
             if (!user?.userId) {
-              toast.error("로그인이 필요합니다.");
+              toast.error(t("boardListPage.toast.loginRequired"));
               navigate("/login");
               return;
             }
@@ -273,7 +275,7 @@ function BoardListPage() {
           }}
           className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
-          글쓰기
+          {t("boardListPage.writeButton")}
         </button>
       </div>
           </div>

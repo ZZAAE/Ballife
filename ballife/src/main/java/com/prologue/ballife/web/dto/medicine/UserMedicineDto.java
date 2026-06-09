@@ -13,14 +13,14 @@ public class UserMedicineDto {
     @AllArgsConstructor
     public static class CreateRequest {
 
-        @NotNull(message = "처방그룹을 선택해주세요")
+        @NotNull(message = "{validation.userMedicine.prescriptionId.required}")
         private Long prescriptionId;
 
         private String medicineName;
 
         private Long supplementId;
 
-        
+
     }
 
     @Data
@@ -29,7 +29,7 @@ public class UserMedicineDto {
     @AllArgsConstructor
     public static class UpdateRequest {
 
-        @NotNull(message = "처방그룹을 선택해주세요")
+        @NotNull(message = "{validation.userMedicine.prescriptionId.required}")
         private Long prescriptionId;
 
         private String medicineName;

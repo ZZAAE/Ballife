@@ -24,13 +24,13 @@ public class MealDto {
     @AllArgsConstructor
     public static class MealSaveRequest{
 
-        @NotNull(message = "식사 날짜를 입력해주세요")
+        @NotNull(message = "{validation.meal.mealDate.required}")
         private LocalDate mealDate;
 
-        @NotNull(message = "식사 시간을 입력해주세요")
+        @NotNull(message = "{validation.meal.mealTime.required}")
         private LocalTime mealTime;
 
-        @NotNull(message = "식사 카테고리를 입력해주세요")
+        @NotNull(message = "{validation.meal.mealCategory.required}")
         private MealCategory mealCategory;
 
         private String mealPhoto;
@@ -49,13 +49,13 @@ public class MealDto {
     @AllArgsConstructor
     public static class MealUpdateRequest{
 
-        @NotNull(message = "식사 날짜를 입력해주세요")
+        @NotNull(message = "{validation.meal.mealDate.required}")
         private LocalDate mealDate;
 
-        @NotNull(message = "식사 시간을 입력해주세요")
+        @NotNull(message = "{validation.meal.mealTime.required}")
         private LocalTime mealTime;
 
-        @NotNull(message = "식사 카테고리를 입력해주세요")
+        @NotNull(message = "{validation.meal.mealCategory.required}")
         private MealCategory mealCategory;
 
         private String mealPhoto;
