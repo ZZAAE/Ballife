@@ -4,11 +4,13 @@
 #   2) 서버에 SSH 접속 → docker compose pull && up -d
 #
 # 필요한 GitHub Secrets:
-#   DEPLOY_HOST     배포 서버 IP/도메인
-#   DEPLOY_USER     SSH 사용자
-#   DEPLOY_SSH_KEY  SSH 개인키(PEM 내용 전체)
-#   DEPLOY_PATH     서버에서 docker-compose.yml + .env 가 있는 경로
-#   GHCR_PAT        서버에서 GHCR 이미지 pull용 토큰(read:packages). 패키지를 public 으로 두면 생략 가능.
+#   GABIA_HOST      배포 서버 IP/도메인
+#   GABIA_USER      SSH 사용자
+#   GABIA_SSH_KEY   SSH 개인키(PEM 내용 전체)
+#   GABIA_SSH_PORT  SSH 포트 (가비아는 22 가 아닐 수 있음)
+#   GHCR_PAT        (선택) 서버에서 GHCR 이미지 pull용 토큰(read:packages). 패키지를 public 으로 두면 불필요.
+# 참고: 서버의 배포 경로는 아래 deploy 스텝의 `cd ~/ballife` 를 실제 경로로 수정.
+#       GABIA_KNOWN_HOSTS 는 appleboy/ssh-action 에선 사용하지 않음(없어도 됨).
 # ============================================================
 name: Deploy
 
@@ -72,17 +74,24 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: SSH 배포 (compose pull & up)
+      - name: SSH 배포 (가비아 서버에서 compose pull & up)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host: ${{ secrets.GABIA_HOST }}
+          username: ${{ secrets.GABIA_USER }}
+          key: ${{ secrets.GABIA_SSH_KEY }}
+          port: ${{ secrets.GABIA_SSH_PORT }}
           script: |
             set -e
-            cd "${{ secrets.DEPLOY_PATH }}"
-            # private 패키지면 로그인 필요(public 이면 이 줄 생략 가능)
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            # ▼▼ 서버에서 docker-compose.yml + .env 가 있는 경로로 수정하세요 ▼▼
+            cd ~/ballife
+            # ▲▲ (예: /home/계정/ballife) ▲▲
+
+            # GHCR 패키지가 private 이면 토큰으로 로그인. public 으로 바꿨다면 이 if 블록은 지워도 됨.
+            if [ -n "${{ secrets.GHCR_PAT }}" ]; then
+              echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            fi
+
             export IMAGE_PREFIX="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
             export IMAGE_TAG="${{ github.sha }}"
             docker compose pull

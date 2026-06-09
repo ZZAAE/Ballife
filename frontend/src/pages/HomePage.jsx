@@ -1,5 +1,5 @@
 import { useState } from "react";
-import WaterRecordModal from "../modals/BloodsugarModal";
+import WaterRecordModal from "../modals/bloodsugarModal";
 import Chatbot from '../modals/Chatbot'
 
 function HomePage() {

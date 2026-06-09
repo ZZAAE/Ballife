@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import postApi from "../../api/boardApi";
-import Button from "../../components/Button";
+import Button from "../../components/button";
 import RichTextEditor from "../../components/board/RichTextEditor";
 import { isRichTextEmpty } from "../../components/board/richTextEditorUtils";
 
