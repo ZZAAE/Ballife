@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 export default function MemoCard({ memoList = [] }) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const hasMemo = memoList.length > 0;
@@ -24,7 +26,7 @@ export default function MemoCard({ memoList = [] }) {
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#2563EB]" />
-          <span className="text-[16px] font-bold text-gray-900">메모장</span>
+          <span className="text-[16px] font-bold text-gray-900">{t("memoCard.title")}</span>
         </div>
       </div>
 
@@ -36,7 +38,7 @@ export default function MemoCard({ memoList = [] }) {
               {currentMemo.content}
             </p>
           ) : (
-            <p className="text-[14px] text-gray-400">등록된 메모가 없습니다.</p>
+            <p className="text-[14px] text-gray-400">{t("memoCard.empty")}</p>
           )}
         </div>
 

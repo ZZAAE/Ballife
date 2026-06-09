@@ -22,13 +22,13 @@ public class BioValueRecordDto {
     public static class CreateRequest {
 
         // 사용자가 입력한 값 1개만 넣어야돼서 유효성 검사 안함
-        @NotNull(message = "날짜를 입력해주세요")
+        @NotNull(message = "{validation.bioValue.recordDate.required}")
         private LocalDate recordDate;
 
-        @NotNull(message = "날짜를 입력해주세요")
+        @NotNull(message = "{validation.bioValue.recordDate.required}")
         private LocalTime recordTime;
 
-        @NotNull(message = "카테고리를 입력해주세요")
+        @NotNull(message = "{validation.bioValue.category.required}")
         private String category;
 
         private Integer bloodSugar;
@@ -49,12 +49,12 @@ public class BioValueRecordDto {
     public static class UpdateRequest {
 
         // 사용자가 입력한 값 1개만 넣어야돼서 유효성 검사 안함
-        @NotNull(message = "날짜를 입력해주세요")
+        @NotNull(message = "{validation.bioValue.recordDate.required}")
         private LocalDate recordDate;
-        @NotNull(message = "시간을 입력해주세요")
+        @NotNull(message = "{validation.bioValue.recordTime.required}")
         private LocalTime recordTime;
 
-        @NotNull(message = "카테고리를 입력해주세요")
+        @NotNull(message = "{validation.bioValue.category.required}")
         private String category;
 
         private Integer bloodSugar;

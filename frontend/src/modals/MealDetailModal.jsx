@@ -1,19 +1,22 @@
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import salmonImg from "../assets/salmon.jpg";
 import riceImg from "../assets/rice.jpg";
 
 function MealDetailModal({ isOpen, onClose, mealData }) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   // 영양 수치는 소수점 첫째 자리까지만 표시 (정수는 그대로)
   const round1 = (n) => Math.round((Number(n) || 0) * 10) / 10;
 
   const meal = mealData || {
-    mealType: "점심 식사",
+    mealType: t("mealDetailModal.sample.mealType"),
     foods: [
       {
         id: 1,
-        name: "연어 샐러드",
+        name: t("mealDetailModal.sample.salmonSalad"),
         calories: 486,
         nutrition: {
           carbs: 12,
@@ -27,7 +30,7 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
       },
       {
         id: 2,
-        name: "현미밥 반 공기",
+        name: t("mealDetailModal.sample.brownRiceHalf"),
         calories: 150,
         nutrition: {
           carbs: 32,
@@ -64,7 +67,9 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
         <div className="flex-shrink-0 px-5 md:px-10 pt-7 pb-7">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-1">식단 기록</p>
+              <p className="text-sm text-gray-400 mb-1">
+                {t("mealDetailModal.label.dietRecord")}
+              </p>
               <h2 className="text-[28px] font-bold text-gray-900 leading-tight">
                 {meal.mealType}
               </h2>
@@ -112,15 +117,30 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
                 </div>
                 <div className="grid grid-cols-6 gap-1">
                   {[
-                    { label: "탄수화물", value: `${round1(food.nutrition.carbs)}g` },
-                    { label: "단백질", value: `${round1(food.nutrition.protein)}g` },
-                    { label: "지방", value: `${round1(food.nutrition.fat)}g` },
-                    { label: "당류", value: `${round1(food.nutrition.sugar)}g` },
                     {
-                      label: "콜레스테롤",
+                      label: t("mealDetailModal.nutrition.carbs"),
+                      value: `${round1(food.nutrition.carbs)}g`,
+                    },
+                    {
+                      label: t("mealDetailModal.nutrition.protein"),
+                      value: `${round1(food.nutrition.protein)}g`,
+                    },
+                    {
+                      label: t("mealDetailModal.nutrition.fat"),
+                      value: `${round1(food.nutrition.fat)}g`,
+                    },
+                    {
+                      label: t("mealDetailModal.nutrition.sugar"),
+                      value: `${round1(food.nutrition.sugar)}g`,
+                    },
+                    {
+                      label: t("mealDetailModal.nutrition.cholesterol"),
                       value: `${round1(food.nutrition.cholesterol)}mg`,
                     },
-                    { label: "나트륨", value: `${round1(food.nutrition.sodium)}mg` },
+                    {
+                      label: t("mealDetailModal.nutrition.sodium"),
+                      value: `${round1(food.nutrition.sodium)}mg`,
+                    },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -145,37 +165,37 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
           <div className="flex gap-2 justify-between mb-4">
             {[
               {
-                label: "탄수화물",
+                label: t("mealDetailModal.nutrition.carbs"),
                 value: `${round1(meal.totalNutrition.carbs)}g`,
                 bgClass: "bg-slate-100",
                 textClass: "text-slate-400",
               },
               {
-                label: "단백질",
+                label: t("mealDetailModal.nutrition.protein"),
                 value: `${round1(meal.totalNutrition.protein)}g`,
                 bgClass: "bg-cyan-50",
                 textClass: "text-cyan-500",
               },
               {
-                label: "지방",
+                label: t("mealDetailModal.nutrition.fat"),
                 value: `${round1(meal.totalNutrition.fat)}g`,
                 bgClass: "bg-orange-50",
                 textClass: "text-orange-400",
               },
               {
-                label: "당류",
+                label: t("mealDetailModal.nutrition.sugar"),
                 value: `${round1(meal.totalNutrition.sugar)}g`,
                 bgClass: "bg-pink-50",
                 textClass: "text-pink-400",
               },
               {
-                label: "콜레스테롤",
+                label: t("mealDetailModal.nutrition.cholesterol"),
                 value: `${round1(meal.totalNutrition.cholesterol)}mg`,
                 bgClass: "bg-indigo-50",
                 textClass: "text-indigo-400",
               },
               {
-                label: "나트륨",
+                label: t("mealDetailModal.nutrition.sodium"),
                 value: `${round1(meal.totalNutrition.sodium)}mg`,
                 bgClass: "bg-yellow-50",
                 textClass: "text-yellow-500",
@@ -198,7 +218,7 @@ function MealDetailModal({ isOpen, onClose, mealData }) {
           {/* 총 칼로리 */}
           <div className="flex justify-between items-center pt-4">
             <span className="text-base font-semibold text-gray-700">
-              총 칼로리
+              {t("mealDetailModal.totalCalories")}
             </span>
             <span className="text-2xl font-bold text-gray-900">
               {round1(meal.totalCalories)} kcal

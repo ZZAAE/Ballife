@@ -2,7 +2,9 @@ package com.prologue.ballife.service.news;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NewsService {
 
     private final NewsCardRepository newsCardRepository;
+    private final NewsTranslationClient newsTranslationClient;
 
     public static final String CATEGORY_ALL = "전체";
 
@@ -42,10 +45,13 @@ public class NewsService {
     private static final int SHOW_COUNT = 6;
     private static final int TIMEOUT_MS = 8000;
 
-    public List<NewsCardDto> getCards() {
+    // 제목을 사전번역할 대상 언어 (ko 는 원문 title 그대로 사용)
+    private static final List<String> TRANSLATE_LANGS = List.of("en", "ja", "zh-CN");
+
+    public List<NewsCardDto> getCards(String lang) {
         return newsCardRepository.findByCategoryOrderBySeqAsc(CATEGORY_ALL)
                 .stream()
-                .map(this::toDto)
+                .map(card -> toDto(card, lang))
                 .toList();
     }
 
@@ -61,9 +67,35 @@ public class NewsService {
             log.warn("[NewsService] 수집 0건 — 기존 데이터 유지");
             return;
         }
+        translateTitles(cards); // en/ja/zh-CN 사전번역 (실패해도 한국어로 동작)
         newsCardRepository.deleteByCategory(CATEGORY_ALL);
         newsCardRepository.saveAll(cards);
         log.info("[NewsService] 카드뉴스 {}건 저장", cards.size());
+    }
+
+    /** 카드 제목을 en/ja/zh-CN 으로 사전번역해 titleI18n 에 채운다. 실패 시 해당 언어만 건너뜀. */
+    private void translateTitles(List<NewsCard> cards) {
+        List<String> koTitles = cards.stream().map(NewsCard::getTitle).toList();
+        for (String lang : TRANSLATE_LANGS) {
+            List<String> translated = newsTranslationClient.translateTitles(koTitles, lang);
+            // 번역 실패 시 클라이언트가 원문을 그대로 돌려주므로, 원문과 같으면 저장 생략
+            if (translated == null || translated.size() != cards.size()) {
+                continue;
+            }
+            for (int i = 0; i < cards.size(); i++) {
+                NewsCard card = cards.get(i);
+                String value = translated.get(i);
+                if (value == null || value.isBlank() || value.equals(card.getTitle())) {
+                    continue;
+                }
+                Map<String, String> map = card.getTitleI18n();
+                if (map == null) {
+                    map = new HashMap<>();
+                    card.setTitleI18n(map);
+                }
+                map.put(lang, value);
+            }
+        }
     }
 
     private List<NewsCard> fetchFromRss() {
@@ -125,13 +157,22 @@ public class NewsService {
         return desc.length() > 90 ? desc.substring(0, 90) + "…" : desc;
     }
 
-    private NewsCardDto toDto(NewsCard card) {
+    private NewsCardDto toDto(NewsCard card, String lang) {
         return NewsCardDto.builder()
-                .title(card.getTitle())
+                .title(resolveTitle(card, lang))
                 .link(card.getLink())
                 .thumbnail(card.getThumbnail())
                 .summary(card.getSummary())
                 .pubDate(card.getPubDate())
                 .build();
+    }
+
+    /** 요청 언어에 맞는 제목 선택. 번역본이 없으면 한국어 원문으로 폴백. */
+    private String resolveTitle(NewsCard card, String lang) {
+        if (lang == null || lang.isBlank() || "ko".equals(lang) || card.getTitleI18n() == null) {
+            return card.getTitle();
+        }
+        String translated = card.getTitleI18n().get(lang);
+        return (translated != null && !translated.isBlank()) ? translated : card.getTitle();
     }
 }

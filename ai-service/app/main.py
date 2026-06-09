@@ -16,6 +16,13 @@ from collections import defaultdict
 from datetime import date
 
 from app.food_classifier import predict as predict_food, warmup as warmup_food_model
+from app.i18n import (
+    normalize_lang,
+    language_directive,
+    image_default_question,
+    no_reply,
+    LANGUAGE_NAMES,
+)
 
 load_dotenv()
 
@@ -167,6 +174,7 @@ class ChatRequest(BaseModel):
     date: str | None = (
         None  # 조회할 식단 날짜 (YYYY-MM-DD). 미지정 시 오늘 하루치만 조회
     )
+    lang: str = "ko"  # 응답 언어 ("ko"/"en"/"ja"/"zh-CN"). 미지정 시 ko
 
 
 class AnalyzeRequest(BaseModel):
@@ -174,6 +182,7 @@ class AnalyzeRequest(BaseModel):
     metric: str = ""  # "weight" | "bloodPressure" | "bloodSugar"
     data: dict = {}  # 페이지가 계산한 요약/추세 데이터
     token: str | None = None
+    lang: str = "ko"  # 응답 언어 ("ko"/"en"/"ja"/"zh-CN"). 미지정 시 ko
 
 
 def _safe_json(result):
@@ -411,6 +420,7 @@ def summarize_health_data(raw: dict, target_date: date) -> str:
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
+    lang = normalize_lang(req.lang)
     # 식단 조회 날짜: 요청에 date 가 있으면 그 날, 없으면 오늘 하루치
     target_date = _to_date(req.date) or date.today()
     raw = await fetch_user_health_data(req.userId, req.token, target_date)
@@ -418,10 +428,13 @@ async def chat(req: ChatRequest):
 
     history = conversation_histories[req.userId]
 
+    # 응답 언어 강제 지시를 시스템 프롬프트에 주입
+    system_prompt = SYSTEM_PROMPT + language_directive(lang)
+
     # 사용자가 텍스트 없이 이미지만 보낸 경우 기본 질문을 채움
     user_text = req.message.strip()
     if req.image and not user_text:
-        user_text = "이 사진을 분석해 주세요."
+        user_text = image_default_question(lang)
 
     if req.image:
         # 비전: 텍스트 + 이미지로 멀티모달 human 메시지 구성 후 LLM 직접 호출
@@ -434,17 +447,16 @@ async def chat(req: ChatRequest):
                 {"type": "image_url", "image_url": {"url": req.image}},
             ]
         )
-        messages = [SystemMessage(content=SYSTEM_PROMPT), *history, human_message]
-        response = await llm.ainvoke(messages)
-        result = response.content
+        messages = [SystemMessage(content=system_prompt), *history, human_message]
     else:
-        result = await chain.ainvoke(
-            {
-                "health_data": health_summary,
-                "history": history,
-                "message": user_text,
-            }
+        text_block = (
+            f"[사용자 건강 데이터 요약]\n{health_summary}\n\n[질문]\n{user_text}"
         )
+        messages = [SystemMessage(content=system_prompt), *history,
+                    HumanMessage(content=text_block)]
+
+    response = await llm.ainvoke(messages)
+    result = response.content or no_reply(lang)
 
     # LLM 문맥/표시용 기록에는 텍스트만 저장 (이미지는 재전송 비용 때문에 누적하지 않음)
     history_text = f"[사진] {user_text}" if req.image else user_text
@@ -472,6 +484,21 @@ METRIC_LABELS = {
 }
 
 
+async def _translate_analysis(text: str, lang: str) -> str:
+    """생성된 한국어 분석을 대상 언어로 번역. 번역 단독 작업이라 모델이 출력 언어를 안정적으로 지킨다."""
+    name = LANGUAGE_NAMES.get(lang, "English")
+    resp = await llm.ainvoke([
+        SystemMessage(content=(
+            f"You are a medical translator. Translate the user's health analysis into {name}. "
+            f"Output ONLY the translation with no preface or notes. "
+            f"Preserve the original line breaks and blank lines exactly, and keep all numbers and "
+            f"measurement units (mg/dL, mmHg, kcal, kg) unchanged."
+        )),
+        HumanMessage(content=text),
+    ])
+    return (resp.content or text).strip()
+
+
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
     # 건강 기록 페이지(체중/혈압/혈당)의 요약 데이터를 받아 단건 AI 분석 생성
@@ -482,19 +509,25 @@ async def analyze(req: AnalyzeRequest):
     if isinstance(trend, list) and len(trend) > 60:
         data["trend"] = trend[-60:]
 
+    lang = normalize_lang(req.lang)
     label = METRIC_LABELS.get(req.metric, req.metric or "건강 지표")
     text = (
         f"[분석 지표] {label}\n"
         f"[데이터(JSON)]\n{json.dumps(data, ensure_ascii=False)}"
     )
 
-    response = await llm.ainvoke(
-        [
-            SystemMessage(content=ANALYSIS_PROMPT),
-            HumanMessage(content=text),
-        ]
-    )
-    return {"analysis": response.content}
+    # 1) 한국어로 분석 생성 (모델 기본 언어 → 품질·안정성 높음)
+    response = await llm.ainvoke([
+        SystemMessage(content=ANALYSIS_PROMPT),
+        HumanMessage(content=text),
+    ])
+    analysis = (response.content or "").strip()
+
+    # 2) 비한국어면 결과를 대상 언어로 번역 (프롬프트로 직접 생성하는 것보다 언어 준수가 확실)
+    if lang != "ko" and analysis:
+        analysis = await _translate_analysis(analysis, lang)
+
+    return {"analysis": analysis}
 
 
 @app.get("/chat/history/{user_id}")
@@ -548,3 +581,109 @@ async def ocr_Str_Extraction(ocrStrList: List[str] = Body(...)):
     ocrChain = promptOcrParsing | llm_structured
     result = await ocrChain.ainvoke({"OCR_STR": ocrStrList})
     return result.medicines
+
+
+# ── 메인 카드뉴스 제목 다국어 번역 (백엔드 refresh 시 사전번역용) ──────────────
+class NewsTitleTranslation(BaseModel):
+    # 입력과 동일한 개수·순서로, 대상 언어로 번역된 제목 목록
+    titles: List[str]
+
+
+class NewsTranslateRequest(BaseModel):
+    titles: List[str]
+    lang: str = "en"
+
+
+llm_news_translate = llm.with_structured_output(NewsTitleTranslation)
+
+newsTranslatePrompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are a professional translator for a health and wellness app. "
+        "Translate each Korean health-news headline into {LANG_NAME}. "
+        "Keep medical terminology accurate and natural for {LANG_NAME} readers, "
+        "and keep measurement units (mg/dL, mmHg, kcal, kg) unchanged. "
+        "Translate the meaning faithfully and concisely as a news headline — "
+        "do not add explanations. "
+        "Return EXACTLY the same number of titles, in the SAME order as the input. "
+        "Do not add, drop, merge, or reorder items.",
+    ),
+    ("human", "{TITLES_JSON}"),
+])
+
+
+@app.post("/news/translate")
+async def news_translate(req: NewsTranslateRequest):
+    """카드뉴스 제목을 lang(en/ja/zh-CN)으로 일괄 번역. ko 거나 입력이 비면 원문 그대로."""
+    lang = normalize_lang(req.lang)
+    if lang == "ko" or not req.titles:
+        return {"titles": req.titles}
+
+    lang_name = LANGUAGE_NAMES.get(lang, "English")
+    chain = newsTranslatePrompt | llm_news_translate
+    try:
+        result = await chain.ainvoke({
+            "LANG_NAME": lang_name,
+            "TITLES_JSON": json.dumps(req.titles, ensure_ascii=False),
+        })
+        titles = result.titles
+    except Exception as e:
+        print(f"[news_translate] 번역 실패(lang={lang}): {e}")
+        return {"titles": req.titles}
+
+    # 개수 안전장치: 모델이 개수를 바꾸면 원문으로 폴백
+    if not titles or len(titles) != len(req.titles):
+        return {"titles": req.titles}
+    return {"titles": titles}
+
+
+# ── 범용 짧은 텍스트 일괄 번역 (사용자 입력값 표시용: 처방 이름·메모 등) ──────────
+class TextTranslateRequest(BaseModel):
+    texts: List[str]
+    lang: str = "en"
+
+
+class TextTranslateResult(BaseModel):
+    # 입력과 동일한 개수·순서로 번역된 텍스트 목록
+    texts: List[str]
+
+
+llm_text_translate = llm.with_structured_output(TextTranslateResult)
+
+textTranslatePrompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are a translator for a health app. Translate each short user-entered Korean text "
+        "(prescription names, memos, labels) into {LANG_NAME}. "
+        "Translate concisely and naturally. "
+        "Leave numbers, dates, codes, and proper drug/brand names unchanged. "
+        "Return EXACTLY the same number of items, in the SAME order as the input. "
+        "Do not add, drop, merge, or reorder items.",
+    ),
+    ("human", "{TEXTS_JSON}"),
+])
+
+
+@app.post("/translate")
+async def translate_texts(req: TextTranslateRequest):
+    """사용자 입력 짧은 텍스트(처방 이름·메모 등)를 lang 으로 일괄 번역. ko 거나 비면 원문."""
+    lang = normalize_lang(req.lang)
+    if lang == "ko" or not req.texts:
+        return {"texts": req.texts}
+
+    lang_name = LANGUAGE_NAMES.get(lang, "English")
+    chain = textTranslatePrompt | llm_text_translate
+    try:
+        result = await chain.ainvoke({
+            "LANG_NAME": lang_name,
+            "TEXTS_JSON": json.dumps(req.texts, ensure_ascii=False),
+        })
+        texts = result.texts
+    except Exception as e:
+        print(f"[translate] 번역 실패(lang={lang}): {e}")
+        return {"texts": req.texts}
+
+    # 개수 안전장치: 개수 바뀌면 원문 폴백
+    if not texts or len(texts) != len(req.texts):
+        return {"texts": req.texts}
+    return {"texts": texts}

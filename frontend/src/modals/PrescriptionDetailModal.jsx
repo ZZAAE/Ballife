@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 
 function MedicineThumb({ type }) {
@@ -58,6 +59,7 @@ export default function PrescriptionDetailModal({
   onDeleteMedicine,
   onUpdateMedicine,
 }) {
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState({ name: "", purpose: "", dosageText: "" });
   // 삭제 확인 모달 대상 약 id (null 이면 모달 닫힘)
@@ -105,10 +107,10 @@ export default function PrescriptionDetailModal({
         <div className="flex shrink-0 items-start justify-between px-5 md:px-8 pt-8 pb-6">
           <div>
             <h2 className="text-[30px] font-semibold text-gray-700 leading-tight">
-              나의 [{group.groupName}] 처방 목록
+              {t("prescriptionDetailModal.title", { groupName: group.groupName })}
             </h2>
             <p className="mt-2 text-[14px] text-gray-400">
-              총 {medicines.length}개의 약이 처방되어 있습니다.
+              {t("prescriptionDetailModal.totalCount", { count: medicines.length })}
             </p>
           </div>
 
@@ -124,7 +126,7 @@ export default function PrescriptionDetailModal({
         <div className="space-y-5 overflow-y-auto px-5 md:px-8 pb-8 max-h-[min(540px,calc(90vh-160px))]">
           {medicines.length === 0 ? (
             <div className="bg-white rounded-2xl px-5 py-12 text-center text-[15px] text-gray-400 shadow-sm">
-              처방된 약이 없습니다. 약을 모두 삭제하면 이 그룹은 복용 일정·이행률에서도 사라집니다.
+              {t("prescriptionDetailModal.empty")}
             </div>
           ) : (
             medicines.map((medicine) => {
@@ -144,7 +146,7 @@ export default function PrescriptionDetailModal({
                           onChange={(e) =>
                             setDraft((d) => ({ ...d, name: e.target.value }))
                           }
-                          placeholder="약 이름"
+                          placeholder={t("prescriptionDetailModal.placeholder.name")}
                           className={EDIT_INPUT_CLASS}
                         />
                         <input
@@ -152,7 +154,7 @@ export default function PrescriptionDetailModal({
                           onChange={(e) =>
                             setDraft((d) => ({ ...d, purpose: e.target.value }))
                           }
-                          placeholder="효능"
+                          placeholder={t("prescriptionDetailModal.placeholder.purpose")}
                           className={EDIT_INPUT_CLASS}
                         />
                         <input
@@ -163,7 +165,7 @@ export default function PrescriptionDetailModal({
                               dosageText: e.target.value,
                             }))
                           }
-                          placeholder="복용법"
+                          placeholder={t("prescriptionDetailModal.placeholder.dosage")}
                           className={EDIT_INPUT_CLASS}
                         />
                       </>
@@ -197,7 +199,7 @@ export default function PrescriptionDetailModal({
                           type="button"
                           onClick={() => saveEdit(medicine.id)}
                           className="text-[#2563EB] hover:text-blue-700"
-                          aria-label="저장"
+                          aria-label={t("prescriptionDetailModal.action.save")}
                         >
                           <Check className="w-4 h-4" />
                         </button>
@@ -205,7 +207,7 @@ export default function PrescriptionDetailModal({
                           type="button"
                           onClick={cancelEdit}
                           className="text-gray-400 hover:text-gray-600"
-                          aria-label="취소"
+                          aria-label={t("prescriptionDetailModal.action.cancel")}
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -216,7 +218,7 @@ export default function PrescriptionDetailModal({
                           type="button"
                           onClick={() => startEdit(medicine)}
                           className="text-gray-500 hover:text-gray-700"
-                          aria-label="수정"
+                          aria-label={t("prescriptionDetailModal.action.edit")}
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -224,7 +226,7 @@ export default function PrescriptionDetailModal({
                           type="button"
                           onClick={() => requestDelete(medicine.id)}
                           className="text-red-400 hover:text-red-500"
-                          aria-label="삭제"
+                          aria-label={t("prescriptionDetailModal.action.delete")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -253,7 +255,7 @@ export default function PrescriptionDetailModal({
             <Trash2 className="h-6 w-6 text-red-500" />
           </div>
           <h3 className="text-[18px] font-semibold text-gray-800">
-            정말 삭제하시겠습니까?
+            {t("prescriptionDetailModal.confirmDelete.title")}
           </h3>
           <p className="mt-2 text-[14px] leading-6 text-gray-500">
             {pendingMedicine ? (
@@ -261,11 +263,11 @@ export default function PrescriptionDetailModal({
                 <span className="font-medium text-gray-700">
                   {pendingMedicine.name}
                 </span>{" "}
-                약을 삭제합니다.
+                {t("prescriptionDetailModal.confirmDelete.target")}
                 <br />
               </>
             ) : null}
-            삭제 후에는 되돌릴 수 없습니다.
+            {t("prescriptionDetailModal.confirmDelete.warning")}
           </p>
           <div className="mt-6 flex gap-3">
             <button
@@ -273,14 +275,14 @@ export default function PrescriptionDetailModal({
               onClick={cancelDelete}
               className="h-11 flex-1 rounded-xl bg-gray-100 text-[14px] font-medium text-gray-700 transition hover:bg-gray-200"
             >
-              취소
+              {t("prescriptionDetailModal.action.cancel")}
             </button>
             <button
               type="button"
               onClick={confirmDelete}
               className="h-11 flex-1 rounded-xl bg-red-500 text-[14px] font-semibold text-white transition hover:bg-red-600"
             >
-              삭제
+              {t("prescriptionDetailModal.action.delete")}
             </button>
           </div>
         </div>

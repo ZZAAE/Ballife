@@ -1,7 +1,9 @@
 package com.prologue.ballife.service.report;
 
 import java.util.List;
+import java.util.Locale;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -64,7 +66,10 @@ public class ReportService {
         HealthAnalysisResponse response = healthAnalysisService.analyzeMonthly(userId);
         List<String> questions = generateQuestions(response, userId);
 
-        Context context = new Context();
+        // 요청 로케일을 Thymeleaf 컨텍스트에 전달 → 템플릿 #{...} 메시지가 해당 언어로 해석됨
+        Context context = new Context(LocaleContextHolder.getLocale());
+        // 로케일별 폰트 우선순위 (일본어=JP 한자 자형, 중국어=SC 자형, 그 외=KR). 한글 이름은 KR 폴백.
+        context.setVariable("fontFamily", fontStackFor(LocaleContextHolder.getLocale()));
         context.setVariable("period",         response.period());
         context.setVariable("user",           response.user());
         context.setVariable("bloodPressure",  response.bloodPressure());
@@ -84,6 +89,21 @@ public class ReportService {
 
         String html = templateEngine.process(TEMPLATE_MONTHLY, context);
         return pdfGenerator.generate(html);
+    }
+
+    /**
+     * 로케일별 CSS font-family 스택. 한자 자형을 해당 언어식으로 렌더하기 위해 1순위 폰트를 바꾼다.
+     *  - 일본어: JP(일본식 한자) → KR(한글 이름 폴백) → SC
+     *  - 중국어: SC(간체) → KR(한글 이름 폴백)
+     *  - 그 외 : KR → SC
+     */
+    private String fontStackFor(Locale locale) {
+        String lang = (locale != null) ? locale.getLanguage() : "ko";
+        return switch (lang) {
+            case "ja" -> "'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC', sans-serif";
+            case "zh" -> "'Noto Sans SC', 'Noto Sans KR', sans-serif";
+            default   -> "'Noto Sans KR', 'Noto Sans SC', sans-serif";
+        };
     }
 
     /**

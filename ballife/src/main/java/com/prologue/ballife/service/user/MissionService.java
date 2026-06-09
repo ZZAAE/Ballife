@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.user.MissionType;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.domain.user.UserMission;
@@ -31,11 +32,12 @@ public class MissionService {
     private final UserMissionRepository userMissionRepository;
     private final UserRepository userRepository;
     private final MissionVerifier missionVerifier;
+    private final MessageResolver messages;
 
     // 미션 현황 + 보유 포인트 조회
     public MissionDto.Overview getOverview(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         List<UserMission> claims = userMissionRepository.findByUser_UserId(userId);
         LocalDate today = LocalDate.now();
@@ -55,7 +57,7 @@ public class MissionService {
     @Transactional
     public MissionDto.ClaimResult claim(Long userId, MissionType type) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         List<UserMission> claimsOfType = userMissionRepository.findByUser_UserId(userId).stream()
                 .filter(m -> m.getMissionType() == type)
@@ -65,11 +67,11 @@ public class MissionService {
 
         // 1) 주기 제한: 이미 받았거나 한도를 초과했는지
         if (!isClaimable(type, claimsOfType, today)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 수령했거나 수령 한도를 초과했습니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messages.get("business.mission.alreadyClaimedOrLimitExceeded"));
         }
         // 2) 실제 행동 달성: 정말로 그 행동을 수행했는지
         if (!missionVerifier.isAchieved(userId, type, today, claimsOfType.size())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "아직 미션 조건을 달성하지 못했습니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messages.get("business.mission.conditionNotMet"));
         }
 
         UserMission claim = UserMission.builder()

@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import newsApi from "../../api/newsApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import mealApi from "../../api/mealApi";
@@ -66,7 +68,7 @@ const computeMedicineData = (schedules) => {
   });
 
   const items = Array.from(itemSet);
-  const groups = items.length > 0 ? [{ name: "처방 그룹", items }] : [];
+  const groups = items.length > 0 ? [{ name: i18n.t("mainPage.prescriptionGroup"), items }] : [];
 
   return { todayRemaining, groups };
 };
@@ -89,6 +91,7 @@ const mergeTakenState = (base, saved) =>
   });
 
 const MainPage = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id ?? null;
 
@@ -310,7 +313,8 @@ const MainPage = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // 언어 전환 시 재요청 — 백엔드가 Accept-Language(현재 언어)에 맞춘 제목을 내려준다.
+  }, [i18n.language]);
 
   const {
     unityProvider,
@@ -425,10 +429,10 @@ const MainPage = () => {
       return m ? Number(m[1]) : 80;
     })();
     return [
-      { value: sysMax, label: `목표 수축기 ${sysMax}`, color: "#94A3B8" },
-      { value: diaMax, label: `목표 이완기 ${diaMax}`, color: "#94A3B8" },
+      { value: sysMax, label: t("mainPage.chart.targetSystolic", { value: sysMax }), color: "#94A3B8" },
+      { value: diaMax, label: t("mainPage.chart.targetDiastolic", { value: diaMax }), color: "#94A3B8" },
     ];
-  }, [memberProfile]);
+  }, [memberProfile, t]);
 
   const bloodSugarReferences = useMemo(() => {
     const raw = memberProfile?.normalFastingGlucose;
@@ -441,15 +445,15 @@ const MainPage = () => {
         if (single) target = Number(single[1]);
       }
     }
-    return [{ value: target, label: `목표 ${target}`, color: "#94A3B8" }];
-  }, [memberProfile]);
+    return [{ value: target, label: t("mainPage.chart.target", { value: target }), color: "#94A3B8" }];
+  }, [memberProfile, t]);
 
   const weightReferences = useMemo(() => {
     if (targetWeight == null) return [];
     return [
-      { value: targetWeight, label: `목표 ${targetWeight}`, color: "#94A3B8" },
+      { value: targetWeight, label: t("mainPage.chart.target", { value: targetWeight }), color: "#94A3B8" },
     ];
-  }, [targetWeight]);
+  }, [targetWeight, t]);
 
   const chartConfig = useMemo(() => {
     return {
@@ -457,20 +461,20 @@ const MainPage = () => {
         accent: "#ED5934",
         data: bloodPressureChartData,
         legends: [
-          { label: "수축기", color: "#ED5934" },
-          { label: "이완기", color: "#F59874" },
+          { label: t("mainPage.chart.systolic"), color: "#ED5934" },
+          { label: t("mainPage.chart.diastolic"), color: "#F59874" },
         ],
         unit: "mmHg",
         areas: [
           {
             key: "systolic",
-            name: "수축기",
+            name: t("mainPage.chart.systolic"),
             stroke: "#ED5934",
             gradientId: "systolicGrad",
           },
           {
             key: "diastolic",
-            name: "이완기",
+            name: t("mainPage.chart.diastolic"),
             stroke: "#F59874",
             gradientId: "diastolicGrad",
           },
@@ -481,13 +485,13 @@ const MainPage = () => {
         accent: "#D40000",
         data: bloodSugarChartData,
         legends: [
-          { label: "혈당", color: "#D40000" },
+          { label: t("mainPage.chart.bloodSugar"), color: "#D40000" },
         ],
         unit: "mg/dL",
         areas: [
           {
             key: "glucose",
-            name: "혈당",
+            name: t("mainPage.chart.bloodSugar"),
             stroke: "#D40000",
             gradientId: "glucoseGrad",
           },
@@ -498,13 +502,13 @@ const MainPage = () => {
         accent: "#434335",
         data: weightChartData,
         legends: [
-          { label: "체중", color: "#434335" },
+          { label: t("mainPage.chart.weight"), color: "#434335" },
         ],
         unit: "kg",
         areas: [
           {
             key: "weight",
-            name: "체중",
+            name: t("mainPage.chart.weight"),
             stroke: "#434335",
             gradientId: "weightGrad",
           },
@@ -519,6 +523,7 @@ const MainPage = () => {
     bpReferences,
     bloodSugarReferences,
     weightReferences,
+    t,
   ]);
 
   const activeChart = chartConfig[selectedChartType];
@@ -621,10 +626,10 @@ const MainPage = () => {
       : null;
   const bmiLabel = (() => {
     if (bmiValue == null) return "—";
-    if (bmiValue < 18.5) return `${bmiValue} (저체중)`;
-    if (bmiValue < 23) return `${bmiValue} (정상)`;
-    if (bmiValue < 25) return `${bmiValue} (과체중)`;
-    return `${bmiValue} (비만)`;
+    if (bmiValue < 18.5) return t("mainPage.bmi.underweight", { value: bmiValue });
+    if (bmiValue < 23) return t("mainPage.bmi.normal", { value: bmiValue });
+    if (bmiValue < 25) return t("mainPage.bmi.overweight", { value: bmiValue });
+    return t("mainPage.bmi.obese", { value: bmiValue });
   })();
   const bmiColor = (() => {
     if (bmiValue == null) return "text-[#0F172A]";
@@ -634,10 +639,16 @@ const MainPage = () => {
     return "text-red-500";
   })();
 
+  const genderLabel = (() => {
+    if (gender === "남성") return t("mainPage.gender.male");
+    if (gender === "여성") return t("mainPage.gender.female");
+    return gender;
+  })();
+
   const userStats = {
     ageGender:
       age != null || gender
-        ? `${age != null ? `${age}세` : "—"}${gender ? ` / ${gender}` : ""}`
+        ? `${age != null ? t("mainPage.ageYears", { age }) : "—"}${gender ? ` / ${genderLabel}` : ""}`
         : "—",
     height: heightCm != null ? `${heightCm}cm` : "—",
     weight: profileWeightKg != null ? `${profileWeightKg}kg` : "—",
@@ -645,7 +656,7 @@ const MainPage = () => {
     bmiColor,
   };
 
-  const displayName = memberProfile?.username ?? user?.nickname ?? "회원";
+  const displayName = memberProfile?.username ?? user?.nickname ?? t("mainPage.defaultName");
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -683,21 +694,21 @@ const MainPage = () => {
               {/* lg+: 좌측 인사말, 우측 스탯 가로 */}
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#0F172A]">
-                  {displayName}님 안녕하세요.
+                  {t("mainPage.greeting", { name: displayName })}
                 </h1>
 
                 {/* 모바일: 2×2 그리드 / sm+: 가로 나열 */}
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:gap-6 text-sm">
                   <div>
-                    <p className="text-xs text-[#94A3B8]">나이 / 성별</p>
+                    <p className="text-xs text-[#94A3B8]">{t("mainPage.stats.ageGender")}</p>
                     <p className="font-semibold text-[#0F172A]">{userStats.ageGender}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[#94A3B8]">키</p>
+                    <p className="text-xs text-[#94A3B8]">{t("mainPage.stats.height")}</p>
                     <p className="font-semibold text-[#0F172A]">{userStats.height}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[#94A3B8]">몸무게</p>
+                    <p className="text-xs text-[#94A3B8]">{t("mainPage.stats.weight")}</p>
                     <p className="font-semibold text-[#0F172A]">{userStats.weight}</p>
                   </div>
                   <div>
@@ -713,16 +724,16 @@ const MainPage = () => {
               <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8">
                 <div>
                   <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-white">
-                    내 펫이 기다리고 있어요
+                    {t("mainPage.pet.title")}
                   </h2>
                   <p className="mt-2 text-sm lg:text-base text-slate-300">
-                    펫과 함께 건강한 하루를 시작해보세요.
+                    {t("mainPage.pet.subtitle")}
                   </p>
                   <Link
                     to="/member/pet"
                     className="group mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
                   >
-                    내 펫 자세히 보기
+                    {t("mainPage.pet.detailLink")}
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Link>
                 </div>
@@ -742,7 +753,7 @@ const MainPage = () => {
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
                         <div className="mb-3 text-3xl">🐾</div>
                         <p className="text-sm font-semibold text-blue-700">
-                          펫을 데려오는 중이에요…
+                          {t("mainPage.pet.loading")}
                         </p>
                         <div className="mt-3 h-1.5 w-40 overflow-hidden rounded-full bg-white/70">
                           <div
@@ -768,8 +779,8 @@ const MainPage = () => {
               <Calendar />
 
               <ChartSection
-                title="주간 건강 추이"
-                subtitle="일자별 평균 수치 추이"
+                title={t("mainPage.chart.weeklyTitle")}
+                subtitle={t("mainPage.chart.weeklySubtitle")}
                 data={activeChart.data}
                 legends={activeChart.legends}
                 areas={activeChart.areas}
@@ -780,9 +791,9 @@ const MainPage = () => {
                 selectedType={selectedChartType}
                 onTypeChange={setSelectedChartType}
                 chartTypes={[
-                  { value: "bloodSugar", label: "혈당", color: "#D40000" },
-                  { value: "bloodPressure", label: "혈압", color: "#ED5934" },
-                  { value: "weight", label: "체중", color: "#434335" },
+                  { value: "bloodSugar", label: t("mainPage.chart.bloodSugar"), color: "#D40000" },
+                  { value: "bloodPressure", label: t("mainPage.chart.bloodPressure"), color: "#ED5934" },
+                  { value: "weight", label: t("mainPage.chart.weight"), color: "#434335" },
                 ]}
               >
                 {(filteredData) => {
@@ -866,9 +877,9 @@ const MainPage = () => {
             {/* ====================== 건강 뉴스 ====================== */}
             <section>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-[#0F172A]">건강 뉴스</h2>
+                <h2 className="text-2xl font-bold text-[#0F172A]">{t("mainPage.news.title")}</h2>
                 <p className="text-[#64748B] text-sm mt-1">
-                  하이닥에서 큐레이션한 건강 정보를 만나보세요.
+                  {t("mainPage.news.subtitle")}
                 </p>
               </div>
 
@@ -929,7 +940,7 @@ const MainPage = () => {
 
               {!newsLoading && newsCards.length === 0 && (
                 <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-10 text-center text-sm text-[#94A3B8]">
-                  뉴스를 불러오지 못했습니다.
+                  {t("mainPage.news.loadFailed")}
                 </div>
               )}
             </section>

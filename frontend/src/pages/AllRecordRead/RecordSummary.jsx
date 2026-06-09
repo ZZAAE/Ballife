@@ -1,4 +1,6 @@
 import { useRef, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import mealApi from "../../api/mealApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import userConfigApi from "../../api/userConfigApi";
@@ -6,11 +8,11 @@ import { getExercisesInRange } from "../../api/exerciseApi";
 import { BIO_CATEGORY } from "../../constants/bioCategory";
 import { useAuth } from "../../contexts/AuthContext";
 
-const MEAL_CATEGORY_LABEL = {
-  BREAKFAST: "아침",
-  LUNCH: "점심",
-  DINNER: "저녁",
-  SNACK: "간식",
+const MEAL_CATEGORY_LABEL_KEY = {
+  BREAKFAST: "recordSummary.mealCategory.breakfast",
+  LUNCH: "recordSummary.mealCategory.lunch",
+  DINNER: "recordSummary.mealCategory.dinner",
+  SNACK: "recordSummary.mealCategory.snack",
 };
 const MEAL_CATEGORY_ORDER = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
 
@@ -84,7 +86,7 @@ function buildMealData(meal) {
   if (!meal) return null;
   const sum = (key) => meal.items.reduce((s, i) => s + (i[key] || 0), 0);
   return {
-    mealType: `${meal.label} 식사`,
+    mealType: i18n.t("recordSummary.mealType", { label: meal.label }),
     foods: meal.items.map((item, idx) => ({
       id: idx + 1,
       name: item.name,
@@ -179,6 +181,7 @@ const BloodPressureTooltip = ({ active, payload, label }) => {
 };
 
 export default function RecordSummary() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [isTimeLineModalOpen, setTimeLineModelOpen] = useState(false);
@@ -389,7 +392,7 @@ export default function RecordSummary() {
           if (!groupedByCategory[cat]) {
             groupedByCategory[cat] = {
               id: cat,
-              label: MEAL_CATEGORY_LABEL[cat] || cat,
+              label: MEAL_CATEGORY_LABEL_KEY[cat] ? t(MEAL_CATEGORY_LABEL_KEY[cat]) : cat,
               time: (m.mealTime || "").slice(0, 5),
               image: m.mealPhoto || null,
               items: [],
@@ -412,7 +415,7 @@ export default function RecordSummary() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, selectedDate]);
+  }, [user?.id, selectedDate, t]);
 
   const openDatePicker = () => {
     if (dateInputRef.current?.showPicker) {
@@ -429,26 +432,36 @@ export default function RecordSummary() {
       : null;
   const mealUnit =
     summary.targetIntakeKcal != null
-      ? `/ ${formatNumber(summary.targetIntakeKcal)} kcal`
-      : "kcal";
+      ? t("recordSummary.meal.unitTarget", {
+          value: formatNumber(summary.targetIntakeKcal),
+        })
+      : t("recordSummary.meal.unit");
   const mealBottom =
     intakeRemaining != null
       ? intakeRemaining >= 0
-        ? `남은 섭취 칼로리 ${formatNumber(intakeRemaining)}kcal`
-        : `목표 초과 ${formatNumber(Math.abs(intakeRemaining))}kcal`
-      : "목표 미설정";
+        ? t("recordSummary.meal.remaining", {
+            value: formatNumber(intakeRemaining),
+          })
+        : t("recordSummary.meal.overTarget", {
+            value: formatNumber(Math.abs(intakeRemaining)),
+          })
+      : t("recordSummary.meal.noTarget");
 
   const exerciseBottom =
     summary.burnedKcal != null
-      ? `총 소모칼로리 ${formatNumber(Math.round(summary.burnedKcal))} kcal`
-      : "기록 없음";
+      ? t("recordSummary.exercise.totalBurned", {
+          value: formatNumber(Math.round(summary.burnedKcal)),
+        })
+      : t("recordSummary.exercise.noRecord");
 
   const weightInc = summary.weightDelta != null && summary.weightDelta > 0;
   const weightDec = summary.weightDelta != null && summary.weightDelta < 0;
   const weightBottom =
     summary.weightDelta != null
-      ? `지난주 대비 ${summary.weightDelta > 0 ? "+" : ""}${summary.weightDelta}kg`
-      : "지난주 기록 없음";
+      ? t("recordSummary.weight.weekDelta", {
+          value: `${summary.weightDelta > 0 ? "+" : ""}${summary.weightDelta}`,
+        })
+      : t("recordSummary.weight.noWeekRecord");
   const weightBottomColor = weightInc
     ? "text-rose-600"
     : weightDec
@@ -462,18 +475,25 @@ export default function RecordSummary() {
     targetWaterL != null && waterL != null
       ? Math.max(0, +(targetWaterL - waterL).toFixed(1))
       : null;
-  const waterUnit = targetWaterL != null ? `/ ${targetWaterL} L` : "L";
+  const waterUnit =
+    targetWaterL != null
+      ? t("recordSummary.water.unitTarget", { value: targetWaterL })
+      : t("recordSummary.water.unit");
   const waterBottom =
     waterRemainingL != null
       ? waterRemainingL === 0
-        ? "목표량 달성"
-        : `남은 수분 섭취량 ${waterRemainingL}L`
-      : "목표 미설정";
+        ? t("recordSummary.water.goalReached")
+        : t("recordSummary.water.remaining", { value: waterRemainingL })
+      : t("recordSummary.water.noTarget");
 
   const medDateLabel = (() => {
     const d = new Date(selectedDate);
     if (Number.isNaN(d.getTime())) return selectedDate;
-    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    return t("recordSummary.dateLabel", {
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      day: d.getDate(),
+    });
   })();
 
   return (
@@ -486,10 +506,10 @@ export default function RecordSummary() {
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
               <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-                하루 기록
+                {t("recordSummary.header.title")}
               </h1>
               <p className="mb-8 text-sm text-gray-500">
-                하루의 신체 변화를 분석한 결과입니다.
+                {t("recordSummary.header.subtitle")}
               </p>
             </div>
 
@@ -519,8 +539,8 @@ export default function RecordSummary() {
               Icon={Utensils}
               colorText="text-red-600"
               colorBackgorund="bg-red-50"
-              labelName="식단"
-              description="오늘의 섭취 kcal"
+              labelName={t("recordSummary.cards.meal.label")}
+              description={t("recordSummary.cards.meal.description")}
               record={formatNumber(
                 summary.intakeKcal != null ? Math.round(summary.intakeKcal) : null,
               )}
@@ -534,10 +554,10 @@ export default function RecordSummary() {
               Icon={Dumbbell}
               colorText="text-orange-600"
               colorBackgorund="bg-orange-50"
-              labelName="운동"
-              description="오늘의 활동 시간"
+              labelName={t("recordSummary.cards.exercise.label")}
+              description={t("recordSummary.cards.exercise.description")}
               record={summary.exerciseMin != null ? formatNumber(summary.exerciseMin) : "—"}
-              unit="분"
+              unit={t("recordSummary.cards.exercise.unit")}
               bottomLabel={exerciseBottom}
               bottomeLabelColor="text-orange-600"
             />
@@ -547,8 +567,8 @@ export default function RecordSummary() {
               Icon={Scale}
               colorText="text-yellow-600"
               colorBackgorund="bg-yellow-50"
-              labelName="체중"
-              description="현재 체중 및 추세"
+              labelName={t("recordSummary.cards.weight.label")}
+              description={t("recordSummary.cards.weight.description")}
               record={summary.weightKg != null ? summary.weightKg : "—"}
               unit="kg"
               bottomLabel={weightBottom}
@@ -561,8 +581,8 @@ export default function RecordSummary() {
               Icon={Droplets}
               colorText="text-sky-600"
               colorBackgorund="bg-sky-50"
-              labelName="수분"
-              description="오늘의 수분 섭취량"
+              labelName={t("recordSummary.cards.water.label")}
+              description={t("recordSummary.cards.water.description")}
               record={waterL != null ? waterL : "—"}
               unit={waterUnit}
               bottomLabel={waterBottom}
@@ -575,22 +595,22 @@ export default function RecordSummary() {
             <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-gray-900">
-                  오늘의 혈당 변화
+                  {t("recordSummary.bloodSugar.title")}
                 </h3>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    식전 (Fasting)
+                    {t("recordSummary.bloodSugar.legendFasting")}
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-red-400" />
-                    식후 (Post-meal)
+                    {t("recordSummary.bloodSugar.legendPostMeal")}
                   </span>
                 </div>
               </div>
               {bloodSugarData.length === 0 ? (
                 <div className="flex h-[240px] items-center justify-center text-sm text-slate-400">
-                  이 날의 혈당 기록이 없습니다.
+                  {t("recordSummary.bloodSugar.empty")}
                 </div>
               ) : (
               <ResponsiveContainer width="100%" height={240}>
@@ -664,22 +684,22 @@ export default function RecordSummary() {
             <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-gray-900">
-                  오늘의 혈압 변화
+                  {t("recordSummary.bloodPressure.title")}
                 </h3>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-red-400" />
-                    수축기 (Systolic)
+                    {t("recordSummary.bloodPressure.legendSystolic")}
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-indigo-400" />
-                    이완기 (Diastolic)
+                    {t("recordSummary.bloodPressure.legendDiastolic")}
                   </span>
                 </div>
               </div>
               {bloodPressureData.length === 0 ? (
                 <div className="flex h-[240px] items-center justify-center text-sm text-slate-400">
-                  이 날의 혈압 기록이 없습니다.
+                  {t("recordSummary.bloodPressure.empty")}
                 </div>
               ) : (
               <ResponsiveContainer width="100%" height={240}>
@@ -706,7 +726,7 @@ export default function RecordSummary() {
                   <Area
                     type="monotone"
                     dataKey="systolic"
-                    name="수축기"
+                    name={t("recordSummary.bloodPressure.systolic")}
                     stroke="#f87171"
                     fill="#fee2e2"
                     strokeWidth={2}
@@ -716,7 +736,7 @@ export default function RecordSummary() {
                   <Area
                     type="monotone"
                     dataKey="diastolic"
-                    name="이완기"
+                    name={t("recordSummary.bloodPressure.diastolic")}
                     stroke="#818cf8"
                     fill="#e0e7ff"
                     strokeWidth={2}
@@ -733,7 +753,7 @@ export default function RecordSummary() {
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
                 <h3 className="text-base font-bold text-gray-900">
-                  오늘의 복용 일정
+                  {t("recordSummary.medication.title")}
                 </h3>
                 <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-3 py-1">
                   {medDateLabel}
@@ -743,7 +763,7 @@ export default function RecordSummary() {
 
             {medSchedules.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-400">
-                해당 날짜의 복용 일정이 없습니다.
+                {t("recordSummary.medication.empty")}
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -791,15 +811,18 @@ export default function RecordSummary() {
                       </p>
                       {status === "all" ? (
                         <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                          <Check size={14} /> 복용 완료
+                          <Check size={14} /> {t("recordSummary.medication.statusAll")}
                         </div>
                       ) : status === "partial" ? (
                         <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
-                          부분 복용 ({takenCount}/{drugs.length})
+                          {t("recordSummary.medication.statusPartial", {
+                            taken: takenCount,
+                            total: drugs.length,
+                          })}
                         </div>
                       ) : (
                         <div className="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                          미복용
+                          {t("recordSummary.medication.statusNone")}
                         </div>
                       )}
                     </div>
@@ -832,11 +855,15 @@ export default function RecordSummary() {
                 </svg>
               </div>
               <h3 className="mb-2 text-[16px] font-semibold text-[#0F172A]">
-                기록된 식단이 없습니다
+                {t("recordSummary.mealEmpty.title")}
               </h3>
               <p className="text-center text-[13px] leading-relaxed text-[#64748B]">
-                <span className="font-semibold text-[#475569]">전체 기록 관리</span> 페이지에서<br />
-                오늘의 식단을 등록해보세요.
+                <span className="font-semibold text-[#475569]">
+                  {t("recordSummary.mealEmpty.linkLabel")}
+                </span>{" "}
+                {t("recordSummary.mealEmpty.descPart1")}
+                <br />
+                {t("recordSummary.mealEmpty.descPart2")}
               </p>
             </div>
           ) : (

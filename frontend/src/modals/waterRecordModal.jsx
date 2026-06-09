@@ -1,6 +1,8 @@
 import { useId, useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { BIO_CATEGORY } from '../constants/bioCategory';
 import bioValueRecordApi from '../api/bioValueRecordApi';
@@ -37,18 +39,18 @@ const resolveUserId = (user) => {
 
 const getProgressMessage = (progress) => {
   if (progress >= 100) {
-    return '오늘 목표를 달성했습니다. 몸 상태도 함께 체크해보세요.';
+    return i18n.t('waterRecordModal.progress.done');
   }
 
   if (progress >= 70) {
-    return '현재 페이스를 유지하시면 오늘 목표에 무리 없이 도달할 수 있습니다.';
+    return i18n.t('waterRecordModal.progress.high');
   }
 
   if (progress >= 40) {
-    return '좋은 흐름입니다. 계속해서 천천히 마시면 목표에 가까워집니다.';
+    return i18n.t('waterRecordModal.progress.mid');
   }
 
-  return '아직 여유가 있습니다. 조금씩 나눠 마시면 부담 없이 목표를 채울 수 있습니다.';
+  return i18n.t('waterRecordModal.progress.low');
 };
 
 const WaterRecordModal = ({
@@ -57,6 +59,7 @@ const WaterRecordModal = ({
   onSave,
   recordDate, // 부모가 지정한 기록 날짜 (없으면 오늘)
 }) => {
+  const { t } = useTranslation();
   const clipPathId = useId();
   const { user } = useAuth();
   const [inputAmount, setInputAmount] = useState('0');
@@ -113,7 +116,7 @@ const WaterRecordModal = ({
 
   const handleSave = async () => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t('waterRecordModal.toast.loginRequired'));
       return;
     }
     const now = new Date();
@@ -161,14 +164,14 @@ const WaterRecordModal = ({
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">수분 섭취 기록하기</h2>
-              <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">오늘의 수분 섭취량을 기록하세요.</p>
+              <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">{t('waterRecordModal.title')}</h2>
+              <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">{t('waterRecordModal.subtitle')}</p>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              aria-label="닫기"
+              aria-label={t('waterRecordModal.close')}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
             >
               <X size={18} strokeWidth={2.2} />
@@ -185,7 +188,7 @@ const WaterRecordModal = ({
                   <button
                     onClick={() => setInputAmount(String(parsedCurrentCups + 1))}
                     className="w-12 h-12 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-sm"
-                    aria-label="컵 수 증가"
+                    aria-label={t('waterRecordModal.cupIncrease')}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="18 15 12 9 6 15" />
@@ -197,19 +200,19 @@ const WaterRecordModal = ({
                   <button
                     onClick={() => setInputAmount(String(Math.max(0, parsedCurrentCups - 1)))}
                     className="w-12 h-12 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors shadow-sm"
-                    aria-label="컵 수 감소"
+                    aria-label={t('waterRecordModal.cupDecrease')}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </button>
                 </div>
-                <span className="text-4xl font-bold text-slate-300 self-center">컵</span>
+                <span className="text-4xl font-bold text-slate-300 self-center">{t('waterRecordModal.cupUnit')}</span>
               </div>
               <div className="mt-2 space-y-1">
-                <p className="text-[12px] font-semibold text-slate-500">현재 수분 섭취량</p>
+                <p className="text-[12px] font-semibold text-slate-500">{t('waterRecordModal.currentIntake')}</p>
                 <p className="text-[26px] font-extrabold text-[#3454ff]">{progress}%</p>
-                <p className="text-[13px] font-semibold text-slate-400">= {parsedCurrentMl}ml</p>
+                <p className="text-[13px] font-semibold text-slate-400">{t('waterRecordModal.milliliters', { ml: parsedCurrentMl })}</p>
               </div>
             </div>
 
@@ -239,8 +242,8 @@ const WaterRecordModal = ({
             </div>
 
             <div className="absolute bottom-3 left-0">
-              <p className="text-[12px] font-semibold text-slate-400">목표 수분 섭취량</p>
-              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{targetCups}컵</p>
+              <p className="text-[12px] font-semibold text-slate-400">{t('waterRecordModal.targetIntake')}</p>
+              <p className="mt-1 text-[34px] font-extrabold tracking-[-0.04em] text-[#2447ea]">{t('waterRecordModal.cupsValue', { count: targetCups })}</p>
             </div>
           </div>
 
@@ -253,7 +256,7 @@ const WaterRecordModal = ({
 
               <div className="flex-1 space-y-1">
                 <p className="text-[13px] leading-relaxed text-[#475569]">
-                  목표 수분 섭취량 대비 약 <span className="font-bold text-[#2563EB]">{progress}%</span>를 달성했습니다.
+                  {t('waterRecordModal.advicePrefix')}<span className="font-bold text-[#2563EB]">{progress}%</span>{t('waterRecordModal.adviceSuffix')}
                 </p>
                 <p className="text-[12px] text-[#94A3B8]">{feedbackMessage}</p>
               </div>
@@ -267,7 +270,7 @@ const WaterRecordModal = ({
             onClick={handleSave}
             className="w-full rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98]"
           >
-            기록 저장 및 확인
+            {t('waterRecordModal.submit')}
           </button>
         </div>
       </div>

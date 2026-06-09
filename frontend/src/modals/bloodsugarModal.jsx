@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock, Sparkles, X } from "lucide-react";
 import toast from "react-hot-toast";
+import i18n from "../i18n";
 import { useAuth } from "../contexts/AuthContext";
 import bioValueRecordApi from "../api/bioValueRecordApi";
 import userApi from "../api/userApi";
@@ -109,10 +111,10 @@ const BLOOD_SUGAR_RANGES = {
 };
 
 const DIABETES_LABEL = {
-  NONE: "당뇨 없음",
-  type1: "1형 당뇨",
-  type2: "2형 당뇨",
-  GESTATIONAL: "임신성 당뇨",
+  NONE: () => i18n.t("bloodsugarModal.diabetes.none"),
+  type1: () => i18n.t("bloodsugarModal.diabetes.type1"),
+  type2: () => i18n.t("bloodsugarModal.diabetes.type2"),
+  GESTATIONAL: () => i18n.t("bloodsugarModal.diabetes.gestational"),
 };
 
 // 식사 탭/식전·식후 토글을 기준표의 행(공복/식전/식후/취침전)으로 매핑
@@ -131,32 +133,32 @@ const getStatusInfo = (value, range) => {
   const { warn, danger } = range;
   if (value < HYPO_CUT)
     return {
-      statusText: "저혈당",
-      label: "저혈당 상태입니다",
-      description: "혈당이 낮습니다. 당분이 포함된 음식을 섭취해주세요.",
+      statusText: i18n.t("bloodsugarModal.status.hypo.text"),
+      label: i18n.t("bloodsugarModal.status.hypo.label"),
+      description: i18n.t("bloodsugarModal.status.hypo.description"),
       color: "#60A5FA",
       badge: "bg-[#EFF6FF] text-[#2563EB]",
     };
   if (value < warn)
     return {
-      statusText: "정상",
-      label: "이상적인 혈당입니다",
-      description: "현재 혈당 수치는 정상 범위입니다. 꾸준한 관리를 유지해주세요.",
+      statusText: i18n.t("bloodsugarModal.status.normal.text"),
+      label: i18n.t("bloodsugarModal.status.normal.label"),
+      description: i18n.t("bloodsugarModal.status.normal.description"),
       color: "#22C55E",
       badge: "bg-[#ECFDF3] text-[#16A34A]",
     };
   if (value < danger)
     return {
-      statusText: "경고",
-      label: "혈당 관리가 필요합니다",
-      description: "혈당이 높습니다. 식단과 운동을 통한 관리가 필요합니다.",
+      statusText: i18n.t("bloodsugarModal.status.warn.text"),
+      label: i18n.t("bloodsugarModal.status.warn.label"),
+      description: i18n.t("bloodsugarModal.status.warn.description"),
       color: "#FB923C",
       badge: "bg-[#FFF7ED] text-[#EA580C]",
     };
   return {
-    statusText: "위험",
-    label: "매우 높은 혈당입니다",
-    description: "위험 수준의 혈당입니다. 의료진과 상담하시기 바랍니다.",
+    statusText: i18n.t("bloodsugarModal.status.danger.text"),
+    label: i18n.t("bloodsugarModal.status.danger.label"),
+    description: i18n.t("bloodsugarModal.status.danger.description"),
     color: "#F87171",
     badge: "bg-[#FEF2F2] text-[#DC2626]",
   };
@@ -199,7 +201,34 @@ export default function BloodSugarModal({
   recordDate, // 부모가 지정한 기록 날짜 (없으면 오늘)
 }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isEditMode = Boolean(editingRecord?.recordId);
+
+  // 측정 시점(공복/식전/식후/취침전) 값 → 표시 라벨
+  const contextLabel = (ctx) =>
+    ({
+      공복: t("bloodsugarModal.context.fasting"),
+      취침전: t("bloodsugarModal.context.beforeBed"),
+      식전: t("bloodsugarModal.context.beforeMeal"),
+      식후: t("bloodsugarModal.context.afterMeal"),
+    }[ctx] ?? ctx);
+
+  // 식사 탭 값(공복/아침/점심/저녁/취침전) → 표시 라벨
+  const mealLabel = (id) =>
+    ({
+      공복: t("bloodsugarModal.meal.fasting"),
+      아침: t("bloodsugarModal.meal.breakfast"),
+      점심: t("bloodsugarModal.meal.lunch"),
+      저녁: t("bloodsugarModal.meal.dinner"),
+      취침전: t("bloodsugarModal.meal.beforeBed"),
+    }[id] ?? id);
+
+  // 식전/식후 토글 값 → 표시 라벨
+  const timingLabel = (id) =>
+    ({
+      식전: t("bloodsugarModal.timing.beforeMeal"),
+      식후: t("bloodsugarModal.timing.afterMeal"),
+    }[id] ?? id);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
@@ -275,10 +304,10 @@ export default function BloodSugarModal({
 
   // 슬라이더의 4개 색상 구간 (0~maxVal 스케일)
   const zones = [
-    { key: "저혈당", color: "#60A5FA", start: 0, end: HYPO_CUT },
-    { key: "정상", color: "#22C55E", start: HYPO_CUT, end: currentRange.warn },
-    { key: "경고", color: "#FB923C", start: currentRange.warn, end: currentRange.danger },
-    { key: "위험", color: "#F87171", start: currentRange.danger, end: maxVal },
+    { key: "저혈당", label: t("bloodsugarModal.zone.hypo"), color: "#60A5FA", start: 0, end: HYPO_CUT },
+    { key: "정상", label: t("bloodsugarModal.zone.normal"), color: "#22C55E", start: HYPO_CUT, end: currentRange.warn },
+    { key: "경고", label: t("bloodsugarModal.zone.warn"), color: "#FB923C", start: currentRange.warn, end: currentRange.danger },
+    { key: "위험", label: t("bloodsugarModal.zone.danger"), color: "#F87171", start: currentRange.danger, end: maxVal },
   ].map((zone) => ({
     ...zone,
     width: Math.max(0, ((zone.end - zone.start) / maxVal) * 100),
@@ -288,10 +317,10 @@ export default function BloodSugarModal({
   // 안내 박스에 표시할 기준표 행
   // 저혈당(<70)과 정상 시작값 사이 구간은 정상으로 포함해 70부터 표시
   const guideRows = [
-    { label: "저혈당", text: `< ${HYPO_CUT}mg/dL` },
-    { label: "정상", text: `${HYPO_CUT} ~ ${currentRange.warn - 1}mg/dL` },
-    { label: "경고", text: `${currentRange.warn} ~ ${currentRange.danger - 1}mg/dL` },
-    { label: "위험", text: `≥ ${currentRange.danger}mg/dL` },
+    { key: "저혈당", label: t("bloodsugarModal.zone.hypo"), text: `< ${HYPO_CUT}mg/dL` },
+    { key: "정상", label: t("bloodsugarModal.zone.normal"), text: `${HYPO_CUT} ~ ${currentRange.warn - 1}mg/dL` },
+    { key: "경고", label: t("bloodsugarModal.zone.warn"), text: `${currentRange.warn} ~ ${currentRange.danger - 1}mg/dL` },
+    { key: "위험", label: t("bloodsugarModal.zone.danger"), text: `≥ ${currentRange.danger}mg/dL` },
   ];
 
   const updateFromX = useCallback(
@@ -362,12 +391,12 @@ export default function BloodSugarModal({
 
     const userId = resolveUserId(user);
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("bloodsugarModal.toast.loginRequired"));
       return;
     }
 
     if (currentVal <= 0) {
-      toast.error("혈당 수치를 입력해주세요");
+      toast.error(t("bloodsugarModal.toast.enterValue"));
       return;
     }
 
@@ -391,7 +420,7 @@ export default function BloodSugarModal({
           editingRecord.recordId,
           payload
         );
-        toast.success("혈당 기록이 수정되었습니다");
+        toast.success(t("bloodsugarModal.toast.updated"));
         onSaved?.(null);
         onClose();
       } else {
@@ -403,7 +432,7 @@ export default function BloodSugarModal({
         };
         await bioValueRecordApi.createBioValueRecord(userId, payload);
         updateCurrentRecord({ saved: true });
-        toast.success("혈당이 저장되었습니다");
+        toast.success(t("bloodsugarModal.toast.saved"));
         onClose();
       }
     } catch {
@@ -416,12 +445,12 @@ export default function BloodSugarModal({
   const handleDelete = async (e) => {
     e?.stopPropagation();
     if (!isEditMode || isDeleting) return;
-    if (!window.confirm("이 혈당 기록을 삭제하시겠어요?")) return;
+    if (!window.confirm(t("bloodsugarModal.confirm.delete"))) return;
 
     setIsDeleting(true);
     try {
       await bioValueRecordApi.deleteBioValueRecord(editingRecord.recordId);
-      toast.success("혈당 기록이 삭제되었습니다");
+      toast.success(t("bloodsugarModal.toast.deleted"));
       onSaved?.(null);
       onClose();
     } catch {
@@ -602,19 +631,19 @@ export default function BloodSugarModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">
-                {isEditMode ? "혈당 기록 수정" : "혈당 기록하기"}
+                {isEditMode ? t("bloodsugarModal.title.edit") : t("bloodsugarModal.title.create")}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">
                 {isEditMode
-                  ? "값을 수정하거나 기록을 삭제할 수 있어요."
-                  : "오늘의 혈당을 기록하세요."}
+                  ? t("bloodsugarModal.subtitle.edit")
+                  : t("bloodsugarModal.subtitle.create")}
               </p>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              aria-label="닫기"
+              aria-label={t("bloodsugarModal.close")}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
             >
               <X size={18} strokeWidth={2.2} />
@@ -624,12 +653,15 @@ export default function BloodSugarModal({
           {/* 안내 박스 — 당뇨 유형 · 측정 시점별 기준 */}
           <div className="mt-5 rounded-2xl bg-[#F8FAFC] px-4 py-4">
             <p className="mb-2 text-[12px] font-bold text-[#475569]">
-              {DIABETES_LABEL[diabetesType] ?? "당뇨 없음"} · {bsContext} 기준
+              {t("bloodsugarModal.guide.header", {
+                diabetes: (DIABETES_LABEL[diabetesType] ?? DIABETES_LABEL.NONE)(),
+                context: contextLabel(bsContext),
+              })}
             </p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
               {guideRows.map((row) => (
                 <p
-                  key={row.label}
+                  key={row.key}
                   className="text-[13px] leading-relaxed text-[#64748B]"
                 >
                   {row.label}: {row.text}
@@ -695,7 +727,7 @@ export default function BloodSugarModal({
                       : "text-[#64748B]"
                   }`}
                 >
-                  {tab.label}
+                  {mealLabel(tab.id)}
                 </button>
               ))}
             </div>
@@ -704,17 +736,17 @@ export default function BloodSugarModal({
           {/* 식전/식후 토글 */}
           {meal.hasTiming && (
             <div className="flex justify-center gap-3 mb-6">
-              {TIMINGS.map((t) => (
+              {TIMINGS.map((timingId) => (
                 <button
-                  key={t}
-                  onClick={() => setActiveTiming(t)}
+                  key={timingId}
+                  onClick={() => setActiveTiming(timingId)}
                   className={`px-6 py-2.5 rounded-[14px] text-[13px] font-semibold transition-all ${
-                    activeTiming === t
+                    activeTiming === timingId
                       ? "bg-[#1a1a2e] text-white shadow-[0_4px_12px_rgba(26,26,46,0.2)]"
                       : "bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]"
                   }`}
                 >
-                  {t}
+                  {timingLabel(timingId)}
                 </button>
               ))}
             </div>
@@ -746,7 +778,7 @@ export default function BloodSugarModal({
           {/* 혈당 상태 */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[15px] font-bold text-[#1E293B]">혈당 상태</span>
+              <span className="text-[15px] font-bold text-[#1E293B]">{t("bloodsugarModal.statusHeading")}</span>
               <span className={`rounded-full px-3 py-1 text-[12px] font-bold ${status.badge}`}>
                 {status.statusText}
               </span>
@@ -790,7 +822,7 @@ export default function BloodSugarModal({
                   className="absolute -translate-x-1/2"
                   style={{ left: `${zone.left}%` }}
                 >
-                  {zone.key}
+                  {zone.label}
                 </span>
               ))}
             </div>
@@ -825,7 +857,7 @@ export default function BloodSugarModal({
                 disabled={isSaving || isDeleting}
                 className="flex-1 rounded-[20px] border border-[#FCA5A5] bg-white py-5 text-lg font-bold text-[#DC2626] transition hover:bg-[#FEF2F2] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isDeleting ? "삭제 중..." : "삭제"}
+                {isDeleting ? t("bloodsugarModal.button.deleting") : t("bloodsugarModal.button.delete")}
               </button>
             )}
             <button
@@ -834,12 +866,12 @@ export default function BloodSugarModal({
               className={`${isEditMode ? "flex-1" : "w-full"} rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {isSaving
-                ? "저장 중..."
+                ? t("bloodsugarModal.button.saving")
                 : isEditMode
-                ? "수정 저장"
+                ? t("bloodsugarModal.button.saveEdit")
                 : isSaved
-                ? "저장 완료 ✓"
-                : "기록 저장 및 확인"}
+                ? t("bloodsugarModal.button.saved")
+                : t("bloodsugarModal.button.save")}
             </button>
           </div>
         </div>

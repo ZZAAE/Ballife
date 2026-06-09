@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, Info, BookOpen } from "lucide-react";
 
 // 섹션 헤더: 이미지의 작은 아이콘과 타이틀 스타일 반영
@@ -20,19 +21,22 @@ export const ContentCard = ({ children, className = "" }) => (
 );
 
 // 우측 주요 위험 요소 (다크 카드)
-export const RiskFactorCard = ({ factors }) => (
-  <div className="bg-[#0F172A] text-white rounded-[18px] p-7">
-    <h3 className="text-[14px] font-bold text-white mb-5">주요 위험 요소</h3>
-    <ul className="space-y-4">
-      {factors.map((factor, idx) => (
-        <li key={idx} className="flex items-start gap-3 text-[13px] text-white/80">
-          <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
-          {factor}
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+export const RiskFactorCard = ({ factors }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-[#0F172A] text-white rounded-[18px] p-7">
+      <h3 className="text-[14px] font-bold text-white mb-5">{t('diseaseComponents.riskFactorsTitle')}</h3>
+      <ul className="space-y-4">
+        {factors.map((factor, idx) => (
+          <li key={idx} className="flex items-start gap-3 text-[13px] text-white/80">
+            <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+            {factor}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 export const DiagnosisCard = ({ icon: Icon, title, subTitle, desc, color }) => (
   <ContentCard className={`border-l-4 ${color}`}>
@@ -75,36 +79,42 @@ export const StepInfoCard = ({ number, title, desc }) => (
 /**
  * 하단 주의사항 안내 (Info)
  */
-export const CautionBox = ({ children }) => (
-  <div className="bg-rose-50 border border-rose-100 rounded-[18px] p-5 flex items-start gap-3">
-    <Info className="text-rose-500 shrink-0 mt-0.5" size={18} />
-    <p className="text-[13px] text-[#475569]">
-      <span className="font-semibold text-rose-600">주의 : </span>
-      {children}
-    </p>
-  </div>
-);
+export const CautionBox = ({ children }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-rose-50 border border-rose-100 rounded-[18px] p-5 flex items-start gap-3">
+      <Info className="text-rose-500 shrink-0 mt-0.5" size={18} />
+      <p className="text-[13px] text-[#475569]">
+        <span className="font-semibold text-rose-600">{t('diseaseComponents.cautionLabel')}</span>
+        {children}
+      </p>
+    </div>
+  );
+};
 
 /**
  * 참고 자료 푸터
  */
-export const ReferenceFooter = ({ items, lastUpdated }) => (
-  <footer className="mt-16 bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-7">
-    <div className="flex items-center gap-2 mb-4">
-      <BookOpen size={18} className="text-[#0F172A]" />
-      <h3 className="text-[15px] font-bold text-[#0F172A]">참고 자료 (References)</h3>
-    </div>
-    <p className="text-[12px] text-[#94A3B8] mb-4 leading-relaxed">
-      본 페이지의 의학 정보는 아래 공신력 있는 출처를 바탕으로 작성되었으며, 진단·치료를 대신하지 않습니다. 개인별 상태는 반드시 의료진과 상담하시기 바랍니다.
-    </p>
-    <ul className="space-y-2.5">
-      {items.map((item, idx) => (
-        <li key={idx} className="flex items-start gap-2.5 text-[13px] text-[#475569] leading-relaxed">
-          <span className="mt-1.5 w-1 h-1 rounded-full bg-[#94A3B8] shrink-0" />
-          <span><span className="font-semibold text-[#0F172A]">{item.source}</span>{item.detail ? ` — ${item.detail}` : ""}</span>
-        </li>
-      ))}
-    </ul>
-    {lastUpdated && <p className="mt-4 text-[11px] text-[#94A3B8]">마지막 업데이트: {lastUpdated}</p>}
-  </footer>
-);
+export const ReferenceFooter = ({ items, lastUpdated }) => {
+  const { t } = useTranslation();
+  return (
+    <footer className="mt-16 bg-white rounded-[18px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-7">
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen size={18} className="text-[#0F172A]" />
+        <h3 className="text-[15px] font-bold text-[#0F172A]">{t('diseaseComponents.referencesTitle')}</h3>
+      </div>
+      <p className="text-[12px] text-[#94A3B8] mb-4 leading-relaxed">
+        {t('diseaseComponents.referencesDisclaimer')}
+      </p>
+      <ul className="space-y-2.5">
+        {items.map((item, idx) => (
+          <li key={idx} className="flex items-start gap-2.5 text-[13px] text-[#475569] leading-relaxed">
+            <span className="mt-1.5 w-1 h-1 rounded-full bg-[#94A3B8] shrink-0" />
+            <span><span className="font-semibold text-[#0F172A]">{item.source}</span>{item.detail ? ` — ${item.detail}` : ""}</span>
+          </li>
+        ))}
+      </ul>
+      {lastUpdated && <p className="mt-4 text-[11px] text-[#94A3B8]">{t('diseaseComponents.lastUpdated', { date: lastUpdated })}</p>}
+    </footer>
+  );
+};

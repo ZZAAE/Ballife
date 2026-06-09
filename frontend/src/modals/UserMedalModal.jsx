@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import medalApi from "../api/medalApi";
 import userApi from "../api/userApi";
 import { useAuth } from "../contexts/AuthContext";
@@ -12,6 +13,7 @@ import { useAuth } from "../contexts/AuthContext";
  *  - onClose: 닫기 핸들러
  */
 export default function UserMedalModal({ open, onClose }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
 
@@ -35,7 +37,7 @@ export default function UserMedalModal({ open, onClose }) {
         setAllMedals(allRes.data);
         setEquippedMedalId(userRes.data?.medalId ?? null);
       } catch {
-        toast.error("메달 정보를 불러오지 못했습니다.");
+        toast.error(t("userMedalModal.toast.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -48,9 +50,9 @@ export default function UserMedalModal({ open, onClose }) {
     try {
       await medalApi.equipMedal(medalId);
       setEquippedMedalId(medalId);
-      toast.success("메달을 장착했습니다.");
+      toast.success(t("userMedalModal.toast.equipped"));
     } catch {
-      toast.error("메달 장착에 실패했습니다.");
+      toast.error(t("userMedalModal.toast.equipFailed"));
     } finally {
       setEquipping(null);
     }
@@ -71,7 +73,7 @@ export default function UserMedalModal({ open, onClose }) {
       >
         {/* 헤더 */}
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#0F172A]">🏅 내 메달</h2>
+          <h2 className="text-lg font-bold text-[#0F172A]">🏅 {t("userMedalModal.title")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -82,16 +84,16 @@ export default function UserMedalModal({ open, onClose }) {
         </div>
 
         {loading ? (
-          <p className="py-10 text-center text-sm text-gray-400">불러오는 중...</p>
+          <p className="py-10 text-center text-sm text-gray-400">{t("userMedalModal.loading")}</p>
         ) : (
           <>
             {/* 보유 메달 */}
             <div className="mb-5">
               <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                보유 메달 · 클릭하여 장착
+                {t("userMedalModal.ownedMedalsLabel")}
               </p>
               {myMedals.length === 0 ? (
-                <p className="text-sm text-gray-400">아직 획득한 메달이 없습니다.</p>
+                <p className="text-sm text-gray-400">{t("userMedalModal.noMedals")}</p>
               ) : (
                 <div className="flex flex-wrap gap-3">
                   {myMedals.map((m) => {
@@ -120,11 +122,11 @@ export default function UserMedalModal({ open, onClose }) {
                         </span>
                         {isEquipped ? (
                           <span className="rounded-full bg-yellow-400 px-2 py-0.5 text-[10px] font-semibold text-white">
-                            장착됨
+                            {t("userMedalModal.equipped")}
                           </span>
                         ) : (
                           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-500">
-                            {isEquipping ? "장착 중..." : "장착"}
+                            {isEquipping ? t("userMedalModal.equipping") : t("userMedalModal.equip")}
                           </span>
                         )}
                       </button>
@@ -137,7 +139,7 @@ export default function UserMedalModal({ open, onClose }) {
             {/* 전체 메달 목록 */}
             <div>
               <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[#94A3B8]">
-                전체 메달
+                {t("userMedalModal.allMedalsLabel")}
               </p>
               <div className="flex max-h-52 flex-col gap-2 overflow-y-auto pr-1">
                 {allMedals.map((m) => {
@@ -163,16 +165,16 @@ export default function UserMedalModal({ open, onClose }) {
                           {m.medalName}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {m.medalPrice?.toLocaleString()}P 필요
+                          {t("userMedalModal.priceRequired", { price: m.medalPrice?.toLocaleString() })}
                         </p>
                       </div>
                       {isEquipped ? (
                         <span className="rounded-full bg-yellow-400 px-2 py-0.5 text-[10px] font-semibold text-white">
-                          장착됨
+                          {t("userMedalModal.equipped")}
                         </span>
                       ) : owned ? (
                         <span className="rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                          보유
+                          {t("userMedalModal.owned")}
                         </span>
                       ) : null}
                     </div>

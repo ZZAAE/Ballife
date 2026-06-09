@@ -1,5 +1,8 @@
 // 복용 일정(schedules)의 약 체크 상태로 오늘의 복용 이행률(%)을 계산
+import { useTranslation } from "react-i18next";
+
 export default function MedicationProgressCard({ schedules = [] }) {
+  const { t } = useTranslation();
   const allDrugs = schedules.flatMap((s) => s.drugs ?? []);
   const total = allDrugs.length;
   const taken = allDrugs.filter((d) => d.taken).length;
@@ -7,7 +10,7 @@ export default function MedicationProgressCard({ schedules = [] }) {
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <p className="text-[16px] text-gray-400 mb-3">오늘의 복용 이행률</p>
+      <p className="text-[16px] text-gray-400 mb-3">{t('medicationProgressCard.title')}</p>
       <p className="text-[45px] font-extrabold text-gray-900 leading-none mb-4">
         {rate} %
       </p>
@@ -21,7 +24,7 @@ export default function MedicationProgressCard({ schedules = [] }) {
         </div>
 
         <span className="text-[12px] text-[#2563EB] font-semibold bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
-          {taken}/{total} 복용 완료
+          {t('medicationProgressCard.completed', { taken, total })}
         </span>
       </div>
     </div>

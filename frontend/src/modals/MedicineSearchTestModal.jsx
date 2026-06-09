@@ -1,8 +1,10 @@
 // src/components/MedicineSearchModal.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import medicineApi from "../api/medicineApi";
 
 export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
+  const { t } = useTranslation();
   const [keyword, setKeyword] = useState("");
   const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,8 +22,8 @@ export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
     } catch (e) {
       setError(
         e.response?.status === 404
-          ? "해당 의약품을 찾을 수 없습니다."
-          : "조회 중 오류가 발생했습니다."
+          ? t("medicineSearchTestModal.error.notFound")
+          : t("medicineSearchTestModal.error.searchFailed")
       );
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
       >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">의약품 검색</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t("medicineSearchTestModal.title")}</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600"
@@ -64,7 +66,7 @@ export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="예: 모티리톤정"
+            placeholder={t("medicineSearchTestModal.searchPlaceholder")}
             className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]"
           />
           <button
@@ -72,7 +74,7 @@ export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
             disabled={loading}
             className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "조회중..." : "조회"}
+            {loading ? t("medicineSearchTestModal.searching") : t("medicineSearchTestModal.search")}
           </button>
         </div>
 
@@ -83,13 +85,13 @@ export default function MedicineSearchTestModal({ isOpen, onClose, onSaved }) {
         {medicine && (
           <div className="mt-4 rounded-xl bg-[#EAF2FF] p-4 text-sm">
             <dl className="grid grid-cols-[100px_1fr] gap-y-2">
-              <dt className="text-gray-500">품목기준코드</dt>
+              <dt className="text-gray-500">{t("medicineSearchTestModal.itemSeqLabel")}</dt>
               <dd className="text-gray-800">{medicine.itemSeq || "-"}</dd>
 
-              <dt className="text-gray-500">성상</dt>
+              <dt className="text-gray-500">{t("medicineSearchTestModal.chartLabel")}</dt>
               <dd className="text-gray-800">{medicine.chart || "-"}</dd>
 
-              <dt className="text-gray-500">저장방법</dt>
+              <dt className="text-gray-500">{t("medicineSearchTestModal.storageMethodLabel")}</dt>
               <dd className="text-gray-800">{medicine.storageMethod || "-"}</dd>
             </dl>
           </div>

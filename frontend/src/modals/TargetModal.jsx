@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dumbbell, Flame, Scale, Target, X, Droplet } from "lucide-react";
+import i18n from "../i18n";
 
 /* ──────────────────────────────────────────────────────────────────────────
  * 목표 지표 일괄 수정 모달 (체중 / 음수량 / 섭취 칼로리 / 소모 칼로리)
@@ -21,8 +23,8 @@ const DEFAULT_TARGETS = {
 const FIELDS = [
   {
     key: "weight",
-    label: "목표 체중",
-    description: "달성하고 싶은 체중을 입력해 주세요.",
+    label: i18n.t("targetModal.field.weight.label"),
+    description: i18n.t("targetModal.field.weight.description"),
     unit: "kg",
     placeholder: "70.0",
     step: "0.1",
@@ -32,9 +34,9 @@ const FIELDS = [
   },
   {
     key: "water",
-    label: "목표 음수량",
-    description: "하루 동안 마실 물의 양 (1잔 = 약 200ml).",
-    unit: "잔",
+    label: i18n.t("targetModal.field.water.label"),
+    description: i18n.t("targetModal.field.water.description"),
+    unit: i18n.t("targetModal.field.water.unit"),
     placeholder: "8",
     step: "1",
     accent: "#0EA5E9",
@@ -43,8 +45,8 @@ const FIELDS = [
   },
   {
     key: "calorieIn",
-    label: "목표 섭취 칼로리",
-    description: "하루 권장 섭취 열량을 입력해 주세요.",
+    label: i18n.t("targetModal.field.calorieIn.label"),
+    description: i18n.t("targetModal.field.calorieIn.description"),
     unit: "kcal",
     placeholder: "2000",
     step: "10",
@@ -54,8 +56,8 @@ const FIELDS = [
   },
   {
     key: "calorieOut",
-    label: "목표 소모 칼로리",
-    description: "운동 및 활동으로 소모할 목표 열량.",
+    label: i18n.t("targetModal.field.calorieOut.label"),
+    description: i18n.t("targetModal.field.calorieOut.description"),
     unit: "kcal",
     placeholder: "1200",
     step: "10",
@@ -78,8 +80,10 @@ export default function TargetModal({
   onSubmit,
   onSaved,
   initialTargets,
-  title = "목표 지표 수정",
+  title,
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("targetModal.title");
   const [targets, setTargets] = useState(() =>
     initialTargets ? sanitize(initialTargets) : DEFAULT_TARGETS,
   );
@@ -120,7 +124,7 @@ export default function TargetModal({
       onClose?.();
     } catch (err) {
       console.error("목표 지표 저장 실패:", err);
-      alert("저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      alert(t("targetModal.alert.saveError"));
     } finally {
       setSubmitting(false);
     }
@@ -136,9 +140,11 @@ export default function TargetModal({
               <Target className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-[18px] font-bold text-[#0F172A]">{title}</h2>
+              <h2 className="text-[18px] font-bold text-[#0F172A]">
+                {resolvedTitle}
+              </h2>
               <p className="text-[12px] text-[#64748B] mt-0.5">
-                매일의 목표 수치를 한 번에 설정할 수 있어요.
+                {t("targetModal.subtitle")}
               </p>
             </div>
           </div>
@@ -146,7 +152,7 @@ export default function TargetModal({
             type="button"
             onClick={onClose}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
-            aria-label="닫기"
+            aria-label={t("targetModal.close")}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -210,7 +216,7 @@ export default function TargetModal({
             onClick={handleReset}
             className="text-[13px] font-medium text-[#64748B] hover:text-[#0F172A] transition"
           >
-            초기화
+            {t("targetModal.reset")}
           </button>
           <div className="flex items-center gap-2">
             <button
@@ -218,7 +224,7 @@ export default function TargetModal({
               onClick={onClose}
               className="h-11 px-5 rounded-[12px] bg-white border border-[#E5E7EB] text-[#0F172A] text-[13px] font-medium hover:bg-gray-50 transition"
             >
-              취소
+              {t("targetModal.cancel")}
             </button>
             <button
               type="button"
@@ -226,7 +232,7 @@ export default function TargetModal({
               onClick={handleSubmit}
               className="h-11 px-7 rounded-[12px] bg-[#0F172A] text-white text-[13px] font-semibold hover:bg-[#1E293B] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? "저장 중..." : "저장하기"}
+              {submitting ? t("targetModal.saving") : t("targetModal.submit")}
             </button>
           </div>
         </div>

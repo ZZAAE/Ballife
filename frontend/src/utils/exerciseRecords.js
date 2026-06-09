@@ -1,19 +1,34 @@
+import i18n from "../i18n";
+
 const STORAGE_KEY_PREFIX = "ballife.exerciseRecords";
 
+// value: 프론트 영문 코드(모달 select 값), koName: 백엔드 운동명(한글) 매칭 키(변경 금지),
+// label: 표시용 → 현재 언어로 lazy 해석. option.label 을 읽는 컴포넌트는 수정 없이 번역값을 받는다.
+function exerciseOption(value, koName, iconType) {
+  return {
+    value,
+    koName,
+    iconType,
+    get label() {
+      return i18n.t(`exercise.type.${value}`);
+    },
+  };
+}
+
 export const CARDIO_OPTIONS = [
-  { value: "cycling", label: "사이클", iconType: "cycling" },
-  { value: "running", label: "러닝", iconType: "running" },
-  { value: "jumprope", label: "줄넘기", iconType: "jumprope" },
-  { value: "walking", label: "걷기", iconType: "walking" },
-  { value: "stair", label: "천국의 계단", iconType: "stair" },
+  exerciseOption("cycling", "사이클", "cycling"),
+  exerciseOption("running", "러닝", "running"),
+  exerciseOption("jumprope", "줄넘기", "jumprope"),
+  exerciseOption("walking", "걷기", "walking"),
+  exerciseOption("stair", "천국의 계단", "stair"),
 ];
 
 export const STRENGTH_OPTIONS = [
-  { value: "dumbbellpress", label: "벤치프레스", iconType: "dumbbellpress" },
-  { value: "squat", label: "스쿼트", iconType: "squat" },
-  { value: "deadlift", label: "데드리프트", iconType: "deadlift" },
-  { value: "shoulderpress", label: "숄더프레스", iconType: "dumbbellpress" },
-  { value: "barbellrow", label: "바벨로우", iconType: "barbelllow" },
+  exerciseOption("dumbbellpress", "벤치프레스", "dumbbellpress"),
+  exerciseOption("squat", "스쿼트", "squat"),
+  exerciseOption("deadlift", "데드리프트", "deadlift"),
+  exerciseOption("shoulderpress", "숄더프레스", "dumbbellpress"),
+  exerciseOption("barbellrow", "바벨로우", "barbelllow"),
 ];
 
 export const EXERCISE_META = [...CARDIO_OPTIONS, ...STRENGTH_OPTIONS].reduce(
@@ -24,13 +39,46 @@ export const EXERCISE_META = [...CARDIO_OPTIONS, ...STRENGTH_OPTIONS].reduce(
   {},
 );
 
+// 백엔드가 내려주는 한글 운동명(dto.exerciseName) → 메타 매칭. koName 기준(번역 영향 없음).
 const EXERCISE_META_BY_LABEL = [...CARDIO_OPTIONS, ...STRENGTH_OPTIONS].reduce(
   (accumulator, option) => {
-    accumulator[option.label] = option;
+    accumulator[option.koName] = option;
     return accumulator;
   },
   {},
 );
+
+// 운동 종류 코드(value) → 표시 라벨. 모르는 코드면 원본 반환.
+export function exerciseTypeLabel(value) {
+  return EXERCISE_META[value] ? i18n.t(`exercise.type.${value}`) : value;
+}
+
+// 강도 한글 값("낮음"/"보통"/"높음") → 표시 라벨.
+const INTENSITY_LABEL_KEY = { 낮음: "low", 보통: "medium", 높음: "high" };
+export function intensityLabel(koIntensity) {
+  const key = INTENSITY_LABEL_KEY[koIntensity];
+  return key ? i18n.t(`exercise.intensity.${key}`) : koIntensity;
+}
+
+// 백엔드 카테고리 한글("유산소"/"무산소") → 표시 라벨.
+export function exerciseCategoryLabel(koCategory) {
+  if (koCategory === "유산소") return i18n.t("exercise.category.aerobic");
+  if (koCategory === "무산소") return i18n.t("exercise.category.anaerobic");
+  return koCategory;
+}
+
+// 운동 기록의 표시 이름: 코드 기반 라벨 우선, 없으면 저장된 한글명/폴백.
+export function exerciseDisplayName(record) {
+  if (record?.exerciseTypeId && EXERCISE_META[record.exerciseTypeId]) {
+    return i18n.t(`exercise.type.${record.exerciseTypeId}`);
+  }
+  return record?.name || i18n.t("exercise.fallbackName");
+}
+
+// 천국의 계단 강도 선택 안내 (단계 → 강도). 현재 언어로 해석.
+export function getStairIntensityHint() {
+  return i18n.t("exercise.stairIntensityHint");
+}
 
 export const ICON_BY_TYPE = {
   cycling: "🚴",
@@ -82,10 +130,6 @@ export function aerobicMet(exerciseTypeId, intensity) {
   if (!tiers) return 0;
   return tiers[intensity] ?? tiers["보통"];
 }
-
-// 천국의 계단 강도 선택 안내 (단계 → 강도)
-export const STAIR_INTENSITY_HINT =
-  "1~2단계 = 낮음 · 3~5단계 = 보통 · 6단계~ = 높음";
 
 export function createAerobicRow(id) {
   return {
@@ -259,7 +303,7 @@ export function dbExerciseToRecord(dto) {
     // 프론트에서 사용하는 영문 키로 정규화 (모달 select 값과 일치)
     exerciseTypeId: meta?.value ?? dto.exerciseTypeId,
     iconType: meta?.iconType ?? (isCardio ? "running" : "dumbbellpress"),
-    name: dto.exerciseName ?? "운동",
+    name: dto.exerciseName ?? i18n.t("exercise.fallbackName"),
     kind: isCardio ? "cardio" : "strength",
     dateIso,
     durationSec,

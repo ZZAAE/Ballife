@@ -16,8 +16,8 @@ public class CommentDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CreateRequest {
-        @NotBlank(message = "내용은 필수입니다")
-        @Size(max = 500, message = "댓글길이는 500자 이하여야 합니다.")
+        @NotBlank(message = "{validation.comment.content.required}")
+        @Size(max = 500, message = "{validation.comment.content.size}")
         private String content;
 
         private Long parentComment;
@@ -88,8 +88,8 @@ public class CommentDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest {
-        @NotBlank(message = "내용은 필수입니다")
-        @Size(max = 500, message = "댓글길이는 500자 이하여야 합니다.")
+        @NotBlank(message = "{validation.comment.content.required}")
+        @Size(max = 500, message = "{validation.comment.content.size}")
         private String content;
 
         private Long parentComment;

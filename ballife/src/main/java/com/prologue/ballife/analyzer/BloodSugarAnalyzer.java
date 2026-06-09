@@ -1,5 +1,6 @@
 package com.prologue.ballife.analyzer;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.standard.BloodSugarStandard;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,12 @@ import java.util.List;
  */
 @Component
 public class BloodSugarAnalyzer {
+
+    private final MessageResolver messages;
+
+    public BloodSugarAnalyzer(MessageResolver messages) {
+        this.messages = messages;
+    }
 
     public BloodSugarAnalysisResult analyze(List<Integer> fastingValues,
                                             List<Integer> preMealValues,
@@ -42,15 +49,15 @@ public class BloodSugarAnalyzer {
         return new BloodSugarAnalysisResult(
                 fastingAvg,
                 f   == null ? null : f.status,
-                f   == null ? null : f.label,
+                f   == null ? null : messages.get(f.code),
 
                 preMealAvg,
                 pre == null ? null : pre.status,
-                pre == null ? null : pre.label,
+                pre == null ? null : messages.get(pre.code),
 
                 postMealAvg,
                 p   == null ? null : p.status,
-                p   == null ? null : p.label,
+                p   == null ? null : messages.get(p.code),
 
                 // min/max — 빈 리스트면 null
                 min(fastingValues),  max(fastingValues),

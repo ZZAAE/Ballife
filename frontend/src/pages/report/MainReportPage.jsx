@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   ArrowRight,
@@ -13,67 +14,87 @@ import {
   Target,
 } from "lucide-react";
 import logo from "../../assets/icons/ballifeLogo.svg";
+import i18n from "../../i18n";
 import { useAuth } from "../../contexts/AuthContext";
 
 const HERO_BADGES = [
-  "식단·운동 기록",
-  "혈압·혈당 추적",
-  "AI 분석 리포트",
-  "질환별 가이드",
+  i18n.t("mainReportPage.heroBadges.diet"),
+  i18n.t("mainReportPage.heroBadges.bloodTracking"),
+  i18n.t("mainReportPage.heroBadges.aiReport"),
+  i18n.t("mainReportPage.heroBadges.diseaseGuide"),
 ];
 
 const FEATURES = [
   {
     icon: Activity,
-    title: "일일 건강 기록",
-    description:
-      "식단, 운동, 수분 섭취, 체중, 혈압, 혈당, 복약까지 하루의 모든 건강 기록을 한 화면에서 입력하고 관리합니다.",
-    tags: ["식단", "운동", "수분", "혈압/혈당"],
+    title: i18n.t("mainReportPage.features.dailyRecord.title"),
+    description: i18n.t("mainReportPage.features.dailyRecord.description"),
+    tags: [
+      i18n.t("mainReportPage.features.dailyRecord.tags.diet"),
+      i18n.t("mainReportPage.features.dailyRecord.tags.exercise"),
+      i18n.t("mainReportPage.features.dailyRecord.tags.water"),
+      i18n.t("mainReportPage.features.dailyRecord.tags.bloodPressureSugar"),
+    ],
     accent: "#3B82F6",
     bg: "#EFF6FF"
   },
   {
     icon: BarChart3,
-    title: "기록 통계 & 리포트",
-    description:
-      "기간별 통계와 시각화된 그래프로 변화의 흐름을 한눈에 확인하고, 주간 종합 리포트를 받아볼 수 있습니다.",
-    tags: ["일/주/월 통계", "추이 그래프", "종합 리포트"],
+    title: i18n.t("mainReportPage.features.stats.title"),
+    description: i18n.t("mainReportPage.features.stats.description"),
+    tags: [
+      i18n.t("mainReportPage.features.stats.tags.periodStats"),
+      i18n.t("mainReportPage.features.stats.tags.trendGraph"),
+      i18n.t("mainReportPage.features.stats.tags.comprehensiveReport"),
+    ],
     accent: "#10B981",
     bg: "#ECFDF5"
   },
   {
     icon: Target,
-    title: "맞춤 목표 설정",
-    description:
-      "목표 체중·음수량·섭취/소모 칼로리를 설정하고 하루 생활 루틴(기상·식사·취침)에 맞춰 알림을 받아보세요.",
-    tags: ["목표 지표", "루틴 알림", "달성률"],
+    title: i18n.t("mainReportPage.features.goal.title"),
+    description: i18n.t("mainReportPage.features.goal.description"),
+    tags: [
+      i18n.t("mainReportPage.features.goal.tags.goalMetric"),
+      i18n.t("mainReportPage.features.goal.tags.routineAlert"),
+      i18n.t("mainReportPage.features.goal.tags.achievementRate"),
+    ],
     accent: "#F97316",
     bg: "#FFF7ED"
   },
   {
     icon: PillBottle,
-    title: "복약 관리",
-    description:
-      "처방전 사진 한 장이면 복용 중인 약을 자동으로 등록하고, 시간대별 복약 알림으로 빠짐없이 챙길 수 있습니다.",
-    tags: ["처방전 OCR", "복약 알림", "복약 이력"],
+    title: i18n.t("mainReportPage.features.medication.title"),
+    description: i18n.t("mainReportPage.features.medication.description"),
+    tags: [
+      i18n.t("mainReportPage.features.medication.tags.prescriptionOcr"),
+      i18n.t("mainReportPage.features.medication.tags.medicationAlert"),
+      i18n.t("mainReportPage.features.medication.tags.medicationHistory"),
+    ],
     accent: "#8B5CF6",
     bg: "#F5F3FF"
   },
   {
     icon: Stethoscope,
-    title: "질환별 가이드",
-    description:
-      "고혈압·당뇨·고지혈증·비만·통풍·골다공증 등 주요 만성질환에 대한 신뢰성 있는 의학 정보와 관리법을 제공합니다.",
-    tags: ["WHO·KDCA 기반", "6대 질환", "관리법"],
+    title: i18n.t("mainReportPage.features.diseaseGuide.title"),
+    description: i18n.t("mainReportPage.features.diseaseGuide.description"),
+    tags: [
+      i18n.t("mainReportPage.features.diseaseGuide.tags.whoKdca"),
+      i18n.t("mainReportPage.features.diseaseGuide.tags.sixDiseases"),
+      i18n.t("mainReportPage.features.diseaseGuide.tags.management"),
+    ],
     accent: "#EF4444",
     bg: "#FEF2F2"
   },
   {
     icon: MessageCircle,
-    title: "건강 커뮤니티",
-    description:
-      "같은 고민을 가진 사람들과 경험을 나누고, 카테고리별 게시판에서 질문·노하우·일상을 자유롭게 공유하세요.",
-    tags: ["카테고리 게시판", "질문/응답", "추천/조회"],
+    title: i18n.t("mainReportPage.features.community.title"),
+    description: i18n.t("mainReportPage.features.community.description"),
+    tags: [
+      i18n.t("mainReportPage.features.community.tags.categoryBoard"),
+      i18n.t("mainReportPage.features.community.tags.qa"),
+      i18n.t("mainReportPage.features.community.tags.recommendView"),
+    ],
     accent: "#0EA5E9",
     bg: "#F0F9FF"
   },
@@ -82,21 +103,18 @@ const FEATURES = [
 const HOW_IT_WORKS = [
   {
     step: "01",
-    title: "기록한다",
-    description:
-      "오늘 먹은 식단, 운동, 혈압·혈당·체중을 가볍게 입력해 두기만 해도 데이터가 차곡차곡 쌓입니다.",
+    title: i18n.t("mainReportPage.howItWorks.record.title"),
+    description: i18n.t("mainReportPage.howItWorks.record.description"),
   },
   {
     step: "02",
-    title: "분석한다",
-    description:
-      "쌓인 데이터를 AI가 분석해 변화 추이, 위험 신호, 개선이 필요한 영역을 알려드립니다.",
+    title: i18n.t("mainReportPage.howItWorks.analyze.title"),
+    description: i18n.t("mainReportPage.howItWorks.analyze.description"),
   },
   {
     step: "03",
-    title: "관리한다",
-    description:
-      "맞춤 목표·루틴·복약 알림과 커뮤니티의 응원을 통해 건강한 습관을 지속할 수 있도록 돕습니다.",
+    title: i18n.t("mainReportPage.howItWorks.manage.title"),
+    description: i18n.t("mainReportPage.howItWorks.manage.description"),
   },
 ];
 
@@ -134,6 +152,7 @@ function FeatureCard({ icon, title, description, tags, accent, bg, to }) {
 }
 
 export default function MainReportPage() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const startPath = isAuthenticated ? "/" : "/login";
 
@@ -149,14 +168,12 @@ export default function MainReportPage() {
                 Balance + Life
               </span>
               <h1 className="mt-5 text-[44px] leading-[1.15] font-extrabold text-[#0F172A] tracking-tight">
-                매일의 작은 기록이,
+                {t("mainReportPage.hero.titleLine1")}
                 <br />
-                <span className="text-[#3B82F6]">평생의 건강</span>이 됩니다.
+                <span className="text-[#3B82F6]">{t("mainReportPage.hero.titleHighlight")}</span>{t("mainReportPage.hero.titleLine2Suffix")}
               </h1>
               <p className="mt-5 text-[15px] text-[#64748B] leading-relaxed max-w-[520px]">
-                BalLife는 식단·운동·혈압·혈당·복약까지 흩어져 있던 건강 데이터를
-                한 곳에 모으고, AI가 분석한 인사이트와 커뮤니티의 응원으로
-                지속 가능한 건강 관리를 돕습니다.
+                {t("mainReportPage.hero.description")}
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
@@ -175,14 +192,14 @@ export default function MainReportPage() {
                   to={startPath}
                   className="inline-flex items-center gap-2 h-12 px-7 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
                 >
-                  지금 바로 시작하기
+                  {t("mainReportPage.hero.startNow")}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <a
                   href="#features"
                   className="inline-flex items-center h-12 px-7 rounded-[12px] bg-white border border-[#E5E7EB] text-[#0F172A] text-[14px] font-semibold hover:bg-gray-50 transition"
                 >
-                  주요 기능 살펴보기
+                  {t("mainReportPage.hero.exploreFeatures")}
                 </a>
               </div>
             </div>
@@ -196,7 +213,7 @@ export default function MainReportPage() {
                 <div className="relative flex items-center gap-3 mb-6">
                   <img src={logo} alt="BalLife" className="w-9 h-9" />
                   <span className="text-white text-[13px] font-semibold">
-                    오늘의 건강 요약
+                    {t("mainReportPage.heroVisual.todaySummary")}
                   </span>
                   <span className="ml-auto text-[11px] text-white/50">
                     2026.05.22
@@ -207,7 +224,7 @@ export default function MainReportPage() {
                   <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10">
                     <div className="flex items-center gap-1.5 text-[11px] text-white/60 mb-1">
                       <HeartPulse className="w-3.5 h-3.5" />
-                      혈압
+                      {t("mainReportPage.heroVisual.bloodPressure")}
                     </div>
                     <p className="text-white text-[22px] font-bold">
                       118 / 78
@@ -219,7 +236,7 @@ export default function MainReportPage() {
                   <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10">
                     <div className="flex items-center gap-1.5 text-[11px] text-white/60 mb-1">
                       <Activity className="w-3.5 h-3.5" />
-                      혈당
+                      {t("mainReportPage.heroVisual.bloodSugar")}
                     </div>
                     <p className="text-white text-[22px] font-bold">
                       96
@@ -231,7 +248,7 @@ export default function MainReportPage() {
                   <div className="bg-white/5 backdrop-blur rounded-[14px] p-4 border border-white/10 col-span-2">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[11px] text-white/60">
-                        오늘의 목표 달성률
+                        {t("mainReportPage.heroVisual.goalAchievement")}
                       </span>
                       <span className="text-[12px] font-semibold text-[#3B82F6]">
                         78%
@@ -259,11 +276,10 @@ export default function MainReportPage() {
               Features
             </span>
             <h2 className="mt-3 text-[32px] font-extrabold text-[#0F172A]">
-              건강 관리에 필요한 모든 것을, 한 곳에
+              {t("mainReportPage.featuresSection.title")}
             </h2>
             <p className="mt-3 text-[14px] text-[#64748B]">
-              BalLife가 제공하는 6가지 핵심 기능으로 건강 관리를 더 쉽게,
-              더 똑똑하게.
+              {t("mainReportPage.featuresSection.subtitle")}
             </p>
           </div>
 
@@ -283,7 +299,7 @@ export default function MainReportPage() {
               How it works
             </span>
             <h2 className="mt-3 text-[32px] font-extrabold text-[#0F172A]">
-              3단계로 시작하는 건강한 습관
+              {t("mainReportPage.howItWorksSection.title")}
             </h2>
           </div>
 
@@ -318,19 +334,18 @@ export default function MainReportPage() {
                 AI Assistant
               </span>
               <h3 className="mt-4 text-[28px] font-bold leading-tight">
-                24시간 함께하는
+                {t("mainReportPage.aiSection.titleLine1")}
                 <br />
-                AI 건강 도우미
+                {t("mainReportPage.aiSection.titleLine2")}
               </h3>
               <p className="mt-4 text-[14px] text-white/70 leading-relaxed">
-                건강 관련 궁금증, 식단 사진 분석, 복약 시간 알림까지.
-                당신의 라이프스타일에 맞춰 맞춤형 조언을 제공합니다.
+                {t("mainReportPage.aiSection.description")}
               </p>
               <ul className="mt-6 space-y-2.5">
                 {[
-                  "복용 중인 약과 상호작용 확인",
-                  "오늘 먹은 음식의 영양 분석",
-                  "혈압·혈당 수치 해석",
+                  t("mainReportPage.aiSection.points.interaction"),
+                  t("mainReportPage.aiSection.points.nutrition"),
+                  t("mainReportPage.aiSection.points.interpretation"),
                 ].map((item) => (
                   <li
                     key={item}
@@ -346,7 +361,7 @@ export default function MainReportPage() {
             <div className="space-y-3">
               <div className="bg-white/5 backdrop-blur rounded-[16px] p-4 border border-white/10 max-w-[85%] ml-auto">
                 <p className="text-[13px] text-white/90">
-                  오늘 점심 후 혈당이 180 나왔어요. 괜찮은 건가요?
+                  {t("mainReportPage.aiSection.chatUser")}
                 </p>
               </div>
               <div className="bg-[#3B82F6]/15 backdrop-blur rounded-[16px] p-4 border border-[#3B82F6]/30 max-w-[85%]">
@@ -357,9 +372,7 @@ export default function MainReportPage() {
                   </span>
                 </div>
                 <p className="text-[13px] text-white/90 leading-relaxed">
-                  식후 2시간 혈당이 180mg/dL이면 정상 기준(140 미만)보다 다소
-                  높은 수치예요. 식이섬유가 풍부한 잡곡과 채소 위주의 식사,
-                  식후 20분 가벼운 산책이 도움이 됩니다.
+                  {t("mainReportPage.aiSection.chatAi")}
                 </p>
               </div>
             </div>
@@ -372,17 +385,16 @@ export default function MainReportPage() {
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="bg-white rounded-[24px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-12 text-center">
             <h2 className="text-[32px] font-extrabold text-[#0F172A]">
-              내일의 더 나은 나를 위한 첫걸음
+              {t("mainReportPage.cta.title")}
             </h2>
             <p className="mt-3 text-[14px] text-[#64748B]">
-              지금 BalLife에 합류하여 더 나은 사용자와 함께
-              건강한 라이프스타일을 시작해보세요.
+              {t("mainReportPage.cta.subtitle")}
             </p>
             <Link
               to={startPath}
               className="mt-7 inline-flex items-center gap-2 h-12 px-8 rounded-[12px] bg-[#0F172A] text-white text-[14px] font-semibold hover:bg-[#1E293B] transition"
             >
-              지금 바로 시작하기
+              {t("mainReportPage.hero.startNow")}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

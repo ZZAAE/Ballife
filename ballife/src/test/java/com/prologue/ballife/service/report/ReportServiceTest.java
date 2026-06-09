@@ -72,12 +72,16 @@ class ReportServiceTest {
         resolver.setCharacterEncoding("UTF-8");
         resolver.setCacheable(false);
 
+        var messages = com.prologue.ballife.support.TestMessages.resolver();
+
         templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(resolver);
+        // 템플릿의 #{report.*} 메시지 해석을 위해 실제 번들을 연결 (요청 로케일은 한국어로 고정됨)
+        templateEngine.setTemplateEngineMessageSource(com.prologue.ballife.support.TestMessages.source());
 
         pdfGenerator = new ReportPdfGenerator();
-        ruleBasedGenerator = new ConsultationQuestionGenerator();
-        chartRenderer = new ReportChartRenderer();
+        ruleBasedGenerator = new ConsultationQuestionGenerator(messages);
+        chartRenderer = new ReportChartRenderer(messages);
 
         reportService = new ReportService(
                 healthAnalysisService, templateEngine, pdfGenerator,

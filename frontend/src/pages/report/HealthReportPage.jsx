@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
@@ -23,10 +24,10 @@ const avg = (nums) =>
   nums.length ? Math.round(nums.reduce((s, n) => s + n, 0) / nums.length) : null;
 
 const CHART_TABS = [
-  { key: "bloodSugar", label: "혈당" },
-  { key: "bloodPressure", label: "혈압" },
-  { key: "weight", label: "체중" },
-  { key: "bmi", label: "BMI" },
+  { key: "bloodSugar", labelKey: "healthReportPage.tab.bloodSugar" },
+  { key: "bloodPressure", labelKey: "healthReportPage.tab.bloodPressure" },
+  { key: "weight", labelKey: "healthReportPage.tab.weight" },
+  { key: "bmi", labelKey: "healthReportPage.tab.bmi" },
 ];
 
 function SummaryCard({ icon: Icon, accent, bg, label, value, unit, sub }) {
@@ -55,6 +56,7 @@ function SummaryCard({ icon: Icon, accent, bg, label, value, unit, sub }) {
 }
 
 export default function HealthReportPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
@@ -169,31 +171,59 @@ export default function HealthReportPage() {
 
   const chartViews = {
     bloodSugar: {
-      title: "최근 혈당 추이",
+      title: t("healthReportPage.chart.bloodSugar.title"),
       data: sugarTrend,
-      empty: "혈당 기록이 없습니다.",
-      lines: [{ key: "value", name: "혈당", color: "#16a34a" }],
+      empty: t("healthReportPage.chart.bloodSugar.empty"),
+      lines: [
+        {
+          key: "value",
+          name: t("healthReportPage.chart.bloodSugar.lineName"),
+          color: "#16a34a",
+        },
+      ],
     },
     bloodPressure: {
-      title: "최근 혈압 추이",
+      title: t("healthReportPage.chart.bloodPressure.title"),
       data: bpTrend,
-      empty: "혈압 기록이 없습니다.",
+      empty: t("healthReportPage.chart.bloodPressure.empty"),
       lines: [
-        { key: "systolic", name: "수축기", color: "#ED5934" },
-        { key: "diastolic", name: "이완기", color: "#F59874" },
+        {
+          key: "systolic",
+          name: t("healthReportPage.chart.bloodPressure.systolic"),
+          color: "#ED5934",
+        },
+        {
+          key: "diastolic",
+          name: t("healthReportPage.chart.bloodPressure.diastolic"),
+          color: "#F59874",
+        },
       ],
     },
     weight: {
-      title: "최근 체중 추이",
+      title: t("healthReportPage.chart.weight.title"),
       data: weightTrend,
-      empty: "체중 기록이 없습니다.",
-      lines: [{ key: "value", name: "체중", color: "#3B82F6" }],
+      empty: t("healthReportPage.chart.weight.empty"),
+      lines: [
+        {
+          key: "value",
+          name: t("healthReportPage.chart.weight.lineName"),
+          color: "#3B82F6",
+        },
+      ],
     },
     bmi: {
-      title: "최근 BMI 추이",
+      title: t("healthReportPage.chart.bmi.title"),
       data: bmiTrend,
-      empty: heightCm ? "체중 기록이 없습니다." : "키 정보가 필요합니다.",
-      lines: [{ key: "value", name: "BMI", color: "#0f1c33" }],
+      empty: heightCm
+        ? t("healthReportPage.chart.bmi.emptyWeight")
+        : t("healthReportPage.chart.bmi.emptyHeight"),
+      lines: [
+        {
+          key: "value",
+          name: t("healthReportPage.chart.bmi.lineName"),
+          color: "#0f1c33",
+        },
+      ],
     },
   };
   const activeView = chartViews[chartTab] ?? chartViews.bloodSugar;
@@ -209,10 +239,10 @@ export default function HealthReportPage() {
               </div>
               <div>
                 <h1 className="text-[24px] font-extrabold tracking-tight">
-                  건강 리포트
+                  {t("healthReportPage.header.title")}
                 </h1>
                 <p className="text-sm text-[#64748B]">
-                  나의 최근 건강 지표를 한눈에 확인하세요.
+                  {t("healthReportPage.header.subtitle")}
                 </p>
               </div>
             </div>
@@ -227,7 +257,7 @@ export default function HealthReportPage() {
     return (
       <Shell>
         <div className="rounded-2xl bg-white p-16 text-center text-sm text-[#64748B] shadow-sm">
-          불러오는 중...
+          {t("healthReportPage.loading")}
         </div>
       </Shell>
     );
@@ -240,16 +270,18 @@ export default function HealthReportPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8]">
             <Lock size={24} />
           </div>
-          <h2 className="text-[18px] font-bold">개인/가족 플랜 전용 기능입니다</h2>
+          <h2 className="text-[18px] font-bold">
+            {t("healthReportPage.locked.title")}
+          </h2>
           <p className="mt-2 text-[13px] text-[#64748B]">
-            건강 리포트는 개인 플랜 또는 가족 플랜에서 이용할 수 있어요.
+            {t("healthReportPage.locked.description")}
           </p>
           <button
             type="button"
             onClick={() => navigate("/member")}
             className="mt-5 h-11 rounded-xl bg-[#0f1c33] px-6 text-sm font-semibold text-white hover:bg-[#1a2d4d]"
           >
-            구독하러 가기
+            {t("healthReportPage.locked.subscribe")}
           </button>
         </div>
       </Shell>
@@ -263,46 +295,58 @@ export default function HealthReportPage() {
           icon={Droplet}
           accent="#16a34a"
           bg="#ECFDF5"
-          label="최근 혈당"
+          label={t("healthReportPage.summary.bloodSugar.label")}
           value={latestSugar ?? null}
           unit="mg/dL"
-          sub={sugarAvg != null ? `평균 ${sugarAvg} mg/dL` : "기록 없음"}
+          sub={
+            sugarAvg != null
+              ? t("healthReportPage.summary.bloodSugar.avg", { value: sugarAvg })
+              : t("healthReportPage.summary.noRecord")
+          }
         />
         <SummaryCard
           icon={HeartPulse}
           accent="#ED5934"
           bg="#FFEEE3"
-          label="최근 혈압"
+          label={t("healthReportPage.summary.bloodPressure.label")}
           value={latestBP ? `${latestBP.systolicBP}/${latestBP.diastolicBP}` : null}
           unit="mmHg"
-          sub={latestBP ? "수축기 / 이완기" : "기록 없음"}
+          sub={
+            latestBP
+              ? t("healthReportPage.summary.bloodPressure.sub")
+              : t("healthReportPage.summary.noRecord")
+          }
         />
         <SummaryCard
           icon={Scale}
           accent="#3B82F6"
           bg="#EFF6FF"
-          label="체중"
+          label={t("healthReportPage.summary.weight.label")}
           value={profileWeight ?? null}
           unit="kg"
-          sub={heightCm ? `키 ${heightCm}cm` : null}
+          sub={
+            heightCm
+              ? t("healthReportPage.summary.weight.height", { value: heightCm })
+              : null
+          }
         />
         <SummaryCard
           icon={FileText}
           accent="#0f1c33"
           bg="#F1F5F9"
-          label="BMI"
+          label={t("healthReportPage.summary.bmi.label")}
           value={bmi ?? null}
           unit=""
           sub={
             bmi == null
-              ? "체중/키 필요"
+              ? t("healthReportPage.summary.bmi.needData")
               : bmi < 18.5
-                ? "저체중"
+                ? t("healthReportPage.summary.bmi.underweight")
                 : bmi < 23
-                  ? "정상"
+                  ? t("healthReportPage.summary.bmi.normal")
                   : bmi < 25
-                    ? "과체중"
-                    : "비만"
+                    ? t("healthReportPage.summary.bmi.overweight")
+                    : t("healthReportPage.summary.bmi.obese")
           }
         />
       </div>
@@ -311,18 +355,18 @@ export default function HealthReportPage() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-[15px] font-bold">{activeView.title}</h3>
           <div className="inline-flex rounded-full bg-[#F1F5F9] p-1">
-            {CHART_TABS.map((t) => (
+            {CHART_TABS.map((tab) => (
               <button
-                key={t.key}
+                key={tab.key}
                 type="button"
-                onClick={() => setChartTab(t.key)}
+                onClick={() => setChartTab(tab.key)}
                 className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
-                  chartTab === t.key
+                  chartTab === tab.key
                     ? "bg-white text-[#0F172A] shadow-sm"
                     : "text-[#64748B] hover:text-[#0F172A]"
                 }`}
               >
-                {t.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>

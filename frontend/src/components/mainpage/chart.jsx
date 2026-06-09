@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { LineChart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const DEFAULT_DAYS = 7;
 const fmt = (d) => d.toISOString().split("T")[0];
@@ -22,6 +23,7 @@ export default function ChartSection({
   children,
   // areas / primaryAreaKey / primaryAreaName / unit prop 은 사용 안 함 (시그니처 호환용)
 }) {
+  const { t } = useTranslation();
   const now = useMemo(() => new Date(), []);
   const year = now.getFullYear();
 
@@ -154,13 +156,13 @@ export default function ChartSection({
             </div>
             <p className="text-[14px] font-bold text-slate-700">
               {data.length === 0
-                ? "아직 기록이 없습니다"
-                : "선택한 기간에 기록이 없습니다"}
+                ? t("mainChart.empty.noRecordsTitle")
+                : t("mainChart.empty.noRecordsInRangeTitle")}
             </p>
             <p className="mt-1 text-[12px] text-slate-400">
               {data.length === 0
-                ? "측정 결과를 등록하면 이곳에 추이가 표시됩니다"
-                : "다른 기간을 선택해 보세요"}
+                ? t("mainChart.empty.noRecordsDesc")
+                : t("mainChart.empty.noRecordsInRangeDesc")}
             </p>
           </div>
         )}

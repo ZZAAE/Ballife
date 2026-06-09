@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, Pill, PlusSquare } from "lucide-react";
 import medicineApi from "../api/medicineApi";
 
@@ -47,6 +48,7 @@ export default function SearchMedicineModal({
   onClose,
   onSelectMedicine,
 }) {
+  const { t } = useTranslation();
   const [keyword, setKeyword] = useState("");
   const [medicineList, setMedicineList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,8 +76,8 @@ export default function SearchMedicineModal({
     } catch (e) {
       setError(
         e.response?.status === 404
-          ? "해당 의약품을 찾을 수 없습니다."
-          : "조회 중 오류가 발생했습니다."
+          ? t("searchMedicineModal.error.notFound")
+          : t("searchMedicineModal.error.generic")
       );
       setMedicineList([]);
     } finally {
@@ -92,7 +94,9 @@ export default function SearchMedicineModal({
         <div className="flex items-center justify-between px-5 md:px-8 py-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <Search className="w-5 h-5 text-[#2563EB]" />
-            <h2 className="text-[28px] font-semibold text-gray-800">검색</h2>
+            <h2 className="text-[28px] font-semibold text-gray-800">
+              {t("searchMedicineModal.title")}
+            </h2>
           </div>
 
           <button
@@ -108,7 +112,7 @@ export default function SearchMedicineModal({
           {/* 검색 영역 */}
           <div className="mb-8">
             <label className="block text-[14px] font-semibold text-gray-600 mb-3">
-              약물 이름 검색
+              {t("searchMedicineModal.searchLabel")}
             </label>
 
             <div className="flex gap-2">
@@ -119,7 +123,7 @@ export default function SearchMedicineModal({
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder="약물 이름을 입력하거나 선택하세요"
+                  placeholder={t("searchMedicineModal.searchPlaceholder")}
                   className="w-full h-[52px] rounded-xl bg-[#F6F7FB] border border-transparent focus:border-[#2563EB] outline-none pl-11 pr-4 text-[14px] text-gray-700 placeholder:text-gray-400"
                 />
               </div>
@@ -129,7 +133,9 @@ export default function SearchMedicineModal({
                 disabled={loading}
                 className="h-[52px] px-6 rounded-xl bg-[#2563EB] text-white text-[14px] font-semibold hover:bg-blue-700 transition disabled:opacity-50"
               >
-                {loading ? "조회중..." : "검색"}
+                {loading
+                  ? t("searchMedicineModal.searchingButton")
+                  : t("searchMedicineModal.searchButton")}
               </button>
             </div>
 
@@ -147,7 +153,9 @@ export default function SearchMedicineModal({
                 }
                 className="mt-3 text-[13px] font-semibold text-[#2563EB] hover:underline"
               >
-                검색 결과에 없나요? '{keyword.trim()}' 직접 추가하기
+                {t("searchMedicineModal.addManually", {
+                  keyword: keyword.trim(),
+                })}
               </button>
             )}
           </div>
@@ -155,24 +163,24 @@ export default function SearchMedicineModal({
           {/* 복용 상세 정보 */}
           <div>
             <p className="text-[14px] font-semibold text-gray-600 mb-3">
-              복용 상세 정보
+              {t("searchMedicineModal.detailTitle")}
             </p>
 
             <div className="rounded-2xl border border-gray-200 overflow-hidden">
               {/* 헤더 */}
               <div className="grid grid-cols-[1.6fr_0.8fr] bg-[#F8FAFC] px-6 py-4 border-b border-gray-200">
                 <span className="text-[12px] font-semibold text-gray-400">
-                  이름
+                  {t("searchMedicineModal.column.name")}
                 </span>
                 <span className="text-[12px] font-semibold text-gray-400 text-right">
-                  용량 (MG/PILL)
+                  {t("searchMedicineModal.column.dosage")}
                 </span>
               </div>
 
               {/* 리스트 */}
               {medicineList.length === 0 && (
                 <div className="px-6 py-10 text-center text-[14px] text-gray-400">
-                  약물 이름을 검색해 주세요.
+                  {t("searchMedicineModal.emptyState")}
                 </div>
               )}
 
