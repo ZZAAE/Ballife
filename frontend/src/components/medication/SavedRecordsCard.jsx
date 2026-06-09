@@ -25,7 +25,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
+    <div className="-mt-4 flex-1 min-h-0 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
@@ -62,14 +62,15 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
       />
 
 
+      <div className="relative flex-1">
       {filtered.length === 0 ? (
-        <p className="flex-1 flex items-center justify-center text-[13px] text-gray-400 text-center">
+        <p className="absolute inset-0 flex items-center justify-center text-[13px] text-gray-400 text-center">
           {isToday
             ? "오늘 기록된 상비약이 없습니다."
             : "해당 날짜에 기록된 상비약이 없습니다."}
         </p>
       ) : (
-        <ul className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-1 max-h-[100px]">
+        <ul className="absolute inset-0 space-y-2 overflow-y-auto pr-1">
           {filtered.map((r) => (
             <li
               key={r.id}
@@ -110,6 +111,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
           ))}
         </ul>
       )}
+      </div>
     </div>
   );
 }
