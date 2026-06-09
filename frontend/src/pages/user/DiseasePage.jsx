@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from "react-router-dom"; // 페이지 이동
 import toast from 'react-hot-toast';
-import Button from '../../components/Button';
+import Button from '../../components/button';
 import authApi from "../../api/authApi";
 
 
