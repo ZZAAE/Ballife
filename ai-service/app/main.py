@@ -635,3 +635,55 @@ async def news_translate(req: NewsTranslateRequest):
     if not titles or len(titles) != len(req.titles):
         return {"titles": req.titles}
     return {"titles": titles}
+
+
+# ── 범용 짧은 텍스트 일괄 번역 (사용자 입력값 표시용: 처방 이름·메모 등) ──────────
+class TextTranslateRequest(BaseModel):
+    texts: List[str]
+    lang: str = "en"
+
+
+class TextTranslateResult(BaseModel):
+    # 입력과 동일한 개수·순서로 번역된 텍스트 목록
+    texts: List[str]
+
+
+llm_text_translate = llm.with_structured_output(TextTranslateResult)
+
+textTranslatePrompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are a translator for a health app. Translate each short user-entered Korean text "
+        "(prescription names, memos, labels) into {LANG_NAME}. "
+        "Translate concisely and naturally. "
+        "Leave numbers, dates, codes, and proper drug/brand names unchanged. "
+        "Return EXACTLY the same number of items, in the SAME order as the input. "
+        "Do not add, drop, merge, or reorder items.",
+    ),
+    ("human", "{TEXTS_JSON}"),
+])
+
+
+@app.post("/translate")
+async def translate_texts(req: TextTranslateRequest):
+    """사용자 입력 짧은 텍스트(처방 이름·메모 등)를 lang 으로 일괄 번역. ko 거나 비면 원문."""
+    lang = normalize_lang(req.lang)
+    if lang == "ko" or not req.texts:
+        return {"texts": req.texts}
+
+    lang_name = LANGUAGE_NAMES.get(lang, "English")
+    chain = textTranslatePrompt | llm_text_translate
+    try:
+        result = await chain.ainvoke({
+            "LANG_NAME": lang_name,
+            "TEXTS_JSON": json.dumps(req.texts, ensure_ascii=False),
+        })
+        texts = result.texts
+    except Exception as e:
+        print(f"[translate] 번역 실패(lang={lang}): {e}")
+        return {"texts": req.texts}
+
+    # 개수 안전장치: 개수 바뀌면 원문 폴백
+    if not texts or len(texts) != len(req.texts):
+        return {"texts": req.texts}
+    return {"texts": texts}

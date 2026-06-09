@@ -33,6 +33,8 @@ import {
   formatDiseaseSummary,
   loadCachedMemberProfile,
 } from "../../utils/userProfile";
+import { SCHEDULE_SLOTS } from "../../components/medication/prescriptionData";
+import { translateTexts } from "../../utils/aiTranslate";
 
 const ROUTINE_FIELDS = [
   { label: "기상", key: "wakeupTime" },
@@ -114,8 +116,21 @@ const ROUTINE_LABEL_I18N_KEY = {
   취침: "userInformation.routine.bedtime",
 };
 
+// 성별 저장값(한글) → 표시용 i18n 키. 저장값 자체는 보존하고 표시만 번역.
+const GENDER_I18N_KEY = {
+  남성: "profileEditPage.gender.male",
+  여성: "profileEditPage.gender.female",
+};
+
+// 복용 시간대 키워드(백엔드 한글 저장: 아침/점심/저녁/취침전) → 약 페이지 슬롯 id.
+// 표시는 t(`medication.slot.${id}`) 로 번역(매칭 안 되는 값은 원문 그대로).
+const INTERVAL_KEYWORD_TO_SLOT_ID = SCHEDULE_SLOTS.reduce((acc, s) => {
+  acc[s.keyword] = s.id;
+  return acc;
+}, {});
+
 function UserInformation() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
@@ -134,6 +149,8 @@ function UserInformation() {
   const [savedPrescriptions, setSavedPrescriptions] = useState([]);
   const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
   const [editingPrescription, setEditingPrescription] = useState(null);
+  // 처방 이름/메모(사용자 입력 한글) → 현재 언어 번역 맵 { 원문: 번역문 }
+  const [txMap, setTxMap] = useState({});
   const [trackedUserId, setTrackedUserId] = useState(userId);
 
   // 계정이 바뀌는 순간(렌더 중) 이전 사용자의 잔여 정보를 즉시 비운다.
@@ -174,6 +191,32 @@ function UserInformation() {
   useEffect(() => {
     loadMedicinesFromServer();
   }, [loadMedicinesFromServer]);
+
+  // 처방 이름/메모(사용자 입력 한글)를 현재 언어로 즉석 번역해 표시.
+  // ko 거나 처방이 없으면 번역하지 않음. 언어 변경 시 다시 번역.
+  useEffect(() => {
+    const lang = i18n.language;
+    if (!lang || lang === "ko" || savedPrescriptions.length === 0) {
+      setTxMap({});
+      return;
+    }
+    const texts = [];
+    savedPrescriptions.forEach((p) => {
+      if (p.prescriptionName) texts.push(p.prescriptionName);
+      if (p.memo) texts.push(p.memo);
+    });
+    if (texts.length === 0) {
+      setTxMap({});
+      return;
+    }
+    let cancelled = false;
+    translateTexts(texts, lang).then((m) => {
+      if (!cancelled) setTxMap(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [savedPrescriptions, i18n.language]);
 
   // 처방전 목록 전체에서 약 정보를 평탄화해 처방전 카드에 노출한다.
   const savedMedicines = savedPrescriptions.flatMap((p) => p.medicines || []);
@@ -740,7 +783,9 @@ function UserInformation() {
                           {t("userInformation.memberInfo.gender")}
                         </dt>
                         <dd className="mt-1 text-[13.5px] font-semibold text-[#0F172A]">
-                          {profile.gender}
+                          {GENDER_I18N_KEY[profile.gender]
+                            ? t(GENDER_I18N_KEY[profile.gender])
+                            : profile.gender}
                         </dd>
                       </div>
                     </div>
@@ -964,8 +1009,10 @@ function UserInformation() {
                                 {/* 처방전 이름 + 수정/삭제 */}
                                 <div className="flex items-start justify-between gap-2">
                                   <p className="text-sm font-bold text-gray-900 break-all">
-                                    {p.prescriptionName ||
-                                      t("userInformation.prescription.noName")}
+                                    {p.prescriptionName
+                                      ? txMap[p.prescriptionName] ||
+                                        p.prescriptionName
+                                      : t("userInformation.prescription.noName")}
                                   </p>
                                   <div className="flex flex-shrink-0 items-center gap-1">
                                     <button
@@ -995,24 +1042,30 @@ function UserInformation() {
                                   </div>
                                 </div>
 
-                                {/* 복용 시간대 배지 (이름 아래) */}
+                                {/* 복용 시간대 배지 (이름 아래) — 한글 키워드를 현재 언어로 표시 */}
                                 {intervals.length > 0 && (
                                   <div className="mt-2 flex flex-wrap gap-1">
-                                    {intervals.map((t) => (
-                                      <span
-                                        key={t}
-                                        className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600"
-                                      >
-                                        {t}
-                                      </span>
-                                    ))}
+                                    {intervals.map((iv) => {
+                                      const slotId =
+                                        INTERVAL_KEYWORD_TO_SLOT_ID[iv];
+                                      return (
+                                        <span
+                                          key={iv}
+                                          className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600"
+                                        >
+                                          {slotId
+                                            ? t(`medication.slot.${slotId}`)
+                                            : iv}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 )}
 
-                                {/* 메모 (입력된 경우만) */}
+                                {/* 메모 (입력된 경우만) — 사용자 입력값을 현재 언어로 번역 표시 */}
                                 {p.memo && (
                                   <p className="mt-1 text-xs text-gray-500 break-words">
-                                    {p.memo}
+                                    {txMap[p.memo] || p.memo}
                                   </p>
                                 )}
 
