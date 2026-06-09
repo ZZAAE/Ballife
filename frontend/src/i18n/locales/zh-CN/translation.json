@@ -2132,6 +2132,7 @@
   "prescriptionDetailModal": {
     "title": "我的 [{{groupName}}] 处方列表",
     "totalCount": "共开具了 {{count}} 种药。",
+    "ingredientLabel": "成分: {{ingredient}}",
     "empty": "没有开具的药。若删除全部药品，该分组将从服药日程和依从率中一并消失。",
     "placeholder": {
       "name": "药名",

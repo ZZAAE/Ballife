@@ -59,7 +59,9 @@ export default function PrescriptionDetailModal({
   onDeleteMedicine,
   onUpdateMedicine,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // 한국어 화면은 약 이름 괄호 안 한글 성분으로 충분 → 비한국어일 때만 영문 성분명을 병기
+  const isKorean = (i18n.language || "ko").startsWith("ko");
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState({ name: "", purpose: "", dosageText: "" });
   // 삭제 확인 모달 대상 약 id (null 이면 모달 닫힘)
@@ -175,6 +177,13 @@ export default function PrescriptionDetailModal({
                           <p className="text-[18px] font-semibold text-gray-800">
                             {medicine.name}
                           </p>
+                          {!isKorean && medicine.ingredientEng && (
+                            <p className="mt-1 text-[13px] text-gray-400">
+                              {t("prescriptionDetailModal.ingredientLabel", {
+                                ingredient: medicine.ingredientEng,
+                              })}
+                            </p>
+                          )}
                         </div>
 
                         <div>

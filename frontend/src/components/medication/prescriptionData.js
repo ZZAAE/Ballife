@@ -48,6 +48,9 @@ export const mapPrescriptionsToGroups = (prescriptions) =>
       purpose: "",
       dosageText: p.dosage || "",
       imageType: "white",
+      // 주성분 다국어 병기용(백엔드 약품 캐시에서 채움, 없으면 undefined)
+      ingredientKo: m.ingredientKo || "",
+      ingredientEng: m.ingredientEng || "",
     })),
   }));
 
