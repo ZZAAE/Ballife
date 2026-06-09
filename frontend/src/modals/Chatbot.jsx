@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { AI_BASE_URL } from "../api/aiBase";
 
 /* ---------- Avatars ---------- */
 const BotAvatar = ({ size = 20 }) => (
@@ -91,7 +92,7 @@ export default function BallChatbot() {
     (async () => {
       try {
         const res = await fetch(
-          `http://localhost:8001/chat/history/${userId}`
+          `${AI_BASE_URL}/chat/history/${userId}`
         );
         if (!res.ok) return;
         const data = await res.json();
@@ -235,7 +236,7 @@ export default function BallChatbot() {
     setIsWaiting(true);
 
     try {
-      const response = await fetch("http://localhost:8001/chat", {
+      const response = await fetch(`${AI_BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

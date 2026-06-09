@@ -21,7 +21,9 @@ load_dotenv()
 
 app = FastAPI()
 
-SPRING_API = "http://localhost:8080"
+# 백엔드(Spring Boot) 주소. 운영(도커)에서는 서비스명으로 주입: SPRING_API_URL=http://backend:8080
+import os
+SPRING_API = os.getenv("SPRING_API_URL", "http://localhost:8080")
 
 # React 개발서버(포트 5173)에서 오는 요청 허용
 

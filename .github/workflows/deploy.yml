@@ -1,0 +1,90 @@
+# ============================================================
+# Ballife 배포 워크플로
+#   1) 3개 이미지(frontend/backend/ai-service)를 빌드해 GHCR에 푸시
+#   2) 서버에 SSH 접속 → docker compose pull && up -d
+#
+# 필요한 GitHub Secrets:
+#   DEPLOY_HOST     배포 서버 IP/도메인
+#   DEPLOY_USER     SSH 사용자
+#   DEPLOY_SSH_KEY  SSH 개인키(PEM 내용 전체)
+#   DEPLOY_PATH     서버에서 docker-compose.yml + .env 가 있는 경로
+#   GHCR_PAT        서버에서 GHCR 이미지 pull용 토큰(read:packages). 패키지를 public 으로 두면 생략 가능.
+# ============================================================
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: frontend
+            context: ./frontend
+            build_args: |
+              VITE_API_BASE_URL=/api
+              VITE_AI_BASE_URL=/ai
+          - name: backend
+            context: ./ballife
+            build_args: ""
+          - name: ai-service
+            context: ./ai-service
+            build_args: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 소유자명 소문자화(GHCR 요구)
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: GHCR 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 빌드 & 푸시 — ${{ matrix.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ matrix.name }}:latest
+            ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ matrix.name }}:${{ github.sha }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: SSH 배포 (compose pull & up)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            # private 패키지면 로그인 필요(public 이면 이 줄 생략 가능)
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            export IMAGE_PREFIX="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+            export IMAGE_TAG="${{ github.sha }}"
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
