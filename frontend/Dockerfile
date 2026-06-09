@@ -30,8 +30,9 @@ RUN npm run build
 # ---------- 2) 런타임 스테이지 ----------
 FROM nginx:1.27-alpine AS runtime
 
-# 기본 사이트 설정을 우리 설정으로 교체
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# nginx 템플릿 배치 — 컨테이너 기동 시 envsubst 로 BACKEND_ADDR/AI_ADDR 치환 후
+# /etc/nginx/conf.d/default.conf 로 생성됨 (런타임에 백엔드/AI 서버 IP 주입)
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # 빌드 산출물 배치 (Unity 에셋도 dist 안에 함께 포함됨)
 COPY --from=build /app/dist /usr/share/nginx/html

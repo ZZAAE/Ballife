@@ -1,0 +1,13 @@
+# [ai-server] AI 서비스(FastAPI + YOLO)만
+name: ballife-ai
+services:
+  ai-service:
+    image: ${IMAGE_PREFIX}/ai-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8001:8001"   # front-server 와 backend-server 에서만 접근하도록 방화벽 제한 권장
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      SPRING_API_URL: http://${BACKEND_ADDR}    # 백엔드서버IP:8080 (AI → 백엔드 호출)
+      TZ: Asia/Seoul

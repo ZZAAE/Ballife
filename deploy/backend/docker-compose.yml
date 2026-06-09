@@ -1,0 +1,31 @@
+# [backend-server] 백엔드(Spring Boot)만
+# mysql / mongo / ai 는 각각 다른 서버 → IP 로 연결 (.env 에서 주입)
+name: ballife-backend
+services:
+  backend:
+    image: ${IMAGE_PREFIX}/backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # front-server 와 ai-server 에서만 접근하도록 방화벽 제한 권장
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # DB/AI 주소 — .env 에서 주입
+      SPRING_DATASOURCE_URL: jdbc:mysql://${MYSQL_ADDR}/project_ballife?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-ballife}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATA_MONGODB_HOST: ${MONGO_HOST}
+      SPRING_DATA_MONGODB_PORT: ${MONGO_PORT:-27017}
+      SPRING_DATA_MONGODB_DATABASE: Ballife
+      AISERVICE_BASE_URL: http://${AI_ADDR}     # AI서버IP:8001
+      JWT_SECRET: ${JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      MFDS_SERVICE_KEY: ${MFDS_SERVICE_KEY}
+      FOOD_SAFETY_KEY: ${FOOD_SAFETY_KEY}
+      NAVER_OCR_BASE_URL: ${NAVER_OCR_BASE_URL}
+      NAVER_OCR_SECRET_KEY: ${NAVER_OCR_SECRET_KEY}
+      STORAGE_BASE_PATH: /app/uploads
+      TZ: Asia/Seoul
+    volumes:
+      - uploads_data:/app/uploads
+volumes:
+  uploads_data:
