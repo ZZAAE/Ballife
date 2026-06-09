@@ -98,8 +98,14 @@ export default function MissionModal({ open, onClose, onClaimed }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 헤더 */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-[#0F172A]">🎯 미션</h2>
