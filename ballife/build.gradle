@@ -48,6 +48,17 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// WebClient용
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Step C — 보고서 PDF 생성 인프라
+	// Thymeleaf : HTML 템플릿 엔진 (Step D에서 보고서 템플릿 렌더링용)
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	// OpenHTMLtoPDF : HTML/CSS → PDF 변환 (한글 폰트 임베드 지원)
+	implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
+	implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+	implementation 'com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10'
 }
 
 tasks.named('test') {

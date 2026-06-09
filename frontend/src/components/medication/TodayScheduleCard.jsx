@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { Check, Sun, Triangle, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { CalendarDays, Check, Sun, Triangle, X } from "lucide-react";
+
+// YYYY-MM-DD -> "YYYY년 M월 D일"
+const formatScheduleDateLabel = (dateKey) => {
+  const [y, m, d] = (dateKey ?? "").split("-");
+  if (!y || !m || !d) return dateKey;
+  return `${y}년 ${Number(m)}월 ${Number(d)}일`;
+};
 
 const getStatus = (drugs) => {
   if (!drugs || drugs.length === 0) return "none";
@@ -9,11 +16,26 @@ const getStatus = (drugs) => {
   return "partial";
 };
 
-export default function TodayScheduleCard({ schedules, onToggleDrug, onToggleAllDrugs }) {
+export default function TodayScheduleCard({
+  schedules,
+  scheduleDate,
+  todayKey,
+  onDateChange,
+  onToggleDrug,
+  onToggleAllDrugs,
+}) {
   const [openScheduleId, setOpenScheduleId] = useState(null);
+  const dateInputRef = useRef(null);
 
-  const today = new Date();
-  const todayLabel = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const isToday = !scheduleDate || scheduleDate === todayKey;
+
+  const openDatePicker = () => {
+    if (dateInputRef.current?.showPicker) {
+      dateInputRef.current.showPicker();
+    } else {
+      dateInputRef.current?.click();
+    }
+  };
 
   const openSchedule = schedules.find((s) => s.id === openScheduleId);
 
@@ -21,14 +43,30 @@ export default function TodayScheduleCard({ schedules, onToggleDrug, onToggleAll
     <div className="bg-white rounded-2xl p-6 shadow-sm">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-[18px] font-bold text-gray-900">오늘의 복용 일정</h2>
-          <span className="text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium">
-            {todayLabel}
-          </span>
+          <h2 className="text-[18px] font-bold text-gray-900">
+            {isToday ? "오늘의 복용 일정" : "복용 일정"}
+          </h2>
+          <div className="relative">
+            <input
+              type="date"
+              ref={dateInputRef}
+              value={scheduleDate ?? ""}
+              onChange={(e) => onDateChange?.(e.target.value)}
+              className="absolute opacity-0 pointer-events-none"
+            />
+            <button
+              type="button"
+              onClick={openDatePicker}
+              className="inline-flex items-center gap-1.5 text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors"
+            >
+              {formatScheduleDateLabel(scheduleDate)}
+              <CalendarDays className="h-3.5 w-3.5 text-[#2563EB]" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="flex gap-4 overflow-x-auto pb-2">
         {schedules.map((schedule) => {
           const status = getStatus(schedule.drugs);
 
@@ -59,7 +97,10 @@ export default function TodayScheduleCard({ schedules, onToggleDrug, onToggleAll
           }
 
           return (
-            <div key={schedule.id} className={`rounded-xl p-5 ${cardBorder}`}>
+            <div
+              key={schedule.id}
+              className={`w-[240px] flex-shrink-0 rounded-xl p-5 ${cardBorder}`}
+            >
               <div className="flex items-center gap-1.5 text-[12px] text-gray-400 mb-3">
                 <Sun className="w-3.5 h-3.5" /> {schedule.label} ({schedule.time})
               </div>

@@ -1,6 +1,5 @@
 package com.prologue.ballife.service.user;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserConfigRepository userConfigRepository;
     private final PasswordEncoder passwordEncoder; // 12345 ->
+    private final UserMedalService userMedalService; // 포인트 적립 후 메달 자동 지급 연계
 
     // ====================
     // 회원가입
@@ -44,9 +44,9 @@ public class UserService {
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateResourceException("닉네임", request.getNickname());
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new DuplicateResourceException("사용자명", request.getUsername());
-        }
+        // if (userRepository.existsByUsername(request.getUsername())) {
+        //     throw new DuplicateResourceException("사용자명", request.getUsername());
+        // }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("이메일", request.getEmail());
         }
@@ -69,20 +69,11 @@ public class UserService {
         // 오라클에 INSERT INTO
         User savedUser = userRepository.save(user);
 
-        // 4. 회원 가입 시 기본 UserConfig 함께 생성 (목표 지표/루틴 조회 API의 NPE/500 방지)
-        UserConfig defaultConfig = UserConfig.builder()
+        // 4. 회원 가입 시 빈 UserConfig 행만 생성 — 목표/루틴은 사용자가 직접 선택하도록 모두 null
+        UserConfig emptyConfig = UserConfig.builder()
                 .user(savedUser)
-                .targetWeight(savedUser.getWeight())     // 기본: 가입 시 입력한 체중
-                .targetDailyCaloriesBurned(300)          // 기본 소모 칼로리 목표
-                .targetDailyCaloriesIntake(2000)         // 기본 섭취 칼로리 목표
-                .targetDailyWaterIntake(8)               // 기본 물 8잔
-                .wakeupTime(LocalTime.of(7, 0))
-                .breakfastTime(LocalTime.of(8, 0))
-                .lunchTime(LocalTime.of(12, 30))
-                .dinnerTime(LocalTime.of(18, 30))
-                .bedTime(LocalTime.of(23, 30))
                 .build();
-        userConfigRepository.save(defaultConfig);
+        userConfigRepository.save(emptyConfig);
 
         // Entity-> DTO에 넣기 위해서 변환 후 반환
         return UserDto.UserResponse.from(savedUser);
@@ -179,6 +170,55 @@ public class UserService {
 
         return UserDto.UserResponse.from(user);
 
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // 리워드 포인트 적립 (보유 포인트 point 와 누적 포인트 usePointCount 를 동일 양만큼 증가)
+    // ═══════════════════════════════════════════════════════════
+    @Transactional
+    @NonNull
+    public UserDto.UserResponse addPoint(@NonNull Long id, int amount) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+
+        long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
+        long currentCount = user.getUsePointCount() != null ? user.getUsePointCount() : 0L;
+
+        // 보유 포인트와 누적 포인트를 동일한 양만큼 증가
+        user.setPoint(currentPoint + amount);
+        user.setUsePointCount(currentCount + amount);
+
+        // 적립 직후 달성 조건을 충족한 메달 자동 지급 (같은 트랜잭션 내에서 갱신된 포인트 기준)
+        userMedalService.checkAndGrantMedals(id);
+
+        return UserDto.UserResponse.from(user);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // 리워드 포인트 감소 (보유 포인트 point 만 차감, 누적 포인트 usePointCount 는 변경 없음)
+    // ═══════════════════════════════════════════════════════════
+    @Transactional
+    @NonNull
+    public UserDto.UserResponse deductPoint(@NonNull Long id, int amount) {
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException("차감 포인트는 0보다 커야 합니다.");
+        }
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("회원", id));
+
+        long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
+
+        if (currentPoint < amount) {
+            throw new IllegalArgumentException("보유 포인트가 부족합니다. 보유: " + currentPoint + ", 차감 요청: " + amount);
+        }
+
+        // 보유 포인트만 차감 (누적 포인트는 변경하지 않음)
+        user.setPoint(currentPoint - amount);
+
+        return UserDto.UserResponse.from(user);
     }
 
     // ═══════════════════════════════════════════════════════════

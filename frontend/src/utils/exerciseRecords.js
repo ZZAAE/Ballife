@@ -50,6 +50,43 @@ export const ICON_BY_TYPE = {
   barbellrow: "🏋️",
 };
 
+export const INTENSITY_OPTIONS = ["낮음", "보통", "높음"];
+
+// 무산소(웨이트): 볼륨(중량 × 횟수 × 세트)에 비례해 MET 가 연속적으로 변함
+//   MET = 4 + 4 × √(볼륨 / 5000)   (볼륨 0 → 4, 볼륨 5000 → 8, 이후로도 완만히 증가)
+// kcal = MET × 체중(kg) × 운동시간(h)
+export function anaerobicVolume(row) {
+  const weight = Number(row.weightKg) || 0;
+  const reps = Number(row.exerciseReps) || 0;
+  const sets = Number(row.exerciseSet) || 0;
+  return weight * reps * sets;
+}
+
+export function anaerobicMetByVolume(volume) {
+  const v = Math.max(0, Number(volume) || 0);
+  return 4 + 4 * Math.sqrt(v / 5000);
+}
+
+// 유산소: 운동 종류 × 강도(낮음/보통/높음) → MET
+// (CARDIO_OPTIONS 의 value 키 기준)
+export const AEROBIC_MET_BY_INTENSITY = {
+  walking: { 낮음: 3, 보통: 4, 높음: 5 }, // 걷기 (4km/h 등)
+  running: { 낮음: 8, 보통: 10, 높음: 12 }, // 러닝 (조깅 8 / 달리기 10 / 빠른 달리기 12 km/h)
+  cycling: { 낮음: 4.5, 보통: 7, 높음: 11 }, // 사이클
+  jumprope: { 낮음: 8, 보통: 11, 높음: 13 }, // 줄넘기
+  stair: { 낮음: 6, 보통: 8.5, 높음: 11 }, // 천국의 계단(스텝밀)
+};
+
+export function aerobicMet(exerciseTypeId, intensity) {
+  const tiers = AEROBIC_MET_BY_INTENSITY[exerciseTypeId];
+  if (!tiers) return 0;
+  return tiers[intensity] ?? tiers["보통"];
+}
+
+// 천국의 계단 강도 선택 안내 (단계 → 강도)
+export const STAIR_INTENSITY_HINT =
+  "1~2단계 = 낮음 · 3~5단계 = 보통 · 6단계~ = 높음";
+
 export function createAerobicRow(id) {
   return {
     id,
@@ -129,9 +166,11 @@ export function buildCreatePayload(kind, row, recordedAt) {
       ...base,
       exerciseMin,
       exerciseHard: row.intensity,
+      distanceKm: row.distanceKm !== "" ? Number(row.distanceKm) : null,
     };
   }
 
+  // 무산소: 세트/중량/횟수(볼륨 계산용) + 시간
   return {
     ...base,
     exerciseMin,
@@ -197,7 +236,6 @@ export function hydrateExerciseSessions(records) {
 }
 
 // 백엔드 DetailedResponse → 프론트 session 객체로 변환
-// distanceKm 는 백엔드에 저장되지 않으므로 null
 export function dbExerciseToRecord(dto) {
   const meta = EXERCISE_META_BY_LABEL[dto.exerciseName] || null;
   const isCardio = dto.exerciseCategory === "유산소";
@@ -226,10 +264,11 @@ export function dbExerciseToRecord(dto) {
     dateIso,
     durationSec,
     calories: dto.burnedCalorie ?? 0,
-    distanceKm: null,
+    distanceKm: isCardio ? (dto.distanceKm ?? null) : null,
     sets: isCardio ? null : (dto.exerciseSet ?? null),
     reps: isCardio ? null : (dto.exerciseReps ?? null),
     weightKg: isCardio ? null : (dto.exerciseWeight ?? null),
+    // 강도는 유산소에서만 사용 (무산소는 볼륨으로 MET/칼로리 결정)
     intensity: isCardio ? (dto.exerciseHard ?? "보통") : null,
     createdAt: dateIso,
   };
@@ -281,8 +320,8 @@ export function buildStoredExerciseRecord(response, kind, row, recordedAt) {
     kind === "aerobic"
       ? parseDurationToSeconds(row.durationText)
       : Math.max(
+          parseDurationToSeconds(row.durationText),
           (Number(row.exerciseSet) || 0) * (Number(row.exerciseReps) || 0) * 3,
-          (Number(row.exerciseSet) || 0) * 60,
         );
 
   return {

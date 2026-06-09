@@ -26,6 +26,7 @@ public class UserExerciseDetailService {
                 .exerciseReps(request.getExerciseReps())
                 .exerciseWeight(request.getExerciseWeight())
                 .exerciseHard(request.getExerciseHard())
+                .distanceKm(request.getDistanceKm())
                 .build();
         return userExerciseDetailRepository.save(detail);
     }
@@ -55,6 +56,9 @@ public class UserExerciseDetailService {
         }
         if (request.getExerciseHard() != null) {
             detail.setExerciseHard(request.getExerciseHard());
+        }
+        if (request.getDistanceKm() != null) {
+            detail.setDistanceKm(request.getDistanceKm());
         }
 
         return UserExerciseDetailDto.Response.from(userExerciseDetailRepository.save(detail));

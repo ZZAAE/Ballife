@@ -113,6 +113,7 @@ public class UserExerciseService {
                             .exerciseReps(detail != null ? detail.getExerciseReps() : null)
                             .exerciseWeight(detail != null ? detail.getExerciseWeight() : null)
                             .exerciseHard(detail != null ? detail.getExerciseHard() : null)
+                            .distanceKm(detail != null ? detail.getDistanceKm() : null)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -146,6 +147,8 @@ public class UserExerciseService {
                 request.getExerciseMin(),
                 request.getExerciseSet(),
                 request.getExerciseReps(),
+                request.getExerciseWeight(),
+                request.getExerciseHard(),
                 user.getWeight());
 
         UserExercise userExercise = UserExercise.builder()
@@ -166,6 +169,7 @@ public class UserExerciseService {
                         .exerciseReps(request.getExerciseReps())
                         .exerciseWeight(request.getExerciseWeight())
                         .exerciseHard(request.getExerciseHard())
+                        .distanceKm(request.getDistanceKm())
                         .build());
 
         return UserExerciseDto.Response.from(saved, exerciseType);
@@ -187,6 +191,7 @@ public class UserExerciseService {
                         .exerciseReps(request.getExerciseReps())
                         .exerciseWeight(request.getExerciseWeight())
                         .exerciseHard(request.getExerciseHard())
+                        .distanceKm(request.getDistanceKm())
                         .build());
 
         // 칼로리는 클라이언트가 직접 지정했으면 그 값을, 아니면 서버에서 재계산
@@ -199,6 +204,8 @@ public class UserExerciseService {
                     request.getExerciseMin(),
                     request.getExerciseSet(),
                     request.getExerciseReps(),
+                    request.getExerciseWeight(),
+                    request.getExerciseHard(),
                     userWeight);
         }
 
@@ -237,22 +244,37 @@ public class UserExerciseService {
     }
 
     // 칼로리 계산 공식: MET × 체중(kg) × 운동시간(h)
-    // - 무산소 운동인데 exerciseMin 이 없거나 0 이면 sets × reps × 3초 로 시간을 추정
+    // - 유산소: MET 는 운동 종류 × 강도(exerciseHard)로 결정 (AEROBIC_MET 표)
+    // - 무산소: MET 는 볼륨(중량 × 횟수 × 세트)에 비례해 연속적으로 변함
+    //     MET = 4 + 4 × √(볼륨 / 5000) (볼륨 0 → 4, 5000 → 8, 이후로도 완만히 증가)
+    // - 무산소에서 exerciseMin 이 없으면 sets × reps × 3초 로 시간을 추정
     //   (체육관 기준 1 rep ≒ 3초, 세트 간 휴식은 칼로리에 포함하지 않음)
     // - 체중이 비었으면 의미 있는 값을 계산할 수 없으므로 0 을 반환
     private static final int SECONDS_PER_REP = 3;
     private static final String AEROBIC = "유산소";
 
+    // 유산소 운동 종류 × 강도[낮음, 보통, 높음] → MET.
+    // 프론트(AEROBIC_MET_BY_INTENSITY)와 동일하게 유지해야 미리보기/저장 칼로리가 일치한다.
+    private static final Map<String, double[]> AEROBIC_MET = Map.of(
+            "걷기", new double[] { 3, 4, 5 },
+            "러닝", new double[] { 8, 10, 12 },
+            "사이클", new double[] { 4.5, 7, 11 },
+            "줄넘기", new double[] { 8, 11, 13 },
+            "천국의 계단", new double[] { 6, 8.5, 11 });
+
     private int calculateCalorie(ExerciseType exerciseType,
             Integer exerciseMin,
             Integer exerciseSet,
             Integer exerciseReps,
+            Integer exerciseWeight,
+            String exerciseHard,
             Double userWeightKg) {
         if (userWeightKg == null || userWeightKg <= 0) {
             return 0;
         }
-        Double metValue = exerciseType.getMet();
-        if (metValue == null || metValue <= 0) {
+
+        double metValue = resolveMet(exerciseType, exerciseSet, exerciseReps, exerciseWeight, exerciseHard);
+        if (metValue <= 0) {
             return 0;
         }
 
@@ -262,6 +284,46 @@ public class UserExerciseService {
         }
 
         return (int) Math.round(metValue * userWeightKg * hours);
+    }
+
+    // 유산소: 운동 종류 × 강도 표 / 무산소: 볼륨 구간
+    private double resolveMet(ExerciseType exerciseType,
+            Integer exerciseSet, Integer exerciseReps, Integer exerciseWeight, String exerciseHard) {
+        boolean isAnaerobic = !AEROBIC.equals(exerciseType.getExerciseCategory());
+        if (isAnaerobic) {
+            long volume = (long) nz(exerciseWeight) * nz(exerciseReps) * nz(exerciseSet);
+            return anaerobicMetByVolume(volume);
+        }
+
+        double[] tiers = AEROBIC_MET.get(exerciseType.getExerciseName());
+        if (tiers != null) {
+            return tiers[intensityIndex(exerciseHard)];
+        }
+        // 표에 없는 유산소 운동은 시드 MET 로 폴백
+        Double met = exerciseType.getMet();
+        return (met != null && met > 0) ? met : 0.0;
+    }
+
+    // 볼륨에 비례해 연속 증가하는 MET (제곱근 곡선): 볼륨 0 → 4, 5000 → 8.
+    // 프론트(anaerobicMetByVolume)와 동일한 공식이어야 미리보기/저장 칼로리가 일치한다.
+    private double anaerobicMetByVolume(long volume) {
+        double v = Math.max(0L, volume);
+        return 4.0 + 4.0 * Math.sqrt(v / 5000.0);
+    }
+
+    // 낮음 → 0, 보통/미지정 → 1, 높음 → 2
+    private int intensityIndex(String exerciseHard) {
+        if ("낮음".equals(exerciseHard)) {
+            return 0;
+        }
+        if ("높음".equals(exerciseHard)) {
+            return 2;
+        }
+        return 1;
+    }
+
+    private int nz(Integer value) {
+        return value != null ? value : 0;
     }
 
     private double resolveExerciseHours(ExerciseType exerciseType,

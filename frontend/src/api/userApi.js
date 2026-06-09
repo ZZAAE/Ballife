@@ -17,6 +17,16 @@ const userApi = {
     return api.put(`/users/disease/${userId}`, memberData);
   },
 
+  //리워드 포인트 적립 (1 또는 3점 — 보유 포인트와 누적 포인트가 동시에 증가)
+  addPoint: (userId, amount) => {
+    return api.post(`/users/${userId}/points`, null, { params: { amount } });
+  },
+
+  //리워드 포인트 차감 (보유 포인트만 감소, 누적 포인트는 변경 없음)
+  deductPoint: (userId, amount) => {
+    return api.post(`/users/${userId}/points/deduct`, null, { params: { amount } });
+  },
+
   //회원 삭제
   deleteMember: (userId) => {
     return api.delete(`/users/${userId}`);

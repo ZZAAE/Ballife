@@ -36,15 +36,21 @@ public class CommentDto {
         private Long userId;
         private Long postId;
         private String userNickname;
+        private String userMedalIcon;
         private String imageUrl;
         private String content;
         private Long parentComment;
         private Integer level;
         private Integer upVote;
+        private boolean liked; // 현재 로그인한 사용자가 이 댓글을 추천했는지 여부
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
         public static CommentResponse from(Comment comment) {
+            return from(comment, false);
+        }
+
+        public static CommentResponse from(Comment comment, boolean liked) {
             String userNickname = comment.getUserId().getNickname() != null
                     && !comment.getUserId().getNickname().isBlank()
                             ? comment.getUserId().getNickname()
@@ -54,15 +60,27 @@ public class CommentDto {
                     .userId(comment.getUserId().getUserId())
                     .postId(comment.getPostId() != null ? comment.getPostId().getPostId() : null)
                     .userNickname(userNickname)
+                    .userMedalIcon(comment.getUserId().getMedal() != null ? comment.getUserId().getMedal().getMedalIcon() : null)
                     .imageUrl(comment.getImageUrl())
                     .content(comment.getContent())
                     .parentComment(comment.getParentComment())
                     .level(comment.getLevel())
                     .upVote(comment.getUpVote())
+                    .liked(liked)
                     .createdAt(comment.getCreatedAt())
                     .updatedAt(comment.getUpdatedAt())
                     .build();
         }
+    }
+
+    // 추천 토글 결과 — 현재 추천 여부 + 갱신된 추천 총 개수
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpVoteResponse {
+        private boolean liked;
+        private Integer upVote;
     }
 
     @Data

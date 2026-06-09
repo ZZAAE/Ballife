@@ -56,15 +56,26 @@ export default function WeightRecord() {
     ]).then(([latestRes, targetRes, memberRes]) => {
       if (cancelled) return;
 
+      // 최신 체중 기록값
+      let recordWeight = null;
       if (latestRes.status === "fulfilled") {
         const content = latestRes.value?.data?.content ?? [];
-        if (content[0]?.weight != null) setLatestWeight(Number(content[0].weight));
+        if (content[0]?.weight != null) recordWeight = Number(content[0].weight);
       }
+
+      // 회원정보(프로필) 몸무게 / 키
+      let profileWeight = null;
+      if (memberRes.status === "fulfilled" && memberRes.value?.data) {
+        const member = memberRes.value.data;
+        if (member.height != null) setHeightCm(Number(member.height));
+        if (member.weight != null) profileWeight = Number(member.weight);
+      }
+
+      // 현재 체중: 회원정보 몸무게를 우선, 없으면 최신 체중 기록 (메인 페이지와 일관)
+      setLatestWeight(profileWeight ?? recordWeight);
+
       if (targetRes.status === "fulfilled" && targetRes.value?.data != null) {
         setTargetWeight(Number(targetRes.value.data));
-      }
-      if (memberRes.status === "fulfilled" && memberRes.value?.data?.height != null) {
-        setHeightCm(Number(memberRes.value.data.height));
       }
     });
 
@@ -149,7 +160,7 @@ export default function WeightRecord() {
     <div className="min-h-screen bg-[#F9FAFB] text-[#0F172A] font-['Noto_Sans_KR']">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
-          <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
               체중 기록 확인
             </h1>
@@ -244,7 +255,17 @@ export default function WeightRecord() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <AIAnalysisCard />
+              <AIAnalysisCard
+                metric="weight"
+                userId={userId}
+                data={{
+                  current: latestWeight,
+                  target: targetWeight,
+                  bmi,
+                  range: chartRange,
+                  trend: chartData,
+                }}
+              />
 
               <div className="mb-8 flex flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6 h-[calc(100vh-500px)] min-h-[280px] xl:col-span-2">
                 <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">

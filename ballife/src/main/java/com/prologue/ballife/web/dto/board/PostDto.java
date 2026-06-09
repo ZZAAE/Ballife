@@ -40,15 +40,21 @@ public class PostDto {
         private CATEGORY category;
         private Long userId;
         private String userNickname;
+        private String userMedalIcon;
         private String imageUrl;
         private String title;
         private String content;
         private Integer viewCount;
         private Integer upVote;
+        private boolean liked; // 현재 로그인한 사용자가 이 글을 추천했는지 여부
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
         public static PostResponse from(Post post){
+            return from(post, false);
+        }
+
+        public static PostResponse from(Post post, boolean liked){
             String userNickname = post.getUserId().getNickname() != null
                                 && !post.getUserId().getNickname().isBlank()
                                 ? post.getUserId().getNickname()
@@ -58,15 +64,27 @@ public class PostDto {
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
                         .userNickname(userNickname)
+                        .userMedalIcon(post.getUserId().getMedal() != null ? post.getUserId().getMedal().getMedalIcon() : null)
                         .imageUrl(post.getImageUrl())
                         .title(post.getTitle())
                         .content(post.getContent())
                         .viewCount(post.getViewCount())
                         .upVote(post.getUpVote())
+                        .liked(liked)
                         .createdAt(post.getCreatedAt())
                         .updatedAt(post.getUpdatedAt())
                         .build();
         }
+    };
+
+    // 추천 토글 결과 — 현재 추천 여부 + 갱신된 추천 총 개수
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpVoteResponse {
+        private boolean liked;
+        private Integer upVote;
     };
 
     @Data
@@ -78,6 +96,7 @@ public class PostDto {
         private CATEGORY category;
         private Long userId;
         private String userNickname;
+        private String userMedalIcon;
         private String title;
         private Integer upVote;
         private Integer viewCount;
@@ -93,6 +112,7 @@ public class PostDto {
                         .category(post.getCategory())
                         .userId(post.getUserId().getUserId())
                         .userNickname(userNickname)
+                        .userMedalIcon(post.getUserId().getMedal() != null ? post.getUserId().getMedal().getMedalIcon() : null)
                         .upVote(post.getUpVote())
                         .title(post.getTitle())
                         .viewCount(post.getViewCount())

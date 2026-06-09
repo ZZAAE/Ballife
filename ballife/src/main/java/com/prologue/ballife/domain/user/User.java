@@ -25,7 +25,7 @@ public class User {
     @Column(name = "PASSWORD_HASH", unique = true, nullable = false, length = 256)
     private String passwordHash;
 
-    @Column(name = "USER_NAME", unique = true, nullable = false, length = 50)
+    @Column(name = "USER_NAME", nullable = false, length = 50)
     private String username;
 
     @Column(name = "NICKNAME", unique = true, nullable = false, length = 20)
@@ -52,8 +52,9 @@ public class User {
     @Column(name = "USE_POINT_COUNT")
     private Long usePointCount;
 
-    @Column(name = "MEDAL")
-    private Long medal;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MEDAL_ID")
+    private Medal medal;
 
     @Column(name = "DISEASE_INDEX", unique = false, nullable = true, length = 300)
     private String diseaseIndex;

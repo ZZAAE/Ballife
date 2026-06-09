@@ -49,9 +49,29 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 유저 삭제 
+    // 리워드 포인트 적립 (보유 포인트와 누적 포인트가 동일하게 증가)
+    @Operation(summary = "리워드 포인트 적립", description = "유저에게 리워드 포인트를 적립합니다. 보유 포인트(point)와 누적 포인트(usePointCount)가 같은 양만큼 증가합니다.")
+    @PostMapping("/{userId}/points")
+    public ResponseEntity<UserDto.UserResponse> addPoint(
+        @Parameter(description = "유저 ID") @PathVariable Long userId,
+        @Parameter(description = "적립 포인트") @RequestParam int amount) {
+        UserDto.UserResponse response = userService.addPoint(userId, amount);
+        return ResponseEntity.ok(response);
+    }
+
+    // 리워드 포인트 감소 (보유 포인트만 차감, 누적 포인트는 변경 없음)
+    @Operation(summary = "리워드 포인트 차감", description = "유저의 보유 포인트(point)를 차감합니다. 누적 포인트(usePointCount)는 변경되지 않습니다.")
+    @PostMapping("/{userId}/points/deduct")
+    public ResponseEntity<UserDto.UserResponse> deductPoint(
+        @Parameter(description = "유저 ID") @PathVariable Long userId,
+        @Parameter(description = "차감 포인트") @RequestParam int amount) {
+        UserDto.UserResponse response = userService.deductPoint(userId, amount);
+        return ResponseEntity.ok(response);
+    }
+
+    // 유저 삭제
     @Operation(summary = "유저 삭제", description = "회원을 삭제합니다.")
-    @DeleteMapping("/{userId}") 
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteMember( 
         @Parameter(description = "회원 ID") @PathVariable Long userId) {
         userService.deleteUser(userId);

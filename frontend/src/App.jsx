@@ -1,6 +1,6 @@
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatBot from "./modals/Chatbot";
 import SignUpPage from "./pages/user/SignUpPage";
 import LoginPage from "./pages/user/LoginPage";
@@ -28,36 +28,31 @@ import HypertensionReportPage from "./pages/report/HypertensionReportPage";
 import DyslipidemiaReportPage from "./pages/report/DyslipidemiaReportPage";
 import ObesityReportPage from "./pages/report/ObesityReportPage";
 import Header from "./components/Header";
-import HealthIndicatorMenu from "./components/HealthMenu";
 import HealthCalenderPage from "./pages/main/HealthCalenderPage";
 import AllRecordPage from "./pages/AllRecordPage";
 import UserInformation from "./pages/user/UserInformation";
 import Calendar from "./components/mainpage/calendar";
 import PetPage from "./pages/PetPage";
+import FamilyPage from "./pages/family/FamilyPage";
+import HealthReportPage from "./pages/report/HealthReportPage";
+
+/**
+ * 루트(`/`) 진입 처리
+ * - 미로그인: 인트로 페이지(/intro/web)로 리다이렉트
+ * - 로그인 상태: 메인 대시보드(MainPage) 렌더
+ */
+function RootRoute() {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null; // 인증 복원 중에는 빈 화면
+  return isAuthenticated ? <MainPage /> : <Navigate to="/intro/web" replace />;
+}
 
 function App() {
   const location = useLocation();
-  const hideHealthMenu =
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/disease" ||
-    location.pathname === "/boards" ||
-    location.pathname === "/posts/create" ||
-    location.pathname === "/intro/web" ||
-    location.pathname === "/intro/osteoporosis" ||
-    location.pathname === "/intro/diabetes" ||
-    location.pathname === "/intro/gout" ||
-    location.pathname === "/intro/hypertension" ||
-    location.pathname === "/intro/hyperlipidemia" ||
-    location.pathname === "/intro/dyslipidemia" ||
-    location.pathname === "/intro/obesity" ||
-    location.pathname === "/AllRecordPage" ||
-    location.pathname === "/allRecord" ||
-    location.pathname === "/" ||
-    location.pathname === "/member" ||
-    location.pathname.startsWith("/member/") ||
-    location.pathname.startsWith("/check/") ||
-    location.pathname.startsWith("/posts/");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const hideChatbot =
     location.pathname === "/login" ||
@@ -83,7 +78,7 @@ function App() {
         <div className="min-w-screen flex justify-end bg-white">
           <div className="flex-1">
             <Routes>
-              <Route path="/" element={<MainPage />} />
+              <Route path="/" element={<RootRoute />} />
               <Route path="/calender" element={<HealthCalenderPage />} />
 
               <Route path="/signup" element={<SignUpPage />} />
@@ -124,6 +119,8 @@ function App() {
                 element={<DiseaseEditPage />}
               />
               <Route path="/member/pet" element={<PetPage />} />
+              <Route path="/member/family" element={<FamilyPage />} />
+              <Route path="/report/health" element={<HealthReportPage />} />
               <Route path="/user/information" element={<UserInformation />} />
 
               <Route path="/allRecord" element={<AllRecordPage />} />
@@ -148,7 +145,6 @@ function App() {
               <Route path="/member/pet" element={<PetPage />} />
             </Routes>
           </div>
-          {!hideHealthMenu && <HealthIndicatorMenu />}
           {!hideChatbot && <ChatBot />}
         </div>
       </main>

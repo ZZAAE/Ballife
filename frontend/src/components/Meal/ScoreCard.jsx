@@ -3,7 +3,7 @@ const ScoreCard = ({
 ...props
     }) => {
 return(
-            <div style={{ background: "#fff", borderRadius: 16, padding: 28, flex: 1, display: "flex", gap: 28, alignItems: "center" }}>
+            <div className="flex flex-col items-center gap-7 sm:flex-row" style={{ background: "#fff", borderRadius: 16, padding: 28, flex: 1 }}>
               <div style={{ position: "relative", width: 160, height: 160, flexShrink: 0 }}>
                 <DonutChart value={85} max={100} size={160} strokeWidth={10} color="#10B981" />
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>

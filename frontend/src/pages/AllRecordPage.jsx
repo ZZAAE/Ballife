@@ -20,7 +20,7 @@ import Plus from "../assets/Record/Plus.svg";
 import BloodsugarModal from "../modals/bloodsugarModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import MealRegisterModal from "../modals/MealRegisterModal";
-import WaterRecordModal from "../modals/WaterRecordModal";
+import WaterRecordModal from "../modals/waterRecordModal";
 import WeightRecordModal from "../modals/WeightRecordModal";
 import ExerciseModal from "../modals/ExerciseModal";
 import MealRecordCard from "../components/MealRecordCard";
@@ -443,6 +443,9 @@ function AllRecordPage() {
     }
   };
 
+  // React Compiler가 이 컴포넌트 최적화를 건너뛰며 수동 useCallback 메모를
+  // 보존하지 못해 발생하는 경고. 동작·성능에는 영향 없어 의도적으로 억제한다.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const fetchAll = useCallback(async () => {
     if (!userId || !selectedDate) return;
 
@@ -601,8 +604,17 @@ function AllRecordPage() {
                 type="date"
                 ref={dateInputRef}
                 value={selectedDate}
+                max={new Date().toISOString().split("T")[0]}
                 className="absolute opacity-0 pointer-events-none"
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  const today = new Date().toISOString().split("T")[0];
+                  // 미래 날짜 차단 (브라우저 max 무시한 입력 대비)
+                  if (e.target.value > today) {
+                    setSelectedDate(today);
+                  } else {
+                    setSelectedDate(e.target.value);
+                  }
+                }}
               />
 
               <button
@@ -848,12 +860,14 @@ function AllRecordPage() {
         isOpen={modalType === "bp"}
         onClose={closeModal}
         editingRecord={editingBp}
+        recordDate={selectedDate}
       />
 
       <BloodsugarModal
         isOpen={modalType === "blood"}
         onClose={closeModal}
         editingRecord={editingBs}
+        recordDate={selectedDate}
       />
 
       <MealRegisterModal
@@ -873,14 +887,23 @@ function AllRecordPage() {
         initialChips={editingMeal?.rawItems ?? []}
       />
 
-      <WaterRecordModal isOpen={modalType === "water"} onClose={closeModal} />
+      <WaterRecordModal
+        isOpen={modalType === "water"}
+        onClose={closeModal}
+        recordDate={selectedDate}
+      />
 
-      <WeightRecordModal isOpen={modalType === "weight"} onClose={closeModal} />
+      <WeightRecordModal
+        isOpen={modalType === "weight"}
+        onClose={closeModal}
+        recordDate={selectedDate}
+      />
 
       <ExerciseModal
         isOpen={modalType === "exercise"}
         onClose={closeModal}
         onSaved={fetchExercisesForDate}
+        recordDate={selectedDate}
       />
 
       <ExerciseModal

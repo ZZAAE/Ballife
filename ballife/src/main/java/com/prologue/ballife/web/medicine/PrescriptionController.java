@@ -4,12 +4,17 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.prologue.ballife.security.CustomUserDetails;
 import com.prologue.ballife.service.medicine.MedicineService;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
@@ -32,26 +37,57 @@ public class PrescriptionController {
     @Operation(summary = "약 등록", description = "처방전별 약을 등록합니다.")
     @PostMapping("/register/medicine")
     public ResponseEntity<PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse> postMedicine(
+        @AuthenticationPrincipal CustomUserDetails principal,
         @Valid @RequestBody PrescriptionAndMedicineDto.CreateRequest request) {
-            PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse response = medicineService.postMedicine(request);
+            PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse response = medicineService.postMedicine(principal.getUserId(), request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     //@Operation(summary = "처방전 조회")
 
     @Operation(summary = "처방전 약 목록 조회", description = "처방전별 약 목록을 조회합니다.")
-    @PostMapping("/{prescriptionId}")
+    @GetMapping("/prescriptions/{prescriptionId}/medicines")
     public ResponseEntity<List<UserMedicineDto.UserMedicineResponse>> getUserMedicine(
         @PathVariable Long prescriptionId) {
             return ResponseEntity.ok(medicineService.getUserMedicine(prescriptionId));
     }
 
-    
-    // @Operation(summary = "처방전 수정", description = "등록된 처방전을 수정합니다.")
-    // @PostMapping("/{prescriptionId}/edit")
-    // public ResponseEntity<PrescriptionDto.PrescriptionResponse> putPrescription(
-    //     @PathVariable
-    // )h
+    @Operation(summary = "사용자 처방전 목록 조회", description = "사용자의 처방전(복용량 포함) 목록을 조회합니다.")
+    @GetMapping("/prescriptions/user/{userId}")
+    public ResponseEntity<List<PrescriptionDto.PrescriptionResponse>> getPrescriptions(
+        @PathVariable Long userId) {
+            return ResponseEntity.ok(medicineService.getPrescription(userId));
+    }
+
+
+    @Operation(summary = "처방전 수정", description = "등록된 처방전을 수정합니다.")
+    @PutMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<PrescriptionDto.PrescriptionResponse> putPrescription(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId,
+        @Valid @RequestBody PrescriptionDto.UpdateRequest request) {
+            return ResponseEntity.ok(
+                medicineService.putPrescription(principal.getUserId(), prescriptionId, request));
+    }
+
+    @Operation(summary = "처방전+약 전체 수정", description = "처방전 정보와 약 목록을 함께 수정합니다.")
+    @PutMapping("/register/medicine/{prescriptionId}")
+    public ResponseEntity<PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse> putMedicine(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId,
+        @Valid @RequestBody PrescriptionAndMedicineDto.CreateRequest request) {
+            return ResponseEntity.ok(
+                medicineService.updateMedicine(principal.getUserId(), prescriptionId, request));
+    }
+
+    @Operation(summary = "처방전 삭제", description = "등록된 처방전을 삭제합니다.")
+    @DeleteMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<Void> deletePrescription(
+        @AuthenticationPrincipal CustomUserDetails principal,
+        @PathVariable Long prescriptionId) {
+            medicineService.deletePrescription(principal.getUserId(), prescriptionId);
+            return ResponseEntity.noContent().build();
+    }
 
 
 }

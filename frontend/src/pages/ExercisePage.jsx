@@ -95,7 +95,7 @@ function WeekSelector({
         <button
           onClick={() => onMoveWeek(-1)}
           className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
-          aria-label="이전 주"
+          aria-label="저번 주"
         >
           {"<"}
         </button>
@@ -222,7 +222,9 @@ function SessionRow({ session, onClick }) {
             ? session.distanceKm != null
               ? `${session.distanceKm.toFixed(2)} km`
               : "—"
-            : `${session.sets} Sets · ${session.reps}회`}
+            : session.sets != null && session.reps != null
+              ? `${session.sets} Sets · ${session.reps}회`
+              : "—"}
         </div>
       </div>
       <div className="text-right">
@@ -276,7 +278,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   const [sortOrder, setSortOrder] = useState("desc"); // "desc" | "asc"
   const [storedSessions, setStoredSessions] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
-  const userId = user?.userId ?? user?.id ?? 1;
+  const userId = user?.userId ?? user?.id ?? null;
 
   const handleEditSession = (session) => {
     setEditingRecord({
@@ -321,6 +323,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
   }, [userId, weekStart]);
 
   useEffect(() => {
+    if (!userId) return undefined;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchWeek();
     const onUpdated = () => {
@@ -329,7 +332,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
     window.addEventListener("exercise-records-updated", onUpdated);
     return () =>
       window.removeEventListener("exercise-records-updated", onUpdated);
-  }, [fetchWeek]);
+  }, [fetchWeek, userId]);
 
   // 선택 주(일~토)에 해당하는 세션
   const thisWeekSessions = useMemo(

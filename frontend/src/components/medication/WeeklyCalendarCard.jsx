@@ -1,7 +1,6 @@
 import { Check, Circle, Moon, Pill, Sun, Triangle, X } from "lucide-react";
 import { getCurrentWeekData } from "./medicationData";
 
-const DEFAULT_DRUGS = ["혈압약", "당뇨약"];
 
 const getScheduleStatus = (drugs) => {
   if (!drugs || drugs.length === 0) return null;
@@ -35,7 +34,23 @@ const formatDateKey = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], todayKey }) {
+// 과거 날짜용 상태 계산: 하루가 지난 슬롯은 복용 0개를 미복용(miss)으로 굳힌다.
+// (오늘은 아직 진행 중이라 getScheduleStatus 가 null 을 반환 — 빈 원으로 둔다)
+const getPastStatus = (drugs) => {
+  if (!drugs || drugs.length === 0) return null;
+  const takenCount = drugs.filter((d) => d.taken).length;
+  if (takenCount === drugs.length) return "done";
+  if (takenCount === 0) return "miss";
+  return "partial";
+};
+
+export default function WeeklyCalendarCard({
+  todaySchedules,
+  prnRecords = [],
+  todayKey,
+  drugNames = [],
+  savedSchedulesByDate = {},
+}) {
   const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
 
   const rows = [
@@ -51,23 +66,28 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
       }, {})
     : null;
 
-  const getCellStatus = (item, rowKey) => {
+  const getCellStatus = (item, rowKey, cellIndex) => {
     if (todayStatusMap && item.today) return todayStatusMap[rowKey];
+    const cellDate = getCellDateKey(cellIndex);
+    // 지난 날짜는 실제 저장 기록 기준. 기록이 있으면 그대로,
+    // 복용 확인을 안 눌러 기록이 없으면 미복용(miss)으로 굳힌다.
+    if (cellDate && cellDate < todayKey) {
+      const slot = getSavedSlot(item, rowKey, cellIndex);
+      // 그날 복용할 약이 있었을 때만 판정. 등록 전(약 없음)이면 빈 칸(null).
+      return slot ? getPastStatus(slot.drugs) : null;
+    }
     return item[rowKey];
   };
 
-  // 호버 시 표시할 약 목록: 오늘은 실제 체크 상태, 다른 날은 셀 상태로 추정
-  const getCellDrugs = (item, rowKey) => {
+  // 호버 시 표시할 약 목록: 오늘은 실제 체크 상태, 과거는 저장 일정(없으면 미복용으로 간주)
+  const getCellDrugs = (item, rowKey, cellIndex) => {
     if (todaySchedules && item.today) {
       const s = todaySchedules.find((sch) => sch.id === rowKey);
       return s ? s.drugs.map((d) => ({ name: d.name, taken: d.taken })) : [];
     }
-    const status = item[rowKey];
-    if (!status || status === "null") return [];
-    return DEFAULT_DRUGS.map((name) => ({
-      name,
-      taken: status === "done",
-    }));
+    const slot = getSavedSlot(item, rowKey, cellIndex);
+    if (slot) return slot.drugs.map((d) => ({ name: d.name, taken: d.taken }));
+    return [];
   };
 
   // 각 셀의 실제 날짜를 today 기준 인덱스 오프셋으로 계산
@@ -80,6 +100,17 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
     const d = new Date(todayDate);
     d.setDate(d.getDate() + offset);
     return formatDateKey(d);
+  };
+
+  // 해당 날짜의 일정 슬롯을 찾는다 (오늘은 라이브 상태를 따로 쓰므로 제외).
+  // 과거: 저장된 복용 기록 / 미래: 등록일 이후 예정된 약.
+  const getSavedSlot = (item, rowKey, cellIndex) => {
+    if (item.today) return null;
+    const cellDate = getCellDateKey(cellIndex);
+    if (!cellDate || cellDate === todayKey) return null;
+    const saved = savedSchedulesByDate[cellDate];
+    if (!Array.isArray(saved)) return null;
+    return saved.find((s) => s.id === rowKey) ?? null;
   };
 
   const getCellPrn = (item, rowKey, cellIndex) => {
@@ -99,7 +130,11 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
             <div key={item.day} className="flex min-w-0 flex-col items-center">
               <span
                 className={`mb-1 text-[13px] font-semibold ${
-                  item.weekend ? "text-[#E64563]" : "text-gray-500"
+                  item.day === "SUN"
+                    ? "text-[#315BFF]"
+                    : item.weekend
+                    ? "text-[#E64563]"
+                    : "text-gray-500"
                 }`}
               >
                 {item.day}
@@ -107,7 +142,11 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
 
               <span
                 className={`text-[15px] font-bold ${
-                  item.weekend ? "text-[#E64563]" : "text-gray-800"
+                  item.day === "SUN"
+                    ? "text-[#315BFF]"
+                    : item.weekend
+                    ? "text-[#E64563]"
+                    : "text-gray-800"
                 }`}
               >
                 {item.date}
@@ -120,8 +159,8 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
         <div className="space-y-5">
           {rows.map((row) => {
             const RowIcon = row.icon;
-            const labelText = row.label.match(/^[^\(]+/)?.[0].trim();
-            const timeText = row.label.match(/\([^\)]+\)/)?.[0];
+            const labelText = row.label.match(/^[^(]+/)?.[0].trim();
+            const timeText = row.label.match(/\([^)]+\)/)?.[0];
 
             return (
               <div key={row.key}>
@@ -137,8 +176,8 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
                 {/* 체크 도형들 */}
                 <div className="mb-4 grid grid-cols-7 items-start gap-1">
                   {weekData.map((item, index) => {
-                    const status = getCellStatus(item, row.key);
-                    const drugs = getCellDrugs(item, row.key);
+                    const status = getCellStatus(item, row.key, index);
+                    const drugs = getCellDrugs(item, row.key, index);
                     const prn = getCellPrn(item, row.key, index);
                     const hasContent = drugs.length > 0 || prn.length > 0;
 
@@ -152,7 +191,7 @@ export default function WeeklyCalendarCard({ todaySchedules, prnRecords = [], to
                         {hasContent && (
                           <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-[180px] -translate-x-1/2 rounded-xl bg-[#0F172A] px-3 py-2.5 text-[12px] text-white shadow-xl group-hover:block">
                             <p className="mb-1.5 text-[11px] font-bold text-gray-300">
-                              {item.day} {item.date}일 · {row.label.match(/^[^\(]+/)?.[0].trim()}
+                              {item.day} {item.date}일 · {row.label.match(/^[^(]+/)?.[0].trim()}
                               {status && (
                                 <span className="ml-1 font-normal text-gray-400">
                                   ({STATUS_LABEL[status] || ""})

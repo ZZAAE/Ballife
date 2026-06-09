@@ -28,7 +28,7 @@ const commentApi = {
     return api.delete(`/comments/${commentId}`, { params: { userId } });
   },
 
-  // 댓글 추천
+  // 댓글 추천 토글 (계정당 1개, 재요청 시 취소) → { liked, upVote } 반환
   upVote: (commentId) => {
     return api.post(`/comments/${commentId}/upvote`);
   },

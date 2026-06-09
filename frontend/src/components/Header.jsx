@@ -77,7 +77,7 @@ export default function Header() {
     >
       {/* 상단 바 */}
       <div
-        className="h_inner flex h-[60px] items-center px-[100px] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
+        className="h_inner flex h-[60px] items-center px-4 md:px-8 xl:px-[100px] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
         style={{ backgroundColor: TOKENS.black }}
       >
         {/* h_logo */}
@@ -93,7 +93,7 @@ export default function Header() {
 
         {/* gnb */}
         <nav className="gnb flex-1">
-          <ul className="nav flex items-center justify-center gap-[120px]">
+          <ul className="nav flex items-center justify-center gap-6 lg:gap-12 xl:gap-[120px]">
             {navItems.map((item) => {
               const isActive = hoveredKey === item.key;
               const canNavigate = item.navigable !== false;
@@ -151,7 +151,7 @@ export default function Header() {
         </nav>
 
         {/* h_etc */}
-        <div className="h_etc flex w-[180px] shrink-0 justify-end">
+        <div className="h_etc flex w-auto xl:w-[180px] shrink-0 justify-end">
           {isAuthenticated ? (
             <button
               type="button"

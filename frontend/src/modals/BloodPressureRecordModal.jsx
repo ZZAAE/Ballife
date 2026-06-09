@@ -22,7 +22,7 @@ const resolveUserId = (user) => {
   }
 };
 
-function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null }) {
+function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = null, recordDate }) {
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -118,10 +118,11 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
         onSaved?.(res.data);
       } else {
         const now = new Date();
-        const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
         const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
         const payload = {
-          recordDate,
+          recordDate: targetDate,
           recordTime,
           category,
           systolicBP: s,
@@ -217,7 +218,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
   return (
     <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 px-4 py-6 backdrop-blur-sm">
 
-      <div onClick={(e) => e.stopPropagation()} className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+      <div onClick={(e) => e.stopPropagation()} className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
         {/* 헤더 */}
         <div className="shrink-0 border-b border-[#F1F5F9] px-6 pb-5 pt-7">
           <div className="flex items-start justify-between gap-4">
@@ -257,7 +258,7 @@ function BloodPressureRecordModal({ isOpen, onClose, onSaved, editingRecord = nu
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           {/* 탭 */}
           <div className="pt-0">
             <div className="grid grid-cols-4 rounded-2xl bg-[#F1F5F9] p-1.5">

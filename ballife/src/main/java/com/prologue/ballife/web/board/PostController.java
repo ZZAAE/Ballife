@@ -45,12 +45,14 @@ public class PostController {
                 .body(postService.createPost(principal.getUserId(), request));
     }
 
-    // 게시글 상세 조회
+    // 게시글 상세 조회 — 로그인 사용자의 추천 여부(liked)를 함께 내려줌
     @Operation(summary = "게시글 상세")
     @GetMapping("/{postId}")
     public ResponseEntity<PostDto.PostResponse> getPost(
-            @PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getPost(postId));
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal != null ? principal.getUserId() : null;
+        return ResponseEntity.ok(postService.getPost(postId, userId));
     }
 
     // 조회수 증가
@@ -92,8 +94,8 @@ public class PostController {
         return ResponseEntity.ok(postService.updatePost(postId, userId, request));
     }
 
-    // 게시글 삭제 - 소프트 )
-    @Operation(summary = "게시글 삭제(소프트)")
+    // 게시글 삭제 (하드 삭제 — DB에서 실제로 제거)
+    @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
@@ -102,12 +104,15 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    // 게시글 추천
-    @Operation(summary = "게시글 추천")
+    // 게시글 추천 토글 — JWT 로 인증된 사용자 기준, 계정당 1개. 다시 누르면 취소.
+    @Operation(summary = "게시글 추천 토글")
     @PostMapping("/{postId}/upvote")
-    public ResponseEntity<Void> upVotePost(
-            @PathVariable Long postId) {
-        postService.upvotePost(postId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<PostDto.UpVoteResponse> upVotePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(postService.toggleUpvote(postId, principal.getUserId()));
     }
 }

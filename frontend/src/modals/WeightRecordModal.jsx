@@ -28,7 +28,7 @@ const resolveUserId = (user) => {
   }
 };
 
-const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
+const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -40,30 +40,35 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
     if (!isOpen || !userId) return;
 
     let cancelled = false;
+    const pad = (n) => String(n).padStart(2, "0");
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
 
     Promise.allSettled([
       userConfigApi.getTargetWeight(userId),
-      bioValueRecordApi.getLatestPageByCategory(userId, WEIGHT_CATEGORY),
-    ]).then(([targetRes, latestRes]) => {
+      bioValueRecordApi.searchByDate(userId, WEIGHT_CATEGORY, targetDate),
+    ]).then(([targetRes, dayRes]) => {
       if (cancelled) return;
 
       if (targetRes.status === "fulfilled" && targetRes.value?.data != null) {
         setTargetWeight(Number(targetRes.value.data));
       }
 
-      if (latestRes.status === "fulfilled") {
-        const content = latestRes.value?.data?.content ?? [];
-        const last = content[0];
-        if (last?.weight != null) {
-          setWeight(String(Number(last.weight)));
-        }
+      // 선택한 날짜의 체중 기록을 표시 (없으면 빈 값 → 새 기록 입력)
+      if (dayRes.status === "fulfilled") {
+        const list = Array.isArray(dayRes.value?.data) ? dayRes.value.data : [];
+        const rec = list[0];
+        setWeight(rec?.weight != null ? String(Number(rec.weight)) : "");
+      } else {
+        setWeight("");
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [isOpen, userId]);
+  }, [isOpen, userId, recordDate]);
 
   if (!isOpen) return null;
 
@@ -106,11 +111,12 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    const recordDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const targetDate = recordDate || todayStr; // 부모가 날짜 안 주면 오늘
     const recordTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
     const payload = {
-      recordDate,
+      recordDate: targetDate,
       recordTime,
       category: WEIGHT_CATEGORY,
       weight: weightValue,
@@ -118,13 +124,13 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
 
     setSubmitting(true);
     try {
-      // 1. 오늘 같은 카테고리 기록이 이미 있는지 조회 (체중은 하루 1개만 유지)
-      const todayRes = await bioValueRecordApi.searchByDate(
+      // 1. 선택한 날짜에 같은 카테고리 기록이 이미 있는지 조회 (하루 1개만 유지)
+      const dayRes = await bioValueRecordApi.searchByDate(
         userId,
         WEIGHT_CATEGORY,
-        recordDate,
+        targetDate,
       );
-      const existing = Array.isArray(todayRes.data) ? todayRes.data[0] : null;
+      const existing = Array.isArray(dayRes.data) ? dayRes.data[0] : null;
 
       let res;
       if (existing?.recordId != null) {
@@ -133,11 +139,11 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
           existing.recordId,
           payload,
         );
-        toast.success("오늘의 체중 기록이 수정되었습니다.");
+        toast.success(`${targetDate} 체중 기록이 수정되었습니다.`);
       } else {
         // 2-b. 없으면 insert
         res = await bioValueRecordApi.createBioValueRecord(userId, payload);
-        toast.success("체중이 기록되었습니다.");
+        toast.success(`${targetDate} 체중이 기록되었습니다.`);
       }
 
       // 3. 회원정보의 현재 체중(member.weight)도 동기화 — UserInformation 페이지의 "현재 체중" 갱신용
@@ -167,7 +173,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm px-4 py-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative flex h-[785px] w-full max-w-[672px] flex-col rounded-[32px] bg-white p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+      <div className="relative flex h-[785px] max-h-[92vh] w-full max-w-[672px] flex-col overflow-y-auto rounded-[32px] bg-white p-6 md:p-8 xl:p-10 shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]">
 
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
@@ -195,7 +201,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved }) => {
                 type="text"
                 value={weight}
                 onChange={handleWeightChange}
-                className="w-[350px] text-[110px] leading-none font-bold text-slate-900 tracking-tighter text-center outline-none border-none bg-transparent focus:ring-0"
+                className="w-full max-w-[350px] text-[80px] md:text-[110px] leading-none font-bold text-slate-900 tracking-tighter text-center outline-none border-none bg-transparent focus:ring-0 xl:text-[110px]"
                 autoFocus
               />
               <span className="text-4xl font-bold text-slate-300">kg</span>

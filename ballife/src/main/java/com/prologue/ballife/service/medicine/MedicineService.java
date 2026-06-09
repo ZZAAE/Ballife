@@ -1,5 +1,6 @@
 package com.prologue.ballife.service.medicine;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.prologue.ballife.domain.medicine.Prescription;
+import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 import com.prologue.ballife.domain.medicine.UserMedicine;
+import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.repository.medicine.PrescriptionRepository;
 import com.prologue.ballife.repository.medicine.UserMedicineRepository;
+import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
 import com.prologue.ballife.web.dto.medicine.UserMedicineDto;
@@ -26,17 +30,25 @@ public class MedicineService {
 
     private final PrescriptionRepository prescriptionRepository;
     private final UserMedicineRepository userMedicineRepository;
+    private final UserRepository userRepository;
 
     // 처방전+약 등록
     @Transactional
     public PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse postMedicine(
+            Long userId,
             PrescriptionAndMedicineDto.CreateRequest request) {
-
+        
+        User user = userRepository.getReferenceById(userId);
         Prescription prescription = Prescription.builder()
+                .user(user)
                 .prescriptionName(request.getPrescriptionName())
-                .prescriptionDate(request.getPrescriptionDate())
+                .prescriptionDate(
+                    request.getPrescriptionDate() != null ? request.getPrescriptionDate() : LocalDate.now()
+                ) //임시로 현재 날짜 등록
+                .pCategory(Pcategory.MEDICINE)
                 .memo(request.getMemo())
                 .intakeIntervals(request.getIntakeIntervals())
+                .dosage(request.getDosage())
                 .build();
 
         Prescription savedPrescription = prescriptionRepository.save(prescription);
@@ -47,7 +59,7 @@ public class MedicineService {
 
             UserMedicine userMedicine = UserMedicine.builder()
                     .prescription(savedPrescription) // FK 연결
-                    .kdCode(u.getKdCode())
+                    .medicineName(u.getMedicineName())
                     .supplementId(u.getSupplementId())
                     .build();
 
@@ -56,6 +68,44 @@ public class MedicineService {
 
         return PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse.from(savedPrescription, savedList);
 
+    }
+
+    // 처방전+약 전체 수정 (처방전 정보 갱신 + 약 목록 통째로 교체)
+    @Transactional
+    public PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse updateMedicine(
+            Long userId,
+            Long prescriptionId,
+            PrescriptionAndMedicineDto.CreateRequest request) {
+
+        Prescription prescription = prescriptionRepository
+                .findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
+                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+
+        // 1. 처방전 정보 갱신
+        prescription.setPrescriptionName(request.getPrescriptionName());
+        if (request.getPrescriptionDate() != null) {
+            prescription.setPrescriptionDate(request.getPrescriptionDate());
+        }
+        prescription.setMemo(request.getMemo());
+        prescription.setIntakeIntervals(request.getIntakeIntervals());
+        prescription.setDosage(request.getDosage());
+
+        // 2. 기존 약 목록 제거 후 새 목록으로 교체
+        userMedicineRepository.deleteByPrescription_PrescriptionId(prescriptionId);
+
+        List<UserMedicine> savedList = new ArrayList<>();
+        if (request.getMedicines() != null) {
+            for (UserMedicineDto.CreateRequest u : request.getMedicines()) {
+                UserMedicine userMedicine = UserMedicine.builder()
+                        .prescription(prescription) // FK 연결
+                        .medicineName(u.getMedicineName())
+                        .supplementId(u.getSupplementId())
+                        .build();
+                savedList.add(userMedicineRepository.save(userMedicine));
+            }
+        }
+
+        return PrescriptionAndMedicineDto.PrescriptionAndMedicineResponse.from(prescription, savedList);
     }
 
     // 처방전 조회 //임시로 받음 userId
@@ -90,6 +140,7 @@ public class MedicineService {
         res.setPrescriptionDate(request.getPrescriptionDate());
         res.setMemo(request.getMemo());
         res.setIntakeIntervals(request.getIntakeIntervals());
+        res.setDosage(request.getDosage());
 
         return PrescriptionDto.PrescriptionResponse.from(res);
     }
@@ -107,7 +158,7 @@ public class MedicineService {
                 .orElseThrow(() -> new RuntimeException("처방전 없음"));
 
         res.setPrescription(prescription);
-        res.setKdCode(request.getKdCode());
+        res.setMedicineName(request.getMedicineName());
         res.setSupplementId(request.getSupplementId());
 
         return UserMedicineDto.UserMedicineResponse.from(res);

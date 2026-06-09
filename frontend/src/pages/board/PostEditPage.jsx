@@ -19,7 +19,7 @@ function formatEditorContent(content) {
 function PostEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, authLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [bootLoading, setBootLoading] = useState(true);
   const [saving, setSaving] = useState(null);
   const [formData, setFormData] = useState({
@@ -115,98 +115,107 @@ function PostEditPage() {
   }
 
   return (
-    <section className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl rounded-[28px] border border-[#d8dee8] bg-[#fcfdff] px-5 py-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:px-8 sm:py-8 lg:px-10">
-        <div className="mb-8 border-b border-[#eef2f7] pb-5">
-          <h1 className="text-[28px] font-bold tracking-[-0.03em] text-gray-900">
-            글 수정
-          </h1>
-          <p className="mt-2 text-[15px] leading-7 text-gray-500">
-            건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
+      <div className="flex pt-[55px]">
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
+          글 수정
+        </h1>
+        <p className="mb-8 text-sm text-gray-500">
+          건강한 삶을 위한 커뮤니티에 여러분의 이야기를 들려주세요.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-7">
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="category"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                카테고리
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
-              >
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-7">
+              <div className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="category"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    카테고리
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="h-12 w-full appearance-none rounded-xl border border-[#d8dee8] bg-white bg-no-repeat pl-4 pr-10 text-[15px] text-gray-700 outline-none transition focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")",
+                      backgroundPosition: "right 16px center",
+                      backgroundSize: "18px 18px",
+                    }}
+                  >
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div>
-              <label
-                htmlFor="title"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                제목
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="포스트의 제목을 입력하세요"
-                maxLength={120}
-                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
-              />
-            </div>
+                <div>
+                  <label
+                    htmlFor="title"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    제목
+                  </label>
+                  <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="포스트의 제목을 입력하세요"
+                    maxLength={120}
+                    className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white px-4 text-[15px] text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#8fb4ff] focus:ring-4 focus:ring-blue-100"
+                  />
+                </div>
 
-            <div>
-              <label
-                htmlFor="content"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                내용
-              </label>
-              <RichTextEditor
-                value={formData.content}
-                onChange={handleContentChange}
-                placeholder="내용을 입력하세요..."
-              />
-              <p className="mt-3 text-sm text-gray-400">
-                툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
-              </p>
-            </div>
+                <div>
+                  <label
+                    htmlFor="content"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    내용
+                  </label>
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={handleContentChange}
+                    placeholder="내용을 입력하세요..."
+                  />
+                  <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
+                    <p className="mb-3 text-sm text-gray-400 lg:ml-6">
+                      툴바의 이미지 버튼으로 본문 안에 사진을 넣을 수 있습니다.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => navigate(-1)}
+                        className="rounded-[10px] border border-gray-200 !bg-white px-5 py-2.5 text-sm font-semibold !text-gray-700 shadow-sm transition hover:!bg-gray-50"
+                      >
+                        나가기
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={saving}
+                        className="rounded-[10px] !bg-[#0F172A] px-6 py-2.5 text-sm font-semibold text-white transition hover:!bg-[#1E293B]"
+                      >
+                        {saving ? "수정 중..." : "수정"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
-
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#eef2f7] pt-6">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(-1)}
-              className="min-w-[112px] rounded-xl border border-[#d8dee8] bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              나가기
-            </Button>
-            <Button
-              type="submit"
-              disabled={saving}
-              className="min-w-[112px] rounded-xl bg-[#4f7cff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d68e8]"
-            >
-              {saving ? "수정 중..." : "수정"}
-            </Button>
-          </div>
-        </form>
+        </main>
       </div>
-    </section>
+    </div>
   );
 }
 

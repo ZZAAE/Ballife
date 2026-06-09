@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,6 +34,10 @@ public class SecurityConfig {
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
         private final ObjectMapper objectMapper;
 
+        // 콤마로 구분한 허용 Origin 패턴. 배포 시 환경변수 APP_CORS_ALLOWED_ORIGINS 로 실제 프론트 주소 주입.
+        @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*}")
+        private String[] allowedOrigins;
+
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
@@ -55,20 +60,23 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/medicines").permitAll() //임시코드
                         .requestMatchers("/api/auth/**").permitAll() // 회원가입 토큰없이 접근 가능
                         .requestMatchers("/api/mock/**").permitAll() // 임시 mock API 확인용
                         .requestMatchers(HttpMethod.PUT, "/api/users/disease/**").permitAll() // 회원가입시 질병 정보 업데이트 토큰 없이
                                                                                               // 접근 가능
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll() // 프론트 서버 생존 폴링 (JWT 불필요)
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll() // 카드뉴스 (공개 데이터, JWT 불필요)
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll() // 업로드된 이미지 정적 서빙 (공개)
+                        .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/comments/post/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/{postId}/view").permitAll()
                         // 나머지 인증이 필요한 주소는 이 밑에
 
-                                                // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도
-                                                // (수업용 코드라
-                                                // 그럼)
-                                                .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는
-                                                                              // 이렇게 하는걸 고려)
-                                );
+                        // .anyRequest().permitAll() // 그외 모든 요청은 인증이 불필요 <- 이거는 보안에 문제 있을수도 (수업용 코드라 그럼)
+                        .anyRequest().authenticated() // 그외 모든 요청 인증 필요 <- 실제로는 이게 안전 (현업 나가서는 이렇게 하는걸 고려)
+                        );
 
                 return http.build();
         }
@@ -85,10 +93,8 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // 허용할 Origin (프론트엔드 주소)
-                configuration.setAllowedOriginPatterns(List.of(
-                                "http://localhost:*",
-                                "http://127.0.0.1:*"));
+                // 허용할 Origin (프론트엔드 주소) — app.cors.allowed-origins 로 주입
+                configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins));
 
                 // 허용할 HTTP 메서드
                 configuration.setAllowedMethods(Arrays.asList(

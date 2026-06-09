@@ -41,6 +41,8 @@ public class MealItemService {
         MealItem mealItem = MealItem.builder()
             .meal(meal)
             .foodName(request.getFoodName())
+            .mealPhoto(request.getMealPhoto())
+            .grams(request.getGrams())
             .calorie(request.getCalorie())
             .carbohydrate(request.getCarbohydrate())
             .sugar(request.getSugar())
@@ -63,6 +65,8 @@ public class MealItemService {
             .orElseThrow(() -> new ResourceNotFoundException("식단", USER_ID));
 
         mealItem.setFoodName(request.getFoodName()!=null ? request.getFoodName() : mealItem.getFoodName());
+        mealItem.setMealPhoto(request.getMealPhoto()!=null ? request.getMealPhoto() : mealItem.getMealPhoto());
+        mealItem.setGrams(request.getGrams()!=null ? request.getGrams() : mealItem.getGrams());
         mealItem.setCalorie(request.getCalorie()!=null ? request.getCalorie() : mealItem.getCalorie());
         mealItem.setCarbohydrate(request.getCarbohydrate()!=null ? request.getCarbohydrate() : mealItem.getCarbohydrate());
         mealItem.setSugar(request.getSugar()!=null ? request.getSugar() : mealItem.getSugar());

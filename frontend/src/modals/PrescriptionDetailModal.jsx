@@ -1,54 +1,5 @@
-import { Pencil, Trash2, X } from "lucide-react";
-
-const prescriptionDetailMap = {
-  1: {
-    groupName: "혈압약",
-    medicines: [
-      {
-        id: 101,
-        name: "암로디핀정 5mg",
-        purpose: "혈압 조절",
-        dosageText: "1일 1회, 식후 복용",
-        imageType: "white",
-      },
-      {
-        id: 102,
-        name: "로사르탄정 50mg",
-        purpose: "혈압 안정화",
-        dosageText: "1일 1회, 아침 식후 복용",
-        imageType: "pink",
-      },
-    ],
-  },
-  2: {
-    groupName: "당뇨약",
-    medicines: [
-      {
-        id: 201,
-        name: "다이아벡스정 500mg",
-        purpose: "혈당 강하제",
-        dosageText: "1일 2회, 식사 직후 복용",
-        imageType: "whiteBlue",
-      },
-      {
-        id: 202,
-        name: "자누비아정 100mg",
-        purpose: "인슐린 분비 조절",
-        dosageText: "1일 1회, 식사와 관계없이 복용",
-        imageType: "yellow",
-      },
-      {
-        id: 203,
-        name: "아마릴정 2mg",
-        purpose: "인슐린 분비 촉진",
-        dosageText: "1일 1회, 아침 식전 또는 직후",
-        imageType: "green",
-      },
-    ],
-  },
-};
-
-
+import { useState } from "react";
+import { Check, Pencil, Trash2, X } from "lucide-react";
 
 function MedicineThumb({ type }) {
   if (type === "yellow") {
@@ -95,23 +46,69 @@ function MedicineThumb({ type }) {
   );
 }
 
-export default function PrescriptionDetailModal({ open, group, onClose }) {
+const EDIT_INPUT_CLASS =
+  "w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-[14px] text-gray-800 outline-none focus:border-[#94A3B8] focus:ring-2 focus:ring-slate-100";
+
+// 약 목록은 부모(MedicationPage)의 처방 그룹 상태를 그대로 반영(group.medicines).
+// 삭제/수정은 콜백으로 부모 상태를 갱신 → 약 페이지 전체에 즉시 반영된다.
+export default function PrescriptionDetailModal({
+  open,
+  group,
+  onClose,
+  onDeleteMedicine,
+  onUpdateMedicine,
+}) {
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState({ name: "", purpose: "", dosageText: "" });
+  // 삭제 확인 모달 대상 약 id (null 이면 모달 닫힘)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
   if (!open || !group) return null;
 
-  const detailData = prescriptionDetailMap[group.id];
+  const medicines = group.medicines ?? [];
 
-  if (!detailData) return null;
+  const startEdit = (medicine) => {
+    setEditingId(medicine.id);
+    setDraft({
+      name: medicine.name,
+      purpose: medicine.purpose,
+      dosageText: medicine.dosageText,
+    });
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const saveEdit = (id) => {
+    const patch = { purpose: draft.purpose, dosageText: draft.dosageText };
+    const trimmedName = draft.name.trim();
+    if (trimmedName) patch.name = trimmedName;
+    onUpdateMedicine?.(group.id, id, patch);
+    setEditingId(null);
+  };
+
+  // 삭제 버튼 → 바로 지우지 않고 확인 모달을 띄운다
+  const requestDelete = (id) => setConfirmDeleteId(id);
+  const cancelDelete = () => setConfirmDeleteId(null);
+  const confirmDelete = () => {
+    if (confirmDeleteId == null) return;
+    onDeleteMedicine?.(group.id, confirmDeleteId);
+    if (editingId === confirmDeleteId) setEditingId(null);
+    setConfirmDeleteId(null);
+  };
+
+  const pendingMedicine = medicines.find((m) => m.id === confirmDeleteId);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4">
-      <div className="w-full max-w-[900px] rounded-2xl bg-[#F3F4F6] shadow-2xl overflow-hidden">
-        <div className="flex items-start justify-between px-8 pt-8 pb-6">
+    <>
+    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4 py-6">
+      <div className="flex w-full max-w-[900px] max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-[#F3F4F6] shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between px-5 md:px-8 pt-8 pb-6">
           <div>
             <h2 className="text-[30px] font-semibold text-gray-700 leading-tight">
-              나의 [{detailData.groupName}] 처방 목록
+              나의 [{group.groupName}] 처방 목록
             </h2>
             <p className="mt-2 text-[14px] text-gray-400">
-              총 {detailData.medicines.length}개의 약이 처방되어 있습니다.
+              총 {medicines.length}개의 약이 처방되어 있습니다.
             </p>
           </div>
 
@@ -124,44 +121,171 @@ export default function PrescriptionDetailModal({ open, group, onClose }) {
           </button>
         </div>
 
-        <div className="px-8 pb-8 space-y-5">
-          {detailData.medicines.map((medicine) => (
-            <div
-              key={medicine.id}
-              className="bg-white rounded-2xl px-5 py-5 shadow-sm flex items-center gap-5"
-            >
-              <MedicineThumb type={medicine.imageType} />
-
-              <div className="flex-1 grid grid-cols-3 gap-6">
-                <div>
-                  <p className="text-[18px] font-semibold text-gray-800">
-                    {medicine.name}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-[15px] text-gray-700">{medicine.purpose}</p>
-                </div>
-
-                <div>
-                  <p className="text-[15px] text-gray-700 whitespace-pre-line">
-                    {medicine.dosageText}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button type="button" className="text-gray-500 hover:text-gray-700">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button type="button" className="text-red-400 hover:text-red-500">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+        <div className="space-y-5 overflow-y-auto px-5 md:px-8 pb-8 max-h-[min(540px,calc(90vh-160px))]">
+          {medicines.length === 0 ? (
+            <div className="bg-white rounded-2xl px-5 py-12 text-center text-[15px] text-gray-400 shadow-sm">
+              처방된 약이 없습니다. 약을 모두 삭제하면 이 그룹은 복용 일정·이행률에서도 사라집니다.
             </div>
-          ))}
+          ) : (
+            medicines.map((medicine) => {
+              const isEditing = editingId === medicine.id;
+              return (
+                <div
+                  key={medicine.id}
+                  className="bg-white rounded-2xl px-5 py-5 shadow-sm flex flex-col sm:flex-row sm:items-center gap-5"
+                >
+                  <MedicineThumb type={medicine.imageType} />
+
+                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {isEditing ? (
+                      <>
+                        <input
+                          value={draft.name}
+                          onChange={(e) =>
+                            setDraft((d) => ({ ...d, name: e.target.value }))
+                          }
+                          placeholder="약 이름"
+                          className={EDIT_INPUT_CLASS}
+                        />
+                        <input
+                          value={draft.purpose}
+                          onChange={(e) =>
+                            setDraft((d) => ({ ...d, purpose: e.target.value }))
+                          }
+                          placeholder="효능"
+                          className={EDIT_INPUT_CLASS}
+                        />
+                        <input
+                          value={draft.dosageText}
+                          onChange={(e) =>
+                            setDraft((d) => ({
+                              ...d,
+                              dosageText: e.target.value,
+                            }))
+                          }
+                          placeholder="복용법"
+                          className={EDIT_INPUT_CLASS}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-[18px] font-semibold text-gray-800">
+                            {medicine.name}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[15px] text-gray-700">
+                            {medicine.purpose}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[15px] text-gray-700 whitespace-pre-line">
+                            {medicine.dosageText}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => saveEdit(medicine.id)}
+                          className="text-[#2563EB] hover:text-blue-700"
+                          aria-label="저장"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          className="text-gray-400 hover:text-gray-600"
+                          aria-label="취소"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => startEdit(medicine)}
+                          className="text-gray-500 hover:text-gray-700"
+                          aria-label="수정"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => requestDelete(medicine.id)}
+                          className="text-red-400 hover:text-red-500"
+                          aria-label="삭제"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
+
+    {/* 삭제 확인 모달 — 페이지 모달과 동일한 디자인 톤 */}
+    {confirmDeleteId != null && (
+      <div
+        className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center px-4"
+        onClick={cancelDelete}
+      >
+        <div
+          className="w-full max-w-[400px] rounded-2xl bg-white px-6 py-7 text-center shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+            <Trash2 className="h-6 w-6 text-red-500" />
+          </div>
+          <h3 className="text-[18px] font-semibold text-gray-800">
+            정말 삭제하시겠습니까?
+          </h3>
+          <p className="mt-2 text-[14px] leading-6 text-gray-500">
+            {pendingMedicine ? (
+              <>
+                <span className="font-medium text-gray-700">
+                  {pendingMedicine.name}
+                </span>{" "}
+                약을 삭제합니다.
+                <br />
+              </>
+            ) : null}
+            삭제 후에는 되돌릴 수 없습니다.
+          </p>
+          <div className="mt-6 flex gap-3">
+            <button
+              type="button"
+              onClick={cancelDelete}
+              className="h-11 flex-1 rounded-xl bg-gray-100 text-[14px] font-medium text-gray-700 transition hover:bg-gray-200"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              className="h-11 flex-1 rounded-xl bg-red-500 text-[14px] font-semibold text-white transition hover:bg-red-600"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

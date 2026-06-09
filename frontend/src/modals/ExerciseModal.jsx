@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Plus, Trash2, X } from "lucide-react";
+import { Clock, Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   createExercise,
@@ -10,22 +10,61 @@ import {
 import {
   CARDIO_OPTIONS,
   STRENGTH_OPTIONS,
+  STAIR_INTENSITY_HINT,
+  aerobicMet,
+  anaerobicMetByVolume,
+  anaerobicVolume,
   buildCreatePayload,
   createAerobicRow,
   createAnaerobicRow,
   parseDurationToSeconds,
   recordToRow,
 } from "../utils/exerciseRecords";
+import { USER_KEY } from "../api/api";
+
+const resolveUserId = (user) => {
+  const fromContext = user?.userId ?? user?.id ?? user?.memberId;
+  if (fromContext != null) return fromContext;
+  try {
+    const raw =
+      localStorage.getItem(USER_KEY) ||
+      localStorage.getItem("user") ||
+      localStorage.getItem("loginUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.userId ?? parsed?.id ?? parsed?.memberId ?? null;
+  } catch {
+    return null;
+  }
+};
 
 let nextId = 1;
 
-function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
+const pad2 = (n) => String(n).padStart(2, "0");
+const nowHHmm = () => {
+  const d = new Date();
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+const isoToHHmm = (iso) => {
+  const m = String(iso || "").match(/T(\d{2}):(\d{2})/);
+  return m ? `${m[1]}:${m[2]}` : nowHHmm();
+};
+const todayDateStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+};
+
+function ExerciseModal({ isOpen, onClose, onSaved, editingRecord, recordDate }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("anaerobic");
   const [anaerobicRows, setAnaerobicRows] = useState([]);
   const [aerobicRows, setAerobicRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [exerciseTime, setExerciseTime] = useState("");
+  const [timeEditing, setTimeEditing] = useState(false);
+  const [timeInput, setTimeInput] = useState("");
+  const timeInputRef = useRef(null);
   const isEditMode = !!editingRecord;
 
   useEffect(() => {
@@ -35,7 +74,10 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
 
     if (editingRecord) {
       const { kind, row } = recordToRow(editingRecord, nextId++);
+      // 모달이 열릴 때 편집 대상 기록으로 폼을 초기화하는 의도된 동기화
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(kind);
+      setExerciseTime(isoToHHmm(editingRecord.dateIso));
       if (kind === "aerobic") {
         setAerobicRows([row]);
         setAnaerobicRows([createAnaerobicRow(nextId++)]);
@@ -47,9 +89,51 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
     }
 
     setActiveTab("anaerobic");
+    setExerciseTime(nowHHmm());
     setAnaerobicRows([createAnaerobicRow(nextId++)]);
     setAerobicRows([createAerobicRow(nextId++)]);
   }, [isOpen, editingRecord]);
+
+  const startTimeEdit = () => {
+    setTimeInput(exerciseTime || nowHHmm());
+    setTimeEditing(true);
+  };
+
+  const commitTimeEdit = () => {
+    const raw = timeInput.trim();
+    let hours = -1;
+    let minutes = -1;
+
+    if (/^\d{1,2}:\d{1,2}$/.test(raw)) {
+      const [h, m] = raw.split(":").map(Number);
+      hours = h;
+      minutes = m;
+    } else if (/^\d{4}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 2));
+      minutes = parseInt(raw.slice(2));
+    } else if (/^\d{3}$/.test(raw)) {
+      hours = parseInt(raw.slice(0, 1));
+      minutes = parseInt(raw.slice(1));
+    } else if (/^\d{1,2}$/.test(raw)) {
+      hours = parseInt(raw);
+      minutes = 0;
+    }
+
+    if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+      const formatted = `${String(hours).padStart(2, "0")}:${String(
+        minutes,
+      ).padStart(2, "0")}`;
+      setExerciseTime(formatted);
+    }
+    setTimeEditing(false);
+  };
+
+  useEffect(() => {
+    if (timeEditing && timeInputRef.current) {
+      timeInputRef.current.focus();
+      timeInputRef.current.select();
+    }
+  }, [timeEditing]);
 
   const currentRows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
 
@@ -110,10 +194,49 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
     return null;
   };
 
+  const calculateExpectedCalorie = () => {
+    const rows = activeTab === "anaerobic" ? anaerobicRows : aerobicRows;
+    if (rows.length === 0) return 0;
+
+    const userWeight = user?.weight;
+    if (!userWeight || userWeight <= 0) {
+      console.warn("사용자 체중 없음:", userWeight);
+      return 0;
+    }
+
+    const totalCalories = rows.reduce((sum, row) => {
+      // 무산소: 볼륨(중량×횟수×세트)으로 MET 결정 / 유산소: 운동 종류×강도 MET
+      const met =
+        activeTab === "anaerobic"
+          ? anaerobicMetByVolume(anaerobicVolume(row))
+          : aerobicMet(row.exerciseTypeId, row.intensity);
+
+      if (!met || met <= 0) {
+        return sum;
+      }
+
+      // 저장값과 동일하게: buildCreatePayload 가 보내는 exerciseMin(올림 분)으로 시간 계산
+      const durationSec = parseDurationToSeconds(row.durationText);
+      if (durationSec <= 0) {
+        return sum;
+      }
+      const exerciseMin = Math.max(1, Math.ceil(durationSec / 60));
+      const hours = exerciseMin / 60.0;
+
+      return sum + Math.round(met * userWeight * hours);
+    }, 0);
+
+    return totalCalories;
+  };
+
   const handleDelete = async () => {
     if (!isEditMode || !editingRecord) return;
     if (!window.confirm("이 운동 기록을 삭제할까요?")) return;
-    const userId = user?.userId ?? user?.id ?? 1;
+    const userId = resolveUserId(user);
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
     const targetId = editingRecord.serverId ?? editingRecord.id;
     setIsDeleting(true);
     try {
@@ -132,21 +255,30 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
   };
 
   const handleSubmit = async () => {
+    const userId = resolveUserId(user);
+    if (!userId) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
     const validationMessage = validateRows();
     if (validationMessage) {
       toast.error(validationMessage);
       return;
     }
 
-    const userId = user?.userId ?? user?.id ?? 1;
     setIsSaving(true);
 
     try {
       if (isEditMode) {
         const row = currentRows[0];
-        const recordedAt = editingRecord.dateIso
-          ? new Date(editingRecord.dateIso)
-          : new Date();
+        // 기존 기록의 날짜는 유지하고, 사용자가 입력한 운동 시각을 반영
+        const datePart = editingRecord.dateIso
+          ? String(editingRecord.dateIso).slice(0, 10)
+          : todayDateStr();
+        const recordedAt = new Date(
+          `${datePart}T${exerciseTime || nowHHmm()}:00`,
+        );
         const payload = buildCreatePayload(activeTab, row, recordedAt);
         await updateExercise(
           userId,
@@ -162,9 +294,13 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
         return;
       }
 
+      // 선택한 날짜(없으면 오늘) + 사용자가 입력한 운동 시각
+      const datePart = recordDate || todayDateStr();
+      const baseDate = new Date(`${datePart}T${exerciseTime || nowHHmm()}:00`);
+
       await Promise.all(
         currentRows.map(async (row, index) => {
-          const recordedAt = new Date();
+          const recordedAt = new Date(baseDate);
           recordedAt.setSeconds(recordedAt.getSeconds() + index);
           await createExercise(
             userId,
@@ -197,7 +333,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] xl:max-w-[760px] 2xl:h-[880px] 2xl:max-w-[820px]"
+        className="relative flex h-[785px] max-h-[calc(100vh-32px)] w-full max-w-[672px] flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] xl:h-[840px] 2xl:h-[880px]"
       >
         {/* 고정 상단 영역 */}
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -270,11 +406,44 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                   예상 소모 칼로리
                 </p>
                 <p className="text-xl font-bold text-gray-900">
+                  {calculateExpectedCalorie()}
                   <span className="text-sm font-normal text-gray-500">
-                    kcal
+                    {" "}kcal
                   </span>
                 </p>
               </div>
+            </div>
+
+            {/* 운동 시각 */}
+            <div className="flex gap-3 items-center">
+              {timeEditing ? (
+                <input
+                  ref={timeInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  value={timeInput}
+                  onChange={(e) => setTimeInput(e.target.value)}
+                  onBlur={commitTimeEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitTimeEdit();
+                    }
+                    if (e.key === "Escape") setTimeEditing(false);
+                  }}
+                  placeholder="HH:MM"
+                  className="rounded-[16px] bg-white px-4 py-2.5 text-[13px] font-semibold text-[#1E293B] border-2 border-[#2563EB] shadow-sm outline-none w-[130px] tracking-wider"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={startTimeEdit}
+                  className="flex items-center gap-2 rounded-[16px] bg-[#F1F5F9] px-4 py-2.5 text-[13px] font-semibold text-[#64748B] border border-[#E2E8F0] shadow-sm hover:bg-[#F8FAFC] transition-colors"
+                >
+                  <Clock className="h-4 w-4 text-[#2563EB]" />
+                  {exerciseTime}
+                </button>
+              )}
             </div>
 
             {/* 세트별 상세 기록 */}
@@ -295,7 +464,7 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                     key={row.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4"
                   >
-                    <div className="flex items-end gap-2">
+                    <div className="flex flex-wrap items-end gap-2">
                       {activeTab === "anaerobic" ? (
                         <>
                           <div className="flex-[2] space-y-1">
@@ -480,6 +649,12 @@ function ExerciseModal({ isOpen, onClose, onSaved, editingRecord }) {
                         </button>
                       )}
                     </div>
+                    {activeTab === "aerobic" &&
+                      row.exerciseTypeId === "stair" && (
+                        <p className="mt-2 text-[11px] leading-relaxed text-gray-400">
+                          {STAIR_INTENSITY_HINT}
+                        </p>
+                      )}
                   </div>
                 ))}
               </div>

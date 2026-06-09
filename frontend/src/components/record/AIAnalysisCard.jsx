@@ -1,8 +1,67 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles, Gift } from "lucide-react";
+import { AI_BASE_URL } from "../../api/aiBase";
 
-export default function AIAnalysisCard({ className = "" }) {
+const AI_SERVICE = AI_BASE_URL;
+
+export default function AIAnalysisCard({ className = "", metric, data, userId }) {
   const [rewardFloats, setRewardFloats] = useState([]);
+  const [analysis, setAnalysis] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  // 데이터/지표가 바뀔 때만 재요청하도록 직렬화한 시그니처를 의존성으로 사용
+  // (페이지가 매 렌더마다 새 data 객체를 만들어도 내용이 같으면 재요청하지 않음)
+  const sig = useMemo(
+    () =>
+      JSON.stringify({
+        metric: metric ?? null,
+        userId: userId ?? null,
+        data: data ?? null,
+      }),
+    [metric, userId, data],
+  );
+
+  useEffect(() => {
+    const { metric: m, userId: uid, data: d } = JSON.parse(sig);
+    if (!m || !uid) return;
+    // 분석할 값이 하나도 없으면 호출하지 않음 (플레이스홀더 유지)
+    const hasData =
+      d &&
+      Object.values(d).some((v) =>
+        Array.isArray(v) ? v.length > 0 : v != null,
+      );
+    if (!hasData) return;
+
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const res = await fetch(`${AI_SERVICE}/analyze`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: Number(uid),
+            metric: m,
+            data: d,
+            token: localStorage.getItem("accessToken"),
+          }),
+        });
+        if (!res.ok) throw new Error("analyze failed");
+        const json = await res.json();
+        if (!cancelled) setAnalysis(json.analysis || "");
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sig]);
 
   const handleRewardClick = () => {
     const id = Date.now() + Math.random();
@@ -40,14 +99,39 @@ export default function AIAnalysisCard({ className = "" }) {
           ))}
         </div>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[12px] border border-dashed border-white/30 bg-white/10 px-4 py-8 text-center backdrop-blur-sm">
-        <Sparkles className="mb-3 h-6 w-6 text-white/80" strokeWidth={1.8} />
-        <p className="text-sm font-semibold text-white">
-          분석 결과를 준비 중입니다
-        </p>
-        <p className="mt-1 text-xs text-white/75">
-          데이터가 누적되면 맞춤 인사이트를 제공해드려요
-        </p>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-[12px] border border-dashed border-white/30 bg-white/10 px-4 py-6 backdrop-blur-sm">
+        {loading ? (
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <Sparkles
+              className="mb-3 h-6 w-6 animate-pulse text-white/80"
+              strokeWidth={1.8}
+            />
+            <p className="text-sm font-semibold text-white">분석 중입니다…</p>
+          </div>
+        ) : analysis ? (
+          <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-white/95">
+            {analysis}
+          </p>
+        ) : error ? (
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <p className="text-sm font-semibold text-white">
+              분석을 불러오지 못했어요
+            </p>
+            <p className="mt-1 text-xs text-white/75">
+              잠시 후 다시 시도해 주세요
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <Sparkles className="mb-3 h-6 w-6 text-white/80" strokeWidth={1.8} />
+            <p className="text-sm font-semibold text-white">
+              분석 결과를 준비 중입니다
+            </p>
+            <p className="mt-1 text-xs text-white/75">
+              데이터가 누적되면 맞춤 인사이트를 제공해드려요
+            </p>
+          </div>
+        )}
       </div>
     </aside>
   );

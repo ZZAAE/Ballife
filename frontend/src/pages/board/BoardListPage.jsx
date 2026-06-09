@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import boardApi from "../../api/boardApi";
+import { useAuth } from "../../contexts/AuthContext";
 
 const PAGE_SIZE = 10;
 
 function BoardListPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [posts, setPosts] = useState([]);
@@ -87,14 +91,14 @@ function BoardListPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1280px] px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-[30px] font-extrabold tracking-tight leading-none text-[#0F172A]">커뮤니티</h1>
-        <p className="mt-2 text-sm text-[#64748B]">
-          건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
-        </p>
-      </div>
+        <main className="flex-1">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+            <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
+              커뮤니티
+            </h1>
+            <p className="mb-8 text-sm text-gray-500">
+              건강한 삶을 위한 커뮤니티 공간에 당신의 이야기를 들려주세요.
+            </p>
 
       {/* 검색창 */}
       <div className="mb-6 flex items-center gap-3">
@@ -121,7 +125,13 @@ function BoardListPage() {
         <select
           value={category}
           onChange={(e) => handleCategoryChange(e.target.value)}
-          className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-[#0F172A] outline-none focus:border-[#94A3B8]"
+          className="appearance-none rounded-[10px] border border-[#E5E7EB] bg-white bg-no-repeat pl-3 pr-8 py-2 text-[#0F172A] outline-none focus:border-[#94A3B8]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")",
+            backgroundPosition: "right 7px center",
+            backgroundSize: "16px 16px",
+          }}
         >
           <option value="ALL">전체</option>
           <option value="GENERAL">자유</option>
@@ -155,8 +165,8 @@ function BoardListPage() {
       </div>
 
       {/* 게시글 테이블 */}
-      <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        <table className="w-full table-fixed text-sm">
+      <div className="overflow-x-auto rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+        <table className="w-full min-w-[720px] table-fixed text-sm">
           <colgroup>
             <col className="w-[70px]" />
             <col className="w-[110px]" />
@@ -199,7 +209,18 @@ function BoardListPage() {
                       {post.title}
                     </Link>
                   </td>
-                  <td className="truncate px-4 py-3 text-center text-[#64748B]">{post.userNickname}</td>
+                  <td className="truncate px-4 py-3 text-center text-[#64748B]">
+                    <span className="inline-flex items-center justify-center gap-1">
+                      {post.userMedalIcon && (
+                        <img
+                          src={post.userMedalIcon}
+                          alt=""
+                          className="inline-block h-[1em] w-[1em] object-contain"
+                        />
+                      )}
+                      {post.userNickname}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.viewCount}</td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.upVote ?? 0}</td>
                   <td className="px-4 py-3 text-center text-[#94A3B8]">
@@ -222,7 +243,7 @@ function BoardListPage() {
       </div>
 
       {/* 페이지네이션 */}
-      <div className="mt-6 flex items-center justify-center gap-2">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         {Array.from({ length: totalPages }, (_, i) => (
           <button
             key={i}
@@ -238,14 +259,22 @@ function BoardListPage() {
         ))}
       </div>
 
-      {/* 글쓰기 버튼 */}
+      {/* 글쓰기 버튼 — 로그인한 경우에만 작성 가능 */}
       <div className="mt-6 flex justify-end">
-        <Link
-          to="/posts/create"
+        <button
+          type="button"
+          onClick={() => {
+            if (!user?.userId) {
+              toast.error("로그인이 필요합니다.");
+              navigate("/login");
+              return;
+            }
+            navigate("/posts/create");
+          }}
           className="rounded-[10px] bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
         >
           글쓰기
-        </Link>
+        </button>
       </div>
           </div>
         </main>

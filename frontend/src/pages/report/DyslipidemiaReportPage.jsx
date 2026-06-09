@@ -95,7 +95,7 @@ export default function DyslipidemiaReportPage() {
             <HeartPulse size={18} className="text-emerald-400" />
             <h3 className="font-semibold text-[14px]">약물 치료 (Pharmacology)</h3>
           </div>
-          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-2 gap-10 !p-8">
+          <ContentCard className="rounded-t-none border-t-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 !p-6 md:!p-8">
              <div>
               <h4 className="font-bold text-[14px] mb-4 text-gray-900">지질 수치 강하</h4>
               <ul className="text-[12px] text-gray-600 list-disc list-outside ml-4 space-y-2 leading-relaxed">

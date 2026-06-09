@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import newsApi from "../../api/newsApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
@@ -6,9 +6,13 @@ import mealApi from "../../api/mealApi";
 import userApi from "../../api/userApi";
 import userConfigApi from "../../api/userConfigApi";
 import { getBurnedCalorieByDate } from "../../api/exerciseApi";
+import medicineApi from "../../api/medicineApi";
+import {
+  mapPrescriptionsToGroups,
+  buildSchedulesFromGroups,
+} from "../../components/medication/prescriptionData";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/Header";
-import HealthMenu from "../../components/HealthMenu";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
 import ChartSection from "../../components/mainpage/chart.jsx";
@@ -19,8 +23,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine,
-  ReferenceDot,
   ResponsiveContainer,
 } from "recharts";
 import { Unity, useUnityContext } from "react-unity-webgl";
@@ -52,13 +54,11 @@ const readMedicationSchedules = (dateKey) => {
   }
 };
 
-const buildMedicineData = () => {
-  const todayKey = formatToday();
-  const schedules = readMedicationSchedules(todayKey);
-
+// 복용 일정 배열 → 메인 복약알림용 데이터(오늘 남은 개수 + 약 목록)
+const computeMedicineData = (schedules) => {
   let todayRemaining = 0;
   const itemSet = new Set();
-  schedules.forEach((s) => {
+  (schedules || []).forEach((s) => {
     (s.drugs || []).forEach((d) => {
       itemSet.add(d.name);
       if (!d.taken) todayRemaining += 1;
@@ -70,6 +70,23 @@ const buildMedicineData = () => {
 
   return { todayRemaining, groups };
 };
+
+// localStorage 에 저장된 오늘 복용 기록 기반 (약 페이지 방문 후 갱신됨)
+const buildMedicineData = () => computeMedicineData(readMedicationSchedules(formatToday()));
+
+// 저장된 복용 여부(taken)를 슬롯/약 id 기준으로 기준 일정에 병합
+const mergeTakenState = (base, saved) =>
+  base.map((slot) => {
+    const ss = (saved || []).find((s) => s.id === slot.id);
+    if (!ss || !Array.isArray(ss.drugs)) return slot;
+    return {
+      ...slot,
+      drugs: slot.drugs.map((d) => {
+        const sd = ss.drugs.find((x) => x.id === d.id);
+        return sd ? { ...d, taken: !!sd.taken } : d;
+      }),
+    };
+  });
 
 const MainPage = () => {
   const { user } = useAuth();
@@ -96,30 +113,41 @@ const MainPage = () => {
     const today = formatToday();
 
     const tasks = [
+      // 전체 기록 1회 조회 후 카테고리 prefix로 분류 (category가 "BloodSugar-아침식전" 등
+      // 접미사를 가져 exact-match 페이지 조회로는 누락되므로 startsWith 방식 사용)
       bioValueRecordApi
-        .getPageByCategory(userId, "BloodSugar", 0, 90)
+        .getAllBioValueRecords(userId)
         .then((res) => {
           if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setBloodSugarRecords(list);
-        })
-        .catch(() => {}),
+          const list = Array.isArray(res?.data) ? res.data : [];
+          const byDateDesc = (a, b) => {
+            const ka = `${a.recordDate || ""} ${a.recordTime || ""}`;
+            const kb = `${b.recordDate || ""} ${b.recordTime || ""}`;
+            return kb.localeCompare(ka);
+          };
+          const startsWith = (r, prefix) =>
+            typeof r.category === "string" && r.category.startsWith(prefix);
 
-      bioValueRecordApi
-        .getPageByCategory(userId, "BloodPressure", 0, 90)
-        .then((res) => {
-          if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setBloodPressureRecords(list);
-        })
-        .catch(() => {}),
-
-      bioValueRecordApi
-        .getPageByCategory(userId, "Weight", 0, 90)
-        .then((res) => {
-          if (cancelled) return;
-          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
-          setWeightRecords(list);
+          setBloodSugarRecords(
+            list
+              .filter((r) => startsWith(r, "BloodSugar") && r.bloodSugar != null)
+              .sort(byDateDesc),
+          );
+          setBloodPressureRecords(
+            list
+              .filter(
+                (r) =>
+                  startsWith(r, "BloodPressure") &&
+                  r.systolicBP != null &&
+                  r.diastolicBP != null,
+              )
+              .sort(byDateDesc),
+          );
+          setWeightRecords(
+            list
+              .filter((r) => startsWith(r, "Weight") && r.weight != null)
+              .sort(byDateDesc),
+          );
         })
         .catch(() => {}),
 
@@ -157,19 +185,16 @@ const MainPage = () => {
         })
         .catch(() => {}),
 
+      // 목표값은 회원정보 페이지와 동일하게 user-config 단일 조회로 가져옴
       userConfigApi
-        .getTargetDailyWaterIntake(userId)
+        .getUserConfig(userId)
         .then((res) => {
           if (cancelled) return;
-          if (res?.data != null) setTargetWaterCups(Number(res.data));
-        })
-        .catch(() => {}),
-
-      userConfigApi
-        .getTargetWeight(userId)
-        .then((res) => {
-          if (cancelled) return;
-          if (res?.data != null) setTargetWeight(Number(res.data));
+          const cfg = res?.data;
+          if (!cfg) return;
+          if (cfg.targetDailyWaterIntake != null)
+            setTargetWaterCups(Number(cfg.targetDailyWaterIntake));
+          if (cfg.targetWeight != null) setTargetWeight(Number(cfg.targetWeight));
         })
         .catch(() => {}),
 
@@ -184,6 +209,37 @@ const MainPage = () => {
 
     Promise.allSettled(tasks);
 
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // 로그인 직후 백엔드에서 처방전을 직접 불러와 복약알림을 바로 표시한다.
+  // (약 페이지를 방문해 localStorage 가 채워질 때까지 기다리지 않도록)
+  useEffect(() => {
+    if (!userId) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await medicineApi.getPrescriptions(userId);
+        const list = Array.isArray(data) ? data : [];
+        const withMeds = await Promise.all(
+          list.map((p) =>
+            medicineApi
+              .getUserMedicine(p.prescriptionId)
+              .then((r) => ({ ...p, medicines: r.data || [] }))
+              .catch(() => ({ ...p, medicines: [] }))
+          )
+        );
+        const todayKey = formatToday();
+        const groups = mapPrescriptionsToGroups(withMeds);
+        const base = buildSchedulesFromGroups(groups, todayKey);
+        const merged = mergeTakenState(base, readMedicationSchedules(todayKey));
+        if (!cancelled) setMedicineData(computeMedicineData(merged));
+      } catch {
+        // 실패 시 localStorage 기반 값 유지
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -205,6 +261,37 @@ const MainPage = () => {
     };
   }, []);
 
+  // 체중/회원정보가 다른 페이지에서 갱신되면 헤더의 몸무게·BMI 즉시 반영
+  useEffect(() => {
+    const onProfileUpdated = (e) => {
+      const next = e?.detail;
+      if (!next) return;
+      setMemberProfile((prev) => ({ ...(prev ?? {}), ...next }));
+    };
+    window.addEventListener("member-profile-updated", onProfileUpdated);
+    return () => {
+      window.removeEventListener("member-profile-updated", onProfileUpdated);
+    };
+  }, []);
+
+  // 같은 페이지에 머무는 동안 체중 기록 모달 저장 시 체중 차트/카드도 즉시 반영
+  useEffect(() => {
+    if (!userId) return undefined;
+    const refreshWeight = () => {
+      bioValueRecordApi
+        .getPageByCategory(userId, "Weight", 0, 90)
+        .then((res) => {
+          const list = Array.isArray(res?.data?.content) ? res.data.content : [];
+          setWeightRecords(list);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("member-profile-updated", refreshWeight);
+    return () => {
+      window.removeEventListener("member-profile-updated", refreshWeight);
+    };
+  }, [userId]);
+
   useEffect(() => {
     let cancelled = false;
     setNewsLoading(true);
@@ -225,13 +312,52 @@ const MainPage = () => {
     };
   }, []);
 
-  const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
+  const {
+    unityProvider,
+    isLoaded,
+    loadingProgression,
+    sendMessage,
+    addEventListener,
+    removeEventListener,
+  } = useUnityContext({
     loaderUrl: "/Unity/Build.loader.js",
     dataUrl: "/Unity/Build.data",
     frameworkUrl: "/Unity/Build.framework.js",
     codeUrl: "/Unity/Build.wasm",
+    streamingAssetsUrl: "/Unity/StreamingAssets",
   });
   const loadingPercent = Math.round(loadingProgression * 100);
+
+  // Unity 통신 — ready 전 메시지는 큐잉 후 ready 시점에 일괄 전송
+  const [unityReady, setUnityReady] = useState(false);
+  const queueRef = useRef([]);
+
+  const send = useCallback((type, payload) => {
+    const json = JSON.stringify({ type, payload });
+    if (unityReady) {
+      sendMessage("ReactBrideController", "OnReactMessage", json);
+    } else {
+      queueRef.current.push(json);
+    }
+  }, [unityReady, sendMessage]);
+
+  // Unity → React: ready 신호 수신
+  useEffect(() => {
+    const handleReady = () => setUnityReady(true);
+    addEventListener("unityReady", handleReady);
+    return () => removeEventListener("unityReady", handleReady);
+  }, [addEventListener, removeEventListener]);
+
+  // ready 되는 순간: 큐 비우고 PREVIEW 메시지 전송
+  useEffect(() => {
+    if (!unityReady) return;
+    queueRef.current.forEach((json) =>
+      sendMessage("ReactBrideController", "OnReactMessage", json)
+    );
+    queueRef.current = [];
+
+    send("PREVIEW", null);
+  }, [unityReady, sendMessage, send]);
 
   const bloodPressureChartData = useMemo(() => {
     if (!bloodPressureRecords.length) return [];
@@ -328,60 +454,58 @@ const MainPage = () => {
   const chartConfig = useMemo(() => {
     return {
       bloodPressure: {
+        accent: "#ED5934",
         data: bloodPressureChartData,
         legends: [
-          { label: "수축기", color: "#2563eb" },
-          { label: "이완기", color: "#06b6d4" },
-          { label: "목표", color: "#94A3B8", dashed: true },
+          { label: "수축기", color: "#ED5934" },
+          { label: "이완기", color: "#F59874" },
         ],
         unit: "mmHg",
         areas: [
           {
             key: "systolic",
             name: "수축기",
-            stroke: "#2563eb",
+            stroke: "#ED5934",
             gradientId: "systolicGrad",
           },
           {
             key: "diastolic",
             name: "이완기",
-            stroke: "#06b6d4",
+            stroke: "#F59874",
             gradientId: "diastolicGrad",
           },
         ],
         references: bpReferences,
       },
       bloodSugar: {
+        accent: "#D40000",
         data: bloodSugarChartData,
         legends: [
-          { label: "혈당", color: "#16a34a" },
-          { label: "목표", color: "#94A3B8", dashed: true },
+          { label: "혈당", color: "#D40000" },
         ],
         unit: "mg/dL",
         areas: [
           {
             key: "glucose",
             name: "혈당",
-            stroke: "#16a34a",
+            stroke: "#D40000",
             gradientId: "glucoseGrad",
           },
         ],
         references: bloodSugarReferences,
       },
       weight: {
+        accent: "#434335",
         data: weightChartData,
         legends: [
-          { label: "체중", color: "#f97316" },
-          ...(targetWeight != null
-            ? [{ label: "목표", color: "#94A3B8", dashed: true }]
-            : []),
+          { label: "체중", color: "#434335" },
         ],
         unit: "kg",
         areas: [
           {
             key: "weight",
             name: "체중",
-            stroke: "#f97316",
+            stroke: "#434335",
             gradientId: "weightGrad",
           },
         ],
@@ -395,44 +519,58 @@ const MainPage = () => {
     bpReferences,
     bloodSugarReferences,
     weightReferences,
-    targetWeight,
   ]);
 
   const activeChart = chartConfig[selectedChartType];
 
-  const latestBloodSugar = useMemo(() => {
-    const rec = bloodSugarRecords[0];
-    if (!rec || rec.bloodSugar == null) return null;
+  const todayStr = formatToday();
+
+  const todayBloodSugar = useMemo(() => {
+    const rec = bloodSugarRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.bloodSugar != null,
+    );
+    if (!rec) return null;
     return {
       value: Number(rec.bloodSugar),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [bloodSugarRecords]);
+  }, [bloodSugarRecords, todayStr]);
 
-  const latestBloodPressure = useMemo(() => {
-    const rec = bloodPressureRecords[0];
-    if (!rec || rec.systolicBP == null || rec.diastolicBP == null) return null;
+  const todayBloodPressure = useMemo(() => {
+    const rec = bloodPressureRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.systolicBP != null &&
+        r.diastolicBP != null,
+    );
+    if (!rec) return null;
     return {
       systolic: Number(rec.systolicBP),
       diastolic: Number(rec.diastolicBP),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [bloodPressureRecords]);
+  }, [bloodPressureRecords, todayStr]);
 
-  const latestWeight = useMemo(() => {
-    const rec = weightRecords[0];
-    if (!rec || rec.weight == null) return null;
+  const todayWeight = useMemo(() => {
+    const rec = weightRecords.find(
+      (r) =>
+        String(r?.recordDate || "").slice(0, 10) === todayStr &&
+        r.weight != null,
+    );
+    if (!rec) return null;
     return {
       value: Number(rec.weight),
       recordedAt: `${rec.recordDate} ${(rec.recordTime || "").slice(0, 5)}`,
     };
-  }, [weightRecords]);
+  }, [weightRecords, todayStr]);
 
   const cardData = useMemo(
     () => ({
-      bloodSugar: latestBloodSugar,
-      bloodPressure: latestBloodPressure,
-      weight: latestWeight,
+      bloodSugar: todayBloodSugar,
+      bloodPressure: todayBloodPressure,
+      weight: todayWeight,
       todayMealKcal,
       todayBurnedKcal,
       water: { cups: todayWaterCups, targetCups: targetWaterCups },
@@ -444,9 +582,9 @@ const MainPage = () => {
       },
     }),
     [
-      latestBloodSugar,
-      latestBloodPressure,
-      latestWeight,
+      todayBloodSugar,
+      todayBloodPressure,
+      todayWeight,
       todayMealKcal,
       todayBurnedKcal,
       todayWaterCups,
@@ -455,6 +593,12 @@ const MainPage = () => {
       memberProfile,
     ],
   );
+
+  // 회원정보 몸무게가 없을 때만 보조적으로 가장 최근 체중 기록을 사용
+  const latestWeightValue = useMemo(() => {
+    const rec = weightRecords.find((r) => r?.weight != null);
+    return rec ? Number(rec.weight) : null;
+  }, [weightRecords]);
 
   const computeAgeFromBirth = (birthDate) => {
     if (!birthDate) return null;
@@ -470,7 +614,7 @@ const MainPage = () => {
   const age = computeAgeFromBirth(memberProfile?.birthDate);
   const gender = memberProfile?.gender ?? null;
   const heightCm = memberProfile?.height ?? null;
-  const profileWeightKg = latestWeight?.value ?? memberProfile?.weight ?? null;
+  const profileWeightKg = memberProfile?.weight ?? latestWeightValue ?? null;
   const bmiValue =
     profileWeightKg != null && heightCm
       ? Number((profileWeightKg / ((heightCm / 100) * (heightCm / 100))).toFixed(1))
@@ -625,84 +769,58 @@ const MainPage = () => {
 
               <ChartSection
                 title="주간 건강 추이"
+                subtitle="일자별 평균 수치 추이"
                 data={activeChart.data}
                 legends={activeChart.legends}
                 areas={activeChart.areas}
                 unit={activeChart.unit}
+                accentColor={activeChart.accent}
+                primaryAreaKey={activeChart.areas[0]?.key}
+                primaryAreaName={activeChart.areas[0]?.name}
                 selectedType={selectedChartType}
                 onTypeChange={setSelectedChartType}
                 chartTypes={[
-                  { value: "bloodSugar", label: "혈당" },
-                  { value: "bloodPressure", label: "혈압" },
-                  { value: "weight", label: "체중" },
+                  { value: "bloodSugar", label: "혈당", color: "#D40000" },
+                  { value: "bloodPressure", label: "혈압", color: "#ED5934" },
+                  { value: "weight", label: "체중", color: "#434335" },
                 ]}
               >
                 {(filteredData) => {
-                  // 데이터+기준선 기준 Y축 동적 도메인 (위/아래 빈 공간 최소화)
+                  // 데이터 기준 Y축 동적 도메인 (위/아래 여백 최소화)
                   const allValues = [];
                   activeChart.areas.forEach((a) => {
                     filteredData.forEach((d) => {
                       if (d[a.key] != null) allValues.push(d[a.key]);
                     });
                   });
-                  activeChart.references?.forEach((r) => allValues.push(r.value));
                   const dataMin = allValues.length ? Math.min(...allValues) : 0;
                   const dataMax = allValues.length ? Math.max(...allValues) : 100;
                   const range = dataMax - dataMin || 1;
-                  const pad = Math.max(range * 0.18, 3);
+                  const pad = Math.max(range * 0.15, 3);
                   const yDomain = [
                     Math.floor(dataMin - pad),
                     Math.ceil(dataMax + pad),
                   ];
 
-                  // 각 데이터 키별 min/max 점 위치 계산
-                  const extremes = activeChart.areas.flatMap((a) => {
-                    let maxRow, minRow;
-                    filteredData.forEach((d) => {
-                      const v = d[a.key];
-                      if (v == null) return;
-                      if (!maxRow || v > maxRow[a.key]) maxRow = d;
-                      if (!minRow || v < minRow[a.key]) minRow = d;
-                    });
-                    const result = [];
-                    if (maxRow)
-                      result.push({
-                        type: "max",
-                        areaKey: a.key,
-                        stroke: a.stroke,
-                        date: maxRow.date,
-                        value: maxRow[a.key],
-                      });
-                    if (minRow && minRow !== maxRow)
-                      result.push({
-                        type: "min",
-                        areaKey: a.key,
-                        stroke: a.stroke,
-                        date: minRow.date,
-                        value: minRow[a.key],
-                      });
-                    return result;
-                  });
-
                   return (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={filteredData} margin={{ top: 40, right: 16, left: 0, bottom: 28 }}>
+                    <AreaChart data={filteredData} margin={{ top: 16, right: 16, left: 0, bottom: 16 }}>
                       <defs>
                         <linearGradient id="systolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2563eb" stopOpacity={0.18} />
-                          <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#ED5934" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#ED5934" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="diastolicGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.16} />
-                          <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#F59874" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#F59874" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#16a34a" stopOpacity={0.2} />
-                          <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#D40000" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#D40000" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.2} />
-                          <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#434335" stopOpacity={0.12} />
+                          <stop offset="100%" stopColor="#434335" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="4 6" stroke="#EEF2F7" vertical={false} />
@@ -725,49 +843,6 @@ const MainPage = () => {
                         cursor={{ stroke: "#CBD5E1", strokeWidth: 1, strokeDasharray: "4 4" }}
                       />
 
-                      {/* 목표 기준선 (점선 위에 흰 배지로 라벨) */}
-                      {activeChart.references?.map((ref) => {
-                        const labelText = ref.label;
-                        const pillWidth = labelText.length * 9 + 18;
-                        return (
-                          <ReferenceLine
-                            key={`${ref.label}-${ref.value}`}
-                            y={ref.value}
-                            stroke="#CBD5E1"
-                            strokeDasharray="6 6"
-                            strokeWidth={1.5}
-                            label={(props) => {
-                              const { viewBox } = props;
-                              const cx = viewBox.x + viewBox.width - pillWidth - 6;
-                              const cy = viewBox.y - 14;
-                              return (
-                                <g>
-                                  <rect
-                                    x={cx}
-                                    y={cy - 12}
-                                    width={pillWidth}
-                                    height={24}
-                                    rx={12}
-                                    fill="#F1F5F9"
-                                  />
-                                  <text
-                                    x={cx + pillWidth / 2}
-                                    y={cy + 5}
-                                    textAnchor="middle"
-                                    fontSize={13}
-                                    fontWeight={800}
-                                    fill="#475569"
-                                  >
-                                    {labelText}
-                                  </text>
-                                </g>
-                              );
-                            }}
-                            ifOverflow="extendDomain"
-                          />
-                        );
-                      })}
-
                       {activeChart.areas.map((area) => (
                         <Area
                           key={area.key}
@@ -775,61 +850,12 @@ const MainPage = () => {
                           dataKey={area.key}
                           name={area.name}
                           stroke={area.stroke}
-                          strokeWidth={2.5}
+                          strokeWidth={3}
                           fill={`url(#${area.gradientId})`}
                           dot={{ r: 3, fill: "#fff", stroke: area.stroke, strokeWidth: 2 }}
-                          activeDot={{ r: 6, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
+                          activeDot={{ r: 7, fill: area.stroke, stroke: "#fff", strokeWidth: 2 }}
                         />
                       ))}
-
-                      {/* Max/Min 강조 점 */}
-                      {extremes.map((e) => {
-                        const isMax = e.type === "max";
-                        const bg = isMax ? "#FEE2E2" : "#DCFCE7";
-                        const fg = isMax ? "#DC2626" : "#16A34A";
-                        const valueStr = String(e.value);
-                        const pillWidth = valueStr.length * 10 + 18;
-                        return (
-                          <ReferenceDot
-                            key={`${e.areaKey}-${e.type}`}
-                            x={e.date}
-                            y={e.value}
-                            r={8}
-                            fill={e.stroke}
-                            stroke="#fff"
-                            strokeWidth={3}
-                            ifOverflow="extendDomain"
-                            label={(props) => {
-                              const { viewBox } = props;
-                              const cx = viewBox.cx ?? viewBox.x;
-                              const cy = viewBox.cy ?? viewBox.y;
-                              const labelY = isMax ? cy - 24 : cy + 24;
-                              return (
-                                <g>
-                                  <rect
-                                    x={cx - pillWidth / 2}
-                                    y={labelY - 13}
-                                    width={pillWidth}
-                                    height={26}
-                                    rx={13}
-                                    fill={bg}
-                                  />
-                                  <text
-                                    x={cx}
-                                    y={labelY + 5}
-                                    textAnchor="middle"
-                                    fontSize={15}
-                                    fontWeight={800}
-                                    fill={fg}
-                                  >
-                                    {e.value}
-                                  </text>
-                                </g>
-                              );
-                            }}
-                          />
-                        );
-                      })}
                     </AreaChart>
                   </ResponsiveContainer>
                   );
