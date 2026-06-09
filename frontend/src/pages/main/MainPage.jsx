@@ -14,6 +14,7 @@ import {
   buildSchedulesFromGroups,
 } from "../../components/medication/prescriptionData";
 import { useAuth } from "../../contexts/AuthContext";
+import { translateTexts } from "../../utils/aiTranslate";
 import Header from "../../components/Header";
 import Card from "../../components/mainpage/card.jsx";
 import Calendar from "../../components/mainpage/calendar.jsx";
@@ -109,6 +110,8 @@ const MainPage = () => {
   const [targetWaterCups, setTargetWaterCups] = useState(null);
   const [targetWeight, setTargetWeight] = useState(null);
   const [medicineData, setMedicineData] = useState(() => buildMedicineData());
+  // 복약 위젯에 표시되는 처방 그룹명(사용자 입력 한글)을 현재 언어로 즉석 번역한 맵
+  const [medTxMap, setMedTxMap] = useState({});
 
   useEffect(() => {
     if (!userId) return undefined;
@@ -263,6 +266,23 @@ const MainPage = () => {
       window.removeEventListener("storage", refresh);
     };
   }, []);
+
+  // 복약 위젯의 처방 그룹명을 현재 언어로 번역(UserInformation 과 동일 패턴). ko/실패 시 원문 유지.
+  useEffect(() => {
+    const lang = i18n.language;
+    const items = (medicineData?.groups || []).flatMap((g) => g.items || []);
+    if (!lang || lang.startsWith("ko") || items.length === 0) {
+      setMedTxMap({});
+      return undefined;
+    }
+    let cancelled = false;
+    translateTexts(items, lang).then((m) => {
+      if (!cancelled) setMedTxMap(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [medicineData, i18n.language]);
 
   // 체중/회원정보가 다른 페이지에서 갱신되면 헤더의 몸무게·BMI 즉시 반영
   useEffect(() => {
@@ -592,7 +612,14 @@ const MainPage = () => {
       todayMealKcal,
       todayBurnedKcal,
       water: { cups: todayWaterCups, targetCups: targetWaterCups },
-      medicine: medicineData,
+      // 처방 그룹명(items)만 현재 언어로 치환해 표시. 없으면 원문 유지.
+      medicine: {
+        ...medicineData,
+        groups: (medicineData.groups || []).map((g) => ({
+          ...g,
+          items: (g.items || []).map((it) => medTxMap[it] || it),
+        })),
+      },
       normal: {
         bloodSugar: memberProfile?.normalFastingGlucose,
         systolicBP: memberProfile?.normalSystolicBP,
@@ -608,6 +635,7 @@ const MainPage = () => {
       todayWaterCups,
       targetWaterCups,
       medicineData,
+      medTxMap,
       memberProfile,
     ],
   );

@@ -782,6 +782,15 @@ export default function RecordSummary() {
                       : schedule.id === "dinner"
                         ? Moon
                         : Sun;
+                  // 라벨/이름은 표시 전용이라 저장된 값(저장 당시 언어로 동결됨)을
+                  // 믿지 말고 slot id 로 현재 언어에서 재해석한다. (id 가 슬롯이 아니면 원문 유지)
+                  const hasSlotKey = i18n.exists(`medication.slot.${schedule.id}`);
+                  const slotLabel = hasSlotKey
+                    ? t(`medication.slot.${schedule.id}`)
+                    : schedule.label;
+                  const slotName = hasSlotKey
+                    ? t("medication.slotDoseName", { slot: slotLabel })
+                    : schedule.name;
                   return (
                     <div
                       key={schedule.id}
@@ -798,11 +807,11 @@ export default function RecordSummary() {
                             : "text-gray-400"
                         }`}
                       >
-                        <ScheduleIcon size={13} /> {schedule.label}
+                        <ScheduleIcon size={13} /> {slotLabel}
                         {schedule.time ? ` (${schedule.time})` : ""}
                       </div>
                       <p className="font-semibold text-sm text-gray-900 mb-0.5">
-                        {schedule.name}
+                        {slotName}
                       </p>
                       <p className="text-xs text-gray-400 mb-3">
                         {drugs.length > 0

@@ -17,6 +17,7 @@ import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import medicineApi from "../api/medicineApi";
 import { USER_KEY } from "../api/api";
 import { useAuth } from "../contexts/AuthContext";
+import { translateTexts } from "../utils/aiTranslate";
 
 // 로그인 사용자 ID 해석 (다른 페이지와 동일 방식)
 const resolveUserId = (user) => {
@@ -86,7 +87,7 @@ const loadSchedulesForDate = (dateKey, todayKey, groups) => {
 };
 
 export default function MedicationPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
   const [time, setTime] = useState(() => formatTimeNow());
@@ -141,6 +142,9 @@ export default function MedicationPage() {
   // 처방전 최초 로드 완료 여부. 로드 전에는 일정 저장을 막아,
   // 비동기 로드 직전의 "빈 일정"이 localStorage 의 기존 복용 체크를 덮어쓰는 것을 방지한다.
   const [prescriptionsLoaded, setPrescriptionsLoaded] = useState(false);
+  // 사용자 입력 한글(처방 이름·메모)을 현재 언어로 즉석 번역한 맵 { 원문: 번역문 }.
+  // 약 이름(공식 의약품명)은 번역 대상이 아니므로 넣지 않는다.
+  const [txMap, setTxMap] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -172,6 +176,40 @@ export default function MedicationPage() {
       cancelled = true;
     };
   }, [userId]);
+
+  // 처방 이름·메모를 현재 언어로 번역(UserInformation 과 동일 패턴). ko/실패 시 원문 유지.
+  useEffect(() => {
+    const lang = i18n.language;
+    if (!lang || lang.startsWith("ko") || prescriptionGroups.length === 0) {
+      setTxMap({});
+      return undefined;
+    }
+    const texts = [];
+    prescriptionGroups.forEach((g) => {
+      if (g.groupName) texts.push(g.groupName);
+      if (g.memo) texts.push(g.memo);
+    });
+    if (texts.length === 0) {
+      setTxMap({});
+      return undefined;
+    }
+    let cancelled = false;
+    translateTexts(texts, lang).then((m) => {
+      if (!cancelled) setTxMap(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [prescriptionGroups, i18n.language]);
+
+  // 표시용 번역 헬퍼 — 맵에 없으면 원문 그대로(약 이름 등은 그대로 통과).
+  const tx = (s) => (s == null ? s : txMap[s] || s);
+  // 일정 슬롯의 약 표시명(=처방 그룹명)만 번역. id/taken 등 매칭값은 그대로 둔다.
+  const txSchedules = (schedules) =>
+    schedules.map((s) => ({
+      ...s,
+      drugs: s.drugs.map((d) => ({ ...d, name: tx(d.name) })),
+    }));
 
   // 약이 1개 이상 남은 그룹만 활성 (빈 그룹은 페이지 전체에서 제외)
   const activeGroups = prescriptionGroups.filter(
@@ -288,12 +326,12 @@ export default function MedicationPage() {
 
   // 과거 날짜를 보고 있을 때는 그 시점의 기록을 유지(필터 미적용)
   const isPastSchedule = scheduleDate < todayKey;
-  const displaySchedules = isPastSchedule
-    ? todaySchedules
-    : filterToActiveDrugs(todaySchedules);
+  const displaySchedules = txSchedules(
+    isPastSchedule ? todaySchedules : filterToActiveDrugs(todaySchedules)
+  );
 
   // 주간 달력의 "오늘" 셀은 항상 실제 오늘 기준이라 활성 필터 적용
-  const weekDisplaySchedules = filterToActiveDrugs(weekTodaySchedules);
+  const weekDisplaySchedules = txSchedules(filterToActiveDrugs(weekTodaySchedules));
 
   // 처방 목록에 표시할 "복용일정" = 그 그룹의 약이 포함된 일정 슬롯(아침·점심·저녁)
   const prescriptionsForList = activeGroups.map((g) => {
@@ -302,6 +340,7 @@ export default function MedicationPage() {
       .map((slot) => slot.label);
     return {
       ...g,
+      groupName: tx(g.groupName),
       scheduleLabel: slots.length > 0 ? slots.join(" · ") : "-",
     };
   });
@@ -309,7 +348,7 @@ export default function MedicationPage() {
   // 메모장 = 메모가 입력된 처방 그룹들
   const memoList = activeGroups
     .filter((g) => g.memo)
-    .map((g) => ({ id: g.id, groupName: g.groupName, content: g.memo }));
+    .map((g) => ({ id: g.id, groupName: tx(g.groupName), content: tx(g.memo) }));
 
   const handleToggleDrug = (scheduleId, drugId) => {
     setTodaySchedules((prev) =>
@@ -410,7 +449,7 @@ export default function MedicationPage() {
               <MemoCard memoList={memoList} />
               <WeeklyCalendarCard
                 todaySchedules={weekDisplaySchedules}
-                drugNames={prescriptionGroups.map((g) => g.groupName)}
+                drugNames={prescriptionGroups.map((g) => tx(g.groupName))}
                 prnRecords={savedRecords}
                 todayKey={todayKey}
                 savedSchedulesByDate={savedSchedulesByDate}
@@ -436,7 +475,11 @@ export default function MedicationPage() {
       <PrescriptionDetailModal
         key={selectedGroup?.id ?? "none"}
         open={isPrescriptionModalOpen}
-        group={selectedGroupLive}
+        group={
+          selectedGroupLive
+            ? { ...selectedGroupLive, groupName: tx(selectedGroupLive.groupName) }
+            : null
+        }
         onClose={closePrescriptionModal}
         onDeleteMedicine={handleDeleteMedicine}
         onUpdateMedicine={handleUpdateMedicine}

@@ -2132,6 +2132,7 @@
   "prescriptionDetailModal": {
     "title": "My [{{groupName}}] Prescription List",
     "totalCount": "A total of {{count}} medications are prescribed.",
+    "ingredientLabel": "Ingredient: {{ingredient}}",
     "empty": "No prescribed medications. If you delete all medications, this group will also disappear from the dosing schedule and adherence.",
     "placeholder": {
       "name": "Medication name",

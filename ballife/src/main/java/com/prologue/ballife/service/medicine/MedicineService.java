@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.prologue.ballife.config.MessageResolver;
+import com.prologue.ballife.domain.medicine.Medicine;
 import com.prologue.ballife.domain.medicine.Prescription;
 import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 import com.prologue.ballife.domain.medicine.UserMedicine;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.repository.medicine.PrescriptionRepository;
 import com.prologue.ballife.repository.medicine.UserMedicineRepository;
+import com.prologue.ballife.repository.medicineMongo.MedicineRepository;
 import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
@@ -32,6 +34,7 @@ public class MedicineService {
     private final PrescriptionRepository prescriptionRepository;
     private final UserMedicineRepository userMedicineRepository;
     private final UserRepository userRepository;
+    private final MedicineRepository medicineRepository; // 약품 캐시(MongoDB) — 주성분 다국어 병기용
     private final MessageResolver messages;
 
     // 처방전+약 등록
@@ -126,7 +129,11 @@ public class MedicineService {
         List<UserMedicine> list = userMedicineRepository.findByPrescription_PrescriptionId(prescriptionId);
 
         return list.stream()
-                .map(UserMedicineDto.UserMedicineResponse::from)
+                .map(um -> {
+                    // 저장된 약 이름으로 약품 캐시를 조회해 주성분(한/영)을 병기. 미조회 시 medicine=null → 한글 이름만.
+                    Medicine medicine = medicineRepository.findByItemName(um.getMedicineName()).orElse(null);
+                    return UserMedicineDto.UserMedicineResponse.from(um, medicine);
+                })
                 .toList();
     }
 

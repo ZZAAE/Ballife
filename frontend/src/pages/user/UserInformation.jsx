@@ -1108,6 +1108,15 @@ function UserInformation() {
                                             t(
                                               "userInformation.prescription.noName",
                                             )}
+                                          {/* 비한국어일 때만 영문 주성분(INN) 병기. 약 이름 자체는 한글 유지 */}
+                                          {!(i18n.language || "ko").startsWith(
+                                            "ko",
+                                          ) &&
+                                            m.ingredientEng && (
+                                              <span className="ml-1 text-gray-400">
+                                                ({m.ingredientEng})
+                                              </span>
+                                            )}
                                         </li>
                                       ))
                                     ) : (

@@ -2132,6 +2132,7 @@
   "prescriptionDetailModal": {
     "title": "私の[{{groupName}}]処方リスト",
     "totalCount": "全{{count}}種類の薬が処方されています。",
+    "ingredientLabel": "成分: {{ingredient}}",
     "empty": "処方された薬がありません。薬をすべて削除すると、このグループは服薬スケジュール・遵守率からも消えます。",
     "placeholder": {
       "name": "薬の名前",

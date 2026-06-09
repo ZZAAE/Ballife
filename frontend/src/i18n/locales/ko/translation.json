@@ -2132,6 +2132,7 @@
   "prescriptionDetailModal": {
     "title": "나의 [{{groupName}}] 처방 목록",
     "totalCount": "총 {{count}}개의 약이 처방되어 있습니다.",
+    "ingredientLabel": "성분: {{ingredient}}",
     "empty": "처방된 약이 없습니다. 약을 모두 삭제하면 이 그룹은 복용 일정·이행률에서도 사라집니다.",
     "placeholder": {
       "name": "약 이름",
