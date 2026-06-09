@@ -65,7 +65,8 @@ export default function AIAnalysisCard({ className = "", metric, data, userId })
     return () => {
       cancelled = true;
     };
-  }, [sig]);
+    // 언어 변경 시 선택한 언어로 다시 분석 요청 (/analyze 가 lang 으로 출력 언어를 강제)
+  }, [sig, i18n.language]);
 
   const handleRewardClick = () => {
     const id = Date.now() + Math.random();

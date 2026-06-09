@@ -167,9 +167,10 @@ export default function Header() {
 
         {/* h_etc */}
         <div className="h_etc flex w-auto xl:w-[180px] shrink-0 items-center justify-end gap-2">
-          {/* 언어 스위처 */}
+          {/* 언어 스위처 — 내비 메뉴처럼 마우스를 올리면 목록이 열린다 (클릭 토글은 터치용으로 유지) */}
           <div
             className="relative"
+            onMouseEnter={() => setLangOpen(true)}
             onMouseLeave={() => setLangOpen(false)}
           >
             <button
@@ -199,7 +200,7 @@ export default function Header() {
             {langOpen && (
               <ul
                 role="listbox"
-                className="absolute right-0 top-full z-50 mt-1 min-w-[130px] overflow-hidden rounded-[8px] bg-white py-1 shadow-[0_12px_28px_rgba(18,18,18,0.18)]"
+                className="absolute right-0 top-full z-50 min-w-[130px] overflow-hidden rounded-[8px] bg-white py-1 shadow-[0_12px_28px_rgba(18,18,18,0.18)]"
               >
                 {SUPPORTED_LANGUAGES.map((lng) => (
                   <li key={lng.code}>

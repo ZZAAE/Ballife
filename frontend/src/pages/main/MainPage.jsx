@@ -91,7 +91,7 @@ const mergeTakenState = (base, saved) =>
   });
 
 const MainPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id ?? null;
 
@@ -313,7 +313,8 @@ const MainPage = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+    // 언어 전환 시 재요청 — 백엔드가 Accept-Language(현재 언어)에 맞춘 제목을 내려준다.
+  }, [i18n.language]);
 
   const {
     unityProvider,
