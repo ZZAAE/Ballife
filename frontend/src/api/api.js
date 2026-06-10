@@ -5,9 +5,8 @@ import i18n from "../i18n";
 export const ACCESS_TOKEN_KEY = 'accessToken';
 export const USER_KEY = 'loginUser';
 
-// 다른 컴퓨터에서 합류하려면 같은 백엔드를 봐야 한다.
-// .env 에 VITE_API_BASE_URL=http://<백엔드PC_IP>:8080/api 로 지정하면 그쪽을 본다.
-// (미지정 시 로컬 개발용 localhost 로 폴백)
+// 운영 배포에서는 /api 를 사용해 nginx 프록시를 탄다.
+// 개발에서 직접 백엔드를 호출해야 할 때만 .env.local에 VITE_API_BASE_URL을 지정한다.
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
 });

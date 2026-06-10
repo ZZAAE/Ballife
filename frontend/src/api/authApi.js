@@ -15,19 +15,19 @@ const authApi = {
 
     //로그인 아이디 중복 체크
     checkUsername: (userId) => {
-        return api.get('auth/check-loginid',
+        return api.get('/auth/check-loginid',
             {params: {userId}});
     },
 
     //닉네임 중복 체크
     checkNickname: (nickname) => {
-        return api.get('auth/check-nickname', 
+        return api.get('/auth/check-nickname', 
             {params: {nickname}});
     },
 
     //이메일 중복 체크
     checkEmail: (email) => {
-        return api.get('auth/check-email', 
+        return api.get('/auth/check-email', 
             {params: {email}});
     },
 
