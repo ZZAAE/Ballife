@@ -1,22 +1,15 @@
 # ============================================================
-# Ballife 배포 워크플로 (5-서버 구성)
-#   1) 이미지 3개(frontend/backend/ai-service) 빌드 → GHCR 푸시
-#   2) 각 앱 서버(front/backend/ai)에 SSH 접속 → docker compose pull & up
-#      · mysql/mongo 는 데이터 서버라 CI 배포 대상 아님(최초 1회 수동 설치).
-#      · 시크릿(<X>_HOST)이 설정된 서버에만 배포됨 → 아직 안 만든 서버는 자동 skip.
+# Ballife 배포 워크플로 — front / backend
+#   (AI 서버는 별도 워크플로 deploy-ai.yml 에서 처리)
+#   1) 이미지 2개(frontend/backend) 빌드 → GHCR 푸시
+#   2) front/backend 서버에 SSH 접속 → docker compose pull & up
 #
 # 필요한 GitHub Secrets
-#   [공통]
-#     GABIA_SSH_KEY   배포용 SSH 개인키(모든 서버 authorized_keys 에 같은 공개키 등록)
-#     GABIA_USER      SSH 사용자 (보통 rocky)
-#     GHCR_PAT        (선택) GHCR pull 토큰. 패키지를 public 으로 두면 불필요.
-#   [서버별 HOST — 포트/유저/키는 위 공통(GABIA_SSH_PORT/USER/KEY) 공유]
-#     front   : GABIA_HOST
-#     backend : GABIA_BACKEND_HOST
-#     ai      : GABIA_AI_HOST
-#   ※ if 조건엔 secrets 를 못 쓰므로(깃헙 제약) main 푸시면 3대 모두 배포 시도.
-#     서버를 아직 안 만들었다면 그 잡은 실패하므로, 만든 서버만 잡으로 둘 것.
-#   ※ mysql/mongo 는 데이터 서버라 CI 대상 아님 — 최초 1회 수동 설치 후 그대로 둔다.
+#   [공통]  GABIA_SSH_KEY / GABIA_USER / GABIA_SSH_PORT
+#           GHCR_PAT (선택; 패키지 public 이면 불필요)
+#   [서버별 HOST]  front: GABIA_HOST   backend: GABIA_BACKEND_HOST
+#   ※ if 조건엔 secrets 를 못 씀(깃헙 제약) → main 푸시면 두 서버 모두 배포 시도.
+#   ※ mysql/mongo 는 데이터 서버라 CI 대상 아님(최초 1회 수동 설치).
 #   ※ 각 서버의 ~/ballife 에 그 서버용 docker-compose.yml + .env 가 미리 있어야 함.
 # ============================================================
 name: Deploy
@@ -45,9 +38,6 @@ jobs:
               VITE_AI_BASE_URL=/ai
           - name: backend
             context: ./ballife
-            build_args: ""
-          - name: ai-service
-            context: ./ai-service
             build_args: ""
     steps:
       - uses: actions/checkout@v4
@@ -106,30 +96,6 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.GABIA_BACKEND_HOST }}
-          username: ${{ secrets.GABIA_USER }}
-          key: ${{ secrets.GABIA_SSH_KEY }}
-          port: ${{ secrets.GABIA_SSH_PORT }}
-          script: |
-            set -e
-            cd ~/ballife
-            if [ -n "${{ secrets.GHCR_PAT }}" ]; then
-              echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            fi
-            export IMAGE_PREFIX="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
-            export IMAGE_TAG="${{ github.sha }}"
-            docker compose pull
-            docker compose up -d
-            docker image prune -f
-
-  deploy-ai:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: SSH 배포 — ai 서버
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.GABIA_AI_HOST }}
           username: ${{ secrets.GABIA_USER }}
           key: ${{ secrets.GABIA_SSH_KEY }}
           port: ${{ secrets.GABIA_SSH_PORT }}
