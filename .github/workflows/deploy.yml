@@ -14,7 +14,8 @@
 #     front   : GABIA_HOST
 #     backend : GABIA_BACKEND_HOST
 #     ai      : GABIA_AI_HOST
-#   ※ HOST 시크릿이 없는 서버는 해당 배포 잡이 자동 skip 됨.
+#   ※ if 조건엔 secrets 를 못 쓰므로(깃헙 제약) main 푸시면 3대 모두 배포 시도.
+#     서버를 아직 안 만들었다면 그 잡은 실패하므로, 만든 서버만 잡으로 둘 것.
 #   ※ mysql/mongo 는 데이터 서버라 CI 대상 아님 — 최초 1회 수동 설치 후 그대로 둔다.
 #   ※ 각 서버의 ~/ballife 에 그 서버용 docker-compose.yml + .env 가 미리 있어야 함.
 # ============================================================
@@ -75,7 +76,7 @@ jobs:
   deploy-front:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && secrets.GABIA_HOST != '' }}
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: SSH 배포 — front 서버
         uses: appleboy/ssh-action@v1.2.0
@@ -99,7 +100,7 @@ jobs:
   deploy-backend:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && secrets.GABIA_BACKEND_HOST != '' }}
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: SSH 배포 — backend 서버
         uses: appleboy/ssh-action@v1.2.0
@@ -123,7 +124,7 @@ jobs:
   deploy-ai:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && secrets.GABIA_AI_HOST != '' }}
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: SSH 배포 — ai 서버
         uses: appleboy/ssh-action@v1.2.0
