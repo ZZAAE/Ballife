@@ -106,5 +106,5 @@ def predict(image_bytes, topk=3):
         "known": best_conf >= FOOD_CONFIDENCE_THRESHOLD,
         "food": best_food,
         "confidence": best_conf,
-        "candidates": [{"food": n, "confidence": c} for n, c in candidates],
+        
     }
