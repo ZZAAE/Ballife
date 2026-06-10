@@ -2284,6 +2284,7 @@
   },
   "userMedalModal": {
     "title": "我的勋章",
+    "totalPointsLabel": "累计积分",
     "loading": "加载中...",
     "ownedMedalsLabel": "持有勋章 · 点击装备",
     "noMedals": "还没有获得的勋章。",

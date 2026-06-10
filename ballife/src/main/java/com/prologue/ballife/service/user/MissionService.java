@@ -82,8 +82,12 @@ public class MissionService {
                 .build();
         userMissionRepository.save(claim);
 
-        long newPoint = (user.getPoint() != null ? user.getPoint() : 0L) + type.getReward();
+        long reward = type.getReward();
+        long newPoint = (user.getPoint() != null ? user.getPoint() : 0L) + reward;
+        long newCount = (user.getUsePointCount() != null ? user.getUsePointCount() : 0L) + reward;
+        // 보유 포인트와 누적 포인트를 동일 양만큼 증가 (UserService.addPoint 와 동일 규칙)
         user.setPoint(newPoint);
+        user.setUsePointCount(newCount);
         userRepository.save(user);
 
         claimsOfType.add(claim);
