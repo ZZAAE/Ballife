@@ -503,12 +503,12 @@ export default function RecordSummary() {
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
           {/* Header */}
-          <div className="mb-8 flex items-start justify-between gap-4">
+          <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                 {t("recordSummary.header.title")}
               </h1>
-              <p className="mb-8 text-sm text-gray-500">
+              <p className="text-sm text-gray-500">
                 {t("recordSummary.header.subtitle")}
               </p>
             </div>
