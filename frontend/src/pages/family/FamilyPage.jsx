@@ -394,58 +394,7 @@ export default function FamilyPage() {
   const canCreateGroup =
     subscription?.plan === "FAMILY" && subscription?.active;
   const consent = family?.myConsent ?? {};
-  // TODO(임시): 레이아웃 확인용 더미 형제 2명 — 확인 후 제거
-  const DUMMY_SIBLINGS = [
-    {
-      userId: "dummy-bro-1",
-      nickname: "엄마",
-      me: false,
-      role: "MEMBER",
-      bloodSugar: { value: 98 },
-      bloodPressure: { systolic: 118, diastolic: 76 },
-      exercise: { exerciseName: "러닝", burnedCalorie: 240 },
-      medication: { taken: 2, total: 2 },
-      consent: {
-        shareBloodSugar: true,
-        shareBloodPressure: true,
-        shareMedication: true,
-        shareExercise: true,
-      },
-    },
-    {
-      userId: "dummy-bro-2",
-      nickname: "아빠",
-      me: false,
-      role: "MEMBER",
-      bloodSugar: { value: 105 },
-      bloodPressure: { systolic: 122, diastolic: 80 },
-      exercise: { exerciseName: "수영", burnedCalorie: 310 },
-      medication: { taken: 1, total: 3 },
-      consent: {
-        shareBloodSugar: true,
-        shareBloodPressure: true,
-        shareMedication: true,
-        shareExercise: true,
-      },
-    },
-    {
-      userId: "dummy-bro-3",
-      nickname: "동생",
-      me: false,
-      role: "MEMBER",
-      bloodSugar: { value: 110 },
-      bloodPressure: { systolic: 112, diastolic: 87 },
-      exercise: { exerciseName: "러닝", burnedCalorie: 310 },
-      medication: { taken: 2, total: 3 },
-      consent: {
-        shareBloodSugar: true,
-        shareBloodPressure: true,
-        shareMedication: true,
-        shareExercise: true,
-      },
-    },
-  ];
-  const members = [...(family?.members ?? []), ...DUMMY_SIBLINGS];
+  const members = family?.members ?? [];
 
   // ── 그룹 미소속 ──
   if (!inGroup) {
