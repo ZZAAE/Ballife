@@ -1,0 +1,14 @@
+{
+  "name": "ballife-seed",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ballife 더미데이터 보조 시드 (MySQL + MongoDB 양쪽을 다루는 운동 상세 시드)",
+  "scripts": {
+    "seed:exercise": "node seed_exercise.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.9.0",
+    "mysql2": "^3.11.5"
+  }
+}
