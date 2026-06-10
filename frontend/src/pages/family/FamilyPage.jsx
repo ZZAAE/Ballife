@@ -210,8 +210,8 @@ function Shell({ children }) {
     <div className="min-h-screen w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
       <div className="flex pt-[55px]">
         <main className="min-w-0 flex-1">
-          <div className="mx-auto box-border max-w-[1000px] px-6 py-8">
-            <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="mx-auto box-border max-w-[1280px] px-4 sm:px-6 py-8">
+            <div className="mb-8 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f1c33] text-white">
                   <Users size={20} />

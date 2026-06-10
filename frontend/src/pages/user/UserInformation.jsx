@@ -716,7 +716,7 @@ function UserInformation() {
                     </p>
                   )}
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-1.5">
                     <button
                       type="button"
                       onClick={() => navigate("/member/family")}

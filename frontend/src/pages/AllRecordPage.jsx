@@ -601,13 +601,13 @@ function AllRecordPage() {
   return (
     <>
       <main className="min-h-[calc(100vh-70px)] w-full bg-[#F9FAFB] font-['Noto_Sans_KR'] text-[#0F172A]">
-        <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[87px] pb-8">
+        <div className="mx-auto box-border w-full max-w-[1280px] px-4 sm:px-6 pt-[87px] pb-8">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <h1 className="text-[30px] font-extrabold leading-none tracking-tight text-[#0F172A]">
+              <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                 {t("allRecordPage.title")}
               </h1>
-              <p className="mt-2 text-sm text-[#64748B]">
+              <p className="text-sm text-[#64748B]">
                 {t("allRecordPage.subtitle")}
               </p>
             </div>
@@ -633,7 +633,7 @@ function AllRecordPage() {
               <button
                 type="button"
                 onClick={openDatePicker}
-                className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold text-[#64748B] shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition hover:bg-[#F9FAFB]"
+                className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 py-2.5 text-[14px] font-semibold text-[#64748B] shadow-sm hover:border-slate-300"
               >
                 {selectedDate}
                 <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>

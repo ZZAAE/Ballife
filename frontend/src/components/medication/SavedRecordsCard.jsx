@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Calendar, Clock, Pill, Trash2 } from "lucide-react";
+import { Calendar, CalendarDays, Clock, Pill, Trash2 } from "lucide-react";
+import { formatDate } from "../../utils/format";
 
 export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) {
   const { t } = useTranslation();
@@ -23,10 +24,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
     if (!dateKey) return "";
     const [y, m, d] = dateKey.split("-");
     if (!y || !m || !d) return dateKey;
-    return t("savedRecordsCard.viewLabel", {
-      month: parseInt(m, 10),
-      day: parseInt(d, 10),
-    });
+    return formatDate(dateKey);
   };
 
   return (
@@ -43,10 +41,10 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
             <button
               type="button"
               onClick={openDatePicker}
-              className="text-[12px] text-[#2563EB] bg-blue-50 px-2.5 py-0.5 rounded-full font-medium hover:bg-blue-100 transition-colors inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors"
             >
               {formatViewLabel(viewDate)}
-              <Calendar className="w-3 h-3" />
+              <CalendarDays className="h-3.5 w-3.5 text-[#2563EB]" />
             </button>
           )}
         </div>

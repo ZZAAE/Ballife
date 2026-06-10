@@ -408,12 +408,12 @@ export default function MealPage() {
 
           {/* ── 페이지 타이틀 ─────────────────────────────────────────── */}
           <div className="mb-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
                   {t("mealPage.title")}
                 </h1>
-                <p className="mb-8 text-sm text-gray-500">
+                <p className="text-sm text-gray-500">
                   {t("mealPage.subtitle")}
                 </p>
               </div>
@@ -430,7 +430,7 @@ export default function MealPage() {
                 <button
                   type="button"
                   onClick={() => dateInputRef.current?.showPicker()}
-                  className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold text-[#64748B] shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition hover:bg-[#F9FAFB]"
+                  className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-5 py-2.5 text-[14px] font-semibold text-[#64748B] shadow-sm hover:border-slate-300"
                 >
                   {selectedDate}
                   <span className="ml-1 text-[10px] text-[#94A3B8]">▼</span>
