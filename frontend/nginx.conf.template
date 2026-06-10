@@ -7,15 +7,26 @@
 # ============================================================
 
 upstream ballife_backend {
-    server ${BACKEND_ADDR};
+    server 192.168.0.35:8080;
 }
+
 upstream ballife_ai {
-    server ${AI_ADDR};
+    server 127.0.0.1:8001;
 }
 
 server {
-    listen       80;
-    server_name  _;
+    listen 80;
+    server_name ballife.cloud;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ballife.cloud;
+
+    ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
 
     root   /usr/share/nginx/html;
     index  index.html;
@@ -35,7 +46,17 @@ server {
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    # API → 백엔드 서버
+    location /api/ {
+        proxy_pass http://ballife_backend;
+        proxy_connect_timeout 10s;
+        proxy_read_timeout    300s;
+        proxy_send_timeout    300s;
+    }
+
+    location /uploads/ {
+        proxy_pass http://ballife_backend;
+    }
+
     location /ai/ {
         proxy_pass http://192.168.0.241:8001/;
         proxy_connect_timeout 10s;
@@ -47,24 +68,11 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
-    # 업로드 이미지 → 백엔드 서버
-    location /uploads/ {
-        proxy_pass http://ballife_backend;
-    }
-
-    # AI 서비스 → AI 서버 (/ai 접두어 제거)
-    location /ai/ {
-        proxy_pass http://ballife_ai/;
-        proxy_connect_timeout 10s;
-        proxy_read_timeout    300s;
-        proxy_send_timeout    300s;
-    }
-
-    # Unity WebGL 에셋
     location ~* \.wasm$ {
         default_type application/wasm;
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
+
     location /Unity/ {
         add_header Cache-Control "public, max-age=31536000, immutable";
         try_files $uri =404;
@@ -75,7 +83,6 @@ server {
         try_files $uri =404;
     }
 
-    # SPA 라우팅
     location / {
         try_files $uri $uri/ /index.html;
     }
