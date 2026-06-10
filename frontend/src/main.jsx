@@ -75,6 +75,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
         <Toaster
           position="top-right"
+          containerStyle={{ top: 72 }}
           toastOptions={{
             duration: 3000,
             style: {
