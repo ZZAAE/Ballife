@@ -5,6 +5,11 @@ import mealApi from "../../api/mealApi";
 import bioValueRecordApi from "../../api/bioValueRecordApi";
 import userConfigApi from "../../api/userConfigApi";
 import { getExercisesInRange } from "../../api/exerciseApi";
+import medicineApi from "../../api/medicineApi";
+import {
+  mapPrescriptionsToGroups,
+  buildSchedulesFromGroups,
+} from "../../components/medication/prescriptionData";
 import { BIO_CATEGORY } from "../../constants/bioCategory";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -64,6 +69,25 @@ const readMedicationSchedules = (dateStr) => {
   } catch {
     return [];
   }
+};
+
+// 백엔드 처방으로 만든 기준 일정에 localStorage 의 복용 체크 상태를 덮어쓴다.
+// 약 페이지(loadSchedulesForDate)와 동일한 슬롯/약 id 기준 병합 →
+// 약 페이지를 방문/저장하지 않은 날짜도 일정이 그대로 노출된다.
+const mergeSavedTaken = (base, dateStr) => {
+  const saved = readMedicationSchedules(dateStr);
+  if (saved.length === 0) return base;
+  return base.map((slot) => {
+    const savedSlot = saved.find((s) => s.id === slot.id);
+    if (!savedSlot || !Array.isArray(savedSlot.drugs)) return slot;
+    return {
+      ...slot,
+      drugs: slot.drugs.map((d) => {
+        const sd = savedSlot.drugs.find((x) => x.id === d.id);
+        return sd ? { ...d, taken: !!sd.taken } : d;
+      }),
+    };
+  });
 };
 
 const formatNumber = (n) =>
@@ -361,7 +385,31 @@ export default function RecordSummary() {
       },
     );
 
-    setMedSchedules(readMedicationSchedules(date));
+    // 복용 일정: 약 페이지와 동일하게 백엔드 처방에서 기준 일정을 만들고
+    // localStorage 의 복용 체크 상태를 병합한다. (약 페이지 미방문/미저장이어도 표시)
+    medicineApi
+      .getPrescriptions(userId)
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        return Promise.all(
+          list.map((p) =>
+            medicineApi
+              .getUserMedicine(p.prescriptionId)
+              .then((r) => ({ ...p, medicines: r.data || [] }))
+              .catch(() => ({ ...p, medicines: [] })),
+          ),
+        );
+      })
+      .then((withMeds) => {
+        if (cancelled) return;
+        const groups = mapPrescriptionsToGroups(withMeds);
+        const base = buildSchedulesFromGroups(groups, date);
+        setMedSchedules(mergeSavedTaken(base, date));
+      })
+      .catch(() => {
+        // 처방 조회 실패 시 저장된 복용 기록만이라도 노출
+        if (!cancelled) setMedSchedules(readMedicationSchedules(date));
+      });
 
     return () => {
       cancelled = true;
@@ -766,7 +814,7 @@ export default function RecordSummary() {
                 {t("recordSummary.medication.empty")}
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="flex gap-4 overflow-x-auto pb-2">
                 {medSchedules.map((schedule) => {
                   const drugs = schedule.drugs || [];
                   const takenCount = drugs.filter((d) => d.taken).length;
@@ -794,7 +842,7 @@ export default function RecordSummary() {
                   return (
                     <div
                       key={schedule.id}
-                      className={`rounded-xl p-4 ${
+                      className={`flex-shrink-0 w-[240px] sm:w-[calc((100%-2rem)/3)] rounded-xl p-4 ${
                         status === "none"
                           ? "border-2 border-gray-900"
                           : "border border-gray-100"
