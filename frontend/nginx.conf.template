@@ -1,17 +1,9 @@
 # ============================================================
-# Ballife 프론트엔드 nginx 템플릿 (5-서버 분리 배포용)
-#   - 백엔드/AI 는 "다른 서버"이므로 IP:포트를 런타임 환경변수로 주입.
-#     BACKEND_ADDR (예: 10.0.0.2:8080), AI_ADDR (예: 10.0.0.3:8001)
-#   - nginx 공식 이미지가 /etc/nginx/templates/*.template 를 envsubst 로
-#     치환해 /etc/nginx/conf.d/ 로 배치한다. (설정된 env 변수만 치환 → $host 등은 그대로)
+# Ballife frontend nginx config
 # ============================================================
 
 upstream ballife_backend {
     server 192.168.0.35:8080;
-}
-
-upstream ballife_ai {
-    server 127.0.0.1:8001;
 }
 
 server {
