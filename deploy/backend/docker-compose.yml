@@ -24,6 +24,11 @@ services:
       NAVER_OCR_BASE_URL: ${NAVER_OCR_BASE_URL}
       NAVER_OCR_SECRET_KEY: ${NAVER_OCR_SECRET_KEY}
       STORAGE_BASE_PATH: /app/uploads
+      # 사진(음식/처방전) 업로드 용량 한도 — 큰 사진도 받도록 상향
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 20MB
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 20MB
+      SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE: 20MB
+      SERVER_TOMCAT_MAX_SWALLOW_SIZE: 20MB
       TZ: Asia/Seoul
     volumes:
       - uploads_data:/app/uploads
