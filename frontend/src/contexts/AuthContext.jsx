@@ -13,7 +13,7 @@ import { ACCESS_TOKEN_KEY, USER_KEY } from "../api/api";
 /** axios baseURL 과 동일하게 맞출 것 (폴링 대상: GET /api/health) */
 const API_BASE =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||
-  "http://localhost:8080/api";
+  "/api";
 
 /** 서버 생존 확인 주기(ms) */
 const SERVER_HEALTH_MS = 15_000;

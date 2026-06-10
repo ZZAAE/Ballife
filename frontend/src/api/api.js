@@ -9,8 +9,7 @@ export const USER_KEY = 'loginUser';
 // .env 에 VITE_API_BASE_URL=http://<백엔드PC_IP>:8080/api 로 지정하면 그쪽을 본다.
 // (미지정 시 로컬 개발용 localhost 로 폴백)
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
-    timeout: 10000
+    baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
 });
 
 function clearContentTypeForMultipart(config){
