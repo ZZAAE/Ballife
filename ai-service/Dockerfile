@@ -21,11 +21,11 @@ RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/c
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# 앱 소스 + 모델 가중치(best.pt, 약 66MB)
+# 앱 소스만 복사 (모델 best.pt 는 용량이 커서 이미지에 안 굽고 런타임 볼륨으로 마운트)
 COPY app ./app
-COPY model ./model
 
-# food_classifier 가 읽는 모델 경로 — 실제 위치(/app/model/best.pt)로 지정
+# food_classifier 가 읽는 모델 경로. AI 서버 compose 에서 ./model 을 /app/model 로 마운트하고
+# 그 안에 best.pt 를 둔다. 모델이 없으면 YOLO 로드 실패 → OpenAI 폴백(서비스는 정상 기동).
 ENV FOOD_MODEL_PATH=/app/model/best.pt
 ENV FOOD_MODEL_DEVICE=cpu
 

@@ -10,4 +10,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       SPRING_API_URL: http://${BACKEND_ADDR}    # 백엔드서버IP:8080 (AI → 백엔드 호출)
+      FOOD_MODEL_PATH: /app/model/best.pt
       TZ: Asia/Seoul
+    volumes:
+      # AI 서버의 ~/ballife/model/best.pt 를 컨테이너에 마운트 (모델은 git/이미지에 없음)
+      - ./model:/app/model:ro
