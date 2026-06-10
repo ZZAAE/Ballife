@@ -92,7 +92,8 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
           })
         : card.exercise.exerciseName;
     }
-    if (!card.me && !card.consent?.shareExercise) return t("familyPage.private");
+    if (!card.me && !card.consent?.shareExercise)
+      return t("familyPage.private");
     return t("familyPage.noRecord");
   })();
   const medicationText = (() => {
@@ -131,7 +132,9 @@ function MemberCard({ card, isOwnerViewer, groupActive, onRemove }) {
                   : "bg-[#F1F5F9] text-[#64748B]"
               }`}
             >
-              {card.role === "OWNER" ? t("familyPage.roleOwner") : t("familyPage.roleMember")}
+              {card.role === "OWNER"
+                ? t("familyPage.roleOwner")
+                : t("familyPage.roleMember")}
             </span>
           </div>
         </div>
@@ -395,7 +398,7 @@ export default function FamilyPage() {
   const DUMMY_SIBLINGS = [
     {
       userId: "dummy-bro-1",
-      nickname: "원준",
+      nickname: "엄마",
       me: false,
       role: "MEMBER",
       bloodSugar: { value: 98 },
@@ -411,13 +414,29 @@ export default function FamilyPage() {
     },
     {
       userId: "dummy-bro-2",
-      nickname: "초딩",
+      nickname: "아빠",
       me: false,
       role: "MEMBER",
       bloodSugar: { value: 105 },
       bloodPressure: { systolic: 122, diastolic: 80 },
       exercise: { exerciseName: "수영", burnedCalorie: 310 },
       medication: { taken: 1, total: 3 },
+      consent: {
+        shareBloodSugar: true,
+        shareBloodPressure: true,
+        shareMedication: true,
+        shareExercise: true,
+      },
+    },
+    {
+      userId: "dummy-bro-3",
+      nickname: "동생",
+      me: false,
+      role: "MEMBER",
+      bloodSugar: { value: 110 },
+      bloodPressure: { systolic: 112, diastolic: 87 },
+      exercise: { exerciseName: "러닝", burnedCalorie: 310 },
+      medication: { taken: 2, total: 3 },
       consent: {
         shareBloodSugar: true,
         shareBloodPressure: true,
@@ -435,7 +454,9 @@ export default function FamilyPage() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {/* 초대 코드로 합류 */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="text-[16px] font-bold">{t("familyPage.joinTitle")}</h2>
+            <h2 className="text-[16px] font-bold">
+              {t("familyPage.joinTitle")}
+            </h2>
             <p className="mt-1 text-[13px] text-[#64748B]">
               {t("familyPage.joinDescription")}
             </p>
@@ -460,7 +481,9 @@ export default function FamilyPage() {
 
           {/* 그룹 만들기 / 업셀 */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h2 className="text-[16px] font-bold">{t("familyPage.createTitle")}</h2>
+            <h2 className="text-[16px] font-bold">
+              {t("familyPage.createTitle")}
+            </h2>
             {canCreateGroup ? (
               <>
                 <p className="mt-1 text-[13px] text-[#64748B]">
@@ -500,9 +523,7 @@ export default function FamilyPage() {
     <Shell>
       {!family.groupActive && (
         <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 text-[13px] font-medium text-[#9A3412]">
-          <span>
-            {t("familyPage.inactiveBanner")}
-          </span>
+          <span>{t("familyPage.inactiveBanner")}</span>
           {isOwner && (
             <button
               type="button"
@@ -528,7 +549,9 @@ export default function FamilyPage() {
 
             {isOwner && family.inviteCode && (
               <div className="mt-4">
-                <p className="mb-1 text-[12px] text-[#64748B]">{t("familyPage.inviteCode")}</p>
+                <p className="mb-1 text-[12px] text-[#64748B]">
+                  {t("familyPage.inviteCode")}
+                </p>
                 <div className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
                   <span className="flex-1 text-[18px] font-bold tracking-widest text-[#0F172A]">
                     {family.inviteCode}
@@ -568,7 +591,9 @@ export default function FamilyPage() {
           {/* 내 공유 설정 (항목별 동의) — flex-1 로 남은 높이를 채운다.
               제목/설명은 위에 고정하고, 토글 목록만 남은 공간에서 세로 중앙(justify-center) */}
           <div className="flex flex-1 flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h3 className="mb-1 text-[15px] font-bold">{t("familyPage.myShareSettings")}</h3>
+            <h3 className="mb-1 text-[15px] font-bold">
+              {t("familyPage.myShareSettings")}
+            </h3>
             <p className="mb-4 text-[12px] text-[#64748B]">
               {t("familyPage.shareSettingsDescription")}
             </p>
