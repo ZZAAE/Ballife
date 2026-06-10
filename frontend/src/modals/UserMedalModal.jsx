@@ -20,6 +20,7 @@ export default function UserMedalModal({ open, onClose }) {
   const [myMedals, setMyMedals] = useState([]);
   const [allMedals, setAllMedals] = useState([]);
   const [equippedMedalId, setEquippedMedalId] = useState(null);
+  const [totalPoint, setTotalPoint] = useState(0); // 누적 포인트 (User.usePointCount)
   const [loading, setLoading] = useState(false);
   const [equipping, setEquipping] = useState(null); // 장착 중인 medalId
 
@@ -36,6 +37,7 @@ export default function UserMedalModal({ open, onClose }) {
         setMyMedals(myRes.data);
         setAllMedals(allRes.data);
         setEquippedMedalId(userRes.data?.medalId ?? null);
+        setTotalPoint(userRes.data?.usePointCount ?? 0);
       } catch {
         toast.error(t("userMedalModal.toast.loadFailed"));
       } finally {
@@ -73,7 +75,18 @@ export default function UserMedalModal({ open, onClose }) {
       >
         {/* 헤더 */}
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#0F172A]">🏅 {t("userMedalModal.title")}</h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-lg font-bold text-[#0F172A]">🏅 {t("userMedalModal.title")}</h2>
+            {/* 누적 포인트 — 마이페이지의 "{value} P" 숫자 표기 재사용 */}
+            <span className="flex items-center gap-1 rounded-full bg-[#0f1c33] px-2.5 py-1 text-[11px] font-semibold text-white">
+              <span className="text-white/60">{t("userMedalModal.totalPointsLabel")}</span>
+              <span className="tabular-nums">
+                {t("userInformation.pointsValue", {
+                  value: Number(totalPoint ?? 0).toLocaleString(),
+                })}
+              </span>
+            </span>
+          </div>
           <button
             type="button"
             onClick={onClose}

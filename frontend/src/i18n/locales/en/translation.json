@@ -2284,6 +2284,7 @@
   },
   "userMedalModal": {
     "title": "My Medals",
+    "totalPointsLabel": "Total Points",
     "loading": "Loading…",
     "ownedMedalsLabel": "Owned Medals · Click to equip",
     "noMedals": "No medals earned yet.",

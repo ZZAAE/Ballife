@@ -2284,6 +2284,7 @@
   },
   "userMedalModal": {
     "title": "내 메달",
+    "totalPointsLabel": "누적 포인트",
     "loading": "불러오는 중...",
     "ownedMedalsLabel": "보유 메달 · 클릭하여 장착",
     "noMedals": "아직 획득한 메달이 없습니다.",

@@ -2284,6 +2284,7 @@
   },
   "userMedalModal": {
     "title": "マイメダル",
+    "totalPointsLabel": "累計ポイント",
     "loading": "読み込み中...",
     "ownedMedalsLabel": "保有メダル · クリックして装着",
     "noMedals": "まだ獲得したメダルがありません。",
