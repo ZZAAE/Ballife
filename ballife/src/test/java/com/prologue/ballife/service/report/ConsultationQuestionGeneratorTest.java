@@ -15,6 +15,8 @@ import com.prologue.ballife.analyzer.BloodSugarAnalysisResult;
 import com.prologue.ballife.analyzer.BmiAnalysisResult;
 import com.prologue.ballife.analyzer.DiseaseProfileAnalysisResult;
 import com.prologue.ballife.analyzer.MedicationAnalysisResult;
+import com.prologue.ballife.config.MessageResolver;
+import com.prologue.ballife.support.TestMessages;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.Period;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.RecordingStats;
@@ -31,10 +33,12 @@ import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse.User;
 class ConsultationQuestionGeneratorTest {
 
     ConsultationQuestionGenerator generator;
+    MessageResolver messages;
 
     @BeforeEach
     void setUp() {
-        generator = new ConsultationQuestionGenerator();
+        messages = TestMessages.resolver();
+        generator = new ConsultationQuestionGenerator(messages);
     }
 
     // ============================================================
@@ -108,7 +112,7 @@ class ConsultationQuestionGeneratorTest {
             List<String> questions = generator.generate(data);
 
             assertThat(questions)
-                    .containsExactly(ConsultationQuestionGenerator.Q_BP_RISK);
+                    .containsExactly(messages.get("report.q.bp.risk"));
         }
     }
 
@@ -131,7 +135,7 @@ class ConsultationQuestionGeneratorTest {
             List<String> questions = generator.generate(data);
 
             assertThat(questions)
-                    .containsExactly(ConsultationQuestionGenerator.Q_DEFAULT);
+                    .containsExactly(messages.get("report.q.default"));
         }
     }
 
@@ -154,9 +158,9 @@ class ConsultationQuestionGeneratorTest {
             List<String> questions = generator.generate(data);
 
             assertThat(questions).containsExactly(
-                    ConsultationQuestionGenerator.Q_BP_CAUTION,
-                    ConsultationQuestionGenerator.Q_BS_POSTMEAL_RISK,
-                    ConsultationQuestionGenerator.Q_MED_LOW
+                    messages.get("report.q.bp.caution"),
+                    messages.get("report.q.bs.postMeal.risk"),
+                    messages.get("report.q.med.low")
             );
         }
     }

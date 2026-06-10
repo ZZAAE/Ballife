@@ -1,15 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DailyTimelineModal from "../../modals/DailyTimelineModal";
-
-const WEEKDAY_KO = [
-  "일요일",
-  "월요일",
-  "화요일",
-  "수요일",
-  "목요일",
-  "금요일",
-  "토요일",
-];
 
 const WEEKDAY_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -23,6 +14,7 @@ function startOfWeek(date) {
 
 // 주간 캘린더 컴포넌트
 const WeeklyCalendar = ({ onDayClick }) => {
+  const { t } = useTranslation();
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const today = useMemo(() => {
     const d = new Date();
@@ -47,7 +39,10 @@ const WeeklyCalendar = ({ onDayClick }) => {
     setWeekStart(next);
   };
 
-  const monthTitle = `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월`;
+  const monthTitle = t("healthCalenderPage.monthTitle", {
+    year: weekStart.getFullYear(),
+    month: weekStart.getMonth() + 1,
+  });
   const rangeLabel = `${weekStart.getMonth() + 1}/${weekStart.getDate()} ~ ${
     days[6].getMonth() + 1
   }/${days[6].getDate()}`;
@@ -59,7 +54,7 @@ const WeeklyCalendar = ({ onDayClick }) => {
         <button
           onClick={() => moveWeek(-1)}
           className="p-2 w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-600 transition-colors font-bold"
-          aria-label="이전 주"
+          aria-label={t("healthCalenderPage.prevWeek")}
         >
           {"<"}
         </button>
@@ -70,7 +65,7 @@ const WeeklyCalendar = ({ onDayClick }) => {
         <button
           onClick={() => moveWeek(1)}
           className="p-2 w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-600 transition-colors font-bold"
-          aria-label="다음 주"
+          aria-label={t("healthCalenderPage.nextWeek")}
         >
           {">"}
         </button>
@@ -126,7 +121,10 @@ const WeeklyCalendar = ({ onDayClick }) => {
                   ? "border-emerald-400 ring-2 ring-emerald-400/40"
                   : "border-gray-100"
               }`}
-              title={`${d.getMonth() + 1}월 ${d.getDate()}일`}
+              title={t("healthCalenderPage.dayTitle", {
+                month: d.getMonth() + 1,
+                day: d.getDate(),
+              })}
             />
           );
         })}
@@ -137,29 +135,68 @@ const WeeklyCalendar = ({ onDayClick }) => {
 
 // 건강 지표 테이블 컴포넌트
 const Table = () => {
+  const { t } = useTranslation();
   const rows = [
-    ["혈당", "118 mg/dL", "112 mg/dL", "+6 개선"],
-    ["혈압", "125 mmHg", "118 mmHg", "+7 개선"],
-    ["체중", "78.5 kg", "78.0 kg", "-0.5 kg"],
-    ["운동", "3회", "5회", "+2회"],
-    ["식사", "72점", "85점", "+13점"],
-    ["수면", "85%", "100%", "+15%"],
+    [
+      t("healthCalenderPage.table.rows.bloodSugar.label"),
+      t("healthCalenderPage.table.rows.bloodSugar.lastWeek"),
+      t("healthCalenderPage.table.rows.bloodSugar.thisWeek"),
+      t("healthCalenderPage.table.rows.bloodSugar.change"),
+    ],
+    [
+      t("healthCalenderPage.table.rows.bloodPressure.label"),
+      t("healthCalenderPage.table.rows.bloodPressure.lastWeek"),
+      t("healthCalenderPage.table.rows.bloodPressure.thisWeek"),
+      t("healthCalenderPage.table.rows.bloodPressure.change"),
+    ],
+    [
+      t("healthCalenderPage.table.rows.weight.label"),
+      t("healthCalenderPage.table.rows.weight.lastWeek"),
+      t("healthCalenderPage.table.rows.weight.thisWeek"),
+      t("healthCalenderPage.table.rows.weight.change"),
+    ],
+    [
+      t("healthCalenderPage.table.rows.exercise.label"),
+      t("healthCalenderPage.table.rows.exercise.lastWeek"),
+      t("healthCalenderPage.table.rows.exercise.thisWeek"),
+      t("healthCalenderPage.table.rows.exercise.change"),
+    ],
+    [
+      t("healthCalenderPage.table.rows.meal.label"),
+      t("healthCalenderPage.table.rows.meal.lastWeek"),
+      t("healthCalenderPage.table.rows.meal.thisWeek"),
+      t("healthCalenderPage.table.rows.meal.change"),
+    ],
+    [
+      t("healthCalenderPage.table.rows.sleep.label"),
+      t("healthCalenderPage.table.rows.sleep.lastWeek"),
+      t("healthCalenderPage.table.rows.sleep.thisWeek"),
+      t("healthCalenderPage.table.rows.sleep.change"),
+    ],
   ];
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm h-full">
       <h3 className="font-bold text-gray-800 mb-4 text-base">
-        이번주의 나는 얼마나 건강해졌을까요?
+        {t("healthCalenderPage.table.heading")}
       </h3>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-gray-400 text-left">
             <tr className="border-b border-gray-100">
-              <th className="pb-3 font-semibold">항목</th>
-              <th className="pb-3 font-semibold">지난 주</th>
-              <th className="pb-3 font-semibold">이번 주</th>
-              <th className="pb-3 font-semibold">변화</th>
+              <th className="pb-3 font-semibold">
+                {t("healthCalenderPage.table.col.item")}
+              </th>
+              <th className="pb-3 font-semibold">
+                {t("healthCalenderPage.table.col.lastWeek")}
+              </th>
+              <th className="pb-3 font-semibold">
+                {t("healthCalenderPage.table.col.thisWeek")}
+              </th>
+              <th className="pb-3 font-semibold">
+                {t("healthCalenderPage.table.col.change")}
+              </th>
             </tr>
           </thead>
           <tbody className="text-gray-700 divide-y divide-gray-50">
@@ -182,7 +219,7 @@ const Table = () => {
       </div>
 
       <div className="mt-5 bg-green-50 text-green-700 p-4 rounded-xl text-xs font-semibold flex items-center gap-1.5">
-        <span>👍</span> 전체적으로 개선되고 있습니다! 아주 멋진 변화예요.
+        <span>👍</span> {t("healthCalenderPage.table.footer")}
       </div>
     </div>
   );
@@ -190,16 +227,19 @@ const Table = () => {
 
 // 우측 사이드바 컴포넌트
 const Sidebar = () => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h4 className="font-bold text-gray-800 mb-4 text-sm">월간 종합 성과</h4>
+        <h4 className="font-bold text-gray-800 mb-4 text-sm">
+          {t("healthCalenderPage.sidebar.monthlyTitle")}
+        </h4>
         {[
-          ["식단 건강", 82],
-          ["혈당 안정도", 50],
-          ["수면 리듬", 65],
-          ["체력 지수", 100],
-          ["운동 수행", 75],
+          [t("healthCalenderPage.sidebar.metrics.diet"), 82],
+          [t("healthCalenderPage.sidebar.metrics.bloodSugarStability"), 50],
+          [t("healthCalenderPage.sidebar.metrics.sleepRhythm"), 65],
+          [t("healthCalenderPage.sidebar.metrics.fitnessIndex"), 100],
+          [t("healthCalenderPage.sidebar.metrics.exercisePerformance"), 75],
         ].map(([label, val], i) => (
           <div key={i} className="mb-3.5 last:mb-0">
             <div className="flex justify-between text-xs mb-1.5 font-medium">
@@ -217,9 +257,11 @@ const Sidebar = () => {
       </div>
 
       <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-md">
-        <h4 className="font-bold mb-1.5 text-sm">주간 분석</h4>
+        <h4 className="font-bold mb-1.5 text-sm">
+          {t("healthCalenderPage.sidebar.weeklyAnalysisTitle")}
+        </h4>
         <p className="text-xs text-gray-400 mb-4 font-medium">
-          🔥 7일 연속 운동 달성 중!
+          {t("healthCalenderPage.sidebar.streak")}
         </p>
         <div className="flex items-end justify-between gap-2.5 h-24 pt-2">
           {[20, 40, 30, 60, 50, 80, 90].map((h, i) => (
@@ -231,7 +273,17 @@ const Sidebar = () => {
                 />
               </div>
               <span className="text-[10px] text-gray-500 font-medium">
-                {["월", "화", "수", "목", "금", "토", "일"][i]}
+                {
+                  [
+                    t("healthCalenderPage.sidebar.weekdayShort.mon"),
+                    t("healthCalenderPage.sidebar.weekdayShort.tue"),
+                    t("healthCalenderPage.sidebar.weekdayShort.wed"),
+                    t("healthCalenderPage.sidebar.weekdayShort.thu"),
+                    t("healthCalenderPage.sidebar.weekdayShort.fri"),
+                    t("healthCalenderPage.sidebar.weekdayShort.sat"),
+                    t("healthCalenderPage.sidebar.weekdayShort.sun"),
+                  ][i]
+                }
               </span>
             </div>
           ))}
@@ -242,6 +294,7 @@ const Sidebar = () => {
 };
 
 export default function HealthCalendarPage() {
+  const { t } = useTranslation();
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [selectedDayInfo, setSelectedDayInfo] = useState(null);
 
@@ -254,22 +307,35 @@ export default function HealthCalendarPage() {
     if (!selectedDayInfo) return null;
     const { year, month, day } = selectedDayInfo;
     const dateObj = new Date(year, month, day);
+    const weekdayKeys = [
+      "sun",
+      "mon",
+      "tue",
+      "wed",
+      "thu",
+      "fri",
+      "sat",
+    ];
     return {
-      month: `${month + 1}월`,
-      day: WEEKDAY_KO[dateObj.getDay()],
-      date: `${year}년 ${month + 1}월 ${day}일`,
+      month: t("healthCalenderPage.timeline.month", { month: month + 1 }),
+      day: t(`healthCalenderPage.weekday.${weekdayKeys[dateObj.getDay()]}`),
+      date: t("healthCalenderPage.timeline.date", {
+        year,
+        month: month + 1,
+        day,
+      }),
     };
-  }, [selectedDayInfo]);
+  }, [selectedDayInfo, t]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-['Noto_Sans_KR']">
       <div className="px-4 py-8 sm:px-6 lg:px-10 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto">
         <header className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl tracking-tight">
-            건강 지표 관리 캘린더
+            {t("healthCalenderPage.header.title")}
           </h1>
           <p className="text-sm text-gray-500 mt-1.5">
-            지난 한 달간의 수치와 활동을 추적하고 분석한 스마트 리포트입니다.
+            {t("healthCalenderPage.header.subtitle")}
           </p>
         </header>
 

@@ -1,13 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import ExerciseModal from "../modals/ExerciseModal";
 import { useAuth } from "../contexts/AuthContext";
 import { getExercisesInRange } from "../api/exerciseApi";
 import {
   dbExerciseToRecord,
+  exerciseDisplayName,
   hydrateExerciseSessions,
   ICON_BY_TYPE,
 } from "../utils/exerciseRecords";
+import { formatTime } from "../utils/format";
 
 function formatYmd(date) {
   const y = date.getFullYear();
@@ -47,22 +51,34 @@ function formatDuration(totalSec) {
 }
 
 function formatTimeOfDay(date) {
-  const h = date.getHours();
-  const m = date.getMinutes();
-  const isPM = h >= 12;
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${isPM ? "오후" : "오전"} ${h12}:${String(m).padStart(2, "0")}`;
+  return formatTime(date);
 }
 
 function formatDateLabel(date) {
-  const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
-  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${dayNames[date.getDay()]})`;
+  const dayNames = [
+    i18n.t("exercisePage.weekday.sun"),
+    i18n.t("exercisePage.weekday.mon"),
+    i18n.t("exercisePage.weekday.tue"),
+    i18n.t("exercisePage.weekday.wed"),
+    i18n.t("exercisePage.weekday.thu"),
+    i18n.t("exercisePage.weekday.fri"),
+    i18n.t("exercisePage.weekday.sat"),
+  ];
+  return i18n.t("exercisePage.dateLabel", {
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    weekday: dayNames[date.getDay()],
+  });
 }
 
 function formatWeekRangeLabel(start) {
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  return `${start.getMonth() + 1}월 ${start.getDate()}일 - ${end.getDate()}일`;
+  return i18n.t("exercisePage.weekRange", {
+    startMonth: start.getMonth() + 1,
+    startDay: start.getDate(),
+    endDay: end.getDate(),
+  });
 }
 
 /* ---------- 컴포넌트 ---------- */
@@ -73,7 +89,16 @@ function WeekSelector({
   onSelectDate,
   onMoveWeek,
 }) {
-  const WEEK_KO = ["일", "월", "화", "수", "목", "금", "토"];
+  const { t } = useTranslation();
+  const WEEK_KO = [
+    t("exercisePage.weekday.sun"),
+    t("exercisePage.weekday.mon"),
+    t("exercisePage.weekday.tue"),
+    t("exercisePage.weekday.wed"),
+    t("exercisePage.weekday.thu"),
+    t("exercisePage.weekday.fri"),
+    t("exercisePage.weekday.sat"),
+  ];
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -95,7 +120,7 @@ function WeekSelector({
         <button
           onClick={() => onMoveWeek(-1)}
           className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
-          aria-label="저번 주"
+          aria-label={t("exercisePage.prevWeek")}
         >
           {"<"}
         </button>
@@ -105,7 +130,7 @@ function WeekSelector({
         <button
           onClick={() => onMoveWeek(1)}
           className="rounded-full p-1.5 text-gray-500 hover:bg-gray-100"
-          aria-label="다음 주"
+          aria-label={t("exercisePage.nextWeek")}
         >
           {">"}
         </button>
@@ -182,6 +207,7 @@ function WeekSelector({
 }
 
 function SummaryCard({ label, totalSec, sessions, kcal }) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl bg-white px-5 py-5 shadow-sm">
       <div className="text-sm font-semibold text-gray-500">{label}</div>
@@ -191,7 +217,8 @@ function SummaryCard({ label, totalSec, sessions, kcal }) {
         </span>
         <div className="flex items-baseline gap-3 pb-1 text-sm">
           <span className="text-gray-500">
-            <span className="font-semibold text-gray-700">{sessions}</span> 세션
+            <span className="font-semibold text-gray-700">{sessions}</span>{" "}
+            {t("exercisePage.sessions")}
           </span>
           <span className="text-pink-500">
             <span className="font-bold">{kcal}</span> kcal
@@ -203,6 +230,7 @@ function SummaryCard({ label, totalSec, sessions, kcal }) {
 }
 
 function SessionRow({ session, onClick }) {
+  const { t } = useTranslation();
   const emoji =
     ICON_BY_TYPE[session.iconType] ?? (session.kind === "cardio" ? "🚶" : "🏋️");
   return (
@@ -210,20 +238,25 @@ function SessionRow({ session, onClick }) {
       type="button"
       onClick={() => onClick?.(session)}
       className="flex w-full items-center gap-4 py-3 text-left transition hover:bg-gray-50"
-      aria-label="운동 기록 수정"
+      aria-label={t("exercisePage.editSession")}
     >
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xl">
         {emoji}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-base font-bold text-gray-800">{session.name}</div>
+        <div className="text-base font-bold text-gray-800">
+          {exerciseDisplayName(session)}
+        </div>
         <div className="mt-0.5 text-sm font-semibold text-amber-500">
           {session.kind === "cardio"
             ? session.distanceKm != null
               ? `${session.distanceKm.toFixed(2)} km`
               : "—"
             : session.sets != null && session.reps != null
-              ? `${session.sets} Sets · ${session.reps}회`
+              ? t("exercisePage.setsReps", {
+                  sets: session.sets,
+                  reps: session.reps,
+                })
               : "—"}
         </div>
       </div>
@@ -266,6 +299,7 @@ function DaySection({ date, sessions, onSelectSession }) {
 
 /* ---------- 메인 페이지 ---------- */
 function ExercisePage({ isModalOpen, onCloseModal }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   // 보고 있는 주의 기준 날짜 (주 이동용)
   const [viewDate, setViewDate] = useState(() => {
@@ -317,10 +351,14 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
       setStoredSessions(hydrateExerciseSessions(records));
     } catch (error) {
       console.error("[ExercisePage] fetchWeek failed:", error);
-      toast.error(`운동 기록 조회 실패: ${error.message || error}`);
+      toast.error(
+        t("exercisePage.toast.fetchFailed", {
+          error: error.message || error,
+        }),
+      );
       setStoredSessions([]);
     }
-  }, [userId, weekStart]);
+  }, [userId, weekStart, t]);
 
   useEffect(() => {
     if (!userId) return undefined;
@@ -388,10 +426,10 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
           <header className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-                운동 기록
+                {t("exercisePage.title")}
               </h1>
               <p className="mb-8 text-sm text-gray-500">
-                지난 운동 변화를 분석한 결과입니다.
+                {t("exercisePage.subtitle")}
               </p>
             </div>
           </header>
@@ -414,7 +452,9 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
 
             {/* 정렬 토글 */}
             <div className="flex items-center justify-end gap-2">
-              <span className="text-xs text-gray-400">정렬</span>
+              <span className="text-xs text-gray-400">
+                {t("exercisePage.sort")}
+              </span>
               <div className="inline-flex rounded-full border border-gray-200 bg-white p-0.5 text-xs font-semibold">
                 <button
                   type="button"
@@ -425,7 +465,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
                       : "text-gray-500 hover:text-gray-800"
                   }`}
                 >
-                  최신순
+                  {t("exercisePage.sortNewest")}
                 </button>
                 <button
                   type="button"
@@ -436,7 +476,7 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
                       : "text-gray-500 hover:text-gray-800"
                   }`}
                 >
-                  오래된순
+                  {t("exercisePage.sortOldest")}
                 </button>
               </div>
             </div>
@@ -453,8 +493,8 @@ function ExercisePage({ isModalOpen, onCloseModal }) {
             ) : (
               <div className="rounded-2xl bg-white px-5 py-10 text-center text-sm text-gray-400 shadow-sm">
                 {filterDay
-                  ? "선택한 날짜의 기록이 없습니다."
-                  : "이번 주 기록이 없습니다."}
+                  ? t("exercisePage.emptyDay")
+                  : t("exercisePage.emptyWeek")}
               </div>
             )}
           </div>

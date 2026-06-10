@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MessageCircle } from "lucide-react";
 import {
   Area,
@@ -75,6 +76,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function BloodPressureRecord() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -223,23 +225,23 @@ export default function BloodPressureRecord() {
     const s = metrics.avgSystolic;
     const d = metrics.avgDiastolic;
     if (s == null || d == null) {
-      return { label: "기록 없음", chip: "bg-gray-100 text-gray-500 ring-gray-200", dot: "bg-gray-400" };
+      return { label: t("bloodPressureRecordPage.status.noRecord"), chip: "bg-gray-100 text-gray-500 ring-gray-200", dot: "bg-gray-400" };
     }
     if (s >= 140 || d >= 90) {
-      return { label: "고혈압 범위", chip: "bg-rose-50 text-rose-700 ring-rose-100", dot: "bg-rose-500" };
+      return { label: t("bloodPressureRecordPage.status.hypertension"), chip: "bg-rose-50 text-rose-700 ring-rose-100", dot: "bg-rose-500" };
     }
     if (s >= 120 || d >= 80) {
-      return { label: "주의 범위", chip: "bg-amber-50 text-amber-700 ring-amber-100", dot: "bg-amber-500" };
+      return { label: t("bloodPressureRecordPage.status.caution"), chip: "bg-amber-50 text-amber-700 ring-amber-100", dot: "bg-amber-500" };
     }
     if (s <= 90 || d <= 60) {
-      return { label: "저혈압 범위", chip: "bg-blue-50 text-blue-700 ring-blue-100", dot: "bg-blue-500" };
+      return { label: t("bloodPressureRecordPage.status.hypotension"), chip: "bg-blue-50 text-blue-700 ring-blue-100", dot: "bg-blue-500" };
     }
-    return { label: "정상 혈압 범위", chip: "bg-emerald-50 text-emerald-700 ring-emerald-100", dot: "bg-emerald-500" };
-  }, [metrics.avgSystolic, metrics.avgDiastolic]);
+    return { label: t("bloodPressureRecordPage.status.normal"), chip: "bg-emerald-50 text-emerald-700 ring-emerald-100", dot: "bg-emerald-500" };
+  }, [metrics.avgSystolic, metrics.avgDiastolic, t]);
 
   // 측정 일시 라벨 ("5월 14일 오후 9:15" 형식)
   const formatRecordWhen = (r) => {
-    if (!r) return "기록 없음";
+    if (!r) return t("bloodPressureRecordPage.status.noRecord");
     const d = new Date(r.recordDate);
     if (Number.isNaN(d.getTime())) return r.recordDate;
     const month = d.getMonth() + 1;
@@ -247,9 +249,18 @@ export default function BloodPressureRecord() {
     const time = (r.recordTime || "00:00:00").slice(0, 5);
     const [hhStr, mm] = time.split(":");
     const hh = parseInt(hhStr, 10);
-    const ampm = hh < 12 ? "오전" : "오후";
+    const ampm =
+      hh < 12
+        ? t("bloodPressureRecordPage.am")
+        : t("bloodPressureRecordPage.pm");
     const h12 = hh % 12 === 0 ? 12 : hh % 12;
-    return `${month}월 ${day}일 ${ampm} ${h12}:${mm}`;
+    return t("bloodPressureRecordPage.recordWhen", {
+      month,
+      day,
+      ampm,
+      hour: h12,
+      minute: mm,
+    });
   };
 
   return (
@@ -258,15 +269,15 @@ export default function BloodPressureRecord() {
         <main className="flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-              혈압 기록 확인
+              {t("bloodPressureRecordPage.title")}
             </h1>
             <p className="mb-8 text-sm text-gray-500">
-              지난 혈압 변화를 분석한 결과입니다.
+              {t("bloodPressureRecordPage.subtitle")}
             </p>
 
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               <MetricCard className="ring-1 ring-blue-100 bg-gradient-to-br from-blue-50/60 to-white">
-                <span className="text-sm font-semibold text-blue-600">평균 혈압</span>
+                <span className="text-sm font-semibold text-blue-600">{t("bloodPressureRecordPage.avgBloodPressure")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-[44px] font-extrabold leading-none tracking-tight text-[#0F172A]">
                     {metrics.avgSystolic ?? "-"}
@@ -286,7 +297,7 @@ export default function BloodPressureRecord() {
               </MetricCard>
 
               <MetricCard>
-                <span className="text-xs font-medium text-[#64748B]">최고 수축기</span>
+                <span className="text-xs font-medium text-[#64748B]">{t("bloodPressureRecordPage.maxSystolic")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-[#0F172A]">
                     {metrics.maxSystolicRecord?.systolicBP ?? "-"}
@@ -299,7 +310,7 @@ export default function BloodPressureRecord() {
               </MetricCard>
 
               <MetricCard>
-                <span className="text-xs font-medium text-[#64748B]">최저 이완기</span>
+                <span className="text-xs font-medium text-[#64748B]">{t("bloodPressureRecordPage.minDiastolic")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-[#0F172A]">
                     {metrics.minDiastolicRecord?.diastolicBP ?? "-"}
@@ -328,7 +339,7 @@ export default function BloodPressureRecord() {
               />
 
               <ChartSection
-                title="혈압 변화 추이"
+                title={t("bloodPressureRecordPage.chartTitle")}
                 startDate={pendingStart}
                 endDate={pendingEnd}
                 onStartDateChange={setPendingStart}
@@ -338,7 +349,7 @@ export default function BloodPressureRecord() {
               >
                 {bpData.length === 0 ? (
                   <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                    해당 기간에 혈압 기록이 없습니다.
+                    {t("bloodPressureRecordPage.noRecordInRange")}
                   </div>
                 ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -378,7 +389,7 @@ export default function BloodPressureRecord() {
                     <Area
                       type="monotone"
                       dataKey="systolic"
-                      name="수축기"
+                      name={t("bloodPressureRecordPage.systolic")}
                       stroke="#2563eb"
                       strokeWidth={3}
                       fill="url(#systolicGrad)"
@@ -388,7 +399,7 @@ export default function BloodPressureRecord() {
                     <Area
                       type="monotone"
                       dataKey="diastolic"
-                      name="이완기"
+                      name={t("bloodPressureRecordPage.diastolic")}
                       stroke="#06b6d4"
                       strokeWidth={3}
                       fill="url(#diastolicGrad)"

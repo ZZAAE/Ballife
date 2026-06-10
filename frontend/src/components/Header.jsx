@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
 import { useAuth } from '../contexts/AuthContext';
+import { SUPPORTED_LANGUAGES } from "../i18n";
 
 // DB Inc 디자인 토큰
 const TOKENS = {
@@ -16,56 +18,69 @@ const TOKENS = {
   brandSub: "#7fc31c",
 };
 
+// 라벨은 렌더 시 t() 로 해석 (labelKey → i18n nav.* 키)
 const navItems = [
-  { key: "record", label: "기록", path: "/allRecord" },
+  { key: "record", labelKey: "nav.record", path: "/allRecord" },
   {
     key: "check",
-    label: "확인",
+    labelKey: "nav.check",
     path: "/check/all",
     navigable: false,
     dropdown: [
-      { label: "전체", path: "/check/all" },
-      { label: "식단", path: "/check/meal" },
-      { label: "약", path: "/check/medicine" },
-      { label: "운동", path: "/check/exercise" },
-      { label: "체중", path: "/check/weight" },
-      { label: "혈당", path: "/check/blood-sugar" },
-      { label: "혈압", path: "/check/blood-pressure" },
+      { labelKey: "nav.checkAll", path: "/check/all" },
+      { labelKey: "nav.meal", path: "/check/meal" },
+      { labelKey: "nav.medicine", path: "/check/medicine" },
+      { labelKey: "nav.exercise", path: "/check/exercise" },
+      { labelKey: "nav.weight", path: "/check/weight" },
+      { labelKey: "nav.bloodSugar", path: "/check/blood-sugar" },
+      { labelKey: "nav.bloodPressure", path: "/check/blood-pressure" },
     ],
   },
-  { key: "community", label: "커뮤니티", path: "/boards" },
+  { key: "community", labelKey: "nav.community", path: "/boards" },
   {
     key: "member",
-    label: "회원정보",
+    labelKey: "nav.member",
     path: "/member",
-    dropdown: [{ label: "펫", path: "/member/pet" }],
+    dropdown: [{ labelKey: "nav.pet", path: "/member/pet" }],
   },
   {
     key: "intro",
-    label: "소개",
+    labelKey: "nav.intro",
     path: "/intro/web",
     navigable: false,
     dropdown: [
-      { label: "웹 소개", path: "/intro/web" },
-      { label: "고지혈증", path: "/intro/hyperlipidemia" },
-      { label: "고혈압", path: "/intro/hypertension" },
-      { label: "골다공증", path: "/intro/osteoporosis" },
-      { label: "당뇨", path: "/intro/diabetes" },
-      { label: "비만", path: "/intro/obesity" },
-      { label: "통풍", path: "/intro/gout" },
+      { labelKey: "nav.introWeb", path: "/intro/web" },
+      { labelKey: "nav.hyperlipidemia", path: "/intro/hyperlipidemia" },
+      { labelKey: "nav.hypertension", path: "/intro/hypertension" },
+      { labelKey: "nav.osteoporosis", path: "/intro/osteoporosis" },
+      { labelKey: "nav.diabetes", path: "/intro/diabetes" },
+      { labelKey: "nav.obesity", path: "/intro/obesity" },
+      { labelKey: "nav.gout", path: "/intro/gout" },
     ],
   },
 ];
 
 export default function Header() {
   const [hoveredKey, setHoveredKey] = useState(null);
+  const [langOpen, setLangOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
     logout();
-    toast.success("로그아웃되었습니다.");
+    toast.success(t("common.logoutSuccess"));
     navigate("/", { replace: true });
+  };
+
+  const currentLang =
+    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ||
+    SUPPORTED_LANGUAGES.find((l) => i18n.language?.startsWith(l.code)) ||
+    SUPPORTED_LANGUAGES[0];
+
+  const handleLanguageChange = (code) => {
+    i18n.changeLanguage(code);
+    setLangOpen(false);
   };
 
   return (
@@ -112,11 +127,11 @@ export default function Header() {
                 >
                   {canNavigate ? (
                     <Link to={item.path} className={titleClass}>
-                      <span style={{ color: TOKENS.white }}>{item.label}</span>
+                      <span style={{ color: TOKENS.white }}>{t(item.labelKey)}</span>
                     </Link>
                   ) : (
                     <span className={titleClass}>
-                      <span style={{ color: TOKENS.white }}>{item.label}</span>
+                      <span style={{ color: TOKENS.white }}>{t(item.labelKey)}</span>
                     </span>
                   )}
 
@@ -138,7 +153,7 @@ export default function Header() {
                               e.currentTarget.style.backgroundColor = "transparent";
                             }}
                           >
-                            {sub.label}
+                            {t(sub.labelKey)}
                           </Link>
                         </li>
                       ))}
@@ -151,14 +166,70 @@ export default function Header() {
         </nav>
 
         {/* h_etc */}
-        <div className="h_etc flex w-auto xl:w-[180px] shrink-0 justify-end">
+        <div className="h_etc flex w-auto xl:w-[180px] shrink-0 items-center justify-end gap-2">
+          {/* 언어 스위처 — 내비 메뉴처럼 마우스를 올리면 목록이 열린다 (클릭 토글은 터치용으로 유지) */}
+          <div
+            className="relative"
+            onMouseEnter={() => setLangOpen(true)}
+            onMouseLeave={() => setLangOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setLangOpen((v) => !v)}
+              aria-label={t("language.select")}
+              aria-haspopup="listbox"
+              aria-expanded={langOpen}
+              className="flex h-[34px] items-center gap-[5px] rounded-full border border-white/25 bg-transparent px-[12px] text-[13px] font-semibold text-white transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-[15px] w-[15px]"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span>{currentLang.short}</span>
+            </button>
+            {langOpen && (
+              <ul
+                role="listbox"
+                className="absolute right-0 top-full z-50 min-w-[130px] overflow-hidden rounded-[8px] bg-white py-1 shadow-[0_12px_28px_rgba(18,18,18,0.18)]"
+              >
+                {SUPPORTED_LANGUAGES.map((lng) => (
+                  <li key={lng.code}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={lng.code === currentLang.code}
+                      onClick={() => handleLanguageChange(lng.code)}
+                      className={`block w-full px-4 py-[8px] text-left text-[13.5px] font-medium transition-colors hover:bg-[#f3f6f8] ${
+                        lng.code === currentLang.code
+                          ? "text-[#00844a]"
+                          : "text-[#707070]"
+                      }`}
+                    >
+                      {lng.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {isAuthenticated ? (
             <button
               type="button"
               onClick={handleLogout}
               className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white/25 bg-transparent px-[16px] text-[13px] font-semibold text-white no-underline transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
             >
-              <span>로그아웃</span>
+              <span>{t("common.logout")}</span>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -177,7 +248,7 @@ export default function Header() {
               to="/login"
               className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white bg-white px-[16px] text-[13px] font-semibold text-[#121212] no-underline transition-all duration-200 hover:bg-[#f3f6f8]"
             >
-              <span>로그인</span>
+              <span>{t("common.login")}</span>
             </Link>
           )}
         </div>

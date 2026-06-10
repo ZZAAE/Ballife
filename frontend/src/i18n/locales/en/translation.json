@@ -1,0 +1,2743 @@
+{
+  "common": {
+    "appName": "Ballife",
+    "login": "Log in",
+    "logout": "Log out",
+    "logoutSuccess": "You have been logged out."
+  },
+  "nav": {
+    "record": "Record",
+    "check": "Check",
+    "checkAll": "All",
+    "meal": "Diet",
+    "medicine": "Medicine",
+    "exercise": "Exercise",
+    "weight": "Weight",
+    "bloodSugar": "Blood Sugar",
+    "bloodPressure": "Blood Pressure",
+    "community": "Community",
+    "member": "My Info",
+    "pet": "Pet",
+    "intro": "About",
+    "introWeb": "Web About",
+    "hyperlipidemia": "Hyperlipidemia",
+    "hypertension": "Hypertension",
+    "osteoporosis": "Osteoporosis",
+    "diabetes": "Diabetes",
+    "obesity": "Obesity",
+    "gout": "Gout"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh-CN": "简体中文",
+    "select": "Select Language"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "exerciseRequestFailed": "Exercise record request failed."
+  },
+  "disease": {
+    "none": "N/A",
+    "summaryNone": "None",
+    "hyperlipidemia": {
+      "field": "Has Hyperlipidemia",
+      "summary": "Hyperlipidemia",
+      "type1": "Hypercholesterolemia",
+      "type2": "High LDL Cholesterolemia",
+      "type3": "Hypertriglyceridemia",
+      "type4": "Low HDL Cholesterolemia"
+    },
+    "hypertension": {
+      "field": "Has Hypertension",
+      "summary": "Hypertension",
+      "type1": "Prehypertension",
+      "type2": "Stage 1",
+      "type3": "Stage 2"
+    },
+    "osteoporosis": {
+      "field": "Has Osteoporosis",
+      "summary": "Osteoporosis",
+      "osteopenia": "Osteopenia",
+      "osteoporosis": "Osteoporosis"
+    },
+    "diabetes": {
+      "field": "Has Diabetes",
+      "summary": "Diabetes",
+      "type1": "Type 1",
+      "type2": "Type 2",
+      "gestational": "Gestational"
+    },
+    "gout": {
+      "field": "Has Gout",
+      "summary": "Gout",
+      "asymptomatic": "Hyperuricemia",
+      "acute": "Acute",
+      "intermittent": "Intercritical",
+      "chronic": "Chronic"
+    }
+  },
+  "exercise": {
+    "intensity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "category": {
+      "aerobic": "Aerobic",
+      "anaerobic": "Anaerobic"
+    },
+    "type": {
+      "cycling": "Cycling",
+      "running": "Running",
+      "jumprope": "Jump Rope",
+      "walking": "Walking",
+      "stair": "Stairmaster",
+      "dumbbellpress": "Bench Press",
+      "squat": "Squat",
+      "deadlift": "Deadlift",
+      "shoulderpress": "Shoulder Press",
+      "barbellrow": "Barbell Row"
+    },
+    "fallbackName": "Exercise",
+    "stairIntensityHint": "Level 1-2 = Low · Level 3-5 = Medium · Level 6+ = High",
+    "durationHourMinSec": "{{h}}h {{m}}m {{s}}s",
+    "durationMinSec": "{{m}}m {{s}}s",
+    "durationMin": "{{m}}m",
+    "durationSec": "{{s}}s"
+  },
+  "medication": {
+    "slot": {
+      "morning": "Morning",
+      "lunch": "Lunch",
+      "dinner": "Evening",
+      "bedtime": "Before bed"
+    },
+    "slotDoseName": "{{slot}} medication",
+    "noName": "No name"
+  },
+  "allRecordPage": {
+    "addRecord": "Add Record",
+    "notRecordedYet": "Not recorded yet.",
+    "title": "All Records Management",
+    "subtitle": "See all of today's health records at a glance.",
+    "bloodPressure": "Blood Pressure",
+    "bloodPressureRecord": "Blood Pressure Record",
+    "bloodSugar": "Blood Sugar",
+    "bloodSugarRecord": "Blood Sugar Record",
+    "weight": "Weight",
+    "weightRecord": "Weight Record",
+    "waterIntake": "Water intake",
+    "waterIntakeRecord": "Intake Record",
+    "activitySummary": "Activity Summary",
+    "exerciseRecord": "Exercise Record",
+    "hasRecentRecord": "Recent record available",
+    "noRecentRecord": "No recent record",
+    "hasTodayActivity": "Today's activity available",
+    "noTodayActivity": "No activity today",
+    "todayMeal": "Today's Meals",
+    "mealWaiting": "Waiting for meal record",
+    "meal": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack",
+      "default": "Meal"
+    },
+    "toast": {
+      "exerciseFetchFailed": "Failed to load exercise records: {{error}}"
+    }
+  },
+  "bloodPressureRecordPage": {
+    "title": "Blood Pressure Records",
+    "subtitle": "Results of analyzing your recent blood pressure changes.",
+    "avgBloodPressure": "Average Blood Pressure",
+    "maxSystolic": "Max Systolic",
+    "minDiastolic": "Min Diastolic",
+    "chartTitle": "Blood Pressure Trend",
+    "noRecordInRange": "No blood pressure records in this period.",
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "status": {
+      "noRecord": "No record",
+      "hypertension": "Hypertension range",
+      "caution": "Caution range",
+      "hypotension": "Hypotension range",
+      "normal": "Normal blood pressure range"
+    },
+    "am": "AM",
+    "pm": "PM",
+    "recordWhen": "{{month}}/{{day}} {{ampm}} {{hour}}:{{minute}}"
+  },
+  "bloodSugarRecordPage": {
+    "title": "Blood Sugar Records",
+    "subtitle": "Results from analyzing your past blood sugar changes.",
+    "avgBloodSugar": "Average Blood Sugar",
+    "periodAverage": "Average of {{count}} records in period",
+    "noRecord": "No record",
+    "recentBloodSugar": "Recent Blood Sugar",
+    "beforeAfterMeal": "Before meal / After meal",
+    "recentFastingBloodSugar": "Recent Fasting Blood Sugar",
+    "fasting": "Fasting",
+    "chartTitle": "Blood Sugar Trend",
+    "toggleMealtime": "Before meal · After meal",
+    "toggleFasting": "Fasting · Before bed",
+    "emptyChart": "No blood sugar records for this period.",
+    "legend": {
+      "beforeMeal": "Before meal",
+      "afterMeal": "After meal",
+      "fasting": "Fasting",
+      "bedtime": "Before bed"
+    }
+  },
+  "recordPage": {
+    "toast": {
+      "loginRequired": "Log in required."
+    },
+    "title": "My Health Records",
+    "subtitle": "Consistent records create change.",
+    "recordWeight": "Record Weight"
+  },
+  "recordSummary": {
+    "mealCategory": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "mealType": "{{label}}",
+    "meal": {
+      "unitTarget": "/ {{value}} kcal",
+      "unit": "kcal",
+      "remaining": "{{value}} kcal remaining",
+      "overTarget": "{{value}} kcal over target",
+      "noTarget": "No target set"
+    },
+    "exercise": {
+      "totalBurned": "Total burned {{value}} kcal",
+      "noRecord": "No record"
+    },
+    "weight": {
+      "weekDelta": "{{value}} kg vs. last week",
+      "noWeekRecord": "No record last week"
+    },
+    "water": {
+      "unitTarget": "/ {{value}} L",
+      "unit": "L",
+      "goalReached": "Goal reached",
+      "remaining": "{{value}} L of water remaining",
+      "noTarget": "No target set"
+    },
+    "dateLabel": "{{month}}/{{day}}/{{year}}",
+    "header": {
+      "title": "Daily Record",
+      "subtitle": "An analysis of your body changes throughout the day."
+    },
+    "cards": {
+      "meal": {
+        "label": "Diet/Meals",
+        "description": "Today's intake (kcal)"
+      },
+      "exercise": {
+        "label": "Exercise",
+        "description": "Today's activity time",
+        "unit": "min"
+      },
+      "weight": {
+        "label": "Weight",
+        "description": "Current weight and trend"
+      },
+      "water": {
+        "label": "Water",
+        "description": "Today's water intake"
+      }
+    },
+    "bloodSugar": {
+      "title": "Today's Blood Sugar Changes",
+      "legendFasting": "Fasting",
+      "legendPostMeal": "After meal (Post-meal)",
+      "empty": "No blood sugar records for this day."
+    },
+    "bloodPressure": {
+      "title": "Today's Blood Pressure Changes",
+      "legendSystolic": "Systolic",
+      "legendDiastolic": "Diastolic",
+      "empty": "No blood pressure records for this day.",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic"
+    },
+    "medication": {
+      "title": "Today's Medication Schedule",
+      "empty": "No medication schedule for this date.",
+      "statusAll": "All taken",
+      "statusPartial": "Partially taken ({{taken}}/{{total}})",
+      "statusNone": "Not taken"
+    },
+    "mealEmpty": {
+      "title": "No meals recorded",
+      "linkLabel": "All Records",
+      "descPart1": "On the",
+      "descPart2": "page, add today's meals."
+    }
+  },
+  "weightRecordPage": {
+    "title": "Weight Records",
+    "subtitle": "An analysis of your past body changes.",
+    "currentWeight": "Current Weight",
+    "weeklyDelta": "{{delta}} kg vs. last week's average",
+    "weeklyDeltaInsufficient": "Not enough records from last week",
+    "bmiLabel": "BMI",
+    "bmiFormula": "Weight / Height(m)²",
+    "bmiUnderweight": "Underweight",
+    "bmiNormal": "Normal",
+    "bmiOverweight": "Overweight",
+    "targetWeight": "Target Weight",
+    "currentWeightValue": "Current {{weight}}kg",
+    "currentWeightEmpty": "Current —",
+    "toTargetValue": "{{remaining}}kg to target",
+    "toTargetEmpty": "To target —",
+    "chartTitle": "Weight Trend",
+    "apply": "Apply",
+    "reset": "Reset",
+    "chartSeriesName": "Weight"
+  },
+  "exercisePage": {
+    "weekday": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "dateLabel": "{{month}}/{{day}} ({{weekday}})",
+    "weekRange": "{{startMonth}}/{{startDay}} - {{endDay}}",
+    "prevWeek": "Last Week",
+    "nextWeek": "Next Week",
+    "sessions": "Sessions",
+    "editSession": "Edit Exercise Record",
+    "setsReps": "{{sets}} Sets · {{reps}} reps",
+    "title": "Exercise Record",
+    "subtitle": "Results from analyzing your past exercise changes.",
+    "sort": "Sort",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "emptyDay": "No records for the selected date.",
+    "emptyWeek": "No records this week.",
+    "toast": {
+      "fetchFailed": "Failed to load exercise records: {{error}}"
+    }
+  },
+  "mealPage": {
+    "category": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "mealType": "{{label}} meal",
+    "advice": {
+      "kcal": {
+        "low": "Your total calorie intake is below the recommended amount. Add another balanced meal.",
+        "high": "Your total calorie intake has exceeded the recommended amount. Adjust the portion of your next meal."
+      },
+      "carb": {
+        "low": "Your carbohydrate intake is low. Supplement with brown rice or whole grains.",
+        "high": "You ate a bit too much carbohydrate. Try cutting back on refined carbs."
+      },
+      "protein": {
+        "low": "Your protein intake is low. Supplement with chicken breast, eggs, or tofu.",
+        "high": "Your protein intake has exceeded the recommended amount. Adjust it to avoid straining your kidneys."
+      },
+      "fat": {
+        "low": "Your fat intake is low. Add healthy fats like nuts or olive oil.",
+        "high": "You ate a bit too much fat. Try cutting back on fried and greasy foods."
+      },
+      "sugar": {
+        "high": "You ate more sugar than recommended. Cut back on sweet drinks and desserts."
+      },
+      "na": {
+        "high": "Your sodium intake is high. Cut back on broths, processed foods, and salty dishes."
+      },
+      "chol": {
+        "high": "Your cholesterol intake is high. Adjust greasy meats and organ meats."
+      },
+      "noRecord": "Register today's meals on the All Record Management page, and we'll analyze your nutrient intake to give you a score and personalized advice.",
+      "balanced": "The ratio of nutrients you've consumed so far is very close to the recommended guidelines. Keep up the balanced eating for the rest of the day."
+    },
+    "status": {
+      "noRecord": "No record",
+      "excellent": "Excellent balance",
+      "good": "Good balance",
+      "needsWork": "Needs improvement",
+      "imbalanced": "Imbalance warning"
+    },
+    "headline": {
+      "noRecord": "No meals recorded yet.",
+      "excellent": "Your nutrients are wonderfully balanced.",
+      "good": "Overall, your diet is well balanced.",
+      "needsWork": "Your nutritional balance needs a little improvement.",
+      "imbalanced": "A nutritional imbalance was detected."
+    },
+    "tag": {
+      "proteinEnough": "#Protein_Sufficient",
+      "lowSugar": "#Low_Sugar_Diet",
+      "lowSodium": "#Low_Sodium_Diet",
+      "sugarWarn": "#Sugar_Caution",
+      "sodiumWarn": "#Sodium_Caution",
+      "cholWarn": "#Cholesterol_Caution",
+      "kcalManage": "#Calorie_Management",
+      "carbManage": "#Carbohydrate_Management",
+      "fatManage": "#Fat_Management",
+      "proteinLow": "#Protein_Deficient"
+    },
+    "nutrient": {
+      "carb": "Carbohydrate",
+      "protein": "Protein",
+      "fat": "Fat",
+      "sugar": "Sugar",
+      "na": "Sodium",
+      "chol": "Cholesterol"
+    },
+    "title": "Diet Record",
+    "subtitle": "This is the result of analyzing your past meal records.",
+    "summary": {
+      "remaining": "Remaining",
+      "achievement": "Achievement rate"
+    },
+    "scoreLabel": "Today's diet score",
+    "recordsHeading": "Today's meal records",
+    "empty": {
+      "heading": "No meals recorded",
+      "linkLabel": "All Record Management",
+      "descSuffix": " on the",
+      "descLine2": "page, register today's meals."
+    },
+    "nutritionHeading": "Today's nutrient analysis"
+  },
+  "medicationPage": {
+    "title": "Medication Management",
+    "subtitle": "This is the result of analyzing your past medication.",
+    "alert": {
+      "enterDrugName": "Please enter the medicine name."
+    }
+  },
+  "boardListPage": {
+    "loading": "Loading...",
+    "title": "Community",
+    "subtitle": "Share your story in this community space for a healthier life.",
+    "searchPlaceholder": "Enter a search term.",
+    "searchButton": "Search",
+    "category": {
+      "all": "All",
+      "general": "General",
+      "hyperlipidemia": "Hyperlipidemia",
+      "hypertension": "Hypertension",
+      "osteoporosis": "Osteoporosis",
+      "diabetes": "Diabetes",
+      "obesity": "Obesity",
+      "gout": "Gout",
+      "qna": "Q&A"
+    },
+    "sort": {
+      "recommend": "Most Upvoted",
+      "views": "Most Viewed",
+      "latest": "Latest"
+    },
+    "table": {
+      "number": "No.",
+      "category": "Category",
+      "postTitle": "Post Title",
+      "nickname": "Nickname",
+      "viewCount": "Views",
+      "upVote": "Upvotes",
+      "createdAt": "Date"
+    },
+    "empty": "No posts.",
+    "toast": {
+      "loginRequired": "Log in required."
+    },
+    "writeButton": "Write"
+  },
+  "postCreatePage": {
+    "toast": {
+      "loginRequired": "Login required.",
+      "selectCategory": "Please select a category.",
+      "enterTitle": "Please enter a title.",
+      "enterContent": "Please enter content.",
+      "missingLoginId": "No id found in your login info. Please log out and log in again.",
+      "created": "Posted successfully.",
+      "createFailed": "An error occurred while posting."
+    },
+    "category": {
+      "placeholder": "Select board",
+      "general": "General Board",
+      "hyperlipidemia": "Hyperlipidemia",
+      "hypertension": "Hypertension",
+      "osteoporosis": "Osteoporosis",
+      "diabetes": "Diabetes",
+      "obesity": "Obesity",
+      "gout": "Gout",
+      "qna": "Q&A"
+    },
+    "title": "Write a Post",
+    "subtitle": "Share your story with the community for a healthier life.",
+    "label": {
+      "category": "Category",
+      "title": "Title",
+      "content": "Content"
+    },
+    "placeholder": {
+      "title": "Enter the post title",
+      "content": "Enter content..."
+    },
+    "imageHint": "Use the image button in the toolbar to insert photos into the body.",
+    "button": {
+      "exit": "Exit",
+      "submitting": "Posting...",
+      "submit": "Submit"
+    }
+  },
+  "postDetailPage": {
+    "replyInitial": "R",
+    "commentInitial": "C",
+    "upVote": "Upvote",
+    "reply": "Reply",
+    "delete": "Delete",
+    "category": {
+      "select": "Select a board",
+      "general": "General Board",
+      "hyperlipidemia": "Hyperlipidemia",
+      "hypertension": "Hypertension",
+      "osteoporosis": "Osteoporosis",
+      "diabetes": "Diabetes",
+      "obesity": "Obesity",
+      "gout": "Gout",
+      "qna": "Q&A"
+    },
+    "anonymous": "Anonymous",
+    "loading": "Loading...",
+    "toast": {
+      "commentRequired": "Please enter a comment.",
+      "loginRequired": "Login required.",
+      "commentCreated": "Comment posted.",
+      "commentCreateFailed": "Failed to post comment.",
+      "commentUpVoted": "Comment upvoted.",
+      "upVoteCanceled": "Upvote canceled.",
+      "commentUpVoteFailed": "Failed to upvote comment.",
+      "replyRequired": "Please enter a reply.",
+      "replyCreated": "Reply posted.",
+      "replyCreateFailed": "Failed to post reply.",
+      "commentDeleted": "Comment deleted.",
+      "commentDeleteFailed": "Failed to delete comment.",
+      "postDeleted": "Post deleted.",
+      "postDeleteFailed": "Failed to delete post.",
+      "postUpVoted": "Upvoted.",
+      "postUpVoteFailed": "Failed to upvote."
+    },
+    "confirm": {
+      "deleteComment": "Delete this comment?",
+      "deletePost": "Delete this post?"
+    },
+    "community": "Community",
+    "subtitle": "Share your story in our community space for a healthier life.",
+    "edit": "Edit",
+    "anonymousInitial": "A",
+    "viewCount": "{{count}} views",
+    "postImageAlt": "Post image",
+    "commentCount": "{{count}} comments",
+    "writerInitial": "W",
+    "defaultNickname": "KongKongMeal",
+    "commentPlaceholder": "Please enter a comment. Use respectful language toward others.",
+    "submit": "Submit",
+    "replyPlaceholder": "Please enter a reply.",
+    "cancel": "Cancel",
+    "exit": "Exit"
+  },
+  "postEditPage": {
+    "category": {
+      "general": "General Board",
+      "diabetes": "Diabetes",
+      "obesity": "Obesity",
+      "osteoporosis": "Osteoporosis",
+      "hyperlipidemia": "Hyperlipidemia",
+      "hypertension": "Hypertension",
+      "gout": "Gout",
+      "qna": "Q&A"
+    },
+    "toast": {
+      "loginRequired": "Login is required.",
+      "onlyOwnPost": "You can only edit your own posts.",
+      "titleContentRequired": "Please enter a title and content.",
+      "noUserId": "No id found in your login info. Please log out and log in again.",
+      "updated": "Updated."
+    },
+    "checking": "Checking...",
+    "title": "Edit Post",
+    "subtitle": "Share your story with our community for a healthy life.",
+    "label": {
+      "category": "Category",
+      "title": "Title",
+      "content": "Content"
+    },
+    "placeholder": {
+      "title": "Enter the post title",
+      "content": "Enter content..."
+    },
+    "imageHint": "Use the image button in the toolbar to insert photos into the body.",
+    "button": {
+      "cancel": "Exit",
+      "saving": "Saving...",
+      "submit": "Save"
+    }
+  },
+  "familyPage": {
+    "private": "Private",
+    "noRecord": "No record",
+    "bloodSugarValue": "{{value}} mg/dL",
+    "exerciseValue": "{{name}} · {{kcal}} kcal",
+    "medicationDone": "Medication complete",
+    "medicationProgress": "{{taken}}/{{total}} taken",
+    "avatarFallback": "M",
+    "me": "Me",
+    "roleOwner": "Owner",
+    "roleMember": "Member",
+    "kick": "Remove",
+    "bloodSugar": "Blood Sugar",
+    "bloodPressure": "Blood Pressure",
+    "recentExercise": "Recent Exercise",
+    "medicationStatus": "Medication Status",
+    "headerTitle": "Family Health Management",
+    "headerSubtitle": "Check your family's blood sugar and blood pressure together, based on consent.",
+    "back": "Back",
+    "toast": {
+      "codeRequired": "Please enter an invite code.",
+      "joined": "Joined the family group.",
+      "groupCreated": "Family group created.",
+      "codeRotated": "Invite code reissued.",
+      "left": "Left the group.",
+      "removed": "Member removed.",
+      "codeCopied": "Invite code copied.",
+      "copyFailed": "Copy failed.",
+      "subscribed": "Subscription activated.",
+      "subscriptionCancelled": "Subscription cancelled."
+    },
+    "confirm": {
+      "leave": "Leave the family group?",
+      "remove": "Remove {{nickname}} from the group?"
+    },
+    "loading": "Loading…",
+    "joinTitle": "Join with an Invite Code",
+    "joinDescription": "Enter the invite code your family sent you. You can join without a subscription.",
+    "codePlaceholder": "e.g. AB3D9K2P",
+    "join": "Join",
+    "createTitle": "Create My Family Group",
+    "createDescriptionActive": "You're on the Family Plan. Create a group and invite members.",
+    "createGroup": "Create Family Group",
+    "createDescriptionUpsell": "A Family Plan subscription is required to create a family group.",
+    "goSubscribe": "Go to Subscribe",
+    "inactiveBanner": "This family group is currently inactive. The owner's Family Plan has expired.",
+    "renewSubscription": "Renew Subscription",
+    "groupNameFallback": "Family Group",
+    "ownerLabel": "Owner · {{nickname}}",
+    "inviteCode": "Invite Code",
+    "copy": "Copy",
+    "rotate": "Reissue",
+    "leaveGroup": "Leave Group",
+    "myShareSettings": "My Sharing Settings",
+    "shareSettingsDescription": "Only items you've consented to are shared with your family.",
+    "membersTitle": "Family Members ({{count}})"
+  },
+  "healthCalenderPage": {
+    "monthTitle": "{{month}} {{year}}",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "dayTitle": "{{month}}/{{day}}",
+    "table": {
+      "heading": "How much healthier have I become this week?",
+      "col": {
+        "item": "Item",
+        "lastWeek": "Last week",
+        "thisWeek": "This week",
+        "change": "Change"
+      },
+      "rows": {
+        "bloodSugar": {
+          "label": "Blood Sugar",
+          "lastWeek": "118 mg/dL",
+          "thisWeek": "112 mg/dL",
+          "change": "+6 improved"
+        },
+        "bloodPressure": {
+          "label": "Blood Pressure",
+          "lastWeek": "125 mmHg",
+          "thisWeek": "118 mmHg",
+          "change": "+7 improved"
+        },
+        "weight": {
+          "label": "Weight",
+          "lastWeek": "78.5 kg",
+          "thisWeek": "78.0 kg",
+          "change": "-0.5 kg"
+        },
+        "exercise": {
+          "label": "Exercise",
+          "lastWeek": "3 times",
+          "thisWeek": "5 times",
+          "change": "+2 times"
+        },
+        "meal": {
+          "label": "Meals",
+          "lastWeek": "72 pts",
+          "thisWeek": "85 pts",
+          "change": "+13 pts"
+        },
+        "sleep": {
+          "label": "Sleep",
+          "lastWeek": "85%",
+          "thisWeek": "100%",
+          "change": "+15%"
+        }
+      },
+      "footer": "You're improving across the board! What a great change."
+    },
+    "sidebar": {
+      "monthlyTitle": "Monthly Overall Performance",
+      "metrics": {
+        "diet": "Diet Health",
+        "bloodSugarStability": "Blood Sugar Stability",
+        "sleepRhythm": "Sleep Rhythm",
+        "fitnessIndex": "Fitness Index",
+        "exercisePerformance": "Exercise Performance"
+      },
+      "weeklyAnalysisTitle": "Weekly Analysis",
+      "streak": "🔥 7-day exercise streak in progress!",
+      "weekdayShort": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
+    },
+    "header": {
+      "title": "Health Metrics Calendar",
+      "subtitle": "A smart report tracking and analyzing your metrics and activity over the past month."
+    },
+    "timeline": {
+      "month": "{{month}}",
+      "date": "{{month}}/{{day}}/{{year}}"
+    },
+    "weekday": {
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday"
+    }
+  },
+  "mainPage": {
+    "prescriptionGroup": "Prescription Group",
+    "greeting": "Hello, {{name}}.",
+    "defaultName": "Member",
+    "ageYears": "{{age}} yrs",
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "stats": {
+      "ageGender": "Age / Gender",
+      "height": "Height",
+      "weight": "Weight"
+    },
+    "bmi": {
+      "underweight": "{{value}} (Underweight)",
+      "normal": "{{value}} (Normal)",
+      "overweight": "{{value}} (Overweight)",
+      "obese": "{{value}} (Obesity)"
+    },
+    "pet": {
+      "title": "Your pet is waiting for you",
+      "subtitle": "Start a healthy day together with your pet.",
+      "detailLink": "View my pet",
+      "loading": "Bringing your pet…"
+    },
+    "chart": {
+      "weeklyTitle": "Weekly Health Trend",
+      "weeklySubtitle": "Daily average value trend",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "bloodSugar": "Blood Sugar",
+      "bloodPressure": "Blood Pressure",
+      "weight": "Weight",
+      "target": "Target {{value}}",
+      "targetSystolic": "Target Systolic {{value}}",
+      "targetDiastolic": "Target Diastolic {{value}}"
+    },
+    "news": {
+      "title": "Health News",
+      "subtitle": "Discover health information curated by Hidoc.",
+      "loadFailed": "Failed to load news."
+    }
+  },
+  "diabetesReportPage": {
+    "riskFactors": {
+      "0": "Abdominal obesity and insulin resistance (key risk factors for type 2 diabetes in Koreans)",
+      "1": "Lack of physical activity and a diet centered on refined carbohydrates",
+      "2": "Family history, age 40 or older, accompanied by hypertension and dyslipidemia"
+    },
+    "title": "Diabetes Mellitus",
+    "intro": "Diabetes is a metabolic disease in which blood sugar is chronically elevated due to insulin secretion deficiency or insulin resistance (WHO). Per the Korean Diabetes Association 2023 clinical guidelines, it is diagnosed based on fasting blood sugar, HbA1c, and postprandial blood sugar; systematic blood sugar management and lifestyle correction are key to preventing complications.",
+    "overview": {
+      "heading": "What is diabetes?",
+      "paragraph1": "Diabetes is a group of chronic metabolic diseases that share hyperglycemia as a common feature (WHO). Chronic blood sugar elevation causes microvascular complications in the retina, kidneys, and nerves, as well as macrovascular complications such as myocardial infarction and stroke. According to the KDCA Korea National Health and Nutrition Examination Survey (2022), about 14% of Korean adults aged 30 or older have diabetes, and nearly half do when prediabetes is included.",
+      "paragraph2": "Normally, blood sugar is regulated by insulin secreted from pancreatic beta cells. In diabetes, this regulatory mechanism breaks down due to insufficient insulin secretion or insulin resistance, and if left untreated, it leads to serious complications such as cardiovascular disease, kidney failure, and blindness."
+    },
+    "diagnosis": {
+      "sectionTitle": "Diagnostic Criteria (Diagnosis)",
+      "fasting": {
+        "title": "Fasting blood sugar 126 mg/dL or higher",
+        "subTitle": "Korean Diabetes Association 2023 criteria",
+        "desc": "Blood sugar of 126 mg/dL or higher after fasting for 8 hours or more indicates diabetes; 100-125 mg/dL indicates impaired fasting glucose (prediabetes). A 2-hour postprandial blood sugar of 200 mg/dL or higher is also a diagnostic criterion."
+      },
+      "hba1c": {
+        "title": "Glycated hemoglobin (HbA1c) 6.5% or higher",
+        "subTitle": "Long-term blood sugar indicator",
+        "desc": "Reflects the average blood sugar over the past 2-3 months. HbA1c of 6.5% or higher indicates diabetes, and 5.7-6.4% is classified as prediabetes (WHO and Korean Diabetes Association)."
+      },
+      "ogtt": {
+        "title": "75 g oral glucose tolerance test (OGTT)",
+        "subTitle": "Confirmation and complication assessment",
+        "desc": "Diabetes is diagnosed if blood sugar is 200 mg/dL or higher 2 hours after ingesting 75 g of glucose. After diagnosis, target-organ complications are assessed through fundus, microalbuminuria, and nerve examinations."
+      }
+    },
+    "types": {
+      "sectionTitle": "Types of Diabetes",
+      "heading": "Types of Diabetes",
+      "type1": {
+        "title": "Type 1 Diabetes",
+        "desc": "A form in which insulin secretion is absolutely deficient due to autoimmune destruction of pancreatic beta cells. It mainly develops in childhood and adolescence, and survival is difficult without external insulin administration.",
+        "point": "External insulin injection essential"
+      },
+      "type2": {
+        "title": "Type 2 Diabetes",
+        "desc": "The most common form, accounting for more than 90% of Korean diabetes patients, combining insulin resistance with relative insulin secretion deficiency. It is strongly associated with obesity, lack of exercise, and aging.",
+        "point": "Progressive metabolic disease"
+      }
+    },
+    "nutrition": {
+      "heading": "Nutrition and Lifestyle",
+      "avoidTitle": "Foods to avoid",
+      "avoid": {
+        "0": "Simple sugars and refined carbohydrates (sugar, soda, white rice, rice cakes)",
+        "1": "Sugar-sweetened beverages and excessive fruit juice",
+        "2": "Processed foods containing saturated and trans fats"
+      },
+      "recommendTitle": "Recommendations",
+      "recommend": {
+        "0": "Whole grains rich in dietary fiber (brown rice, multigrain, oats)",
+        "1": "Fresh vegetables and quality protein (beans, tofu, fish)",
+        "2": "Unsaturated fatty acids (nuts, oily fish, olive oil)"
+      }
+    },
+    "activity": {
+      "headingLine1": "Regular Physical Activity",
+      "headingLine2": "(Physical Activity)",
+      "desc": "Per WHO recommendations, 150-300 minutes of moderate-intensity aerobic exercise per week and strength training at least twice a week are recommended. In particular, walking 30 minutes to 1 hour after meals effectively suppresses postprandial blood sugar spikes."
+    },
+    "symptoms": {
+      "sectionTitle": "Clinical Symptoms and Signs",
+      "step1": {
+        "title": "The \"three polys\" symptoms - early signs",
+        "desc": "Polydipsia, polyuria, and polyphagia are typical. This is because high blood sugar causes sugar to spill into the urine, leading to osmotic diuresis."
+      },
+      "step2": {
+        "title": "Warning symptoms - weight loss and vision changes",
+        "desc": "Reduced insulin action breaks down fat and protein instead of glucose, causing rapid weight loss over a short period. Blurred vision, frequent infections, and tingling in the hands and feet are also warning signs."
+      },
+      "step3": {
+        "title": "Chronic complications",
+        "desc": "If left untreated for a long time, systemic complications such as diabetic retinopathy, diabetic nephropathy (the leading cause of dialysis), diabetic neuropathy, myocardial infarction, and stroke can occur."
+      },
+      "caution": "Early diabetes is often asymptomatic, so the KDCA recommends annual fasting blood sugar and HbA1c tests for those aged 40 or older or with risk factors."
+    },
+    "references": {
+      "kda": {
+        "source": "Korean Diabetes Association",
+        "detail": "Clinical Practice Guidelines for Diabetes 2023"
+      },
+      "kdca": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "Korea National Health and Nutrition Examination Survey 2022, chronic disease statistics"
+      }
+    }
+  },
+  "dyslipidemiaReportPage": {
+    "riskFactors": {
+      "0": "About 40% of Korean adults aged 30+ have dyslipidemia (KDCA 2022)",
+      "1": "Progresses to atherosclerosis and cardiovascular/cerebrovascular disease without noticeable symptoms",
+      "2": "Diet, exercise, weight management, and drug therapy such as statins are essential together"
+    },
+    "title": "Hyperlipidemia",
+    "subtitle": "A chronic metabolic disease diagnosed per the Korean Society of Lipid and Atherosclerosis (KSoLA) 2022 guidelines when LDL is 160, total cholesterol 240, or triglycerides 200 mg/dL or higher, or HDL is below 40 mg/dL.",
+    "overview": {
+      "heading": "What is hyperlipidemia?",
+      "paragraph1": "Dyslipidemia is defined as elevated blood LDL cholesterol, total cholesterol, or triglycerides, or low HDL cholesterol (KSoLA). The KDCA 2022 survey reported that about 40% of Korean adults aged 30+ have dyslipidemia, and prevalence rises sharply with age.",
+      "paragraph2": "Excess lipids form plaques in the vascular endothelium, accelerating atherosclerosis and ultimately causing angina, myocardial infarction, stroke, and peripheral vascular disease. As it often accompanies metabolic syndrome, diabetes, and hypertension, integrated risk assessment and management of LDL target levels are key."
+    },
+    "diagnosis": {
+      "sectionTitle": "Diagnosis",
+      "card1": {
+        "title": "LDL 160 / TC 240 / TG 200 mg/dL",
+        "subTitle": "KSoLA 2022 diagnostic criteria",
+        "desc": "Dyslipidemia is diagnosed when any one of the following applies: LDL 160 mg/dL or higher, total cholesterol 240 mg/dL or higher, triglycerides 200 mg/dL or higher, or HDL below 40 mg/dL."
+      },
+      "card2": {
+        "title": "9-12 hour fasting blood test",
+        "subTitle": "Lipid panel measurement",
+        "desc": "For triglyceride accuracy, blood is drawn after 9-12 hours of fasting to measure TC, LDL, HDL, and TG. Retesting at 1-2 week intervals rules out temporary fluctuations."
+      },
+      "card3": {
+        "title": "Cardiovascular risk assessment",
+        "subTitle": "Analysis of accompanying risk factors",
+        "desc": "Atherosclerosis is checked with carotid ultrasound and coronary CT, and the 10-year cardiovascular risk is assessed by combining age, hypertension, diabetes, smoking, and family history to set the LDL target."
+      }
+    },
+    "management": {
+      "sectionTitle": "Management Guidelines",
+      "pharmacology": {
+        "heading": "Pharmacology",
+        "lipidLowering": {
+          "title": "Lowering lipid levels",
+          "item": "Statins are the first-line drug, inhibiting hepatic cholesterol synthesis to reduce LDL by 30-50%. Ezetimibe and PCSK9 inhibitors are added when needed."
+        },
+        "monitoring": {
+          "title": "Continuous monitoring",
+          "item": "Maintain target LDL by risk level (below 70 mg/dL for high-risk, below 100 mg/dL for moderate, below 130 mg/dL for low-risk) and monitor with regular blood tests."
+        }
+      }
+    },
+    "nutrition": {
+      "heading": "Nutrition & Lifestyle",
+      "avoid": {
+        "heading": "Foods to avoid",
+        "item1": "Saturated and trans fats (pork belly, butter, fried food, margarine)",
+        "item2": "Excessive drinking (a leading cause of triglyceride spikes)",
+        "item3": "Simple sugars and high-fructose corn syrup (soda, instant coffee, desserts)"
+      },
+      "recommend": {
+        "heading": "Recommendations",
+        "item1": "Whole grains, oats, and beans rich in soluble fiber",
+        "item2": "Omega-3 unsaturated fats (oily fish, nuts)",
+        "item3": "Fresh vegetables, fruits, and seaweed"
+      }
+    },
+    "physicalActivity": {
+      "heading": {
+        "line1": "Physical Activity & Weight Management",
+        "line2": "(Physical Activity)"
+      },
+      "paragraph": "Per WHO recommendations, 150-300 minutes of moderate-intensity or 75-150 minutes of high-intensity aerobic exercise per week raises HDL and lowers TG. Losing just 5-10% of body weight significantly improves LDL and TG."
+    },
+    "symptoms": {
+      "sectionTitle": "Clinical Symptoms & Signs",
+      "step1": {
+        "title": "Early Silent Phase",
+        "desc": "Dyslipidemia itself causes almost no pain or visible changes and is found only through regular blood tests (national screening every 4 years for those aged 40+)."
+      },
+      "step2": {
+        "title": "Warning Signs",
+        "desc": "In severe cases, eyelid xanthelasma, corneal arcus, and Achilles tendon xanthomas may appear, and chest tightness resembling angina may accompany them."
+      },
+      "step3": {
+        "title": "Chronic Complications",
+        "desc": "Progressing atherosclerosis causes myocardial infarction, cerebral infarction, and peripheral vascular disease, and when triglycerides exceed 500 mg/dL, the risk of acute pancreatitis rises sharply."
+      },
+      "caution": "Manage comorbidities such as hypertension, diabetes, and obesity together, and lipid test monitoring is needed every 6 months to 1 year depending on risk level."
+    },
+    "references": {
+      "ksola": {
+        "source": "Korean Society of Lipid and Atherosclerosis (KSoLA)",
+        "detail": "Dyslipidemia Clinical Practice Guidelines, 5th Edition, 2022"
+      },
+      "kdca": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "National Health and Nutrition Survey 2022, Chronic Disease Status Report"
+      }
+    }
+  },
+  "goutReportPage": {
+    "riskFactors": {
+      "0": "Incidence in men is about 3-4 times higher than in women, surging in the 40s-50s",
+      "1": "Over half of acute attacks begin in the first metatarsophalangeal joint of the big toe",
+      "2": "Diet control, weight management, and urate-lowering therapy are essential together"
+    },
+    "title": "Gout",
+    "intro": "A chronic inflammatory arthritis caused by hyperuricemia, defined as serum uric acid above 7.0 mg/dL, in which monosodium urate (MSU) crystals deposit in the joints (ACR/Korean College of Rheumatology 2020).",
+    "overview": {
+      "heading": "What is gout?",
+      "paragraph1": "Gout occurs when abnormal purine metabolism raises serum uric acid above 7.0 mg/dL (hyperuricemia), causing monosodium urate (MSU) crystals to deposit in joints and soft tissues.\n                Crystals deposited in the joints trigger a rapid inflammatory response, causing acute attacks accompanied by severe pain, swelling, redness, and warmth. The number of gout patients in Korea has roughly doubled over the past 10 years.",
+      "paragraph2": "Gout goes beyond a simple joint disease and is closely linked to metabolic syndrome, hypertension, and chronic kidney disease. If left unmanaged, it can progress to chronic tophaceous gout, kidney stones, and kidney failure."
+    },
+    "diagnosis": {
+      "sectionTitle": "Diagnosis",
+      "card1": {
+        "title": "Serum uric acid > 7.0 mg/dL",
+        "subTitle": "Hyperuricemia criterion",
+        "desc": "Serum uric acid above 7.0 mg/dL is defined as hyperuricemia (ACR/KCR 2020). However, levels may appear normal during an acute attack, so retesting at a different time is needed."
+      },
+      "card2": {
+        "title": "Confirming MSU crystals in joint fluid",
+        "subTitle": "Gold standard for diagnosis",
+        "desc": "Diagnosis is confirmed by identifying needle-shaped monosodium urate (MSU) crystals showing negative birefringence under polarized microscopy in synovial fluid obtained by joint aspiration."
+      },
+      "card3": {
+        "title": "Ultrasound / DECT imaging diagnosis",
+        "subTitle": "Non-invasive diagnosis",
+        "desc": "Gout can be diagnosed non-invasively by identifying the 'Double Contour' sign on joint ultrasound or by visualizing urate crystal deposits with dual-energy CT (DECT)."
+      }
+    },
+    "management": {
+      "sectionTitle": "Management Guidelines"
+    },
+    "pharmacology": {
+      "heading": "Pharmacology",
+      "acute": {
+        "heading": "Acute-phase relief",
+        "item1": "NSAIDs, colchicine (low dose), and steroids are used alone or in combination to suppress inflammation within 24 hours of an attack."
+      },
+      "longTerm": {
+        "heading": "Long-term prevention (ULT)",
+        "item1": "Take urate-lowering drugs (allopurinol, febuxostat) consistently to keep serum uric acid below 6.0 mg/dL (below 5.0 mg/dL for tophaceous gout)."
+      }
+    },
+    "nutrition": {
+      "heading": "Nutrition & Lifestyle",
+      "avoid": {
+        "heading": "Foods to avoid",
+        "item1": "Alcohol such as beer and spirits (promotes uric acid production)",
+        "item2": "High-purine meats (red meat, bacon)",
+        "item3": "High-purine fish such as animal organs, anchovies, sardines, and mackerel"
+      },
+      "recommend": {
+        "heading": "Recommendations",
+        "item1": "Dairy products such as low-fat milk and yogurt (help excrete uric acid)",
+        "item2": "Vegetables, cherries, and vitamin C-rich foods",
+        "item3": "Complex carbohydrates based on whole grains"
+      }
+    },
+    "hydration": {
+      "heading": {
+        "line1": "Water intake",
+        "line2": "(Hydration)"
+      },
+      "description": "Drinking at least 2L of water daily promotes uric acid excretion through the kidneys and prevents urate stone formation. Sweetened and fructose drinks actually increase uric acid production and should be avoided."
+    },
+    "symptoms": {
+      "sectionTitle": "Clinical Symptoms & Signs",
+      "step1": {
+        "title": "Acute gouty arthritis",
+        "desc": "It usually begins abruptly at night, with the joint turning red and swollen and severe pain developing. Over 50% of first attacks occur in the first metatarsophalangeal joint of the big toe."
+      },
+      "step2": {
+        "title": "Intercritical gout",
+        "desc": "An asymptomatic period after an attack subsides. It is easy to stop treatment, but without uric acid control the interval between recurrences gradually shortens."
+      },
+      "step3": {
+        "title": "Chronic tophaceous gout",
+        "desc": "If left untreated for years, urate crystals form tophi that cause joint destruction and deformity, and lead to declining kidney function through kidney stones and urate nephropathy."
+      },
+      "caution": "Managing comorbid metabolic syndrome such as hypertension, diabetes, hyperlipidemia, and obesity is crucial to gout prognosis, and regular uric acid and kidney function tests are needed."
+    },
+    "references": {
+      "0": {
+        "source": "Korean College of Rheumatology (KCR)",
+        "detail": "Gout Clinical Practice Guidelines 2020"
+      },
+      "1": {
+        "source": "American College of Rheumatology (ACR)",
+        "detail": "Guideline for the Management of Gout, 2020"
+      },
+      "2": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "Chronic Disease Statistics (gout prevalence trends)"
+      },
+      "3": {
+        "source": "EULAR",
+        "detail": "Recommendations for the Management of Gout, 2016 (updated)"
+      }
+    }
+  },
+  "healthReportPage": {
+    "tab": {
+      "bloodSugar": "Blood Sugar",
+      "bloodPressure": "Blood Pressure",
+      "weight": "Weight",
+      "bmi": "BMI"
+    },
+    "header": {
+      "title": "Health Report",
+      "subtitle": "Check your recent health metrics at a glance."
+    },
+    "loading": "Loading...",
+    "locked": {
+      "title": "This is an Individual/Family plan exclusive feature",
+      "description": "Health reports are available on the Individual or Family plan.",
+      "subscribe": "Go subscribe"
+    },
+    "summary": {
+      "noRecord": "No record",
+      "bloodSugar": {
+        "label": "Recent Blood Sugar",
+        "avg": "Average {{value}} mg/dL"
+      },
+      "bloodPressure": {
+        "label": "Recent Blood Pressure",
+        "sub": "Systolic / Diastolic"
+      },
+      "weight": {
+        "label": "Weight",
+        "height": "Height {{value}}cm"
+      },
+      "bmi": {
+        "label": "BMI",
+        "needData": "Weight/height needed",
+        "underweight": "Underweight",
+        "normal": "Normal",
+        "overweight": "Overweight",
+        "obese": "Obesity"
+      }
+    },
+    "chart": {
+      "bloodSugar": {
+        "title": "Recent Blood Sugar Trend",
+        "empty": "No blood sugar records.",
+        "lineName": "Blood Sugar"
+      },
+      "bloodPressure": {
+        "title": "Recent Blood Pressure Trend",
+        "empty": "No blood pressure records.",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic"
+      },
+      "weight": {
+        "title": "Recent Weight Trend",
+        "empty": "No weight records.",
+        "lineName": "Weight"
+      },
+      "bmi": {
+        "title": "Recent BMI Trend",
+        "emptyWeight": "No weight records.",
+        "emptyHeight": "Height information is needed.",
+        "lineName": "BMI"
+      }
+    }
+  },
+  "hypertensionReportPage": {
+    "riskFactors": {
+      "0": "About 28% of Korean adults aged 30+ have hypertension (KDCA 2022)",
+      "1": "Progresses without symptoms; target-organ damage may already exist at diagnosis",
+      "2": "A low-salt diet, weight management, and medication must go together"
+    },
+    "title": "Hypertension",
+    "intro": "A chronic condition diagnosed under the Korean Society of Hypertension 2022 guidelines when office blood pressure is 140/90 mmHg or higher, or home blood pressure is 135/85 mmHg or higher.\n            Known as the \"silent killer\" because it has no early symptoms, systematic management is essential to prevent complications such as stroke and myocardial infarction.",
+    "overview": {
+      "heading": "What is hypertension?",
+      "paragraph1": "Hypertension is a state in which the pressure on the blood vessel walls continuously exceeds the normal range (WHO). According to the KDCA's Korea National Health and Nutrition Examination Survey 2022,\n                about 28% of Korean adults aged 30+ have hypertension, exceeding half among those aged 65+. Chronic pressure elevation damages the vascular endothelium and accelerates atherosclerosis, leading to fatal complications such as stroke and myocardial infarction.",
+      "paragraph2": "Hypertension is closely linked to metabolic syndrome, and if left unmanaged it raises the risk of heart failure, kidney failure (dialysis), retinopathy, and dementia. Continuous management through home blood pressure monitoring and regular medical visits is key."
+    },
+    "diagnosis": {
+      "sectionTitle": "Diagnosis",
+      "card1": {
+        "title": "Office blood pressure 140/90 mmHg or higher",
+        "subTitle": "Korean Society of Hypertension 2022 criteria",
+        "desc": "Hypertension is diagnosed when office blood pressure measured on two or more visits is 140 systolic or 90 mmHg diastolic or higher. A reading of 130-139/80-89 is the caution stage."
+      },
+      "card2": {
+        "title": "Home blood pressure 135/85 mmHg or higher",
+        "subTitle": "Home / 24-hour ambulatory blood pressure measurement",
+        "desc": "Home or 24-hour ambulatory blood pressure is measured to distinguish white-coat and masked hypertension. The diagnostic criteria are an ambulatory daytime average of 135/85 or higher and a nighttime average of 120/70 or higher."
+      },
+      "card3": {
+        "title": "Target-organ damage assessment",
+        "subTitle": "Complication screening tests",
+        "desc": "Target-organ damage such as left ventricular hypertrophy, retinopathy, and kidney damage is assessed through ECG, echocardiography, fundus exam, urine test (microalbuminuria), and kidney function tests."
+      }
+    },
+    "management": {
+      "sectionTitle": "Management Guidelines"
+    },
+    "pharmacology": {
+      "heading": "Pharmacology",
+      "initial": {
+        "heading": "Initial blood pressure control",
+        "item1": "ACE inhibitors, ARBs (angiotensin receptor blockers), calcium channel blockers (CCBs), and diuretics are used as first-line agents, given alone or in combination depending on the patient's condition to safely reach the target blood pressure."
+      },
+      "longTerm": {
+        "heading": "Long-term maintenance",
+        "item1": "Through home blood pressure monitoring, regular exercise, and consistent adherence to the prescription, the goal is to maintain below 140/90 mmHg for the general adult, and below 130/80 mmHg when diabetes or kidney disease is present."
+      }
+    },
+    "nutrition": {
+      "heading": "Nutrition and Lifestyle",
+      "avoid": {
+        "heading": "Foods to limit",
+        "item1": "High-sodium foods (ramyeon, salted seafood, kimchi, processed meats)",
+        "item2": "Excessive alcohol (limit to 2 drinks/day for men, 1 for women or less)",
+        "item3": "Saturated fat, trans fat, and simple sugars"
+      },
+      "recommend": {
+        "heading": "Recommendations",
+        "item1": "DASH diet (vegetables, fruits, low-fat dairy)",
+        "item2": "Potassium-rich foods (bananas, spinach, potatoes)",
+        "item3": "Whole grains and lean protein (fish, beans, chicken breast)"
+      }
+    },
+    "lifestyle": {
+      "heading": {
+        "line1": "Weight Management and Aerobic Exercise",
+        "line2": "(Lifestyle Changes)"
+      },
+      "description": "The WHO recommends 150-300 minutes of moderate-intensity aerobic exercise per week and advises limiting salt intake to under 5 g per day (2,000 mg sodium). Losing 1 kg of body weight lowers blood pressure by about 1 mmHg."
+    },
+    "symptoms": {
+      "sectionTitle": "Clinical Symptoms and Signs",
+      "step1": {
+        "title": "Early asymptomatic stage (Silent Phase)",
+        "desc": "Most patients do not notice their elevated blood pressure. This is why it is called the \"silent killer,\" and it is detected only through home blood pressure monitoring and regular health checkups."
+      },
+      "step2": {
+        "title": "Warning Signs",
+        "desc": "When blood pressure rises sharply, occipital headache, dizziness, nosebleeds, and blurred vision may appear; a hypertensive emergency of 180/120 mmHg or higher requires immediate emergency room care."
+      },
+      "step3": {
+        "title": "Chronic Complications",
+        "desc": "If left untreated long-term, atherosclerosis progresses and leads to target-organ damage such as stroke, myocardial infarction, heart failure, chronic kidney disease, and hypertensive retinopathy."
+      },
+      "caution": "It is important to manage coexisting conditions such as diabetes, dyslipidemia, and obesity together, and to detect complications early through regular checkups every 6 months to 1 year."
+    },
+    "references": {
+      "0": {
+        "source": "WHO",
+        "detail": "Hypertension Fact Sheet, 2023"
+      },
+      "1": {
+        "source": "Korean Society of Hypertension",
+        "detail": "Hypertension Clinical Practice Guidelines 2022"
+      },
+      "2": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "National Health Statistics 2022 (hypertension prevalence)"
+      },
+      "3": {
+        "source": "ESC/ESH",
+        "detail": "Guidelines for the Management of Arterial Hypertension, 2023"
+      }
+    }
+  },
+  "mainReportPage": {
+    "heroBadges": {
+      "diet": "Diet & Exercise Records",
+      "bloodTracking": "Blood Pressure & Sugar Tracking",
+      "aiReport": "AI Analysis Report",
+      "diseaseGuide": "Disease Guides"
+    },
+    "features": {
+      "dailyRecord": {
+        "title": "Daily Health Records",
+        "description": "Log and manage all your daily health records on one screen, from diet, exercise, water intake, weight, blood pressure, and blood sugar to medication.",
+        "tags": {
+          "diet": "Diet",
+          "exercise": "Exercise",
+          "water": "Water",
+          "bloodPressureSugar": "Blood Pressure/Sugar"
+        }
+      },
+      "stats": {
+        "title": "Record Statistics & Reports",
+        "description": "See the flow of your changes at a glance with period-based statistics and visualized graphs, and receive a weekly comprehensive report.",
+        "tags": {
+          "periodStats": "Daily/Weekly/Monthly Stats",
+          "trendGraph": "Trend Graph",
+          "comprehensiveReport": "Comprehensive Report"
+        }
+      },
+      "goal": {
+        "title": "Custom Goal Setting",
+        "description": "Set goals for weight, water intake, and calories consumed/burned, and get reminders aligned with your daily routine (wake-up, meals, bedtime).",
+        "tags": {
+          "goalMetric": "Goal Metrics",
+          "routineAlert": "Routine Reminders",
+          "achievementRate": "Achievement Rate"
+        }
+      },
+      "medication": {
+        "title": "Medication Management",
+        "description": "A single photo of your prescription automatically registers the medications you take, and time-based medication reminders help you never miss a dose.",
+        "tags": {
+          "prescriptionOcr": "Prescription OCR",
+          "medicationAlert": "Medication Reminders",
+          "medicationHistory": "Medication History"
+        }
+      },
+      "diseaseGuide": {
+        "title": "Disease Guides",
+        "description": "Get reliable medical information and management methods for major chronic conditions such as hypertension, diabetes, hyperlipidemia, obesity, gout, and osteoporosis.",
+        "tags": {
+          "whoKdca": "Based on WHO & KDCA",
+          "sixDiseases": "6 Major Diseases",
+          "management": "Management Methods"
+        }
+      },
+      "community": {
+        "title": "Health Community",
+        "description": "Share experiences with people who have the same concerns, and freely exchange questions, know-how, and daily life on category boards.",
+        "tags": {
+          "categoryBoard": "Category Boards",
+          "qa": "Q&A",
+          "recommendView": "Upvotes/Views"
+        }
+      }
+    },
+    "howItWorks": {
+      "record": {
+        "title": "Record",
+        "description": "Just casually log today's meals, exercise, blood pressure, blood sugar, and weight, and your data steadily builds up."
+      },
+      "analyze": {
+        "title": "Analyze",
+        "description": "AI analyzes your accumulated data to show you trends, warning signs, and areas that need improvement."
+      },
+      "manage": {
+        "title": "Manage",
+        "description": "We help you sustain healthy habits through custom goals, routines, medication reminders, and community encouragement."
+      }
+    },
+    "hero": {
+      "titleLine1": "Small daily records become",
+      "titleHighlight": "lifelong health",
+      "titleLine2Suffix": ".",
+      "description": "Ballife brings together your scattered health data, from diet, exercise, blood pressure, and blood sugar to medication, in one place, helping you sustain your health with AI-analyzed insights and community encouragement.",
+      "startNow": "Get Started Now",
+      "exploreFeatures": "Explore Key Features"
+    },
+    "heroVisual": {
+      "todaySummary": "Today's Health Summary",
+      "bloodPressure": "Blood Pressure",
+      "bloodSugar": "Blood Sugar",
+      "goalAchievement": "Today's Goal Achievement"
+    },
+    "featuresSection": {
+      "title": "Everything You Need for Health Management, in One Place",
+      "subtitle": "Make health management easier and smarter with the 6 core features Ballife offers."
+    },
+    "howItWorksSection": {
+      "title": "Build Healthy Habits in 3 Steps"
+    },
+    "aiSection": {
+      "titleLine1": "Your 24/7",
+      "titleLine2": "AI Health Assistant",
+      "description": "From health questions and meal photo analysis to medication reminders. We provide personalized advice tailored to your lifestyle.",
+      "points": {
+        "interaction": "Check interactions with your current medications",
+        "nutrition": "Nutritional analysis of today's meals",
+        "interpretation": "Interpretation of blood pressure & sugar readings"
+      },
+      "chatUser": "My blood sugar was 180 after lunch today. Is that okay?",
+      "chatAi": "A 2-hour post-meal blood sugar of 180 mg/dL is somewhat higher than the normal threshold (under 140). Meals centered on fiber-rich grains and vegetables, plus a light 20-minute walk after eating, can help."
+    },
+    "cta": {
+      "title": "The First Step Toward a Better You Tomorrow",
+      "subtitle": "Join Ballife now and start a healthier lifestyle with better users."
+    }
+  },
+  "obesityReportPage": {
+    "riskFactors": {
+      "0": "About 38% of Korean adults are obese (BMI ≥ 25, KDCA 2022)",
+      "1": "Inflammatory cytokine secretion from fat cells causes metabolic and hormonal imbalance",
+      "2": "Combine diet, exercise, and behavioral therapy; consider medication or surgery if needed"
+    },
+    "title": "Obesity",
+    "intro": {
+      "line1": "Per WHO Western Pacific Region and KSSO criteria, obesity is defined as a body mass index (BMI) of 25 kg/m² or higher, a chronic disease that adversely affects health.",
+      "line2": "It should be managed as an independent disease that is a major cause of type 2 diabetes, hypertension, dyslipidemia, and cardiovascular disease."
+    },
+    "overview": {
+      "heading": "What is obesity?",
+      "paragraph1": "Obesity is a state in which excess body fat accumulates because energy intake exceeds expenditure (WHO). In Koreans, a BMI of 25 kg/m² or higher is classified as obesity, and abdominal obesity is diagnosed when waist circumference is 90 cm or more in men and 85 cm or more in women. According to the KDCA 2022 survey, the obesity prevalence among Korean adults is about 38%, particularly high in men.",
+      "paragraph2": "Beyond a cosmetic issue, obesity is a key cause of metabolic syndrome, increasing the risk of type 2 diabetes, hypertension, dyslipidemia, cardio-cerebrovascular disease, fatty liver, sleep apnea, osteoarthritis, and certain cancers (colorectal, breast, etc.), and is also linked to depression."
+    },
+    "diagnosis": {
+      "title": "Diagnostic Criteria (Diagnosis)",
+      "subTitle": "* Body mass index (BMI) = weight (kg) / [height (m)]²",
+      "normal": {
+        "subTitle": "Normal weight",
+        "desc": "Recommended normal BMI range for maintaining health (KSSO)"
+      },
+      "preObesity": {
+        "subTitle": "Pre-obesity (overweight)",
+        "desc": "Pre-obesity stage; lifestyle modification is strongly recommended"
+      },
+      "stage1": {
+        "subTitle": "Stage 1 obesity",
+        "desc": "Stage 1 obesity; significantly increased risk of comorbidities such as diabetes and hypertension"
+      },
+      "stage2": {
+        "subTitle": "Stage 2 or higher obesity",
+        "desc": "Stage 2-3 obesity; consider professional medical intervention, medication, and surgery"
+      }
+    },
+    "guideline": {
+      "title": "Management Guidelines"
+    },
+    "pharmacology": {
+      "title": "Pharmacological Treatment (Pharmacology)",
+      "weightLoss": {
+        "title": "Weight loss support",
+        "item1": "Consider prescribing GLP-1 analogs, appetite suppressants, fat absorption inhibitors, etc. for BMI 25 or higher, or BMI 23 or higher with comorbidities",
+        "item2": "Maximize effectiveness by combining with diet and exercise therapy under a specialist's prescription"
+      },
+      "maintenance": {
+        "title": "Ongoing maintenance",
+        "item1": "Long-term medication use and follow-up monitoring to maintain lost weight",
+        "item2": "Continue regular counseling and lifestyle monitoring even after achieving the 5-10% initial weight loss goal"
+      }
+    },
+    "caution": {
+      "fructose": {
+        "title": "The dangers of high-fructose corn syrup",
+        "desc": "WHO recommends limiting added sugars to less than 10% of total calories (less than 5% if possible). High-fructose corn syrup goes straight to the liver, causing fatty liver and insulin resistance."
+      },
+      "lateNight": {
+        "title": "Late-night eating and metabolic disorders",
+        "desc": "Eating within 3 hours of bedtime disrupts insulin secretion rhythms, is easily stored as fat, and degrades sleep quality and the next day's balance of appetite hormones (leptin and ghrelin)."
+      }
+    },
+    "physicalActivity": {
+      "title": "Physical Activity Therapy (Physical Activity)",
+      "desc": "Per WHO recommendations, combine 150-300 minutes of moderate-intensity aerobic exercise per week (brisk walking, swimming, cycling) or 75-150 minutes of high-intensity exercise with strength training at least twice a week.",
+      "cardio": {
+        "title": "Aerobic exercise",
+        "desc": "Improves cardiorespiratory endurance and reduces body fat"
+      },
+      "strength": {
+        "title": "Strength training",
+        "desc": "Increases basal metabolic rate and prevents muscle loss"
+      },
+      "imageAlt": "Woman exercising"
+    },
+    "diet": {
+      "title": "Diet Therapy",
+      "items": {
+        "0": "Reduce intake by 500-750 kcal per day (target loss of 0.5-1 kg per week)",
+        "1": "A balanced diet centered on protein and dietary fiber",
+        "2": "Keep regular meal times and fast for 3 hours before bed"
+      },
+      "note": "* Starvation diets cause muscle loss and yo-yo effects, so consuming an appropriate amount of quality nutrients is key."
+    },
+    "behavior": {
+      "title": "Behavioral Therapy",
+      "step1": {
+        "title": "Self-monitoring",
+        "desc": "Record meals, weight, and exercise daily to objectively understand lifestyle patterns and identify areas for improvement."
+      },
+      "step2": {
+        "title": "Stress management",
+        "desc": "Distinguish physical hunger from emotional hunger, and prevent stress-induced binge eating with meditation and hobbies."
+      },
+      "step3": {
+        "title": "Setting realistic goals",
+        "desc": "Set a goal of losing 5-10% of initial weight over 6 months and make a step-by-step plan to maintain a sense of achievement and motivation."
+      }
+    },
+    "surgery": {
+      "title": "Medication and Surgery",
+      "step1": {
+        "title": "For severe obesity with BMI 35 or higher, or BMI 30 or higher with comorbidities, metabolic and bariatric surgery such as sleeve gastrectomy may be considered."
+      },
+      "step2": {
+        "title": "When comorbidities such as hypertension, diabetes, and dyslipidemia are present, establish an integrated treatment plan that addresses disease treatment and obesity management simultaneously."
+      }
+    },
+    "references": {
+      "ksso": {
+        "source": "Korean Society for the Study of Obesity (KSSO)",
+        "detail": "Clinical Practice Guidelines for Obesity 2022"
+      },
+      "kdca": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "Korea National Health and Nutrition Examination Survey 2022, obesity prevalence"
+      }
+    }
+  },
+  "osteoporosisReportPage": {
+    "riskFactors": {
+      "0": "Aging and post-menopausal estrogen decline (about 38% of Korean women over 50 have osteoporosis)",
+      "1": "Family history and underweight (BMI < 18.5)",
+      "2": "Long-term use of steroids (glucocorticoids)",
+      "3": "Excessive drinking, smoking, and lack of physical activity"
+    },
+    "title": "Osteoporosis",
+    "intro": "By WHO definition, it is diagnosed when the DXA bone mineral density T-score is -2.5 or lower. It is a systemic skeletal disease in which fracture risk rises due to reduced bone mass and microstructural deterioration. As the population ages, the prevalence of osteoporosis among Koreans over 50 is rising rapidly, making public health management critically important.",
+    "overview": {
+      "heading": "What Is Osteoporosis?",
+      "paragraph1": "Osteoporosis is a condition in which bone strength is weakened by reduced bone mass and microstructural changes in bone tissue (WHO). Bone undergoes lifelong cycles of resorption and formation; when this balance is disrupted by menopause, aging, or certain medications, bone density decreases. According to KDCA data, about 38% of Korean women and about 7% of men over 50 have osteoporosis.",
+      "paragraph2a": "Osteoporosis is nearly asymptomatic as it progresses, eventually leading to ",
+      "paragraph2highlight": "a fragile state in which spine, hip, or wrist fractures can occur from even minor trauma or everyday movements",
+      "paragraph2b": ". Hip fractures are a serious complication that raises the 1-year mortality rate in older adults."
+    },
+    "diagnosis": {
+      "title": "Diagnostic Criteria (WHO T-score)",
+      "subTitle": "A T-score measured from lumbar spine and femur bone density via dual-energy X-ray absorptiometry (DXA) is the standard diagnostic criterion (WHO).",
+      "normal": {
+        "label": "Normal",
+        "desc": "Bone density is stable compared to the young-adult average; maintaining preventive lifestyle habits is recommended."
+      },
+      "osteopenia": {
+        "label": "Osteopenia",
+        "desc": "A stage of reduced bone mass; calcium and vitamin D intake along with strengthened exercise are needed to prevent progression to osteoporosis."
+      },
+      "osteoporosis": {
+        "label": "Osteoporosis",
+        "desc": "This meets the WHO diagnostic criteria and is a stage that requires active drug therapy such as bisphosphonates."
+      }
+    },
+    "management": {
+      "title": "Management Guidelines",
+      "pharmacology": {
+        "heading": "Pharmacology",
+        "antiresorptive": {
+          "heading": "Anti-resorptive Agents",
+          "item1": "Bisphosphonates - the most common",
+          "item2": "Denosumab - an injection given once every 6 months",
+          "item3": "Selective estrogen receptor modulators (SERMs)"
+        },
+        "anabolic": {
+          "heading": "Anabolic (Bone-forming) Agents",
+          "item1": "Teriparatide",
+          "item2": "Romosozumab - a powerful agent introduced recently"
+        }
+      }
+    },
+    "lifestyle": {
+      "heading": "Nutrition & Lifestyle",
+      "calcium": {
+        "title": "Calcium Intake",
+        "desc": "800-1,000 mg per day recommended for those over 50 (milk, anchovies, tofu, kale)"
+      },
+      "vitaminD": {
+        "title": "Vitamin D",
+        "desc": "800-1,000 IU per day recommended, combined with sun exposure 2-3 times a week"
+      },
+      "weightBearing": {
+        "title": "Weight-Bearing Exercise",
+        "desc": "Walking, jogging, or stair climbing 3-5 times a week, 150+ minutes per week as recommended by WHO"
+      }
+    },
+    "fallPrevention": {
+      "heading": "Fall Prevention",
+      "intro": "Most fractures in older adults are caused by falls, so creating an environment that prevents falls is as important as strengthening bones (Korean Society for Bone and Mineral Research, KSBMR).",
+      "check1": "Ensure sufficient indoor lighting and remove floor obstacles",
+      "check2": "Install non-slip mats and handrails in bathrooms and on stairs",
+      "check3": "Regular vision and hearing checks and balance-improving exercises (e.g., tai chi)"
+    },
+    "symptoms": {
+      "title": "Clinical Symptoms & Signs",
+      "fractureRisk": {
+        "heading": "Fracture Risk",
+        "desc": "Fractures of the wrist, spine, and hip are most common; hip fractures in particular are so serious that the 1-year mortality rate reaches about 15-20%. The spine can suffer a compression fracture from even minor trauma or a cough."
+      },
+      "bodyChange": {
+        "title": "Body Shape Changes",
+        "desc": "As spinal compression fractures accumulate, you may lose 3 cm or more in height or develop kyphosis (a hunched back)."
+      },
+      "dullPain": {
+        "title": "Dull Pain",
+        "desc": "Osteoporosis itself is asymptomatic, but when microfractures or compression fractures occur, chronic lower-back pain and generalized pain may accompany them."
+      }
+    },
+    "references": {
+      "ksbmr": {
+        "source": "Korean Society for Bone and Mineral Research (KSBMR)",
+        "detail": "Osteoporosis Clinical Practice Guidelines 2022"
+      },
+      "kdca": {
+        "source": "Korea Disease Control and Prevention Agency (KDCA)",
+        "detail": "Korea National Health and Nutrition Examination Survey 2022, Osteoporosis Prevalence"
+      }
+    }
+  },
+  "diseaseEditPage": {
+    "toast": {
+      "loadFailed": "Failed to load disease information.",
+      "demoSaved": "Demo values for the disease edit screen have been saved.",
+      "saved": "Your disease information has been updated.",
+      "saveFailed": "Failed to update disease information."
+    },
+    "eyebrow": {
+      "member": "Edit Conditions",
+      "demo": "Disease Edit Demo"
+    },
+    "title": "Edit Disease Information",
+    "subtitle": "Select and update your current chronic conditions.",
+    "demoNotice": "You can view the screen without logging in, and saved values are kept only in your browser.",
+    "close": "Close",
+    "loading": "Loading disease information.",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "submit": "Save"
+  },
+  "diseasePage": {
+    "title": "Check Existing Conditions",
+    "submit": "Done",
+    "toast": {
+      "signUpComplete": "Sign-up complete!"
+    }
+  },
+  "loginPage": {
+    "title": "Log in",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "loginIdPlaceholder": "Please enter your ID.",
+    "passwordPlaceholder": "Please enter your password.",
+    "validation": {
+      "loginIdRequired": "Please enter your ID.",
+      "passwordRequired": "Please enter your password."
+    },
+    "toast": {
+      "welcome": "Welcome, {{name}}!",
+      "loginFailed": "The ID or password is incorrect."
+    },
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  },
+  "profileEditPage": {
+    "toast": {
+      "loadFailed": "Failed to load member info.",
+      "imageOnly": "Only image files can be selected.",
+      "imageTooLarge": "Profile photo must be 10MB or less.",
+      "imageLoadFailed": "Couldn't load image.",
+      "profileSaved": "Profile saved.",
+      "memberUpdated": "Member info updated.",
+      "imageSavedLocally": "Profile photo saved to this browser.",
+      "updateFailed": "Failed to update member info."
+    },
+    "eyebrow": {
+      "member": "Edit Member Info",
+      "demo": "Profile Edit Demo"
+    },
+    "title": "Edit Profile",
+    "description": "You can edit your name, nickname, date of birth, gender, and body info.",
+    "demoNotice": "You can view the screen without logging in, but saved values are kept only in the browser.",
+    "close": "Close",
+    "loading": "Loading member info.",
+    "imageAlt": "Profile preview",
+    "imageLabel": "Profile Photo",
+    "imageHint": "You can upload JPG, PNG, or WEBP images. The photo is applied instantly in this browser.",
+    "selectImage": "Select Photo",
+    "defaultImage": "Default Image",
+    "field": {
+      "email": "Email",
+      "username": "Name",
+      "nickname": "Nickname",
+      "birthDate": "Date of Birth",
+      "gender": "Gender",
+      "weight": "Weight (kg)",
+      "height": "Height (cm)"
+    },
+    "gender": {
+      "none": "Not selected",
+      "male": "Male",
+      "female": "Female"
+    },
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "signUpPage": {
+    "title": "Sign up",
+    "devAutoFill": "[DEV] Auto-fill test data",
+    "labels": {
+      "loginId": "ID",
+      "password": "Password",
+      "passwordConfirm": "Confirm password",
+      "username": "Name",
+      "email": "Verification email",
+      "birthDate": "Date of birth",
+      "nickname": "Nickname",
+      "gender": "Gender",
+      "height": "Height",
+      "weight": "Weight"
+    },
+    "optional": "(optional)",
+    "placeholders": {
+      "loginId": "Please enter your ID.",
+      "password": "Enter at least 6 characters using letters and numbers.",
+      "passwordConfirm": "Please enter your password again.",
+      "username": "Please enter your name.",
+      "nickname": "Enter the name to be displayed."
+    },
+    "checkDuplicate": "Check availability",
+    "checkingDuplicate": "Checking...",
+    "loginIdAvailable": "This ID is available.",
+    "loginIdTaken": "This ID is already in use.",
+    "selectEmailDomain": "Select email",
+    "customDomain": "Enter manually",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "submit": "Sign up",
+    "submitting": "Signing up...",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Log in",
+    "toast": {
+      "checkFailed": "Availability check failed. Please try again shortly.",
+      "autoFillDone": "Test data auto-fill complete"
+    },
+    "errors": {
+      "loginIdRequired": "Please enter your ID.",
+      "loginIdMinLength": "ID must be at least 5 characters.",
+      "loginIdCheckRequired": "Please complete the ID availability check.",
+      "passwordRequired": "Please enter your password.",
+      "passwordMinLength": "Password must be at least 6 characters.",
+      "passwordConfirmRequired": "Please confirm your password.",
+      "passwordMismatch": "Passwords do not match.",
+      "emailRequired": "Please enter your email.",
+      "emailInvalid": "Invalid email format.",
+      "birthDateRequired": "Please enter your date of birth.",
+      "genderRequired": "Please select your gender.",
+      "weightRequired": "Please enter your weight.",
+      "heightRequired": "Please enter your height.",
+      "positiveNumber": "Please enter a number of 0 or greater."
+    }
+  },
+  "userInformation": {
+    "routine": {
+      "wakeup": "Wake up",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "bedtime": "Bedtime",
+      "title": "Daily Routine",
+      "edit": "Edit Routine"
+    },
+    "confirm": {
+      "deletePrescription": "Delete this prescription?"
+    },
+    "toast": {
+      "prescriptionDeleted": "Prescription deleted.",
+      "reportGenerating": "Generating your health analysis report…",
+      "reportDownloaded": "Health analysis report downloaded",
+      "memberLoadFailed": "Failed to load member information.",
+      "configLoadFailed": "Failed to load goal/routine information.",
+      "loginRequired": "Login is required.",
+      "targetsSaved": "Goals saved.",
+      "routineSaved": "Routine saved.",
+      "subscriptionActivated": "Subscription activated.",
+      "subscriptionCancelled": "Subscription cancelled."
+    },
+    "metric": {
+      "currentWeight": "Current weight {{weight}}kg",
+      "calorieOutWithGoal": "Calories burned {{current}}kcal / {{goal}}kcal reached",
+      "calorieOut": "Calories burned {{current}}kcal",
+      "calorieInWithGoal": "Calories consumed {{current}}kcal / {{goal}}kcal reached",
+      "calorieIn": "Calories consumed {{current}}kcal",
+      "waterMl": "{{current}} ml / {{target}} ml",
+      "targetWeight": "Target Weight",
+      "targetWater": "Target Water Intake",
+      "targetCalorieIn": "Target Calorie Intake",
+      "targetCalorieOut": "Target Calories Burned",
+      "editBadge": "Edit",
+      "cupUnit": "cups"
+    },
+    "subscription": {
+      "familyPlan": "Family Plan",
+      "individualPlan": "Individual Plan",
+      "free": "Free",
+      "title": "Subscription",
+      "activePlan": "{{plan}} active",
+      "expiryUntil": " · until {{date}}",
+      "promo": "Subscribe to a plan to use health reports and family health sharing.",
+      "generating": "Generating…",
+      "healthReportBtn": "Health Analysis Report",
+      "familyManage": "Family Management",
+      "subscribe": "Subscribe",
+      "manage": "Manage Subscription"
+    },
+    "loginRequiredPage": "This page requires login.",
+    "goToLogin": "Go to Login",
+    "profileImageAlt": "Profile picture",
+    "editProfile": "Edit Profile",
+    "editDisease": "Edit Conditions",
+    "medal": "🏅 Medals",
+    "mission": "🎯 Missions",
+    "points": "Points",
+    "pointsValue": "{{value}} P",
+    "memberInfo": {
+      "title": "Member Information",
+      "email": "Email Address",
+      "birthDate": "Date of Birth",
+      "gender": "Gender",
+      "disease": "Conditions"
+    },
+    "normalBloodSugar": {
+      "title": "Normal Blood Sugar",
+      "fasting": "Fasting",
+      "afterMeal1h": "1 hour after meal",
+      "afterMeal2h": "2 hours after meal"
+    },
+    "normalBloodPressure": {
+      "title": "Normal Blood Pressure",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic"
+    },
+    "healthReport": {
+      "title": "Health Report",
+      "subtitle": "See your latest health metrics at a glance.",
+      "viewBtn": "View Health Report"
+    },
+    "prescription": {
+      "title": "💊 Prescription List",
+      "noName": "No name",
+      "editAria": "Edit prescription",
+      "deleteAria": "Delete prescription",
+      "medicineCount": "{{count}} medicines",
+      "noMedicines": "No medicines registered.",
+      "emptyTitle": "No prescriptions registered",
+      "emptyHint": "Register a prescription using the button below",
+      "uploadBtn": "Upload Prescription"
+    }
+  },
+  "bloodPressureRecordModal": {
+    "tab": {
+      "아침": "Morning",
+      "점심": "Lunch",
+      "저녁": "Evening",
+      "취침전": "Before bed"
+    },
+    "toast": {
+      "loginRequired": "Login is required.",
+      "enterBoth": "Please enter both systolic and diastolic blood pressure.",
+      "systolicGreater": "Systolic pressure must be greater than diastolic pressure.",
+      "updated": "Blood pressure record updated.",
+      "created": "Blood pressure recorded.",
+      "deleted": "Blood pressure record deleted."
+    },
+    "confirm": {
+      "delete": "Delete this blood pressure record?"
+    },
+    "status": {
+      "empty": {
+        "label": "Before entering values",
+        "comment": "Enter systolic and diastolic values to check your current blood pressure status.",
+        "tip": "Entering right after measuring makes record management easier."
+      },
+      "low": {
+        "label": "Low blood pressure",
+        "comment": "Your blood pressure appears to be on the low side.",
+        "tip": "If you feel dizzy or fatigued, get plenty of rest and check your condition."
+      },
+      "high": {
+        "label": "High blood pressure",
+        "comment": "Your blood pressure appears to be on the high side.",
+        "tip": "If it's repeatedly high, review your lifestyle and consider consulting a specialist if needed."
+      },
+      "caution": {
+        "label": "Caution range",
+        "comment": "It's measured slightly above the normal range.",
+        "tip": "It helps to check factors like salty food, caffeine, and stress."
+      },
+      "normal": {
+        "label": "Normal range",
+        "comment": "Your blood pressure trend looks stable.",
+        "tip": "Recording consistently like this makes it easier to track changes."
+      }
+    },
+    "title": {
+      "edit": "Edit Blood Pressure Record",
+      "create": "Record Blood Pressure"
+    },
+    "subtitle": {
+      "edit": "You can edit the values or delete the record.",
+      "create": "Quickly check and record today's blood pressure."
+    },
+    "close": "Close",
+    "info": {
+      "normal": "Normal blood pressure: systolic below 120mmHg, diastolic below 80mmHg",
+      "high": "Hypertension: systolic 140mmHg or higher, or diastolic 90mmHg or higher",
+      "low": "Hypotension: generally systolic 90mmHg or below, or diastolic 60mmHg or below"
+    },
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "statusHeading": "Blood Pressure Status",
+    "gauge": {
+      "low": "Low",
+      "normal": "Normal",
+      "caution": "Caution",
+      "high": "High"
+    },
+    "button": {
+      "deleting": "Deleting…",
+      "delete": "Delete",
+      "saving": "Saving…",
+      "update": "Save Changes",
+      "submit": "Save and Confirm Record"
+    }
+  },
+  "chatbot": {
+    "message": {
+      "imageOnly": "Currently, only images (photos) can be attached.",
+      "imageLoadFailed": "Could not load the photo. Please try again.",
+      "loginRequired": "You can use this after logging in. Please check your login information.",
+      "noReply": "No response received.",
+      "fetchFailed": "Sorry, we can't fetch a response right now. Please try again in a moment."
+    },
+    "aria": {
+      "openChatbot": "Open AI chatbot",
+      "close": "Close",
+      "removeAttach": "Remove attachment",
+      "attachFile": "Attach file",
+      "send": "Send"
+    },
+    "header": {
+      "title": "Health AI Assistant",
+      "status": "Live consultation available"
+    },
+    "empty": {
+      "title": "Hello, I'm Ball",
+      "descLine1": "Feel free to ask anything you're curious about regarding health,",
+      "descLine2": "such as blood sugar, nutrition, exercise, and sleep."
+    },
+    "alt": {
+      "attachedImage": "Attached image",
+      "attachPreview": "Attachment preview"
+    },
+    "input": {
+      "placeholder": "Type a message..."
+    },
+    "disclaimer": "The AI assistant's advice is for reference only and cannot replace a medical diagnosis."
+  },
+  "dailyTimelineModal": {
+    "recordedItems": "Items Recorded Today",
+    "close": "Close",
+    "timelineCount": "Timeline ({{count}})",
+    "empty": "No records on this day.",
+    "category": {
+      "diet": "Diet",
+      "bloodPressure": "Blood Pressure",
+      "bloodSugar": "Blood Sugar",
+      "water": "Water",
+      "medication": "Medication",
+      "exercise": "Exercise",
+      "weight": "Weight"
+    }
+  },
+  "exerciseModal": {
+    "validation": {
+      "atLeastOne": "Please add at least one exercise item.",
+      "aerobicDuration": "Please enter aerobic exercise duration in the format 13min30sec or 13:30.",
+      "anaerobicSetReps": "For anaerobic exercise, please enter both sets and reps.",
+      "anaerobicDuration": "Please enter anaerobic exercise duration in the format 13min30sec or 13:30."
+    },
+    "confirm": {
+      "delete": "Delete this exercise record?"
+    },
+    "toast": {
+      "loginRequired": "Log in required.",
+      "deleted": "Exercise record deleted.",
+      "deleteFailed": "Failed to delete exercise record.",
+      "updated": "Exercise record updated.",
+      "saved": "Exercise record saved.",
+      "updateFailed": "Failed to update exercise record.",
+      "saveFailed": "Failed to save exercise record."
+    },
+    "title": {
+      "edit": "Edit Exercise Record",
+      "create": "Record Exercise"
+    },
+    "subtitle": {
+      "edit": "Edit the selected exercise record.",
+      "create": "Record today's effort in detail."
+    },
+    "close": "Close",
+    "tab": {
+      "anaerobic": "Anaerobic",
+      "aerobic": "Aerobic"
+    },
+    "expectedCalorie": "Estimated Calories Burned",
+    "setDetailLabel": "Per-Set Details",
+    "recording": "Recording",
+    "field": {
+      "exerciseType": "Exercise Type",
+      "set": "Set",
+      "weight": "Weight (KG)",
+      "reps": "Reps (REPS)",
+      "duration": "Duration",
+      "kilometer": "Kilometers",
+      "intensity": "Intensity"
+    },
+    "placeholder": {
+      "duration": "13min30sec"
+    },
+    "intensity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "addItem": "Add",
+    "button": {
+      "deleting": "Deleting...",
+      "delete": "Delete",
+      "saving": "Saving...",
+      "updateDone": "Update Complete",
+      "saveAndConfirm": "Save & Confirm Record",
+      "saveAndConfirmCount": "Save & Confirm Record ({{count}})"
+    }
+  },
+  "mealDetailModal": {
+    "sample": {
+      "mealType": "Lunch",
+      "salmonSalad": "Salmon salad",
+      "brownRiceHalf": "Half bowl of brown rice"
+    },
+    "label": {
+      "dietRecord": "Diet Record"
+    },
+    "nutrition": {
+      "carbs": "Carbohydrate",
+      "protein": "Protein",
+      "fat": "Fat",
+      "sugar": "Sugar",
+      "cholesterol": "Cholesterol",
+      "sodium": "Sodium"
+    },
+    "totalCalories": "Total Calories"
+  },
+  "mealRegisterModal": {
+    "title": "Register Meal",
+    "subtitle": "Meal contents analyzed by AI. Please review the detailed nutrition info.",
+    "category": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack",
+      "fallback": "Meal"
+    },
+    "nutrient": {
+      "calories": "Calories",
+      "carbs": "Carbohydrate",
+      "protein": "Protein",
+      "fat": "Fat",
+      "sugar": "Sugar",
+      "sodium": "Sodium",
+      "cholesterol": "Cholesterol"
+    },
+    "addFood": "Add Food",
+    "uploadTitle": "Upload Meal Photo",
+    "uploadHintLine1": "Click here or drag a photo file",
+    "uploadHintLine2": "to upload (JPG, PNG)",
+    "aiAutoRecognize": "AI automatically recognizes food and nutrients",
+    "selectFile": "Select File",
+    "imageAlt": "Meal photo",
+    "changePhoto": "Change Photo",
+    "removePhoto": "Remove Photo",
+    "analyzing": "AI is analyzing",
+    "analyzingWait": "Please wait a moment...",
+    "aiVisionDone": "AI vision analysis complete",
+    "foodNameLabel": "Food Name",
+    "foodNamePlaceholder": "Enter a food name to search the MFDS database",
+    "searching": "Searching...",
+    "intakeLabel": "Intake (g)",
+    "per100g": "Per 100g",
+    "nutritionHeader": "Nutrition",
+    "aiEstimate": "AI estimate",
+    "deleting": "Deleting...",
+    "deleteMeal": "Delete Meal",
+    "saving": "Saving...",
+    "editComplete": "Edit Complete",
+    "saveMeal": "Save & Confirm Meal",
+    "confirm": {
+      "deleteMeal": "Delete this meal record?\nThe photo and all registered foods will be deleted."
+    },
+    "toast": {
+      "timeChanged": "Time changed.",
+      "recognizedNoNutrition": "Recognized {{count}} food(s) ({{names}}) but couldn't find nutrition info. Please enter it manually.",
+      "notRecognized": "Couldn't recognize food in the photo. Please enter it manually.",
+      "mainFoodAddedWithOthers": "'{{name}}' added. (For {{others}}, use 'Add Food' and upload each photo separately)",
+      "mainFoodRecognized": "'{{name}}' recognized. Please review and press the save button.",
+      "analysisFailed": "AI analysis failed. Please enter it manually.",
+      "mealDeleted": "Meal deleted.",
+      "loginRequired": "Login required.",
+      "foodsSaved": "{{count}} food(s) saved.",
+      "someFoodsSaveFailed": "Failed to save some foods.",
+      "saved": "Saved.",
+      "enterFoodName": "Please enter a food name.",
+      "enterMealTime": "Please enter a meal time.",
+      "updated": "Updated."
+    }
+  },
+  "medicineSearchTestModal": {
+    "title": "Medicine Search",
+    "searchPlaceholder": "e.g. Motilitone Tablet",
+    "searching": "Searching...",
+    "search": "Search",
+    "error": {
+      "notFound": "This medicine could not be found.",
+      "searchFailed": "An error occurred during the search."
+    },
+    "itemSeqLabel": "Item Reference Code",
+    "chartLabel": "Appearance",
+    "storageMethodLabel": "Storage Method"
+  },
+  "missionModal": {
+    "section": {
+      "daily": {
+        "title": "Daily missions",
+        "note": "Once a day"
+      },
+      "weekly": {
+        "title": "Weekly missions",
+        "note": "Once a week"
+      },
+      "special": {
+        "title": "Special missions"
+      },
+      "streak": {
+        "title": "Streak bonus"
+      }
+    },
+    "note": {
+      "eachRegister": "Up to 3 times",
+      "streak7": "Weekly bonus",
+      "streak30": "Monthly bonus"
+    },
+    "title": "🎯 Missions",
+    "loading": "Loading...",
+    "toast": {
+      "claimed": "Mission complete! +{{reward}}P"
+    },
+    "button": {
+      "processing": "Processing...",
+      "claim": "Claim",
+      "maxReached": "Max reached",
+      "done": "Done",
+      "notAchieved": "Not achieved"
+    }
+  },
+  "prescriptionDetailModal": {
+    "title": "My [{{groupName}}] Prescription List",
+    "totalCount": "A total of {{count}} medications are prescribed.",
+    "ingredientLabel": "Ingredient: {{ingredient}}",
+    "empty": "No prescribed medications. If you delete all medications, this group will also disappear from the dosing schedule and adherence.",
+    "placeholder": {
+      "name": "Medication name",
+      "purpose": "Effect",
+      "dosage": "Dosage"
+    },
+    "action": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirmDelete": {
+      "title": "Are you sure you want to delete?",
+      "target": "This medication will be deleted.",
+      "warning": "This cannot be undone after deletion."
+    }
+  },
+  "prescriptionRegisterModal": {
+    "defaultTitle": "Morning medication",
+    "close": "Close",
+    "scanLabel": "Scan prescription",
+    "filePlaceholder": "Attach file",
+    "upload": "Upload",
+    "groupNameLabel": "Prescription group name",
+    "groupNamePlaceholder": "e.g. Blood pressure meds",
+    "memoLabel": "Memo",
+    "memoPlaceholder": "Enter a memo...",
+    "detailLabel": "Medication details",
+    "column": {
+      "name": "Name",
+      "dosage": "Dosage (MG/PILL)",
+      "manage": "Manage"
+    },
+    "emptyList": "No medications registered yet.",
+    "medicineNamePlaceholder": "Medication name",
+    "categoryPlaceholder": "Category",
+    "deleteRow": "Delete row",
+    "addRow": "Add row",
+    "submitting": "Saving...",
+    "submit": "Save",
+    "alert": {
+      "groupNameRequired": "Please enter the prescription group name.",
+      "saveFailed": "An error occurred while saving. Please try again shortly."
+    }
+  },
+  "routineModal": {
+    "title": "Edit Daily Routine",
+    "close": "Close",
+    "description": "Please enter your daily schedule. Notifications and recommended timings are adjusted based on the times you enter.",
+    "scheduleLabel": "Set Daily Times",
+    "saving": "Saving...",
+    "save": "Save",
+    "saveError": "An error occurred while saving. Please try again in a moment.",
+    "meridiemLabel": "AM/PM",
+    "am": "AM",
+    "pm": "PM",
+    "hourLabel": "Hour",
+    "hourUnit": "{{value}}:00",
+    "minuteLabel": "Minute",
+    "minuteUnit": "{{value}} min"
+  },
+  "searchMedicineModal": {
+    "error": {
+      "notFound": "The medication could not be found.",
+      "generic": "An error occurred during the search."
+    },
+    "title": "Search",
+    "searchLabel": "Search by medication name",
+    "searchPlaceholder": "Enter or select a medication name",
+    "searchingButton": "Searching...",
+    "searchButton": "Search",
+    "addManually": "Not in the results? Add '{{keyword}}' manually",
+    "detailTitle": "Intake details",
+    "column": {
+      "name": "Name",
+      "dosage": "Dosage (MG/PILL)"
+    },
+    "emptyState": "Please search for a medication name."
+  },
+  "subscriptionModal": {
+    "title": "Family Health Care Subscription",
+    "subtitle": "Choose a plan and get started.",
+    "close": "Close",
+    "currentPlanBadge": "Current Plan",
+    "perMonth": "/ month",
+    "nextStep": "Next Step",
+    "plan": {
+      "individual": {
+        "name": "Individual Plan",
+        "tagline": "Dive deeper into your health"
+      },
+      "family": {
+        "name": "Family Plan",
+        "tagline": "Manage health together with family"
+      }
+    },
+    "feature": {
+      "healthReport": "Health report",
+      "bioSummary": "Blood sugar, blood pressure & weight summary",
+      "parentBio": "Check parents' blood sugar/blood pressure",
+      "inviteFamily": "Invite family members",
+      "shareMedication": "Share medication reminders",
+      "shareExercise": "Share exercise status"
+    },
+    "button": {
+      "processing": "Processing...",
+      "currentPlan": "Current plan in use",
+      "changeTo": "Change to {{plan}}",
+      "pay": "Pay for {{plan}}",
+      "cancelling": "Cancelling...",
+      "cancelSubscription": "Cancel Subscription",
+      "close": "Cancel"
+    },
+    "confirm": {
+      "cancel": "Cancel your subscription?\nIf this is a Family Plan, family health sharing will also stop."
+    }
+  },
+  "targetModal": {
+    "title": "Edit Target Metrics",
+    "subtitle": "Set all your daily target values at once.",
+    "close": "Close",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "submit": "Save",
+    "saving": "Saving…",
+    "alert": {
+      "saveError": "An error occurred while saving. Please try again later."
+    },
+    "field": {
+      "weight": {
+        "label": "Target Weight",
+        "description": "Enter the weight you want to reach."
+      },
+      "water": {
+        "label": "Target Water Intake",
+        "description": "Amount of water to drink per day (1 cup = about 200ml).",
+        "unit": "cups"
+      },
+      "calorieIn": {
+        "label": "Target Calorie Intake",
+        "description": "Enter your recommended daily calorie intake."
+      },
+      "calorieOut": {
+        "label": "Target Calories Burned",
+        "description": "Target calories to burn through exercise and activity."
+      }
+    }
+  },
+  "userMedalModal": {
+    "title": "My Medals",
+    "loading": "Loading…",
+    "ownedMedalsLabel": "Owned Medals · Click to equip",
+    "noMedals": "No medals earned yet.",
+    "allMedalsLabel": "All Medals",
+    "equipped": "Equipped",
+    "equipping": "Equipping…",
+    "equip": "Equip",
+    "owned": "Owned",
+    "priceRequired": "{{price}}P required",
+    "toast": {
+      "loadFailed": "Failed to load medal information.",
+      "equipped": "Medal equipped.",
+      "equipFailed": "Failed to equip medal."
+    }
+  },
+  "weightRecordModal": {
+    "toast": {
+      "loginRequired": "Log in required.",
+      "invalidWeight": "Please enter your weight correctly.",
+      "updated": "Weight record for {{date}} updated.",
+      "created": "Weight for {{date}} recorded."
+    },
+    "title": "Record Weight",
+    "subtitle": "Record today's weight.",
+    "close": "Close",
+    "targetWeight": "Target Weight",
+    "emptyKg": "— kg",
+    "diffFromCurrent": "Difference from Current",
+    "currentWeight": "Current {{weight}}kg",
+    "progressAchieved": "{{progress}}% to goal achieved",
+    "advice": {
+      "noTarget": "Set a target weight to see your achievement rate and personalized advice.",
+      "reached": "Congratulations! You've reached your target weight. Now focus on maintaining it.",
+      "remaining": "{{diff}}kg to go to your goal. Keep it up!"
+    },
+    "submitting": "Saving...",
+    "submit": "Save & Confirm Record"
+  },
+  "bloodsugarModal": {
+    "title": {
+      "edit": "Edit Blood Sugar Record",
+      "create": "Record Blood Sugar"
+    },
+    "subtitle": {
+      "edit": "You can edit the value or delete the record.",
+      "create": "Record today's blood sugar."
+    },
+    "close": "Close",
+    "guide": {
+      "header": "{{diabetes}} · {{context}} standard"
+    },
+    "statusHeading": "Blood sugar status",
+    "diabetes": {
+      "none": "No diabetes",
+      "type1": "Type 1 diabetes",
+      "type2": "Type 2 diabetes",
+      "gestational": "Gestational diabetes"
+    },
+    "context": {
+      "fasting": "Fasting",
+      "beforeBed": "Before bed",
+      "beforeMeal": "Before meal",
+      "afterMeal": "After meal"
+    },
+    "meal": {
+      "fasting": "Fasting",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "beforeBed": "Before bed"
+    },
+    "timing": {
+      "beforeMeal": "Before meal",
+      "afterMeal": "After meal"
+    },
+    "zone": {
+      "hypo": "Hypoglycemia",
+      "normal": "Normal",
+      "warn": "Caution",
+      "danger": "Risk"
+    },
+    "status": {
+      "hypo": {
+        "text": "Hypoglycemia",
+        "label": "You are in a hypoglycemic state",
+        "description": "Your blood sugar is low. Please eat something containing sugar."
+      },
+      "normal": {
+        "text": "Normal",
+        "label": "Your blood sugar is ideal",
+        "description": "Your current blood sugar is in the normal range. Keep up the consistent management."
+      },
+      "warn": {
+        "text": "Caution",
+        "label": "Blood sugar management is needed",
+        "description": "Your blood sugar is high. Management through diet and exercise is needed."
+      },
+      "danger": {
+        "text": "Risk",
+        "label": "Your blood sugar is very high",
+        "description": "Your blood sugar is at a dangerous level. Please consult a medical professional."
+      }
+    },
+    "toast": {
+      "loginRequired": "Login is required.",
+      "enterValue": "Please enter your blood sugar value",
+      "updated": "Blood sugar record updated",
+      "saved": "Blood sugar saved",
+      "deleted": "Blood sugar record deleted"
+    },
+    "confirm": {
+      "delete": "Delete this blood sugar record?"
+    },
+    "button": {
+      "deleting": "Deleting...",
+      "delete": "Delete",
+      "saving": "Saving...",
+      "saveEdit": "Save changes",
+      "saved": "Saved ✓",
+      "save": "Save & confirm record"
+    }
+  },
+  "prescriptionOcrTestModal": {
+    "intakeOption": {
+      "morning": "Morning",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "beforeSleep": "Before bed"
+    },
+    "toast": {
+      "nameRequired": "The prescription name cannot be left blank.",
+      "noMedicine": "There are no medications to register.",
+      "updated": "The prescription has been updated.",
+      "registered": "The prescription has been registered.",
+      "nameFetchFailed": "Failed to retrieve the medication names.",
+      "alreadyAdded": "This medication has already been added.",
+      "added": "'{{name}}' added"
+    },
+    "error": {
+      "ocrFailed": "Failed to retrieve the medication names. Please try again."
+    },
+    "title": {
+      "edit": "Edit prescription",
+      "register": "Register prescription"
+    },
+    "subtitle": "Upload a prescription image and we'll automatically extract the medication names.",
+    "imagePreviewAlt": "Prescription preview",
+    "imageDropTitle": "Image drop area",
+    "imageDropHint": "Click to select a prescription image",
+    "label": {
+      "prescriptionName": "Prescription name",
+      "memo": "Memo",
+      "intakeTime": "Intake time"
+    },
+    "placeholder": {
+      "prescriptionName": "e.g. May regular prescription",
+      "memo": "Leave a brief note about the prescription."
+    },
+    "medicineListTitle": "Medication name list",
+    "addMedicine": "Add medication",
+    "extracting": "Extracting medication names...",
+    "removeMedicineAria": "Delete {{name}}",
+    "emptyState": "Add an image to display the medication names.",
+    "submit": {
+      "edit": "Edit",
+      "register": "Register"
+    }
+  },
+  "waterRecordModal": {
+    "progress": {
+      "done": "You've reached today's goal. Check in on how your body feels too.",
+      "high": "If you keep up your current pace, you'll comfortably reach today's goal.",
+      "mid": "Good flow. Keep sipping slowly and you'll get closer to your goal.",
+      "low": "There's still room to go. Sip a little at a time and you'll reach your goal without strain."
+    },
+    "toast": {
+      "loginRequired": "Login is required."
+    },
+    "title": "Record Water Intake",
+    "subtitle": "Record today's water intake.",
+    "close": "Close",
+    "cupIncrease": "Increase cups",
+    "cupDecrease": "Decrease cups",
+    "cupUnit": "cups",
+    "currentIntake": "Current water intake",
+    "milliliters": "= {{ml}}ml",
+    "targetIntake": "Target water intake",
+    "cupsValue": "{{count}} cups",
+    "advicePrefix": "About ",
+    "adviceSuffix": " of your target water intake achieved.",
+    "submit": "Save & confirm record"
+  },
+  "inputSelectBox": {
+    "option": {
+      "placeholder": "-- Select --",
+      "beforeStart": "Not started",
+      "inProgress": "In progress",
+      "completed": "Completed"
+    }
+  },
+  "mealScoreCard": {
+    "todayScoreLabel": "Today's diet score",
+    "balanceStatus": "Excellent balance",
+    "heading": "Your nutrients are wonderfully balanced.",
+    "description": "The ratio of nutrients you've consumed so far is very close to the recommended guidelines. Your protein and fat ratios are especially stable, and if you just focus on supplementing fiber for the rest of the day, it looks like it'll be a perfect day.",
+    "tagProtein": "#Protein_Sufficient",
+    "tagLowSugar": "#Low_Sugar_Diet"
+  },
+  "mealRecordCard": {
+    "hiddenCount": "+{{count}} more",
+    "total": "Total",
+    "macro": {
+      "carb": "Carb",
+      "protein": "Prot",
+      "fat": "Fat",
+      "sugar": "Sugar",
+      "chol": "Chol",
+      "na": "Na"
+    }
+  },
+  "richTextEditor": {
+    "placeholder": "Enter content...",
+    "font": {
+      "default": "Default",
+      "malgunGothic": "Malgun Gothic",
+      "nanumGothic": "Nanum Gothic",
+      "nanumMyeongjo": "Nanum Myeongjo",
+      "gungsuh": "Gungsuh"
+    },
+    "toast": {
+      "imageOnly": "Only image files can be attached.",
+      "imageTooLarge": "Only images of 5MB or less can be attached.",
+      "uploading": "Uploading image...",
+      "imageAttached": "Image attached.",
+      "uploadFailed": "Failed to upload image."
+    }
+  },
+  "mainCalendar": {
+    "meal": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "medicationSlot": {
+      "morning": "Morning medication",
+      "lunch": "Lunch medication",
+      "dinner": "Evening medication"
+    },
+    "item": {
+      "bloodSugarCheck": "Blood sugar check",
+      "bloodPressureCheck": "Blood pressure measurement",
+      "weightCheck": "Weight measurement",
+      "waterIntake": "Water intake",
+      "exercise": "Exercise ({{name}})",
+      "exerciseFallback": "Exercise",
+      "minutes": "{{count}} min",
+      "medication": "Medication",
+      "meal": "Meal",
+      "count": "{{count}} entries"
+    },
+    "weekdayShort": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "weekdayLong": {
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday"
+    },
+    "monthLabel": "{{month}}",
+    "yearLabel": "{{year}}",
+    "aria": {
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "yearMonthPicker": "Select year/month",
+      "prevYear": "Previous year",
+      "nextYear": "Next year"
+    },
+    "empty": "No records",
+    "moreItems": "+{{count}} more (click to view)"
+  },
+  "mainCard": {
+    "noRecord": "No record",
+    "status": {
+      "overRange": "Above normal range",
+      "underRange": "Below normal range",
+      "normalRange": "Normal range"
+    },
+    "systolicDiastolic": "Systolic / Diastolic",
+    "type": {
+      "bloodSugar": "Blood Sugar",
+      "bloodPressure": "Blood Pressure",
+      "weight": "Weight",
+      "meal": "Diet",
+      "exercise": "Exercise",
+      "waterIntake": "Water intake",
+      "medicineAlert": "Medication reminder"
+    },
+    "value": {
+      "bloodSugar": "{{value}} mg/dL",
+      "weight": "{{value}}kg",
+      "checkMeal": "Check today's diet",
+      "checkExercise": "Check today's exercise",
+      "totalMl": "Total {{ml}}ml",
+      "checkNeeded": "{{count}} need checking",
+      "doseComplete": "Dose complete"
+    },
+    "label": {
+      "recentMeasure": "Recent measurement",
+      "noMeasureRecord": "No measurement records",
+      "totalIntakeKcal": "Total intake {{kcal}}kcal",
+      "burnedKcal": "Burned {{kcal}}kcal",
+      "goalAchieved": "Goal achieved",
+      "remainCups": "{{count}} cups to goal",
+      "goalNotSet": "Goal not set",
+      "todayMedicine": "Medication to take today",
+      "allScheduleComplete": "All of today's schedule is complete"
+    },
+    "alt": {
+      "bloodSugar": "Blood sugar icon",
+      "bloodPressure": "Blood pressure icon",
+      "weight": "Weight icon",
+      "medicine": "Medication icon",
+      "meal": "Diet icon",
+      "exercise": "Exercise icon",
+      "water": "Water icon",
+      "supplement": "Supplement icon"
+    },
+    "noPrescription": "No registered prescription medication."
+  },
+  "mainChart": {
+    "empty": {
+      "noRecordsTitle": "No records yet",
+      "noRecordsInRangeTitle": "No records in the selected period",
+      "noRecordsDesc": "Register your measurements and the trend will appear here",
+      "noRecordsInRangeDesc": "Try selecting a different period"
+    }
+  },
+  "medicationProgressCard": {
+    "title": "Today's medication adherence",
+    "completed": "{{taken}}/{{total}} taken"
+  },
+  "medicationRecordCard": {
+    "title": "Record manually",
+    "description": "Record when you take over-the-counter medicine.",
+    "drugNameLabel": "Medicine name",
+    "drugNamePlaceholder": "e.g. Vitamin C, Tylenol",
+    "dosageLabel": "Dosage",
+    "dosagePlaceholder": "e.g. 1 tablet, 5ml",
+    "dateLabel": "Date taken",
+    "timeLabel": "Time taken",
+    "addMedicine": "Add medicine",
+    "save": "Save"
+  },
+  "memoCard": {
+    "title": "Memo",
+    "empty": "No memos saved."
+  },
+  "prescriptionListCard": {
+    "title": "My Prescription Medication List",
+    "columnGroup": "Medication Group",
+    "columnDosage": "Dosage",
+    "columnSchedule": "Schedule",
+    "empty": "No prescribed medications.",
+    "prevPage": "Previous Page",
+    "nextPage": "Next Page"
+  },
+  "savedRecordsCard": {
+    "viewLabel": "{{month}}/{{day}}",
+    "title": "OTC Medicine",
+    "count": "{{count}} items",
+    "emptyToday": "No OTC medicine recorded today.",
+    "emptyOtherDay": "No OTC medicine recorded on this date.",
+    "deleteAria": "Delete"
+  },
+  "todayScheduleCard": {
+    "title": {
+      "today": "Today's medication schedule",
+      "other": "Medication schedule"
+    },
+    "status": {
+      "all": "Medication complete",
+      "partial": "Partially taken",
+      "none": "Confirm intake"
+    },
+    "close": "Close",
+    "selectAll": "Select all",
+    "confirm": "Confirm"
+  },
+  "weeklyCalendarCard": {
+    "status": {
+      "done": "Medication complete",
+      "partial": "Partially taken",
+      "miss": "Not taken"
+    },
+    "rows": {
+      "morning": "Morning (08:00)",
+      "lunch": "Lunch (13:00)",
+      "dinner": "Dinner (21:00)"
+    },
+    "dayUnit": "{{date}}",
+    "prnLabel": "OTC Medicine"
+  },
+  "aiAnalysisCard": {
+    "title": "AI Health Analysis",
+    "reward": "Reward",
+    "loading": "Analyzing…",
+    "errorTitle": "Couldn't load the analysis",
+    "errorSubtitle": "Please try again later",
+    "placeholderTitle": "Preparing your analysis results",
+    "placeholderSubtitle": "As data accumulates, we'll provide tailored insights"
+  },
+  "chartSection": {
+    "apply": "Apply"
+  },
+  "recordResultCards": {
+    "am": "AM",
+    "pm": "PM",
+    "exerciseType": {
+      "walking": "Walking",
+      "running": "Running",
+      "cardio": "Aerobic",
+      "strength": "Strength training",
+      "stretching": "Stretching"
+    },
+    "exercise": "Exercise",
+    "runningDefault": "Running",
+    "editExerciseRecord": "Edit exercise record",
+    "waterIcon": "Water intake icon",
+    "waterIntake": "Water intake",
+    "weightIcon": "Weight icon",
+    "todayWeight": "Today's weight"
+  },
+  "diseaseComponents": {
+    "riskFactorsTitle": "Key Risk Factors",
+    "cautionLabel": "Caution: ",
+    "referencesTitle": "References",
+    "referencesDisclaimer": "The medical information on this page is based on the authoritative sources below and does not replace diagnosis or treatment. For your individual condition, please be sure to consult a medical professional.",
+    "lastUpdated": "Last updated: {{date}}"
+  },
+  "authContext": {
+    "toast": {
+      "serverRestarted": "You were logged out because the server restarted.",
+      "serverUnreachable": "You were logged out because the server could not be reached."
+    }
+  }
+}

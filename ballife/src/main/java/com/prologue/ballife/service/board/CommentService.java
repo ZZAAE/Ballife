@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.board.Comment;
 import com.prologue.ballife.domain.board.CommentLike;
 import com.prologue.ballife.domain.board.Post;
@@ -34,15 +35,16 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final MessageResolver messages;
 
     // 댓글 작성
     @Transactional
     public CommentDto.CommentResponse createComment(Long userId, Long postId, CommentDto.CreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), postId)));
 
         Comment comment = Comment.builder()
                 .userId(user)
@@ -60,7 +62,7 @@ public class CommentService {
     // currentUserId 가 있으면 각 댓글에 대한 해당 사용자의 추천 여부(liked)를 함께 내려준다.
     public List<CommentDto.CommentResponse> getCommentsByPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("게시글", postId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.post"), postId)));
 
         List<Comment> comments = commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(post);
 
@@ -83,7 +85,7 @@ public class CommentService {
     // 댓글 단건 조회
     public CommentDto.CommentResponse getComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.comment"), commentId)));
 
         return CommentDto.CommentResponse.from(comment);
     }
@@ -92,10 +94,10 @@ public class CommentService {
     @Transactional
     public CommentDto.CommentResponse updateComment(Long commentId, Long userId, CommentDto.UpdateRequest request) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.comment"), commentId)));
 
         if (!comment.getUserId().getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 댓글만 수정할 수 있습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.comment.notOwnerUpdate"));
         }
 
         comment.setContent(request.getContent());
@@ -112,10 +114,10 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.comment"), commentId)));
 
         if (!comment.getUserId().getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 댓글만 삭제할 수 있습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.comment.notOwnerDelete"));
         }
 
         comment.softDelete();
@@ -129,9 +131,9 @@ public class CommentService {
     @Transactional
     public CommentDto.UpVoteResponse toggleUpvote(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("댓글", commentId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.comment"), commentId)));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         boolean alreadyLiked = commentLikeRepository.existsByComment_CommentIdAndUser_UserId(commentId, userId);
         boolean liked;

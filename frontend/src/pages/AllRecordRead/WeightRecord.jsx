@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarDays, TrendingDown, TrendingUp } from "lucide-react";
 import {
   LineChart,
@@ -29,6 +30,7 @@ const daysAgoStr = (n) => {
 };
 
 export default function WeightRecord() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.userId ?? user?.id;
 
@@ -162,16 +164,16 @@ export default function WeightRecord() {
         <main className="min-w-0 flex-1">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
             <h1 className="text-[26px] font-extrabold tracking-tight text-[#0F172A] sm:text-[30px]">
-              체중 기록 확인
+              {t("weightRecordPage.title")}
             </h1>
             <p className="mb-8 text-sm text-gray-500">
-              지난 신체 변화를 분석한 결과입니다.
+              {t("weightRecordPage.subtitle")}
             </p>
 
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {/* 현재 체중 */}
               <MetricCard>
-                <span className="text-xs font-medium text-blue-600">현재 체중</span>
+                <span className="text-xs font-medium text-blue-600">{t("weightRecordPage.currentWeight")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-[#0F172A]">
                     {latestWeight ?? "—"}
@@ -187,22 +189,24 @@ export default function WeightRecord() {
                   {showDec && <TrendingDown size={12} />}
                   <span>
                     {weeklyDelta != null
-                      ? `지난주 평균 대비 ${weeklyDelta > 0 ? "+" : ""}${weeklyDelta} kg`
-                      : "지난주 기록이 부족합니다"}
+                      ? t("weightRecordPage.weeklyDelta", {
+                          delta: `${weeklyDelta > 0 ? "+" : ""}${weeklyDelta}`,
+                        })
+                      : t("weightRecordPage.weeklyDeltaInsufficient")}
                   </span>
                 </div>
               </MetricCard>
 
               {/* BMI 지수 */}
               <MetricCard>
-                <span className="text-xs text-[#64748B] font-medium">BMI 지수</span>
+                <span className="text-xs text-[#64748B] font-medium">{t("weightRecordPage.bmiLabel")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-[#0F172A]">
                     {bmi ?? "—"}
                   </span>
                   {bmi != null && (
                     <span className="pb-1 text-xs text-[#94A3B8]">
-                      체중 / 신장(m)²
+                      {t("weightRecordPage.bmiFormula")}
                     </span>
                   )}
                 </div>
@@ -216,16 +220,16 @@ export default function WeightRecord() {
                     )}
                   </div>
                   <div className="mt-2 flex justify-between text-[10px] text-[#94A3B8]">
-                    <span>저체중</span>
-                    <span>정상</span>
-                    <span>과체중</span>
+                    <span>{t("weightRecordPage.bmiUnderweight")}</span>
+                    <span>{t("weightRecordPage.bmiNormal")}</span>
+                    <span>{t("weightRecordPage.bmiOverweight")}</span>
                   </div>
                 </div>
               </MetricCard>
 
               {/* 목표 체중 */}
               <MetricCard>
-                <span className="text-xs text-red-500 font-medium">목표 체중</span>
+                <span className="text-xs text-red-500 font-medium">{t("weightRecordPage.targetWeight")}</span>
                 <div className="mt-3 flex min-h-[44px] items-end gap-2">
                   <span className="text-4xl font-bold leading-none text-[#0F172A]">
                     {targetWeight ?? "—"}
@@ -241,13 +245,17 @@ export default function WeightRecord() {
                   </div>
                   <div className="mt-2 flex justify-between text-[10px] text-[#94A3B8]">
                     <span>
-                      {latestWeight != null ? `현재 ${latestWeight}kg` : "현재 —"}
+                      {latestWeight != null
+                        ? t("weightRecordPage.currentWeightValue", { weight: latestWeight })
+                        : t("weightRecordPage.currentWeightEmpty")}
                     </span>
                     <span className="font-semibold text-blue-600">{targetProgress}%</span>
                     <span>
                       {remaining != null
-                        ? `목표까지 ${remaining > 0 ? "+" : ""}${remaining}kg`
-                        : "목표까지 —"}
+                        ? t("weightRecordPage.toTargetValue", {
+                            remaining: `${remaining > 0 ? "+" : ""}${remaining}`,
+                          })
+                        : t("weightRecordPage.toTargetEmpty")}
                     </span>
                   </div>
                 </div>
@@ -270,7 +278,7 @@ export default function WeightRecord() {
               <div className="mb-8 flex flex-col rounded-[18px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.04)] sm:p-6 h-[calc(100vh-500px)] min-h-[280px] xl:col-span-2">
                 <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                   <h2 className="text-[18px] font-bold text-[#0F172A]">
-                    체중 변화 추이
+                    {t("weightRecordPage.chartTitle")}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#64748B]">
@@ -299,7 +307,7 @@ export default function WeightRecord() {
                       }
                       className="rounded-[10px] bg-[#0F172A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
                     >
-                      적용
+                      {t("weightRecordPage.apply")}
                     </button>
                     {(chartRange.start !== defaultStart ||
                       chartRange.end !== defaultEnd) && (
@@ -312,7 +320,7 @@ export default function WeightRecord() {
                         }}
                         className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-semibold text-[#64748B] hover:bg-[#F8FAFC] transition"
                       >
-                        초기화
+                        {t("weightRecordPage.reset")}
                       </button>
                     )}
                   </div>
@@ -355,7 +363,7 @@ export default function WeightRecord() {
                     <Line
                       type="monotone"
                       dataKey="weight"
-                      name="체중"
+                      name={t("weightRecordPage.chartSeriesName")}
                       stroke="#3b82f6"
                       strokeWidth={2}
                       dot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}

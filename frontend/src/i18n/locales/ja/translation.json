@@ -1,0 +1,2743 @@
+{
+  "common": {
+    "appName": "Ballife",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "logoutSuccess": "ログアウトしました。"
+  },
+  "nav": {
+    "record": "記録",
+    "check": "確認",
+    "checkAll": "全体",
+    "meal": "食事",
+    "medicine": "薬",
+    "exercise": "運動",
+    "weight": "体重",
+    "bloodSugar": "血糖",
+    "bloodPressure": "血圧",
+    "community": "コミュニティ",
+    "member": "会員情報",
+    "pet": "ペット",
+    "intro": "紹介",
+    "introWeb": "ウェブ紹介",
+    "hyperlipidemia": "高脂血症",
+    "hypertension": "高血圧",
+    "osteoporosis": "骨粗鬆症",
+    "diabetes": "糖尿病",
+    "obesity": "肥満",
+    "gout": "痛風"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh-CN": "简体中文",
+    "select": "言語選択"
+  },
+  "errors": {
+    "generic": "エラーが発生しました",
+    "exerciseRequestFailed": "運動記録のリクエストに失敗しました。"
+  },
+  "disease": {
+    "none": "該当なし",
+    "summaryNone": "なし",
+    "hyperlipidemia": {
+      "field": "高脂血症の有無",
+      "summary": "高脂血症",
+      "type1": "高コレステロール血症",
+      "type2": "高LDLコレステロール血症",
+      "type3": "高中性脂肪血症",
+      "type4": "低HDLコレステロール血症"
+    },
+    "hypertension": {
+      "field": "高血圧の有無",
+      "summary": "高血圧",
+      "type1": "高血圧前段階",
+      "type2": "1期",
+      "type3": "2期"
+    },
+    "osteoporosis": {
+      "field": "骨粗鬆症の有無",
+      "summary": "骨粗鬆症",
+      "osteopenia": "骨減少症",
+      "osteoporosis": "骨粗鬆症"
+    },
+    "diabetes": {
+      "field": "糖尿病の有無",
+      "summary": "糖尿病",
+      "type1": "1型",
+      "type2": "2型",
+      "gestational": "妊娠性"
+    },
+    "gout": {
+      "field": "痛風の有無",
+      "summary": "痛風",
+      "asymptomatic": "高尿酸血症",
+      "acute": "急性",
+      "intermittent": "間欠期",
+      "chronic": "慢性"
+    }
+  },
+  "exercise": {
+    "intensity": {
+      "low": "低い",
+      "medium": "普通",
+      "high": "高い"
+    },
+    "category": {
+      "aerobic": "有酸素",
+      "anaerobic": "無酸素"
+    },
+    "type": {
+      "cycling": "サイクリング",
+      "running": "ランニング",
+      "jumprope": "縄跳び",
+      "walking": "ウォーキング",
+      "stair": "天国の階段",
+      "dumbbellpress": "ベンチプレス",
+      "squat": "スクワット",
+      "deadlift": "デッドリフト",
+      "shoulderpress": "ショルダープレス",
+      "barbellrow": "バーベルロウ"
+    },
+    "fallbackName": "運動",
+    "stairIntensityHint": "1～2段階 = 低い · 3～5段階 = 普通 · 6段階～ = 高い",
+    "durationHourMinSec": "{{h}}時間{{m}}分{{s}}秒",
+    "durationMinSec": "{{m}}分{{s}}秒",
+    "durationMin": "{{m}}分",
+    "durationSec": "{{s}}秒"
+  },
+  "medication": {
+    "slot": {
+      "morning": "朝",
+      "lunch": "昼",
+      "dinner": "夕",
+      "bedtime": "就寝前"
+    },
+    "slotDoseName": "{{slot}}の服用薬",
+    "noName": "名称なし"
+  },
+  "allRecordPage": {
+    "addRecord": "記録を追加",
+    "notRecordedYet": "まだ記録されていません。",
+    "title": "全記録の管理",
+    "subtitle": "今日一日の健康記録を一目で確認しましょう。",
+    "bloodPressure": "血圧",
+    "bloodPressureRecord": "血圧の記録",
+    "bloodSugar": "血糖",
+    "bloodSugarRecord": "血糖の記録",
+    "weight": "体重",
+    "weightRecord": "体重の記録",
+    "waterIntake": "水分摂取",
+    "waterIntakeRecord": "摂取の記録",
+    "activitySummary": "活動量の概要",
+    "exerciseRecord": "運動の記録",
+    "hasRecentRecord": "最近の記録あり",
+    "noRecentRecord": "最近の記録なし",
+    "hasTodayActivity": "今日の活動あり",
+    "noTodayActivity": "今日の活動なし",
+    "todayMeal": "今日の食事",
+    "mealWaiting": "食事記録の入力待ち",
+    "meal": {
+      "breakfast": "朝食",
+      "lunch": "昼食",
+      "dinner": "夕食",
+      "snack": "間食",
+      "default": "食事"
+    },
+    "toast": {
+      "exerciseFetchFailed": "運動記録の取得に失敗しました: {{error}}"
+    }
+  },
+  "bloodPressureRecordPage": {
+    "title": "血圧記録の確認",
+    "subtitle": "過去の血圧の変化を分析した結果です。",
+    "avgBloodPressure": "平均血圧",
+    "maxSystolic": "最高収縮期",
+    "minDiastolic": "最低拡張期",
+    "chartTitle": "血圧の変化推移",
+    "noRecordInRange": "この期間に血圧の記録がありません。",
+    "systolic": "収縮期",
+    "diastolic": "拡張期",
+    "status": {
+      "noRecord": "記録なし",
+      "hypertension": "高血圧範囲",
+      "caution": "注意範囲",
+      "hypotension": "低血圧範囲",
+      "normal": "正常血圧範囲"
+    },
+    "am": "午前",
+    "pm": "午後",
+    "recordWhen": "{{month}}月{{day}}日 {{ampm}} {{hour}}:{{minute}}"
+  },
+  "bloodSugarRecordPage": {
+    "title": "血糖記録の確認",
+    "subtitle": "これまでの血糖の変化を分析した結果です。",
+    "avgBloodSugar": "平均血糖",
+    "periodAverage": "期間内{{count}}件の平均",
+    "noRecord": "記録なし",
+    "recentBloodSugar": "最近の血糖",
+    "beforeAfterMeal": "食前 / 食後",
+    "recentFastingBloodSugar": "最近の空腹血糖",
+    "fasting": "空腹",
+    "chartTitle": "血糖変化の推移",
+    "toggleMealtime": "食前 · 食後",
+    "toggleFasting": "空腹 · 就寝前",
+    "emptyChart": "この期間に血糖記録がありません。",
+    "legend": {
+      "beforeMeal": "食前",
+      "afterMeal": "食後",
+      "fasting": "空腹",
+      "bedtime": "就寝前"
+    }
+  },
+  "recordPage": {
+    "toast": {
+      "loginRequired": "ログインが必要です。"
+    },
+    "title": "私の健康記録",
+    "subtitle": "継続的な記録が変化を生み出します。",
+    "recordWeight": "体重を記録する"
+  },
+  "recordSummary": {
+    "mealCategory": {
+      "breakfast": "朝食",
+      "lunch": "昼食",
+      "dinner": "夕食",
+      "snack": "間食"
+    },
+    "mealType": "{{label}}の食事",
+    "meal": {
+      "unitTarget": "/ {{value}} kcal",
+      "unit": "kcal",
+      "remaining": "残りの摂取カロリー {{value}}kcal",
+      "overTarget": "目標超過 {{value}}kcal",
+      "noTarget": "目標未設定"
+    },
+    "exercise": {
+      "totalBurned": "総消費カロリー {{value}} kcal",
+      "noRecord": "記録なし"
+    },
+    "weight": {
+      "weekDelta": "先週比 {{value}}kg",
+      "noWeekRecord": "先週の記録なし"
+    },
+    "water": {
+      "unitTarget": "/ {{value}} L",
+      "unit": "L",
+      "goalReached": "目標量達成",
+      "remaining": "残りの水分摂取量 {{value}}L",
+      "noTarget": "目標未設定"
+    },
+    "dateLabel": "{{year}}年{{month}}月{{day}}日",
+    "header": {
+      "title": "1日の記録",
+      "subtitle": "1日の身体の変化を分析した結果です。"
+    },
+    "cards": {
+      "meal": {
+        "label": "食事",
+        "description": "今日の摂取kcal"
+      },
+      "exercise": {
+        "label": "運動",
+        "description": "今日の活動時間",
+        "unit": "分"
+      },
+      "weight": {
+        "label": "体重",
+        "description": "現在の体重と推移"
+      },
+      "water": {
+        "label": "水分",
+        "description": "今日の水分摂取量"
+      }
+    },
+    "bloodSugar": {
+      "title": "今日の血糖の変化",
+      "legendFasting": "食前 (Fasting)",
+      "legendPostMeal": "食後 (Post-meal)",
+      "empty": "この日の血糖の記録がありません。"
+    },
+    "bloodPressure": {
+      "title": "今日の血圧の変化",
+      "legendSystolic": "収縮期 (Systolic)",
+      "legendDiastolic": "拡張期 (Diastolic)",
+      "empty": "この日の血圧の記録がありません。",
+      "systolic": "収縮期",
+      "diastolic": "拡張期"
+    },
+    "medication": {
+      "title": "今日の服薬スケジュール",
+      "empty": "この日付の服薬スケジュールがありません。",
+      "statusAll": "服薬完了",
+      "statusPartial": "一部服薬 ({{taken}}/{{total}})",
+      "statusNone": "未服薬"
+    },
+    "mealEmpty": {
+      "title": "記録された食事がありません",
+      "linkLabel": "全記録管理",
+      "descPart1": "ページで",
+      "descPart2": "今日の食事を登録してみましょう。"
+    }
+  },
+  "weightRecordPage": {
+    "title": "体重記録の確認",
+    "subtitle": "これまでの身体の変化を分析した結果です。",
+    "currentWeight": "現在の体重",
+    "weeklyDelta": "先週平均比 {{delta}} kg",
+    "weeklyDeltaInsufficient": "先週の記録が不足しています",
+    "bmiLabel": "BMI指数",
+    "bmiFormula": "体重 / 身長(m)²",
+    "bmiUnderweight": "低体重",
+    "bmiNormal": "正常",
+    "bmiOverweight": "過体重",
+    "targetWeight": "目標体重",
+    "currentWeightValue": "現在 {{weight}}kg",
+    "currentWeightEmpty": "現在 —",
+    "toTargetValue": "目標まで {{remaining}}kg",
+    "toTargetEmpty": "目標まで —",
+    "chartTitle": "体重変化の推移",
+    "apply": "適用",
+    "reset": "リセット",
+    "chartSeriesName": "体重"
+  },
+  "exercisePage": {
+    "weekday": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    },
+    "dateLabel": "{{month}}月{{day}}日 ({{weekday}})",
+    "weekRange": "{{startMonth}}月{{startDay}}日 - {{endDay}}日",
+    "prevWeek": "先週",
+    "nextWeek": "翌週",
+    "sessions": "セッション",
+    "editSession": "運動記録の修正",
+    "setsReps": "{{sets}} Sets · {{reps}}回",
+    "title": "運動記録",
+    "subtitle": "これまでの運動の変化を分析した結果です。",
+    "sort": "並び替え",
+    "sortNewest": "新しい順",
+    "sortOldest": "古い順",
+    "emptyDay": "選択した日付の記録がありません。",
+    "emptyWeek": "今週の記録がありません。",
+    "toast": {
+      "fetchFailed": "運動記録の取得に失敗しました: {{error}}"
+    }
+  },
+  "mealPage": {
+    "category": {
+      "breakfast": "朝食",
+      "lunch": "昼食",
+      "dinner": "夕食",
+      "snack": "間食"
+    },
+    "mealType": "{{label}}の食事",
+    "advice": {
+      "kcal": {
+        "low": "総摂取カロリーが推奨量より不足しています。バランスの取れた一食をもう少し追加してみましょう。",
+        "high": "総摂取カロリーが推奨量を超えています。次の食事の量を調整してみましょう。"
+      },
+      "carb": {
+        "low": "炭水化物が不足しています。玄米や全粒穀物で補ってみましょう。",
+        "high": "炭水化物をやや多く摂っています。精製された炭水化物を減らしてみましょう。"
+      },
+      "protein": {
+        "low": "タンパク質が不足しています。鶏むね肉・卵・豆腐などで補ってみましょう。",
+        "high": "タンパク質が推奨量を超えています。腎臓に負担がかからないよう調整してみましょう。"
+      },
+      "fat": {
+        "low": "脂肪が不足しています。ナッツ類・オリーブオイルなど健康的な脂肪を加えてみましょう。",
+        "high": "脂肪をやや多く摂っています。揚げ物・脂っこい食べ物を減らしてみましょう。"
+      },
+      "sugar": {
+        "high": "糖類を推奨量より多く摂っています。甘い飲み物やデザートを減らしてみましょう。"
+      },
+      "na": {
+        "high": "ナトリウムの摂取が多いです。汁物・加工食品・塩辛い食べ物を減らしてみましょう。"
+      },
+      "chol": {
+        "high": "コレステロールの摂取が多いです。脂っこい肉類・内臓類を調整してみましょう。"
+      },
+      "noRecord": "全体記録管理ページで今日の食事を登録すると、摂取した栄養素を分析してスコアとおすすめのアドバイスをお知らせします。",
+      "balanced": "現在までに摂取した栄養素の比率が推奨ガイドラインに非常に近づいています。残りの一日も今のようにバランスの取れた食事を続けてみましょう。"
+    },
+    "status": {
+      "noRecord": "記録なし",
+      "excellent": "優れたバランス",
+      "good": "良好なバランス",
+      "needsWork": "改善が必要",
+      "imbalanced": "バランス注意"
+    },
+    "headline": {
+      "noRecord": "まだ記録された食事がありません。",
+      "excellent": "栄養成分がとても調和しています。",
+      "good": "全体的にバランスの取れた食事です。",
+      "needsWork": "栄養バランスに少し改善が必要です。",
+      "imbalanced": "栄養の偏りが検出されました。"
+    },
+    "tag": {
+      "proteinEnough": "#タンパク質_十分",
+      "lowSugar": "#低糖_食事",
+      "lowSodium": "#低塩_食事",
+      "sugarWarn": "#糖_注意",
+      "sodiumWarn": "#ナトリウム_注意",
+      "cholWarn": "#コレステロール_注意",
+      "kcalManage": "#カロリー_管理",
+      "carbManage": "#炭水化物_管理",
+      "fatManage": "#脂肪_管理",
+      "proteinLow": "#タンパク質_不足"
+    },
+    "nutrient": {
+      "carb": "炭水化物",
+      "protein": "タンパク質",
+      "fat": "脂肪",
+      "sugar": "糖類",
+      "na": "ナトリウム",
+      "chol": "コレステロール"
+    },
+    "title": "食事記録の確認",
+    "subtitle": "これまでの食事記録を分析した結果です。",
+    "summary": {
+      "remaining": "残り",
+      "achievement": "達成率"
+    },
+    "scoreLabel": "今日の食事スコア",
+    "recordsHeading": "今日の食事記録の確認",
+    "empty": {
+      "heading": "記録された食事がありません",
+      "linkLabel": "全体記録管理",
+      "descSuffix": " ページで",
+      "descLine2": "今日の食事を登録してみましょう。"
+    },
+    "nutritionHeading": "今日の栄養成分分析"
+  },
+  "medicationPage": {
+    "title": "服薬管理",
+    "subtitle": "これまでの服用結果を分析した結果です。",
+    "alert": {
+      "enterDrugName": "薬の名前を入力してください。"
+    }
+  },
+  "boardListPage": {
+    "loading": "読み込み中...",
+    "title": "コミュニティ",
+    "subtitle": "健康的な生活のためのコミュニティ空間で、あなたの物語を聞かせてください。",
+    "searchPlaceholder": "検索語を入力してください。",
+    "searchButton": "検索",
+    "category": {
+      "all": "全体",
+      "general": "自由",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血圧",
+      "osteoporosis": "骨粗鬆症",
+      "diabetes": "糖尿病",
+      "obesity": "肥満",
+      "gout": "痛風",
+      "qna": "質問"
+    },
+    "sort": {
+      "recommend": "おすすめ順",
+      "views": "閲覧数順",
+      "latest": "日付順"
+    },
+    "table": {
+      "number": "番号",
+      "category": "カテゴリ",
+      "postTitle": "投稿タイトル",
+      "nickname": "ニックネーム",
+      "viewCount": "閲覧数",
+      "upVote": "おすすめ数",
+      "createdAt": "作成日"
+    },
+    "empty": "投稿がありません。",
+    "toast": {
+      "loginRequired": "ログインが必要です。"
+    },
+    "writeButton": "投稿する"
+  },
+  "postCreatePage": {
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "selectCategory": "カテゴリを選択してください。",
+      "enterTitle": "タイトルを入力してください。",
+      "enterContent": "内容を入力してください。",
+      "missingLoginId": "ログイン情報にIDがありません。ログアウト後、再度ログインしてください。",
+      "created": "登録されました。",
+      "createFailed": "投稿の登録中にエラーが発生しました。"
+    },
+    "category": {
+      "placeholder": "掲示板を選択",
+      "general": "自由掲示板",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血圧",
+      "osteoporosis": "骨粗鬆症",
+      "diabetes": "糖尿病",
+      "obesity": "肥満",
+      "gout": "痛風",
+      "qna": "質問"
+    },
+    "title": "掲示板に投稿",
+    "subtitle": "健康な暮らしのためのコミュニティに、あなたのお話を聞かせてください。",
+    "label": {
+      "category": "カテゴリ",
+      "title": "タイトル",
+      "content": "内容"
+    },
+    "placeholder": {
+      "title": "投稿のタイトルを入力してください",
+      "content": "内容を入力してください..."
+    },
+    "imageHint": "ツールバーの画像ボタンで本文に写真を挿入できます。",
+    "button": {
+      "exit": "退出",
+      "submitting": "登録中...",
+      "submit": "登録"
+    }
+  },
+  "postDetailPage": {
+    "replyInitial": "返",
+    "commentInitial": "コ",
+    "upVote": "おすすめ",
+    "reply": "返信",
+    "delete": "削除",
+    "category": {
+      "select": "掲示板を選択",
+      "general": "自由掲示板",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血圧",
+      "osteoporosis": "骨粗鬆症",
+      "diabetes": "糖尿病",
+      "obesity": "肥満",
+      "gout": "痛風",
+      "qna": "質問"
+    },
+    "anonymous": "匿名",
+    "loading": "読み込み中...",
+    "toast": {
+      "commentRequired": "コメント内容を入力してください。",
+      "loginRequired": "ログインが必要です。",
+      "commentCreated": "コメントが登録されました。",
+      "commentCreateFailed": "コメントの登録に失敗しました。",
+      "commentUpVoted": "コメントをおすすめしました。",
+      "upVoteCanceled": "おすすめを取り消しました。",
+      "commentUpVoteFailed": "コメントのおすすめに失敗しました。",
+      "replyRequired": "返信内容を入力してください。",
+      "replyCreated": "返信が登録されました。",
+      "replyCreateFailed": "返信の登録に失敗しました。",
+      "commentDeleted": "コメントが削除されました。",
+      "commentDeleteFailed": "コメントの削除に失敗しました。",
+      "postDeleted": "投稿が削除されました。",
+      "postDeleteFailed": "投稿の削除に失敗しました。",
+      "postUpVoted": "おすすめしました。",
+      "postUpVoteFailed": "おすすめに失敗しました。"
+    },
+    "confirm": {
+      "deleteComment": "このコメントを削除しますか？",
+      "deletePost": "この投稿を削除しますか？"
+    },
+    "community": "コミュニティ",
+    "subtitle": "健康な暮らしのためのコミュニティ空間で、あなたのお話を聞かせてください。",
+    "edit": "編集",
+    "anonymousInitial": "匿",
+    "viewCount": "閲覧 {{count}}",
+    "postImageAlt": "投稿画像",
+    "commentCount": "{{count}}件のコメント",
+    "writerInitial": "投",
+    "defaultNickname": "コンコンの食事",
+    "commentPlaceholder": "コメントを入力してください。お互いを尊重する表現を使ってください。",
+    "submit": "登録",
+    "replyPlaceholder": "返信を入力してください。",
+    "cancel": "キャンセル",
+    "exit": "退出"
+  },
+  "postEditPage": {
+    "category": {
+      "general": "自由掲示板",
+      "diabetes": "糖尿病",
+      "obesity": "肥満",
+      "osteoporosis": "骨粗鬆症",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血圧",
+      "gout": "痛風",
+      "qna": "質問"
+    },
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "onlyOwnPost": "自分の投稿のみ編集できます。",
+      "titleContentRequired": "タイトルと内容を入力してください。",
+      "noUserId": "ログイン情報にidがありません。ログアウトしてから再度ログインしてください。",
+      "updated": "編集されました。"
+    },
+    "checking": "確認中...",
+    "title": "投稿の編集",
+    "subtitle": "健康な暮らしのためのコミュニティに、皆さんのお話を聞かせてください。",
+    "label": {
+      "category": "カテゴリー",
+      "title": "タイトル",
+      "content": "内容"
+    },
+    "placeholder": {
+      "title": "投稿のタイトルを入力してください",
+      "content": "内容を入力してください..."
+    },
+    "imageHint": "ツールバーの画像ボタンで本文の中に写真を挿入できます。",
+    "button": {
+      "cancel": "退出",
+      "saving": "編集中...",
+      "submit": "編集"
+    }
+  },
+  "familyPage": {
+    "private": "非公開",
+    "noRecord": "記録なし",
+    "bloodSugarValue": "{{value}} mg/dL",
+    "exerciseValue": "{{name}} · {{kcal}} kcal",
+    "medicationDone": "服薬完了",
+    "medicationProgress": "{{taken}}/{{total}} 服薬",
+    "avatarFallback": "会",
+    "me": "自分",
+    "roleOwner": "オーナー",
+    "roleMember": "メンバー",
+    "kick": "追放",
+    "bloodSugar": "血糖",
+    "bloodPressure": "血圧",
+    "recentExercise": "最近の運動",
+    "medicationStatus": "服薬状況",
+    "headerTitle": "家族の健康管理",
+    "headerSubtitle": "同意に基づいて家族の血糖・血圧を一緒に確認しましょう。",
+    "back": "戻る",
+    "toast": {
+      "codeRequired": "招待コードを入力してください。",
+      "joined": "家族グループに参加しました。",
+      "groupCreated": "家族グループが作成されました。",
+      "codeRotated": "招待コードを再発行しました。",
+      "left": "グループから退出しました。",
+      "removed": "メンバーを削除しました。",
+      "codeCopied": "招待コードをコピーしました。",
+      "copyFailed": "コピーに失敗しました。",
+      "subscribed": "サブスクリプションが有効になりました。",
+      "subscriptionCancelled": "サブスクリプションを解約しました。"
+    },
+    "confirm": {
+      "leave": "家族グループから退出しますか？",
+      "remove": "{{nickname}}さんをグループから削除しますか？"
+    },
+    "loading": "読み込み中...",
+    "joinTitle": "招待コードで参加",
+    "joinDescription": "家族から送られた招待コードを入力してください。サブスクリプションなしでも参加できます。",
+    "codePlaceholder": "例: AB3D9K2P",
+    "join": "参加",
+    "createTitle": "自分の家族グループを作成",
+    "createDescriptionActive": "家族プランをご利用中です。グループを作成してメンバーを招待しましょう。",
+    "createGroup": "家族グループを作成",
+    "createDescriptionUpsell": "家族グループを作成するには家族プランのサブスクリプションが必要です。",
+    "goSubscribe": "サブスクリプションへ",
+    "inactiveBanner": "この家族グループは現在無効になっています。オーナーの家族プランが期限切れです。",
+    "renewSubscription": "サブスクリプション更新",
+    "groupNameFallback": "家族グループ",
+    "ownerLabel": "オーナー · {{nickname}}",
+    "inviteCode": "招待コード",
+    "copy": "コピー",
+    "rotate": "再発行",
+    "leaveGroup": "グループを退出",
+    "myShareSettings": "自分の共有設定",
+    "shareSettingsDescription": "同意した項目のみ家族に公開されます。",
+    "membersTitle": "家族メンバー ({{count}})"
+  },
+  "healthCalenderPage": {
+    "monthTitle": "{{year}}年{{month}}月",
+    "prevWeek": "前の週",
+    "nextWeek": "次の週",
+    "dayTitle": "{{month}}月{{day}}日",
+    "table": {
+      "heading": "今週の私はどれくらい健康になったでしょうか？",
+      "col": {
+        "item": "項目",
+        "lastWeek": "先週",
+        "thisWeek": "今週",
+        "change": "変化"
+      },
+      "rows": {
+        "bloodSugar": {
+          "label": "血糖",
+          "lastWeek": "118 mg/dL",
+          "thisWeek": "112 mg/dL",
+          "change": "+6 改善"
+        },
+        "bloodPressure": {
+          "label": "血圧",
+          "lastWeek": "125 mmHg",
+          "thisWeek": "118 mmHg",
+          "change": "+7 改善"
+        },
+        "weight": {
+          "label": "体重",
+          "lastWeek": "78.5 kg",
+          "thisWeek": "78.0 kg",
+          "change": "-0.5 kg"
+        },
+        "exercise": {
+          "label": "運動",
+          "lastWeek": "3回",
+          "thisWeek": "5回",
+          "change": "+2回"
+        },
+        "meal": {
+          "label": "食事",
+          "lastWeek": "72点",
+          "thisWeek": "85点",
+          "change": "+13点"
+        },
+        "sleep": {
+          "label": "睡眠",
+          "lastWeek": "85%",
+          "thisWeek": "100%",
+          "change": "+15%"
+        }
+      },
+      "footer": "全体的に改善しています！とても素晴らしい変化です。"
+    },
+    "sidebar": {
+      "monthlyTitle": "月間総合成果",
+      "metrics": {
+        "diet": "食事の健康",
+        "bloodSugarStability": "血糖の安定度",
+        "sleepRhythm": "睡眠リズム",
+        "fitnessIndex": "体力指数",
+        "exercisePerformance": "運動の実施"
+      },
+      "weeklyAnalysisTitle": "週間分析",
+      "streak": "🔥 7日連続運動を達成中！",
+      "weekdayShort": {
+        "mon": "月",
+        "tue": "火",
+        "wed": "水",
+        "thu": "木",
+        "fri": "金",
+        "sat": "土",
+        "sun": "日"
+      }
+    },
+    "header": {
+      "title": "健康指標管理カレンダー",
+      "subtitle": "過去1か月間の数値と活動を追跡・分析したスマートレポートです。"
+    },
+    "timeline": {
+      "month": "{{month}}月",
+      "date": "{{year}}年{{month}}月{{day}}日"
+    },
+    "weekday": {
+      "sun": "日曜日",
+      "mon": "月曜日",
+      "tue": "火曜日",
+      "wed": "水曜日",
+      "thu": "木曜日",
+      "fri": "金曜日",
+      "sat": "土曜日"
+    }
+  },
+  "mainPage": {
+    "prescriptionGroup": "処方グループ",
+    "greeting": "{{name}}さん、こんにちは。",
+    "defaultName": "会員",
+    "ageYears": "{{age}}歳",
+    "gender": {
+      "male": "男性",
+      "female": "女性"
+    },
+    "stats": {
+      "ageGender": "年齢 / 性別",
+      "height": "身長",
+      "weight": "体重"
+    },
+    "bmi": {
+      "underweight": "{{value}} (低体重)",
+      "normal": "{{value}} (正常)",
+      "overweight": "{{value}} (過体重)",
+      "obese": "{{value}} (肥満)"
+    },
+    "pet": {
+      "title": "私のペットが待っています",
+      "subtitle": "ペットと一緒に健康な一日を始めましょう。",
+      "detailLink": "私のペットを詳しく見る",
+      "loading": "ペットを連れてきています…"
+    },
+    "chart": {
+      "weeklyTitle": "週間健康推移",
+      "weeklySubtitle": "日別の平均値の推移",
+      "systolic": "収縮期",
+      "diastolic": "拡張期",
+      "bloodSugar": "血糖",
+      "bloodPressure": "血圧",
+      "weight": "体重",
+      "target": "目標 {{value}}",
+      "targetSystolic": "目標収縮期 {{value}}",
+      "targetDiastolic": "目標拡張期 {{value}}"
+    },
+    "news": {
+      "title": "健康ニュース",
+      "subtitle": "ハイダクがキュレーションした健康情報をご覧ください。",
+      "loadFailed": "ニュースを読み込めませんでした。"
+    }
+  },
+  "diabetesReportPage": {
+    "riskFactors": {
+      "0": "腹部肥満およびインスリン抵抗性（韓国人の2型糖尿病の中核的な危険因子）",
+      "1": "身体活動の不足と精製炭水化物中心の食習慣",
+      "2": "家族歴、40歳以上の年齢、高血圧・脂質異常症の併発"
+    },
+    "title": "糖尿病（Diabetes Mellitus）",
+    "intro": "糖尿病はインスリン分泌の欠乏またはインスリン抵抗性により血糖が慢性的に上昇する代謝疾患です（WHO）。大韓糖尿病学会2023診療指針に従い、空腹時血糖、HbA1c、食後血糖を基準に診断し、体系的な血糖管理と生活習慣の改善が合併症予防の鍵となります。",
+    "overview": {
+      "heading": "糖尿病とは？",
+      "paragraph1": "糖尿病は高血糖を共通の特徴とする慢性代謝疾患群です（WHO）。慢性的な血糖の上昇は網膜・腎臓・神経などの細小血管合併症や、心筋梗塞・脳卒中といった大血管合併症を引き起こします。疾病管理庁の国民健康栄養調査（2022）によると、国内の30歳以上の成人の約14%が糖尿病を有しており、糖尿病前段階まで含めると半数近くに達します。",
+      "paragraph2": "正常な状態では、血糖は膵臓のベータ細胞から分泌されるインスリンによって調節されます。糖尿病ではインスリン分泌の不足またはインスリン抵抗性によりこの調節機構が崩れ、治療せず放置すると心血管疾患・腎不全・失明などの重大な合併症につながります。"
+    },
+    "diagnosis": {
+      "sectionTitle": "診断基準（Diagnosis）",
+      "fasting": {
+        "title": "空腹時血糖 126 mg/dL 以上",
+        "subTitle": "大韓糖尿病学会 2023 基準",
+        "desc": "8時間以上の空腹後に血糖が126 mg/dL以上であれば糖尿病、100～125 mg/dLであれば空腹時血糖異常（糖尿病前段階）に該当します。食後2時間血糖が200 mg/dL以上の場合も診断基準となります。"
+      },
+      "hba1c": {
+        "title": "糖化ヘモグロビン（HbA1c） 6.5% 以上",
+        "subTitle": "長期血糖指標",
+        "desc": "過去2～3か月間の平均血糖を反映します。HbA1cが6.5%以上であれば糖尿病、5.7～6.4%は糖尿病前段階に分類されます（WHO・大韓糖尿病学会）。"
+      },
+      "ogtt": {
+        "title": "75g経口ブドウ糖負荷試験（OGTT）",
+        "subTitle": "確定診断および合併症評価",
+        "desc": "75gのブドウ糖摂取2時間後の血糖が200 mg/dL以上であれば糖尿病と診断します。診断後は眼底・微量アルブミン尿・神経検査を通じて標的臓器の合併症を評価します。"
+      }
+    },
+    "types": {
+      "sectionTitle": "糖尿病の種類",
+      "heading": "糖尿病の種類",
+      "type1": {
+        "title": "1型糖尿病",
+        "desc": "膵臓ベータ細胞の自己免疫的破壊により、インスリン分泌が絶対的に欠乏した型です。主に小児・青少年期に発症し、外部からのインスリン投与なしには生存が困難です。",
+        "point": "外部インスリン注入が必須"
+      },
+      "type2": {
+        "title": "2型糖尿病",
+        "desc": "韓国人の糖尿病患者の90%以上を占める最も一般的な型で、インスリン抵抗性と相対的なインスリン分泌不足が組み合わさった状態です。肥満・運動不足・加齢と強い関連があります。",
+        "point": "代謝性の進行性疾患"
+      }
+    },
+    "nutrition": {
+      "heading": "栄養および生活習慣",
+      "avoidTitle": "避けるべき食品",
+      "avoid": {
+        "0": "単純糖・精製炭水化物（砂糖、炭酸飲料、白米、餅）",
+        "1": "加糖飲料および過量のフルーツジュース",
+        "2": "飽和脂肪・トランス脂肪を含む加工食品"
+      },
+      "recommendTitle": "推奨事項",
+      "recommend": {
+        "0": "食物繊維が豊富な全粒穀物（玄米、雑穀、オーツ麦）",
+        "1": "新鮮な野菜および良質なタンパク質（豆、豆腐、魚）",
+        "2": "不飽和脂肪酸（ナッツ類、青魚、オリーブオイル）"
+      }
+    },
+    "activity": {
+      "headingLine1": "規則的な身体活動",
+      "headingLine2": "(Physical Activity)",
+      "desc": "WHOの推奨に従い、週150～300分の中強度有酸素運動と週2回以上の筋力運動を推奨します。特に食後30分～1時間後のウォーキングは、食後の血糖上昇を効果的に抑制します。"
+    },
+    "symptoms": {
+      "sectionTitle": "臨床症状および徴候",
+      "step1": {
+        "title": "三多（さんた）症状 - 初期のサイン",
+        "desc": "多飲・多尿・多食が代表的です。高血糖により尿に糖が排出され、浸透圧性利尿が起こるためです。"
+      },
+      "step2": {
+        "title": "警告症状 - 体重減少・視野の変化",
+        "desc": "インスリン作用の低下によりブドウ糖の代わりに脂肪・タンパク質を分解し、短期間で体重が減少します。視界のかすみ、頻繁な感染、手足のしびれも危険なサインです。"
+      },
+      "step3": {
+        "title": "慢性合併症",
+        "desc": "長期間放置すると、糖尿病網膜症、糖尿病腎症（透析原因の1位）、糖尿病神経障害、心筋梗塞・脳卒中など全身の合併症が発生する可能性があります。"
+      },
+      "caution": "初期の糖尿病は無症状の場合が多いため、疾病管理庁は40歳以上または危険因子を有する方に、毎年の空腹時血糖・HbA1cの定期検査を推奨しています。"
+    },
+    "references": {
+      "kda": {
+        "source": "大韓糖尿病学会",
+        "detail": "糖尿病診療指針 2023"
+      },
+      "kdca": {
+        "source": "疾病管理庁（KDCA）",
+        "detail": "国民健康栄養調査 2022、慢性疾患統計"
+      }
+    }
+  },
+  "dyslipidemiaReportPage": {
+    "riskFactors": {
+      "0": "国内の30歳以上の成人の約40%が高脂血症 (疾病管理庁 2022)",
+      "1": "自覚症状なく動脈硬化・心脳血管疾患へ進行",
+      "2": "食事・運動・体重管理とスタチンなどの薬物治療の併行が必須"
+    },
+    "title": "高脂血症 (Hyperlipidemia)",
+    "subtitle": "韓国脂質・動脈硬化学会(KSoLA) 2022診療指針に基づき、LDL 160・総コレステロール 240・中性脂肪 200 mg/dL以上、またはHDL 40 mg/dL未満のときに診断される慢性代謝疾患です。",
+    "overview": {
+      "heading": "高脂血症とは?",
+      "paragraph1": "高脂血症は血中LDLコレステロール・総コレステロール・中性脂肪の上昇、またはHDLコレステロールの低下と定義されます(KSoLA)。疾病管理庁2022年調査では、国内の30歳以上の成人の約40%が高脂血症を有すると報告されており、年齢が上がるほど有病率が急激に上昇します。",
+      "paragraph2": "過剰な脂質は血管内皮にプラークを形成して動脈硬化を加速させ、最終的に狭心症・心筋梗塞・脳卒中・末梢血管疾患を引き起こします。メタボリックシンドローム・糖尿病・高血圧を伴う場合が多く、総合的なリスク評価とLDL目標値の管理が重要です。"
+    },
+    "diagnosis": {
+      "sectionTitle": "診断基準 (Diagnosis)",
+      "card1": {
+        "title": "LDL 160 / TC 240 / TG 200 mg/dL",
+        "subTitle": "KSoLA 2022診断基準",
+        "desc": "LDL 160 mg/dL以上、総コレステロール 240 mg/dL以上、中性脂肪 200 mg/dL以上、HDL 40 mg/dL未満のいずれかに該当すれば高脂血症と診断します。"
+      },
+      "card2": {
+        "title": "9～12時間空腹の血液検査",
+        "subTitle": "脂質パネルの測定",
+        "desc": "中性脂肪の精度のため9～12時間の空腹後に採血し、TC・LDL・HDL・TGを測定します。1～2週間隔の再検査で一時的な変動を除外します。"
+      },
+      "card3": {
+        "title": "心血管リスク評価",
+        "subTitle": "併存リスク因子の分析",
+        "desc": "頸動脈超音波・冠動脈CTで動脈硬化を確認し、年齢・高血圧・糖尿病・喫煙・家族歴を総合して10年間の心血管リスクを評価し、LDL目標を設定します。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理ガイドライン",
+      "pharmacology": {
+        "heading": "薬物治療 (Pharmacology)",
+        "lipidLowering": {
+          "title": "脂質値の低下",
+          "item": "スタチン(Statin)が第一選択薬として肝臓のコレステロール合成を抑制し、LDLを30～50%低下させます。必要に応じてエゼチミブ、PCSK9阻害薬を併用します。"
+        },
+        "monitoring": {
+          "title": "継続的なモニタリング",
+          "item": "リスクに応じて目標LDL(高リスク群70 mg/dL未満、中等度100 mg/dL未満、低リスク130 mg/dL未満)を維持し、定期的な血液検査でモニタリングします。"
+        }
+      }
+    },
+    "nutrition": {
+      "heading": "栄養および生活習慣",
+      "avoid": {
+        "heading": "避けるべき食べ物",
+        "item1": "飽和脂肪・トランス脂肪 (サムギョプサル、バター、揚げ物、マーガリン)",
+        "item2": "過度な飲酒 (中性脂肪急上昇の主な原因)",
+        "item3": "単純糖・液状果糖 (炭酸飲料、ミックスコーヒー、デザート)"
+      },
+      "recommend": {
+        "heading": "推奨事項",
+        "item1": "水溶性食物繊維が豊富な全粒穀物・オーツ麦・豆",
+        "item2": "オメガ3不飽和脂肪酸 (青魚、ナッツ類)",
+        "item3": "新鮮な野菜・果物・海藻類"
+      }
+    },
+    "physicalActivity": {
+      "heading": {
+        "line1": "身体活動および体重管理",
+        "line2": "(Physical Activity)"
+      },
+      "paragraph": "WHOの勧告どおり、週150～300分の中強度または75～150分の高強度の有酸素運動はHDLを高めTGを下げます。体重を5～10%減量するだけでもLDL・TGが有意に改善します。"
+    },
+    "symptoms": {
+      "sectionTitle": "臨床症状および徴候",
+      "step1": {
+        "title": "初期無症状 (Silent Phase)",
+        "desc": "高脂血症自体は痛みや外見の変化がほとんどなく、定期的な血液検査(40歳以上は4年ごとの国家検診)でのみ発見されます。"
+      },
+      "step2": {
+        "title": "警告徴候 (Warning Signs)",
+        "desc": "重症の場合はまぶたの黄色腫、角膜輪、かかとのアキレス腱黄色腫が現れることがあり、狭心症のような胸の圧迫感を伴うことがあります。"
+      },
+      "step3": {
+        "title": "慢性合併症 (Chronic Complications)",
+        "desc": "動脈硬化の進行により心筋梗塞・脳梗塞・末梢血管疾患が発生し、中性脂肪が500 mg/dLを超えると急性膵炎のリスクも急増します。"
+      },
+      "caution": "高血圧・糖尿病・肥満などの併存疾患を一緒に管理し、リスクに応じて6か月～1年間隔での脂質検査によるモニタリングが必要です。"
+    },
+    "references": {
+      "ksola": {
+        "source": "韓国脂質・動脈硬化学会(KSoLA)",
+        "detail": "高脂血症診療指針 第5版, 2022"
+      },
+      "kdca": {
+        "source": "疾病管理庁(KDCA)",
+        "detail": "国民健康栄養調査 2022, 慢性疾患現況報告"
+      }
+    }
+  },
+  "goutReportPage": {
+    "riskFactors": {
+      "0": "男性の発症率は女性より約3～4倍高く、40～50代で急増します",
+      "1": "急性発作の半数以上が親指の第1中足趾節関節から始まります",
+      "2": "食事管理・体重管理・尿酸降下薬の服用を併行することが必須です"
+    },
+    "title": "痛風(Gout)",
+    "intro": "血清尿酸が7.0 mg/dLを超える高尿酸血症により、関節に尿酸結晶(MSU)が沈着して発生する慢性炎症性関節炎です(ACR/大韓リウマチ学会 2020)。",
+    "overview": {
+      "heading": "痛風とは?",
+      "paragraph1": "痛風はプリン体代謝異常により血清尿酸が7.0 mg/dLを超え(高尿酸血症)、関節・軟部組織にモノナトリウム尿酸塩(MSU)結晶が沈着して発生します。\n                関節に沈着した結晶は急激な炎症反応を引き起こし、激しい痛み・腫れ・発赤・熱感を伴う急性発作を起こします。国内の痛風患者は過去10年間で約2倍に増加しました。",
+      "paragraph2": "痛風は単なる関節疾患にとどまらず、メタボリックシンドローム・高血圧・慢性腎臓病と密接に関連し、管理されない場合は慢性結節性痛風、腎結石、腎不全などへ進行することがあります。"
+    },
+    "diagnosis": {
+      "sectionTitle": "診断基準 (Diagnosis)",
+      "card1": {
+        "title": "血清尿酸 > 7.0 mg/dL",
+        "subTitle": "高尿酸血症の基準",
+        "desc": "血清尿酸7.0 mg/dL超を高尿酸血症と定義します(ACR/KCR 2020)。ただし急性発作中は正常値を示すこともあるため、時期に応じた再検査が必要です。"
+      },
+      "card2": {
+        "title": "関節液MSU結晶の確認",
+        "subTitle": "確定診断のゴールドスタンダード",
+        "desc": "関節穿刺で採取した滑液から、偏光顕微鏡で負の複屈折を示す針状のモノナトリウム尿酸塩(MSU)結晶を確認すれば確定診断となります。"
+      },
+      "card3": {
+        "title": "超音波・DECT画像診断",
+        "subTitle": "非侵襲的診断",
+        "desc": "関節超音波で「Double Contour」サインを確認したり、デュアルエナジーCT(DECT)で尿酸結晶の沈着を可視化することで、非侵襲的に診断できます。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理ガイドライン"
+    },
+    "pharmacology": {
+      "heading": "薬物治療 (Pharmacology)",
+      "acute": {
+        "heading": "急性期の緩和",
+        "item1": "NSAIDs、コルヒチン(低用量)、ステロイド製剤を単独または併用し、発作から24時間以内に炎症を抑制します。"
+      },
+      "longTerm": {
+        "heading": "長期的な予防(ULT)",
+        "item1": "尿酸降下薬(アロプリノール、フェブキソスタット)を継続して服用し、血清尿酸を6.0 mg/dL未満(結節性痛風は5.0 mg/dL未満)に維持します。"
+      }
+    },
+    "nutrition": {
+      "heading": "栄養および生活習慣",
+      "avoid": {
+        "heading": "避けるべき食べ物",
+        "item1": "ビール・蒸留酒などのアルコール (尿酸生成を促進)",
+        "item2": "高プリン体の肉類 (赤身肉、ベーコン)",
+        "item3": "動物の内臓、煮干し、イワシ、サバなどの高プリン体魚類"
+      },
+      "recommend": {
+        "heading": "推奨事項",
+        "item1": "低脂肪牛乳・ヨーグルトなどの乳製品 (尿酸排出を促進)",
+        "item2": "野菜・チェリーおよびビタミンCが豊富な食品",
+        "item3": "全粒穀物中心の複合炭水化物"
+      }
+    },
+    "hydration": {
+      "heading": {
+        "line1": "水分摂取",
+        "line2": "(Hydration)"
+      },
+      "description": "毎日2L以上の水分摂取は腎臓を通じた尿酸排泄を促進し、尿酸結石の形成を予防します。加糖飲料・果糖飲料はかえって尿酸生成を増やすため避けるべきです。"
+    },
+    "symptoms": {
+      "sectionTitle": "臨床症状および徴候",
+      "step1": {
+        "title": "急性痛風性関節炎",
+        "desc": "主に夜間に急激に始まり、関節が赤く腫れて激しい痛みが生じます。初回発作の50%以上が親指の第1中足趾節関節で起こります。"
+      },
+      "step2": {
+        "title": "間欠期痛風",
+        "desc": "発作後に症状が消える無症状期間で、治療を中断しやすいですが、尿酸管理を行わないと再発間隔が次第に短くなります。"
+      },
+      "step3": {
+        "title": "慢性結節性痛風",
+        "desc": "数年間放置すると尿酸結晶が結節(Tophus)を形成して関節破壊や変形を引き起こし、腎結石・尿酸腎症により腎機能低下を招きます。"
+      },
+      "caution": "高血圧・糖尿病・高脂血症・肥満などメタボリックシンドロームの併存管理が痛風の予後に決定的であり、定期的な尿酸・腎機能検査が必要です。"
+    },
+    "references": {
+      "0": {
+        "source": "大韓リウマチ学会(KCR)",
+        "detail": "痛風診療指針 2020"
+      },
+      "1": {
+        "source": "American College of Rheumatology (ACR)",
+        "detail": "Guideline for the Management of Gout, 2020"
+      },
+      "2": {
+        "source": "疾病管理庁(KDCA)",
+        "detail": "慢性疾患統計 (痛風有病率の推移)"
+      },
+      "3": {
+        "source": "EULAR",
+        "detail": "Recommendations for the Management of Gout, 2016 (updated)"
+      }
+    }
+  },
+  "healthReportPage": {
+    "tab": {
+      "bloodSugar": "血糖",
+      "bloodPressure": "血圧",
+      "weight": "体重",
+      "bmi": "BMI"
+    },
+    "header": {
+      "title": "健康レポート",
+      "subtitle": "最近の健康指標を一目で確認できます。"
+    },
+    "loading": "読み込み中...",
+    "locked": {
+      "title": "個人/家族プラン専用の機能です",
+      "description": "健康レポートは個人プランまたは家族プランでご利用いただけます。",
+      "subscribe": "サブスクリプションへ"
+    },
+    "summary": {
+      "noRecord": "記録なし",
+      "bloodSugar": {
+        "label": "最近の血糖",
+        "avg": "平均 {{value}} mg/dL"
+      },
+      "bloodPressure": {
+        "label": "最近の血圧",
+        "sub": "収縮期 / 拡張期"
+      },
+      "weight": {
+        "label": "体重",
+        "height": "身長 {{value}}cm"
+      },
+      "bmi": {
+        "label": "BMI",
+        "needData": "体重/身長が必要",
+        "underweight": "低体重",
+        "normal": "正常",
+        "overweight": "過体重",
+        "obese": "肥満"
+      }
+    },
+    "chart": {
+      "bloodSugar": {
+        "title": "最近の血糖の推移",
+        "empty": "血糖の記録がありません。",
+        "lineName": "血糖"
+      },
+      "bloodPressure": {
+        "title": "最近の血圧の推移",
+        "empty": "血圧の記録がありません。",
+        "systolic": "収縮期",
+        "diastolic": "拡張期"
+      },
+      "weight": {
+        "title": "最近の体重の推移",
+        "empty": "体重の記録がありません。",
+        "lineName": "体重"
+      },
+      "bmi": {
+        "title": "最近のBMIの推移",
+        "emptyWeight": "体重の記録がありません。",
+        "emptyHeight": "身長の情報が必要です。",
+        "lineName": "BMI"
+      }
+    }
+  },
+  "hypertensionReportPage": {
+    "riskFactors": {
+      "0": "国内30歳以上の成人の約28%が高血圧 (疾病管理庁 2022)",
+      "1": "無症状で進行し、発見時にはすでに標的臓器の損傷が生じている可能性",
+      "2": "減塩食・体重管理・薬物治療の併用が必須"
+    },
+    "title": "高血圧(Hypertension)",
+    "intro": "大韓高血圧学会2022診療ガイドラインに基づき、診察室血圧140/90 mmHg以上、家庭血圧135/85 mmHg以上のときに診断される慢性疾患です。\n            初期症状がなく「沈黙の殺人者」と呼ばれ、脳卒中・心筋梗塞などの合併症予防のために体系的な管理が必須です。",
+    "overview": {
+      "heading": "高血圧とは?",
+      "paragraph1": "高血圧は、血管壁にかかる圧力が持続的に正常範囲を超えた状態です(WHO)。疾病管理庁の国民健康栄養調査2022によると、\n                国内30歳以上の成人の約28%が高血圧を持っており、65歳以上では半数を超えます。慢性的な圧力上昇は血管内皮を損傷し、動脈硬化を加速させ、脳卒中・心筋梗塞などの致命的な合併症につながります。",
+      "paragraph2": "高血圧はメタボリックシンドロームと密接に関連し、管理されない場合は心不全・腎不全(透析)・網膜症・認知症のリスクを高めます。家庭血圧測定と定期的な医療機関の受診による継続的な管理が重要です。"
+    },
+    "diagnosis": {
+      "sectionTitle": "診断基準 (Diagnosis)",
+      "card1": {
+        "title": "診察室血圧140/90 mmHg以上",
+        "subTitle": "大韓高血圧学会2022基準",
+        "desc": "2回以上の受診で測定した診察室血圧が収縮期140または拡張期90 mmHg以上であれば高血圧と診断します。130~139/80~89は注意段階です。"
+      },
+      "card2": {
+        "title": "家庭血圧135/85 mmHg以上",
+        "subTitle": "家庭・24時間自由行動下血圧測定",
+        "desc": "白衣高血圧・仮面高血圧を鑑別するため、家庭血圧または24時間自由行動下血圧を測定します。自由行動下血圧の昼間平均135/85、夜間120/70以上が診断基準です。"
+      },
+      "card3": {
+        "title": "標的臓器損傷の評価",
+        "subTitle": "合併症の併発検査",
+        "desc": "心電図・心エコー・眼底検査・尿(微量アルブミン尿)・腎機能検査を通じて、左室肥大、網膜症、腎臓損傷などの標的臓器損傷を評価します。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理ガイドライン"
+    },
+    "pharmacology": {
+      "heading": "薬物治療 (Pharmacology)",
+      "initial": {
+        "heading": "初期の血圧コントロール",
+        "item1": "ACE阻害薬・ARB(アンジオテンシン受容体拮抗薬)・カルシウム拮抗薬(CCB)・利尿薬が第一選択薬として使用され、患者の状態に応じて単独または併用療法で目標血圧まで安全にコントロールします。"
+      },
+      "longTerm": {
+        "heading": "長期的な維持",
+        "item1": "家庭血圧測定、規則的な運動、処方どおりの継続的な服薬を通じて、一般成人は140/90 mmHg未満、糖尿病・腎臓病を併発している場合は130/80 mmHg未満の維持を目標とします。"
+      }
+    },
+    "nutrition": {
+      "heading": "栄養および生活習慣",
+      "avoid": {
+        "heading": "控えるべき食べ物",
+        "item1": "高ナトリウム食品 (ラーメン、塩辛、キムチ、加工肉)",
+        "item2": "過度な飲酒 (男性2杯/女性1杯以下に制限)",
+        "item3": "飽和脂肪・トランス脂肪・単純糖"
+      },
+      "recommend": {
+        "heading": "推奨事項",
+        "item1": "DASH食 (野菜・果物・低脂肪乳製品)",
+        "item2": "カリウムが豊富な食品 (バナナ、ほうれん草、じゃがいも)",
+        "item3": "全粒穀物および低脂肪タンパク質 (魚、豆、鶏むね肉)"
+      }
+    },
+    "lifestyle": {
+      "heading": {
+        "line1": "体重管理および有酸素運動",
+        "line2": "(Lifestyle Changes)"
+      },
+      "description": "WHOは週150~300分の中強度有酸素運動を推奨し、塩分摂取を1日5g(ナトリウム2,000mg)未満に制限するよう勧告しています。体重1kgの減量で血圧が約1 mmHg低下します。"
+    },
+    "symptoms": {
+      "sectionTitle": "臨床症状および徴候",
+      "step1": {
+        "title": "初期の無症状 (Silent Phase)",
+        "desc": "ほとんどの患者が血圧上昇を自覚しません。「沈黙の殺人者」と呼ばれる理由であり、家庭血圧測定と定期健康診断を通じてのみ発見されます。"
+      },
+      "step2": {
+        "title": "警告症状 (Warning Signs)",
+        "desc": "血圧が急激に上昇する際に後頭部の頭痛、めまい、鼻血、視界のかすみが現れることがあり、180/120 mmHg以上の高血圧緊急症は直ちに救急外来の受診が必要です。"
+      },
+      "step3": {
+        "title": "慢性合併症 (Chronic Complications)",
+        "desc": "長期間放置すると動脈硬化が進行し、脳卒中・心筋梗塞・心不全・慢性腎臓病・高血圧性網膜症などの標的臓器損傷につながります。"
+      },
+      "caution": "糖尿病・脂質異常症・肥満などの併発疾患を一緒に管理し、6か月~1年間隔の定期検診を通じて合併症を早期に発見することが重要です。"
+    },
+    "references": {
+      "0": {
+        "source": "WHO",
+        "detail": "Hypertension Fact Sheet, 2023"
+      },
+      "1": {
+        "source": "大韓高血圧学会",
+        "detail": "高血圧診療ガイドライン 2022"
+      },
+      "2": {
+        "source": "疾病管理庁(KDCA)",
+        "detail": "国民健康統計 2022 (高血圧有病率)"
+      },
+      "3": {
+        "source": "ESC/ESH",
+        "detail": "Guidelines for the Management of Arterial Hypertension, 2023"
+      }
+    }
+  },
+  "mainReportPage": {
+    "heroBadges": {
+      "diet": "食事・運動の記録",
+      "bloodTracking": "血圧・血糖の追跡",
+      "aiReport": "AI分析レポート",
+      "diseaseGuide": "疾患別ガイド"
+    },
+    "features": {
+      "dailyRecord": {
+        "title": "毎日の健康記録",
+        "description": "食事、運動、水分摂取、体重、血圧、血糖、服薬まで、1日のすべての健康記録を一画面で入力・管理できます。",
+        "tags": {
+          "diet": "食事",
+          "exercise": "運動",
+          "water": "水分",
+          "bloodPressureSugar": "血圧/血糖"
+        }
+      },
+      "stats": {
+        "title": "記録の統計＆レポート",
+        "description": "期間別の統計と可視化されたグラフで変化の流れを一目で確認でき、週間の総合レポートを受け取れます。",
+        "tags": {
+          "periodStats": "日/週/月の統計",
+          "trendGraph": "推移グラフ",
+          "comprehensiveReport": "総合レポート"
+        }
+      },
+      "goal": {
+        "title": "カスタム目標設定",
+        "description": "目標体重・飲水量・摂取/消費カロリーを設定し、1日の生活ルーティン（起床・食事・就寝）に合わせて通知を受け取りましょう。",
+        "tags": {
+          "goalMetric": "目標指標",
+          "routineAlert": "ルーティン通知",
+          "achievementRate": "達成率"
+        }
+      },
+      "medication": {
+        "title": "服薬管理",
+        "description": "処方箋の写真1枚で服用中の薬を自動で登録し、時間帯別の服薬通知で漏れなく管理できます。",
+        "tags": {
+          "prescriptionOcr": "処方箋OCR",
+          "medicationAlert": "服薬通知",
+          "medicationHistory": "服薬履歴"
+        }
+      },
+      "diseaseGuide": {
+        "title": "疾患別ガイド",
+        "description": "高血圧・糖尿病・高脂血症・肥満・痛風・骨粗鬆症など主要な慢性疾患について、信頼性の高い医学情報と管理法を提供します。",
+        "tags": {
+          "whoKdca": "WHO・KDCA準拠",
+          "sixDiseases": "6大疾患",
+          "management": "管理法"
+        }
+      },
+      "community": {
+        "title": "健康コミュニティ",
+        "description": "同じ悩みを持つ人々と経験を分かち合い、カテゴリ別の掲示板で質問・ノウハウ・日常を自由に共有しましょう。",
+        "tags": {
+          "categoryBoard": "カテゴリ別掲示板",
+          "qa": "質問/回答",
+          "recommendView": "おすすめ/閲覧数"
+        }
+      }
+    },
+    "howItWorks": {
+      "record": {
+        "title": "記録する",
+        "description": "今日食べた食事、運動、血圧・血糖・体重を気軽に入力しておくだけで、データがどんどん蓄積されます。"
+      },
+      "analyze": {
+        "title": "分析する",
+        "description": "蓄積されたデータをAIが分析し、変化の推移、危険のサイン、改善が必要な領域をお知らせします。"
+      },
+      "manage": {
+        "title": "管理する",
+        "description": "カスタム目標・ルーティン・服薬通知とコミュニティの応援を通じて、健康的な習慣を続けられるようサポートします。"
+      }
+    },
+    "hero": {
+      "titleLine1": "毎日の小さな記録が、",
+      "titleHighlight": "一生の健康",
+      "titleLine2Suffix": "になります。",
+      "description": "Ballifeは食事・運動・血圧・血糖・服薬まで、散らばっていた健康データを一か所に集め、AIが分析したインサイトとコミュニティの応援で、持続可能な健康管理をサポートします。",
+      "startNow": "今すぐ始める",
+      "exploreFeatures": "主な機能を見る"
+    },
+    "heroVisual": {
+      "todaySummary": "今日の健康サマリー",
+      "bloodPressure": "血圧",
+      "bloodSugar": "血糖",
+      "goalAchievement": "今日の目標達成率"
+    },
+    "featuresSection": {
+      "title": "健康管理に必要なすべてを、一か所に",
+      "subtitle": "Ballifeが提供する6つの主要機能で、健康管理をもっと簡単に、もっとスマートに。"
+    },
+    "howItWorksSection": {
+      "title": "3ステップで始める健康的な習慣"
+    },
+    "aiSection": {
+      "titleLine1": "24時間ともにある",
+      "titleLine2": "AI健康アシスタント",
+      "description": "健康に関する疑問、食事写真の分析、服薬時間の通知まで。あなたのライフスタイルに合わせてカスタマイズされたアドバイスを提供します。",
+      "points": {
+        "interaction": "服用中の薬との相互作用の確認",
+        "nutrition": "今日食べた食べ物の栄養分析",
+        "interpretation": "血圧・血糖値の解釈"
+      },
+      "chatUser": "今日の昼食後に血糖が180出ました。大丈夫でしょうか？",
+      "chatAi": "食後2時間の血糖が180mg/dLの場合、正常基準（140未満）より少し高い数値です。食物繊維が豊富な雑穀と野菜中心の食事、食後20分の軽い散歩が役立ちます。"
+    },
+    "cta": {
+      "title": "明日のより良い自分のための第一歩",
+      "subtitle": "今すぐBallifeに参加して、より良いユーザーとともに健康的なライフスタイルを始めましょう。"
+    }
+  },
+  "obesityReportPage": {
+    "riskFactors": {
+      "0": "国内成人の約38%が肥満（BMI ≥ 25、疾病管理庁 2022）",
+      "1": "脂肪細胞の炎症性サイトカイン分泌により代謝・ホルモンの不均衡を引き起こします",
+      "2": "食事・運動・行動療法の併用と、必要に応じて薬物・手術治療を検討します"
+    },
+    "title": "肥満（Obesity）",
+    "intro": {
+      "line1": "WHO西太平洋地域および大韓肥満学会（KSSO）基準で体格指数（BMI）25 kg/m²以上の場合に肥満と定義される、健康に悪影響を及ぼす慢性疾患です。",
+      "line2": "2型糖尿病・高血圧・脂質異常症・心血管疾患の主要な原因となる独立した疾患として管理すべきです。"
+    },
+    "overview": {
+      "heading": "肥満とは？",
+      "paragraph1": "肥満はエネルギー摂取が消費を上回り、体脂肪が過度に蓄積された状態です（WHO）。韓国人はBMI 25 kg/m²以上を肥満と分類し、ウエスト周囲径が男性90cm・女性85cm以上の場合は腹部肥満と診断します。疾病管理庁2022年調査によると、国内成人の肥満有病率は約38%で、特に男性で高くなっています。",
+      "paragraph2": "肥満は美容的な問題を超えてメタボリックシンドロームの中核的な原因であり、2型糖尿病、高血圧、脂質異常症、脳心血管疾患、脂肪肝、睡眠時無呼吸、変形性関節症、一部のがん（大腸がん・乳がんなど）のリスクを高め、うつ病とも関連します。"
+    },
+    "diagnosis": {
+      "title": "診断基準（Diagnosis）",
+      "subTitle": "* 体格指数（BMI） = 体重(kg) / [身長(m)]²",
+      "normal": {
+        "subTitle": "正常体重",
+        "desc": "健康維持のための正常BMI推奨範囲（KSSO）"
+      },
+      "preObesity": {
+        "subTitle": "肥満前段階（過体重）",
+        "desc": "肥満前段階、生活習慣の改善が強く推奨されます"
+      },
+      "stage1": {
+        "subTitle": "1段階肥満",
+        "desc": "1段階肥満、糖尿病・高血圧などの併発リスクが有意に増加"
+      },
+      "stage2": {
+        "subTitle": "2段階以上の肥満",
+        "desc": "2～3段階肥満、専門的な医療介入と薬物・手術を検討"
+      }
+    },
+    "guideline": {
+      "title": "管理ガイドライン"
+    },
+    "pharmacology": {
+      "title": "薬物治療（Pharmacology）",
+      "weightLoss": {
+        "title": "体重減量の補助",
+        "item1": "BMI 25以上、または併発疾患のあるBMI 23以上で、GLP-1作動薬、食欲抑制薬、脂肪吸収阻害薬などの処方を検討",
+        "item2": "専門医の処方のもと、食事・運動療法と併用して効果を最大化"
+      },
+      "maintenance": {
+        "title": "継続的な維持管理",
+        "item1": "減量した体重を維持するため、長期的な薬物使用および経過観察",
+        "item2": "初期体重の5～10%減量という目標を達成した後も、定期的な相談と生活習慣のモニタリングを継続"
+      }
+    },
+    "caution": {
+      "fructose": {
+        "title": "液状果糖の危険性",
+        "desc": "WHOは添加糖を総カロリーの10%未満（可能であれば5%未満）に制限するよう推奨しています。液状果糖は肝臓に直行し、脂肪肝・インスリン抵抗性を引き起こします。"
+      },
+      "lateNight": {
+        "title": "夜食と代謝障害",
+        "desc": "就寝3時間以内の食事はインスリン分泌リズムを乱し、脂肪として蓄積されやすく、睡眠の質や翌日の食欲ホルモン（レプチン・グレリン）のバランスを崩します。"
+      }
+    },
+    "physicalActivity": {
+      "title": "身体活動療法（Physical Activity）",
+      "desc": "WHOの推奨に従い、週150～300分の中強度有酸素運動（速歩、水泳、自転車）または75～150分の高強度運動に、週2回以上の筋力運動を併用します。",
+      "cardio": {
+        "title": "有酸素運動",
+        "desc": "心肺持久力の向上および体脂肪の減少"
+      },
+      "strength": {
+        "title": "筋力運動",
+        "desc": "基礎代謝量の増加および筋肉減少の予防"
+      },
+      "imageAlt": "運動する女性"
+    },
+    "diet": {
+      "title": "食事療法",
+      "items": {
+        "0": "1日500～750 kcalの減量（週あたり0.5～1kg減を目標）",
+        "1": "タンパク質・食物繊維中心のバランスの取れた食事",
+        "2": "規則正しい食事時間の遵守と就寝3時間前の絶食"
+      },
+      "note": "* 絶食ダイエットは筋肉減少・リバウンドを招くため、良質な栄養素を適量摂取することが重要です。"
+    },
+    "behavior": {
+      "title": "行動療法",
+      "step1": {
+        "title": "セルフモニタリング",
+        "desc": "食事・体重・運動を毎日記録し、生活パターンを客観的に把握して改善点を見つけ出します。"
+      },
+      "step2": {
+        "title": "ストレス管理",
+        "desc": "身体的な空腹と情緒的な空腹を区別し、瞑想・趣味活動でストレスによる過食を予防します。"
+      },
+      "step3": {
+        "title": "現実的な目標設定",
+        "desc": "6か月で初期体重の5～10%減量を目標に、段階的な計画を立てて達成感とモチベーションを維持します。"
+      }
+    },
+    "surgery": {
+      "title": "薬物および手術",
+      "step1": {
+        "title": "BMI 35以上、または併発疾患のあるBMI 30以上の高度肥満では、スリーブ状胃切除術などの代謝・肥満手術を検討できます。"
+      },
+      "step2": {
+        "title": "高血圧・糖尿病・脂質異常症などの併発疾患がある場合は、疾患治療と肥満管理を同時に進める統合的な治療計画を立てます。"
+      }
+    },
+    "references": {
+      "ksso": {
+        "source": "大韓肥満学会（KSSO）",
+        "detail": "肥満診療指針 2022"
+      },
+      "kdca": {
+        "source": "疾病管理庁（KDCA）",
+        "detail": "国民健康栄養調査 2022、肥満有病率"
+      }
+    }
+  },
+  "osteoporosisReportPage": {
+    "riskFactors": {
+      "0": "高齢および閉経後のエストロゲン減少（国内の50歳以上女性の約38%が骨粗鬆症）",
+      "1": "家族歴および低体重（BMI < 18.5）",
+      "2": "長期間のステロイド（グルココルチコイド）服用",
+      "3": "過度の飲酒・喫煙および身体活動の不足"
+    },
+    "title": "骨粗鬆症（Osteoporosis）",
+    "intro": "WHOの定義に従い、DXA骨密度のT-scoreが-2.5以下のときに診断され、骨量の減少と微細構造の破壊によって骨折リスクが高まる全身性の骨格系疾患です。高齢化により国内の50歳以上人口の骨粗鬆症有病率が急速に上昇しており、保健学的な管理が非常に重要です。",
+    "overview": {
+      "heading": "骨粗鬆症とは？",
+      "paragraph1": "骨粗鬆症は、骨量の減少と骨組織の微細構造の変化によって骨強度が低下した状態です（WHO）。骨は生涯にわたり吸収と形成を繰り返しますが、閉経・加齢・特定の薬剤などでバランスが崩れると骨密度が減少します。疾病管理庁の資料によると、国内の50歳以上女性の約38%、男性の約7%が骨粗鬆症です。",
+      "paragraph2a": "骨粗鬆症は進行中はほとんど症状がなく、最終的には",
+      "paragraph2highlight": "軽い外傷や日常動作だけでも脊椎・股関節・手首の骨折が起こる脆弱な状態",
+      "paragraph2b": "へとつながります。股関節骨折は高齢者において1年以内の死亡率を高める重大な合併症です。"
+    },
+    "diagnosis": {
+      "title": "診断基準（WHO T-score）",
+      "subTitle": "二重エネルギーX線吸収測定法（DXA）で腰椎・大腿骨の骨密度を測定したT-scoreが標準的な診断基準です（WHO）。",
+      "normal": {
+        "label": "正常",
+        "desc": "骨密度が若年成人の平均と比べて安定した状態で、予防的な生活習慣の維持が推奨されます。"
+      },
+      "osteopenia": {
+        "label": "骨減少症",
+        "desc": "骨量が減少した段階で、骨粗鬆症への進行を防ぐためにカルシウム・ビタミンDの摂取と運動の強化が必要です。"
+      },
+      "osteoporosis": {
+        "label": "骨粗鬆症",
+        "desc": "WHOの診断基準に該当し、ビスホスホネートなど積極的な薬物治療が必要な段階です。"
+      }
+    },
+    "management": {
+      "title": "管理ガイドライン",
+      "pharmacology": {
+        "heading": "薬物治療（Pharmacology）",
+        "antiresorptive": {
+          "heading": "骨吸収抑制薬",
+          "item1": "ビスホスホネート（Bisphosphonates）- 最も一般的",
+          "item2": "デノスマブ（Denosumab）- 6か月に1回の注射剤",
+          "item3": "選択的エストロゲン受容体モジュレーター（SERM）"
+        },
+        "anabolic": {
+          "heading": "骨形成促進薬",
+          "item1": "テリパラチド（Teriparatide）",
+          "item2": "ロモソズマブ（Romosozumab）- 近年導入された強力な薬剤"
+        }
+      }
+    },
+    "lifestyle": {
+      "heading": "栄養および生活習慣",
+      "calcium": {
+        "title": "カルシウム摂取",
+        "desc": "50歳以上は1日800～1,000mgを推奨（牛乳、いわし、豆腐、ケール）"
+      },
+      "vitaminD": {
+        "title": "ビタミンD",
+        "desc": "1日800～1,000 IUを推奨、週2～3回の日光浴も併用"
+      },
+      "weightBearing": {
+        "title": "荷重運動",
+        "desc": "ウォーキング・ジョギング・階段昇降を週3～5回、WHO推奨の週150分以上"
+      }
+    },
+    "fallPrevention": {
+      "heading": "転倒予防（Fall Prevention）",
+      "intro": "高齢者の骨折の大部分は転倒が原因であるため、骨の強化と同じくらい転ばない環境づくりが重要です（大韓骨代謝学会 KSBMR）。",
+      "check1": "室内照明を十分に確保し、床の障害物を取り除く",
+      "check2": "浴室・階段に滑り止めマット・手すりを設置する",
+      "check3": "視力・聴力の定期点検およびバランス感覚を向上させる運動（太極拳など）"
+    },
+    "symptoms": {
+      "title": "臨床症状および兆候",
+      "fractureRisk": {
+        "heading": "骨折リスク（Fracture Risk）",
+        "desc": "手首・脊椎・股関節部位の骨折が最も多く、特に股関節骨折は1年以内の死亡率が約15～20%に達するほど致命的です。脊椎は軽い外傷や咳だけでも圧迫骨折が起こることがあります。"
+      },
+      "bodyChange": {
+        "title": "体型の変化",
+        "desc": "脊椎圧迫骨折が積み重なると、身長が3cm以上縮んだり、背中が曲がる脊椎後弯症が現れることがあります。"
+      },
+      "dullPain": {
+        "title": "鈍い痛み",
+        "desc": "骨粗鬆症自体は無症状ですが、微細骨折・圧迫骨折が起こると慢性的な腰痛や全身の痛みを伴うことがあります。"
+      }
+    },
+    "references": {
+      "ksbmr": {
+        "source": "大韓骨代謝学会（KSBMR）",
+        "detail": "骨粗鬆症診療指針 2022"
+      },
+      "kdca": {
+        "source": "疾病管理庁（KDCA）",
+        "detail": "国民健康栄養調査 2022、骨粗鬆症有病率"
+      }
+    }
+  },
+  "diseaseEditPage": {
+    "toast": {
+      "loadFailed": "疾患情報を読み込めませんでした。",
+      "demoSaved": "疾患修正画面のデモ値が保存されました。",
+      "saved": "保有疾患情報が修正されました。",
+      "saveFailed": "疾患情報の修正に失敗しました。"
+    },
+    "eyebrow": {
+      "member": "保有疾患の修正",
+      "demo": "疾患編集デモ"
+    },
+    "title": "疾患情報の編集",
+    "subtitle": "現在保有している慢性疾患の状態を選択して更新してください。",
+    "demoNotice": "ログインなしでも画面の確認が可能で、保存値はブラウザにのみ保管されます。",
+    "close": "閉じる",
+    "loading": "疾患情報を読み込んでいます。",
+    "cancel": "キャンセル",
+    "saving": "保存中...",
+    "submit": "保存する"
+  },
+  "diseasePage": {
+    "title": "保有疾患チェック",
+    "submit": "完了",
+    "toast": {
+      "signUpComplete": "会員登録が完了しました！"
+    }
+  },
+  "loginPage": {
+    "title": "ログイン",
+    "submit": "ログイン",
+    "submitting": "ログイン中...",
+    "loginIdPlaceholder": "IDを入力してください。",
+    "passwordPlaceholder": "パスワードを入力してください。",
+    "validation": {
+      "loginIdRequired": "IDを入力してください。",
+      "passwordRequired": "パスワードを入力してください。"
+    },
+    "toast": {
+      "welcome": "{{name}}さん、ようこそ！",
+      "loginFailed": "IDまたはパスワードが正しくありません。"
+    },
+    "noAccount": "アカウントをお持ちでないですか？",
+    "signUp": "会員登録"
+  },
+  "profileEditPage": {
+    "toast": {
+      "loadFailed": "会員情報を読み込めませんでした。",
+      "imageOnly": "画像ファイルのみ選択できます。",
+      "imageTooLarge": "プロフィール写真は10MB以下のみアップロードできます。",
+      "imageLoadFailed": "画像を読み込めませんでした。",
+      "profileSaved": "プロフィールが保存されました。",
+      "memberUpdated": "会員情報が修正されました。",
+      "imageSavedLocally": "プロフィール写真はこのブラウザに保存されました。",
+      "updateFailed": "会員情報の修正に失敗しました。"
+    },
+    "eyebrow": {
+      "member": "会員情報の修正",
+      "demo": "プロフィール編集デモ"
+    },
+    "title": "プロフィール修正",
+    "description": "名前、ニックネーム、生年月日、性別、身体情報を修正できます。",
+    "demoNotice": "ログインなしでも画面の確認が可能で、保存値はブラウザにのみ保管されます。",
+    "close": "閉じる",
+    "loading": "会員情報を読み込んでいます。",
+    "imageAlt": "プロフィールプレビュー",
+    "imageLabel": "プロフィール写真",
+    "imageHint": "JPG、PNG、WEBP画像をアップロードできます。写真はこのブラウザですぐに反映されます。",
+    "selectImage": "写真を選択",
+    "defaultImage": "デフォルト画像",
+    "field": {
+      "email": "メールアドレス",
+      "username": "名前",
+      "nickname": "ニックネーム",
+      "birthDate": "生年月日",
+      "gender": "性別",
+      "weight": "体重(kg)",
+      "height": "身長(cm)"
+    },
+    "gender": {
+      "none": "選択しない",
+      "male": "男性",
+      "female": "女性"
+    },
+    "cancel": "キャンセル",
+    "save": "保存する",
+    "saving": "保存中..."
+  },
+  "signUpPage": {
+    "title": "会員登録",
+    "devAutoFill": "[DEV] テストデータ自動入力",
+    "labels": {
+      "loginId": "ID",
+      "password": "パスワード",
+      "passwordConfirm": "パスワード確認",
+      "username": "ユーザー名",
+      "email": "本人確認用メールアドレス",
+      "birthDate": "生年月日",
+      "nickname": "ニックネーム",
+      "gender": "性別",
+      "height": "身長",
+      "weight": "体重"
+    },
+    "optional": "(任意)",
+    "placeholders": {
+      "loginId": "IDを入力してください。",
+      "password": "6文字以上の英字・数字の組み合わせで入力してください。",
+      "passwordConfirm": "パスワードをもう一度入力してください。",
+      "username": "名前を入力してください。",
+      "nickname": "表示される名前を入力してください。"
+    },
+    "checkDuplicate": "重複確認",
+    "checkingDuplicate": "確認中...",
+    "loginIdAvailable": "使用可能なIDです。",
+    "loginIdTaken": "すでに使用されているIDです。",
+    "selectEmailDomain": "メール選択",
+    "customDomain": "直接入力",
+    "genderMale": "男性",
+    "genderFemale": "女性",
+    "submit": "会員登録",
+    "submitting": "登録中...",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか?",
+    "login": "ログイン",
+    "toast": {
+      "checkFailed": "重複確認に失敗しました。しばらくしてからもう一度お試しください。",
+      "autoFillDone": "テストデータの自動入力が完了しました"
+    },
+    "errors": {
+      "loginIdRequired": "IDを入力してください。",
+      "loginIdMinLength": "IDは5文字以上である必要があります。",
+      "loginIdCheckRequired": "IDの重複確認を完了してください。",
+      "passwordRequired": "パスワードを入力してください。",
+      "passwordMinLength": "パスワードは6文字以上である必要があります。",
+      "passwordConfirmRequired": "パスワード確認を入力してください。",
+      "passwordMismatch": "パスワードが一致しません。",
+      "emailRequired": "メールアドレスを入力してください。",
+      "emailInvalid": "正しいメールアドレスの形式ではありません。",
+      "birthDateRequired": "生年月日を入力してください。",
+      "genderRequired": "性別を選択してください。",
+      "weightRequired": "体重を入力してください。",
+      "heightRequired": "身長を入力してください。",
+      "positiveNumber": "0以上の数値を入力してください。"
+    }
+  },
+  "userInformation": {
+    "routine": {
+      "wakeup": "起床",
+      "breakfast": "朝",
+      "lunch": "昼",
+      "dinner": "夕",
+      "bedtime": "就寝",
+      "title": "1日の生活リズム",
+      "edit": "リズムを編集"
+    },
+    "confirm": {
+      "deletePrescription": "この処方箋を削除しますか？"
+    },
+    "toast": {
+      "prescriptionDeleted": "処方箋が削除されました。",
+      "reportGenerating": "健康分析レポートを生成しています…",
+      "reportDownloaded": "健康分析レポートのダウンロードが完了しました",
+      "memberLoadFailed": "会員情報を読み込めませんでした。",
+      "configLoadFailed": "目標／生活リズム情報を読み込めませんでした。",
+      "loginRequired": "ログインが必要です。",
+      "targetsSaved": "目標が保存されました。",
+      "routineSaved": "生活リズムが保存されました。",
+      "subscriptionActivated": "サブスクリプションが有効になりました。",
+      "subscriptionCancelled": "サブスクリプションを解約しました。"
+    },
+    "metric": {
+      "currentWeight": "現在の体重 {{weight}}kg",
+      "calorieOutWithGoal": "現在の消費カロリー {{current}}kcal / {{goal}}kcal 達成",
+      "calorieOut": "現在の消費カロリー {{current}}kcal",
+      "calorieInWithGoal": "現在の摂取カロリー {{current}}kcal / {{goal}}kcal 達成",
+      "calorieIn": "現在の摂取カロリー {{current}}kcal",
+      "waterMl": "{{current}} ml / {{target}} ml",
+      "targetWeight": "目標体重",
+      "targetWater": "目標飲水量",
+      "targetCalorieIn": "目標摂取カロリー",
+      "targetCalorieOut": "目標消費カロリー",
+      "editBadge": "編集",
+      "cupUnit": "杯"
+    },
+    "subscription": {
+      "familyPlan": "家族プラン",
+      "individualPlan": "個人プラン",
+      "free": "無料",
+      "title": "サブスクリプション",
+      "activePlan": "{{plan}} ご利用中",
+      "expiryUntil": " · {{date}}まで",
+      "promo": "プランに加入して健康レポートと家族の健康共有をご利用ください。",
+      "generating": "生成中…",
+      "healthReportBtn": "健康分析レポート",
+      "familyManage": "家族管理",
+      "subscribe": "サブスクリプションに加入",
+      "manage": "サブスクリプション管理"
+    },
+    "loginRequiredPage": "ログインが必要なページです。",
+    "goToLogin": "ログインしに行く",
+    "profileImageAlt": "プロフィール写真",
+    "editProfile": "プロフィール編集",
+    "editDisease": "保有疾患を編集",
+    "medal": "🏅 メダル",
+    "mission": "🎯 ミッション",
+    "points": "保有ポイント",
+    "pointsValue": "{{value}} P",
+    "memberInfo": {
+      "title": "会員情報",
+      "email": "メールアドレス",
+      "birthDate": "生年月日",
+      "gender": "性別",
+      "disease": "疾患"
+    },
+    "normalBloodSugar": {
+      "title": "正常血糖",
+      "fasting": "空腹",
+      "afterMeal1h": "食後1時間",
+      "afterMeal2h": "食後2時間"
+    },
+    "normalBloodPressure": {
+      "title": "正常血圧",
+      "systolic": "収縮期",
+      "diastolic": "拡張期"
+    },
+    "healthReport": {
+      "title": "健康レポート",
+      "subtitle": "最近の健康指標を一目で確認できます。",
+      "viewBtn": "健康レポートを見る"
+    },
+    "prescription": {
+      "title": "💊 処方箋一覧",
+      "noName": "名前なし",
+      "editAria": "処方箋を編集",
+      "deleteAria": "処方箋を削除",
+      "medicineCount": "薬リスト {{count}}件",
+      "noMedicines": "登録された薬がありません。",
+      "emptyTitle": "登録された処方箋がありません",
+      "emptyHint": "下のボタンから処方箋を登録してください",
+      "uploadBtn": "処方箋をアップロード"
+    }
+  },
+  "bloodPressureRecordModal": {
+    "tab": {
+      "아침": "朝",
+      "점심": "昼",
+      "저녁": "夕",
+      "취침전": "就寝前"
+    },
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "enterBoth": "収縮期と拡張期の血圧を両方入力してください。",
+      "systolicGreater": "収縮期血圧は拡張期血圧より大きい必要があります。",
+      "updated": "血圧記録が修正されました。",
+      "created": "血圧が記録されました。",
+      "deleted": "血圧記録が削除されました。"
+    },
+    "confirm": {
+      "delete": "この血圧記録を削除しますか？"
+    },
+    "status": {
+      "empty": {
+        "label": "値入力前",
+        "comment": "収縮期と拡張期の値を入力すると、現在の血圧状態を確認できます。",
+        "tip": "測定直後にすぐ入力すると記録管理がより簡単になります。"
+      },
+      "low": {
+        "label": "低血圧",
+        "comment": "現在の血圧は低めのようです。",
+        "tip": "めまいや疲労感がある場合は十分に休息をとり、状態を確認してください。"
+      },
+      "high": {
+        "label": "高血圧",
+        "comment": "現在の血圧は高めのようです。",
+        "tip": "繰り返し高く出る場合は生活習慣を見直し、必要に応じて専門医への相談を検討してください。"
+      },
+      "caution": {
+        "label": "注意数値",
+        "comment": "正常範囲より少し高めに測定されました。",
+        "tip": "塩辛い食べ物、カフェイン、ストレス要因も一緒にチェックするとよいでしょう。"
+      },
+      "normal": {
+        "label": "正常数値",
+        "comment": "現在の血圧の流れは安定しているようです。",
+        "tip": "今のように継続して記録すると変化の推移を確認しやすくなります。"
+      }
+    },
+    "title": {
+      "edit": "血圧記録の修正",
+      "create": "血圧を記録する"
+    },
+    "subtitle": {
+      "edit": "値を修正したり記録を削除したりできます。",
+      "create": "今日の血圧状態を手軽に確認して記録してみましょう。"
+    },
+    "close": "閉じる",
+    "info": {
+      "normal": "正常血圧: 収縮期120mmHg未満、拡張期80mmHg未満",
+      "high": "高血圧: 収縮期140mmHg以上または拡張期90mmHg以上",
+      "low": "低血圧: 一般的に収縮期90mmHg以下または拡張期60mmHg以下"
+    },
+    "systolic": "収縮期",
+    "diastolic": "拡張期",
+    "statusHeading": "血圧状態",
+    "gauge": {
+      "low": "低血圧",
+      "normal": "正常",
+      "caution": "注意",
+      "high": "高血圧"
+    },
+    "button": {
+      "deleting": "削除中...",
+      "delete": "削除",
+      "saving": "保存中...",
+      "update": "修正を保存",
+      "submit": "記録を保存して確認"
+    }
+  },
+  "chatbot": {
+    "message": {
+      "imageOnly": "現在は画像（写真）のみ添付できます。",
+      "imageLoadFailed": "写真を読み込めませんでした。もう一度お試しください。",
+      "loginRequired": "ログイン後にご利用いただけます。ログイン情報をご確認ください。",
+      "noReply": "応答を受け取れませんでした。",
+      "fetchFailed": "申し訳ありません、現在応答を取得できません。しばらくしてからもう一度お試しください。"
+    },
+    "aria": {
+      "openChatbot": "AIチャットボットを開く",
+      "close": "閉じる",
+      "removeAttach": "添付を削除",
+      "attachFile": "ファイルを添付",
+      "send": "送信"
+    },
+    "header": {
+      "title": "健康AIアシスタント",
+      "status": "リアルタイム相談可能"
+    },
+    "empty": {
+      "title": "こんにちは、Ballです",
+      "descLine1": "血糖、栄養、運動、睡眠など健康に関する",
+      "descLine2": "気になることをお気軽にお尋ねください。"
+    },
+    "alt": {
+      "attachedImage": "添付画像",
+      "attachPreview": "添付プレビュー"
+    },
+    "input": {
+      "placeholder": "メッセージを入力してください..."
+    },
+    "disclaimer": "AIアシスタントのアドバイスは参考用であり、医学的診断に代わるものではありません。"
+  },
+  "dailyTimelineModal": {
+    "recordedItems": "今日記録した項目",
+    "close": "閉じる",
+    "timelineCount": "タイムライン ({{count}}件)",
+    "empty": "この日には記録がありません。",
+    "category": {
+      "diet": "食事",
+      "bloodPressure": "血圧",
+      "bloodSugar": "血糖",
+      "water": "水分",
+      "medication": "服薬",
+      "exercise": "運動",
+      "weight": "体重"
+    }
+  },
+  "exerciseModal": {
+    "validation": {
+      "atLeastOne": "運動項目を1つ以上追加してください。",
+      "aerobicDuration": "有酸素運動の時間は13分30秒または13:30の形式で入力してください。",
+      "anaerobicSetReps": "無酸素運動はセット数と回数の両方を入力してください。",
+      "anaerobicDuration": "無酸素運動の時間は13分30秒または13:30の形式で入力してください。"
+    },
+    "confirm": {
+      "delete": "この運動記録を削除しますか？"
+    },
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "deleted": "運動記録が削除されました。",
+      "deleteFailed": "運動記録の削除に失敗しました。",
+      "updated": "運動記録が修正されました。",
+      "saved": "運動記録が保存されました。",
+      "updateFailed": "運動記録の修正に失敗しました。",
+      "saveFailed": "運動記録の保存に失敗しました。"
+    },
+    "title": {
+      "edit": "運動記録の修正",
+      "create": "運動を記録する"
+    },
+    "subtitle": {
+      "edit": "選択した運動記録を修正します。",
+      "create": "今日の頑張りを正確に記録しましょう。"
+    },
+    "close": "閉じる",
+    "tab": {
+      "anaerobic": "無酸素",
+      "aerobic": "有酸素"
+    },
+    "expectedCalorie": "予想消費カロリー",
+    "setDetailLabel": "セット別の詳細記録",
+    "recording": "記録中",
+    "field": {
+      "exerciseType": "運動の種類",
+      "set": "セット",
+      "weight": "重量 (KG)",
+      "reps": "回数 (REPS)",
+      "duration": "時間",
+      "kilometer": "キロメートル",
+      "intensity": "強度"
+    },
+    "placeholder": {
+      "duration": "13分30秒"
+    },
+    "intensity": {
+      "low": "低い",
+      "medium": "普通",
+      "high": "高い"
+    },
+    "addItem": "追加する",
+    "button": {
+      "deleting": "削除中...",
+      "delete": "削除",
+      "saving": "保存中...",
+      "updateDone": "修正完了",
+      "saveAndConfirm": "記録を保存して確認",
+      "saveAndConfirmCount": "記録を保存して確認 ({{count}})"
+    }
+  },
+  "mealDetailModal": {
+    "sample": {
+      "mealType": "昼食",
+      "salmonSalad": "サーモンサラダ",
+      "brownRiceHalf": "玄米ご飯半膳"
+    },
+    "label": {
+      "dietRecord": "食事記録"
+    },
+    "nutrition": {
+      "carbs": "炭水化物",
+      "protein": "タンパク質",
+      "fat": "脂肪",
+      "sugar": "糖類",
+      "cholesterol": "コレステロール",
+      "sodium": "ナトリウム"
+    },
+    "totalCalories": "総カロリー"
+  },
+  "mealRegisterModal": {
+    "title": "食事登録",
+    "subtitle": "AIが分析した食事内容です。詳細な栄養成分をご確認ください。",
+    "category": {
+      "breakfast": "朝食",
+      "lunch": "昼食",
+      "dinner": "夕食",
+      "snack": "間食",
+      "fallback": "食事"
+    },
+    "nutrient": {
+      "calories": "カロリー",
+      "carbs": "炭水化物",
+      "protein": "タンパク質",
+      "fat": "脂肪",
+      "sugar": "糖類",
+      "sodium": "ナトリウム",
+      "cholesterol": "コレステロール"
+    },
+    "addFood": "食べ物を追加",
+    "uploadTitle": "食事の写真をアップロード",
+    "uploadHintLine1": "ここをクリックするか、写真ファイルをドラッグして",
+    "uploadHintLine2": "アップロードしてください (JPG, PNG)",
+    "aiAutoRecognize": "AIが食べ物と栄養素を自動認識します",
+    "selectFile": "ファイルを選択",
+    "imageAlt": "食事の写真",
+    "changePhoto": "写真を変更",
+    "removePhoto": "写真を削除",
+    "analyzing": "AIが分析しています",
+    "analyzingWait": "少々お待ちください...",
+    "aiVisionDone": "AIビジョン分析完了",
+    "foodNameLabel": "食べ物の名前",
+    "foodNamePlaceholder": "食べ物の名前を入力すると食品医薬品安全処DBから検索されます",
+    "searching": "検索中...",
+    "intakeLabel": "摂取量 (g)",
+    "per100g": "100g基準",
+    "nutritionHeader": "栄養成分",
+    "aiEstimate": "AI推定値",
+    "deleting": "削除中...",
+    "deleteMeal": "食事を削除",
+    "saving": "保存中...",
+    "editComplete": "編集完了",
+    "saveMeal": "食事を保存して確認",
+    "confirm": {
+      "deleteMeal": "この食事記録を削除しますか？\n写真と登録された食べ物がすべて削除されます。"
+    },
+    "toast": {
+      "timeChanged": "時間が変更されました。",
+      "recognizedNoNutrition": "{{count}}個の食べ物を認識（{{names}}）しましたが、栄養情報が見つかりませんでした。直接入力してください。",
+      "notRecognized": "写真から食べ物を認識できませんでした。直接入力してください。",
+      "mainFoodAddedWithOthers": "「{{name}}」を追加しました。（{{others}}は「食べ物を追加」後、それぞれの写真を別々にアップロードしてください）",
+      "mainFoodRecognized": "「{{name}}」を認識しました。確認後、保存ボタンを押してください。",
+      "analysisFailed": "AI分析に失敗しました。直接入力してください。",
+      "mealDeleted": "食事が削除されました。",
+      "loginRequired": "ログインが必要です。",
+      "foodsSaved": "{{count}}個の食べ物が保存されました。",
+      "someFoodsSaveFailed": "一部の食べ物の保存に失敗しました。",
+      "saved": "保存されました。",
+      "enterFoodName": "食べ物の名前を入力してください。",
+      "enterMealTime": "食事の時間を入力してください。",
+      "updated": "修正されました。"
+    }
+  },
+  "medicineSearchTestModal": {
+    "title": "医薬品検索",
+    "searchPlaceholder": "例: モティリトン錠",
+    "searching": "照会中...",
+    "search": "照会",
+    "error": {
+      "notFound": "該当する医薬品が見つかりませんでした。",
+      "searchFailed": "照会中にエラーが発生しました。"
+    },
+    "itemSeqLabel": "品目基準コード",
+    "chartLabel": "性状",
+    "storageMethodLabel": "保管方法"
+  },
+  "missionModal": {
+    "section": {
+      "daily": {
+        "title": "デイリーミッション",
+        "note": "1日1回"
+      },
+      "weekly": {
+        "title": "ウィークリーミッション",
+        "note": "1週間に1回"
+      },
+      "special": {
+        "title": "スペシャルミッション"
+      },
+      "streak": {
+        "title": "連続記録ボーナス"
+      }
+    },
+    "note": {
+      "eachRegister": "最大3回",
+      "streak7": "週間ボーナス",
+      "streak30": "月間ボーナス"
+    },
+    "title": "🎯 ミッション",
+    "loading": "読み込み中...",
+    "toast": {
+      "claimed": "ミッション完了! +{{reward}}P"
+    },
+    "button": {
+      "processing": "処理中...",
+      "claim": "受け取る",
+      "maxReached": "最大達成",
+      "done": "完了",
+      "notAchieved": "未達成"
+    }
+  },
+  "prescriptionDetailModal": {
+    "title": "私の[{{groupName}}]処方リスト",
+    "totalCount": "全{{count}}種類の薬が処方されています。",
+    "ingredientLabel": "成分: {{ingredient}}",
+    "empty": "処方された薬がありません。薬をすべて削除すると、このグループは服薬スケジュール・遵守率からも消えます。",
+    "placeholder": {
+      "name": "薬の名前",
+      "purpose": "効能",
+      "dosage": "服用方法"
+    },
+    "action": {
+      "save": "保存",
+      "cancel": "キャンセル",
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "confirmDelete": {
+      "title": "本当に削除しますか？",
+      "target": "薬を削除します。",
+      "warning": "削除後は元に戻せません。"
+    }
+  },
+  "prescriptionRegisterModal": {
+    "defaultTitle": "朝の服薬",
+    "close": "閉じる",
+    "scanLabel": "処方箋スキャン",
+    "filePlaceholder": "ファイル添付",
+    "upload": "アップロード",
+    "groupNameLabel": "処方グループ名",
+    "groupNamePlaceholder": "例: 血圧の薬",
+    "memoLabel": "メモ",
+    "memoPlaceholder": "メモを入力...",
+    "detailLabel": "服薬の詳細情報",
+    "column": {
+      "name": "名前",
+      "dosage": "用量 (MG/PILL)",
+      "manage": "管理"
+    },
+    "emptyList": "まだ登録された薬品がありません。",
+    "medicineNamePlaceholder": "薬の名前",
+    "categoryPlaceholder": "分類",
+    "deleteRow": "行を削除",
+    "addRow": "行を追加",
+    "submitting": "保存中...",
+    "submit": "保存する",
+    "alert": {
+      "groupNameRequired": "処方グループ名を入力してください。",
+      "saveFailed": "保存中にエラーが発生しました。しばらくしてからもう一度お試しください。"
+    }
+  },
+  "routineModal": {
+    "title": "一日の生活ルーティンの編集",
+    "close": "閉じる",
+    "description": "毎日の生活時間を入力してください。入力した時間を基準に、通知とおすすめのタイミングが調整されます。",
+    "scheduleLabel": "生活時間の設定",
+    "saving": "保存中...",
+    "save": "保存する",
+    "saveError": "保存中にエラーが発生しました。しばらくしてからもう一度お試しください。",
+    "meridiemLabel": "午前/午後",
+    "am": "午前",
+    "pm": "午後",
+    "hourLabel": "時",
+    "hourUnit": "{{value}}時",
+    "minuteLabel": "分",
+    "minuteUnit": "{{value}}分"
+  },
+  "searchMedicineModal": {
+    "error": {
+      "notFound": "該当する医薬品が見つかりません。",
+      "generic": "検索中にエラーが発生しました。"
+    },
+    "title": "検索",
+    "searchLabel": "薬の名前検索",
+    "searchPlaceholder": "薬の名前を入力または選択してください",
+    "searchingButton": "検索中...",
+    "searchButton": "検索",
+    "addManually": "検索結果にありませんか? 「{{keyword}}」を直接追加する",
+    "detailTitle": "服用の詳細情報",
+    "column": {
+      "name": "名前",
+      "dosage": "用量 (MG/PILL)"
+    },
+    "emptyState": "薬の名前を検索してください。"
+  },
+  "subscriptionModal": {
+    "title": "家族健康管理サブスクリプション",
+    "subtitle": "プランを選択して始めましょう。",
+    "close": "閉じる",
+    "currentPlanBadge": "現在のプラン",
+    "perMonth": "/ 月",
+    "nextStep": "次のステップ",
+    "plan": {
+      "individual": {
+        "name": "個人プラン",
+        "tagline": "自分の健康をより深く"
+      },
+      "family": {
+        "name": "家族プラン",
+        "tagline": "家族と一緒に健康管理"
+      }
+    },
+    "feature": {
+      "healthReport": "健康レポート",
+      "bioSummary": "血糖・血圧・体重の概要",
+      "parentBio": "ご両親の血糖／血圧の確認",
+      "inviteFamily": "家族メンバーの招待",
+      "shareMedication": "服薬通知の共有",
+      "shareExercise": "運動状況の共有"
+    },
+    "button": {
+      "processing": "処理中...",
+      "currentPlan": "現在ご利用中のプラン",
+      "changeTo": "{{plan}}に変更",
+      "pay": "{{plan}}を決済する",
+      "cancelling": "解約中...",
+      "cancelSubscription": "サブスクリプション解約",
+      "close": "キャンセル"
+    },
+    "confirm": {
+      "cancel": "サブスクリプションを解約しますか？\n家族プランの場合、家族の健康共有も停止されます。"
+    }
+  },
+  "targetModal": {
+    "title": "目標指標の修正",
+    "subtitle": "毎日の目標数値を一度に設定できます。",
+    "close": "閉じる",
+    "reset": "リセット",
+    "cancel": "キャンセル",
+    "submit": "保存する",
+    "saving": "保存中...",
+    "alert": {
+      "saveError": "保存中にエラーが発生しました。しばらくしてからもう一度お試しください。"
+    },
+    "field": {
+      "weight": {
+        "label": "目標体重",
+        "description": "達成したい体重を入力してください。"
+      },
+      "water": {
+        "label": "目標飲水量",
+        "description": "1日に飲む水の量 (1杯 = 約200ml)。",
+        "unit": "杯"
+      },
+      "calorieIn": {
+        "label": "目標摂取カロリー",
+        "description": "1日の推奨摂取エネルギーを入力してください。"
+      },
+      "calorieOut": {
+        "label": "目標消費カロリー",
+        "description": "運動や活動で消費する目標エネルギー。"
+      }
+    }
+  },
+  "userMedalModal": {
+    "title": "マイメダル",
+    "loading": "読み込み中...",
+    "ownedMedalsLabel": "保有メダル · クリックして装着",
+    "noMedals": "まだ獲得したメダルがありません。",
+    "allMedalsLabel": "全メダル",
+    "equipped": "装着済み",
+    "equipping": "装着中...",
+    "equip": "装着",
+    "owned": "保有",
+    "priceRequired": "{{price}}P 必要",
+    "toast": {
+      "loadFailed": "メダル情報を読み込めませんでした。",
+      "equipped": "メダルを装着しました。",
+      "equipFailed": "メダルの装着に失敗しました。"
+    }
+  },
+  "weightRecordModal": {
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "invalidWeight": "体重を正しく入力してください。",
+      "updated": "{{date}}の体重記録が修正されました。",
+      "created": "{{date}}の体重が記録されました。"
+    },
+    "title": "体重を記録する",
+    "subtitle": "今日の体重を記録しましょう。",
+    "close": "閉じる",
+    "targetWeight": "目標体重",
+    "emptyKg": "— kg",
+    "diffFromCurrent": "現在との差",
+    "currentWeight": "現在 {{weight}}kg",
+    "progressAchieved": "目標まで {{progress}}% 達成",
+    "advice": {
+      "noTarget": "目標体重を設定すると、達成率とカスタムアドバイスを確認できます。",
+      "reached": "おめでとうございます！目標体重に到達しました。維持管理に集中しましょう。",
+      "remaining": "目標まであと {{diff}}kg です。もう少し頑張りましょう！"
+    },
+    "submitting": "保存中...",
+    "submit": "記録を保存して確認"
+  },
+  "bloodsugarModal": {
+    "title": {
+      "edit": "血糖記録の編集",
+      "create": "血糖を記録する"
+    },
+    "subtitle": {
+      "edit": "値を編集したり記録を削除したりできます。",
+      "create": "今日の血糖を記録しましょう。"
+    },
+    "close": "閉じる",
+    "guide": {
+      "header": "{{diabetes}} ・ {{context}} 基準"
+    },
+    "statusHeading": "血糖の状態",
+    "diabetes": {
+      "none": "糖尿病なし",
+      "type1": "1型糖尿病",
+      "type2": "2型糖尿病",
+      "gestational": "妊娠糖尿病"
+    },
+    "context": {
+      "fasting": "空腹",
+      "beforeBed": "就寝前",
+      "beforeMeal": "食前",
+      "afterMeal": "食後"
+    },
+    "meal": {
+      "fasting": "空腹",
+      "breakfast": "朝",
+      "lunch": "昼",
+      "dinner": "夕",
+      "beforeBed": "就寝前"
+    },
+    "timing": {
+      "beforeMeal": "食前",
+      "afterMeal": "食後"
+    },
+    "zone": {
+      "hypo": "低血糖",
+      "normal": "正常",
+      "warn": "警告",
+      "danger": "危険"
+    },
+    "status": {
+      "hypo": {
+        "text": "低血糖",
+        "label": "低血糖の状態です",
+        "description": "血糖が低いです。糖分が含まれた食べ物を摂取してください。"
+      },
+      "normal": {
+        "text": "正常",
+        "label": "理想的な血糖です",
+        "description": "現在の血糖値は正常範囲です。継続的な管理を維持してください。"
+      },
+      "warn": {
+        "text": "警告",
+        "label": "血糖の管理が必要です",
+        "description": "血糖が高いです。食事と運動による管理が必要です。"
+      },
+      "danger": {
+        "text": "危険",
+        "label": "非常に高い血糖です",
+        "description": "危険レベルの血糖です。医療スタッフにご相談ください。"
+      }
+    },
+    "toast": {
+      "loginRequired": "ログインが必要です。",
+      "enterValue": "血糖値を入力してください",
+      "updated": "血糖記録が編集されました",
+      "saved": "血糖が保存されました",
+      "deleted": "血糖記録が削除されました"
+    },
+    "confirm": {
+      "delete": "この血糖記録を削除しますか？"
+    },
+    "button": {
+      "deleting": "削除中...",
+      "delete": "削除",
+      "saving": "保存中...",
+      "saveEdit": "編集を保存",
+      "saved": "保存完了 ✓",
+      "save": "記録の保存と確認"
+    }
+  },
+  "prescriptionOcrTestModal": {
+    "intakeOption": {
+      "morning": "朝",
+      "lunch": "昼",
+      "dinner": "夜",
+      "beforeSleep": "就寝前"
+    },
+    "toast": {
+      "nameRequired": "処方箋の名前を空欄にすることはできません。",
+      "noMedicine": "登録する薬がありません。",
+      "updated": "処方箋が修正されました。",
+      "registered": "処方箋が登録されました。",
+      "nameFetchFailed": "薬の名前を取得できませんでした。",
+      "alreadyAdded": "すでに追加されている薬です。",
+      "added": "「{{name}}」を追加しました"
+    },
+    "error": {
+      "ocrFailed": "薬の名前を取得できませんでした。もう一度お試しください。"
+    },
+    "title": {
+      "edit": "処方箋の修正",
+      "register": "処方箋の登録"
+    },
+    "subtitle": "処方箋の画像をアップロードすると、薬の名前を自動で抽出します。",
+    "imagePreviewAlt": "処方箋プレビュー",
+    "imageDropTitle": "画像を入れる場所",
+    "imageDropHint": "クリックして処方箋の画像を選択してください",
+    "label": {
+      "prescriptionName": "処方箋の名前",
+      "memo": "メモ",
+      "intakeTime": "服用する時間帯"
+    },
+    "placeholder": {
+      "prescriptionName": "例: 5月の定期処方",
+      "memo": "処方箋についての簡単なメモを残してみましょう。"
+    },
+    "medicineListTitle": "薬名リスト",
+    "addMedicine": "薬を追加",
+    "extracting": "薬名を抽出中...",
+    "removeMedicineAria": "{{name}} を削除",
+    "emptyState": "画像をアップロードすると薬名が表示されます。",
+    "submit": {
+      "edit": "修正",
+      "register": "登録"
+    }
+  },
+  "waterRecordModal": {
+    "progress": {
+      "done": "今日の目標を達成しました。体の状態も一緒にチェックしてみましょう。",
+      "high": "現在のペースを維持すれば、今日の目標に無理なく到達できます。",
+      "mid": "良い流れです。引き続きゆっくり飲めば目標に近づきます。",
+      "low": "まだ余裕があります。少しずつ分けて飲めば、負担なく目標を満たせます。"
+    },
+    "toast": {
+      "loginRequired": "ログインが必要です。"
+    },
+    "title": "水分摂取を記録する",
+    "subtitle": "今日の水分摂取量を記録しましょう。",
+    "close": "閉じる",
+    "cupIncrease": "杯数を増やす",
+    "cupDecrease": "杯数を減らす",
+    "cupUnit": "杯",
+    "currentIntake": "現在の水分摂取量",
+    "milliliters": "= {{ml}}ml",
+    "targetIntake": "目標水分摂取量",
+    "cupsValue": "{{count}}杯",
+    "advicePrefix": "目標水分摂取量に対して約 ",
+    "adviceSuffix": "を達成しました。",
+    "submit": "記録の保存と確認"
+  },
+  "inputSelectBox": {
+    "option": {
+      "placeholder": "-- 選択 --",
+      "beforeStart": "開始前",
+      "inProgress": "進行中",
+      "completed": "完了"
+    }
+  },
+  "mealScoreCard": {
+    "todayScoreLabel": "今日の食事スコア",
+    "balanceStatus": "優れたバランス",
+    "heading": "栄養成分がとても調和しています。",
+    "description": "現在までに摂取した栄養素の比率が推奨ガイドラインに非常に近づいています。特にタンパク質と脂肪の比率が安定しており、残りの一日の間は食物繊維の補給にだけ気をつければ、完璧な一日になりそうです。",
+    "tagProtein": "#タンパク質_十分",
+    "tagLowSugar": "#低糖_食事"
+  },
+  "mealRecordCard": {
+    "hiddenCount": "他 {{count}}個",
+    "total": "合計",
+    "macro": {
+      "carb": "炭",
+      "protein": "タ",
+      "fat": "脂",
+      "sugar": "糖",
+      "chol": "コ",
+      "na": "ナ"
+    }
+  },
+  "richTextEditor": {
+    "placeholder": "内容を入力してください...",
+    "font": {
+      "default": "標準",
+      "malgunGothic": "Malgun Gothic",
+      "nanumGothic": "ナヌムゴシック",
+      "nanumMyeongjo": "ナヌム明朝",
+      "gungsuh": "宮書体"
+    },
+    "toast": {
+      "imageOnly": "画像ファイルのみ添付できます。",
+      "imageTooLarge": "画像は5MB以下のみ添付できます。",
+      "uploading": "画像をアップロード中...",
+      "imageAttached": "画像を添付しました。",
+      "uploadFailed": "画像のアップロードに失敗しました。"
+    }
+  },
+  "mainCalendar": {
+    "meal": {
+      "breakfast": "朝食",
+      "lunch": "昼食",
+      "dinner": "夕食",
+      "snack": "間食"
+    },
+    "medicationSlot": {
+      "morning": "朝の服薬",
+      "lunch": "昼の服薬",
+      "dinner": "夕の服薬"
+    },
+    "item": {
+      "bloodSugarCheck": "血糖チェック",
+      "bloodPressureCheck": "血圧測定",
+      "weightCheck": "体重測定",
+      "waterIntake": "水分摂取",
+      "exercise": "運動 ({{name}})",
+      "exerciseFallback": "運動",
+      "minutes": "{{count}}分",
+      "medication": "服薬",
+      "meal": "食事",
+      "count": "{{count}}件"
+    },
+    "weekdayShort": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    },
+    "weekdayLong": {
+      "sun": "日曜日",
+      "mon": "月曜日",
+      "tue": "火曜日",
+      "wed": "水曜日",
+      "thu": "木曜日",
+      "fri": "金曜日",
+      "sat": "土曜日"
+    },
+    "monthLabel": "{{month}}月",
+    "yearLabel": "{{year}}年",
+    "aria": {
+      "prevMonth": "前の月",
+      "nextMonth": "次の月",
+      "yearMonthPicker": "年/月選択",
+      "prevYear": "前の年",
+      "nextYear": "次の年"
+    },
+    "empty": "記録なし",
+    "moreItems": "+{{count}}件 (クリックして表示)"
+  },
+  "mainCard": {
+    "noRecord": "記録なし",
+    "status": {
+      "overRange": "正常範囲超過",
+      "underRange": "正常範囲未満",
+      "normalRange": "正常範囲"
+    },
+    "systolicDiastolic": "収縮期 / 拡張期",
+    "type": {
+      "bloodSugar": "血糖",
+      "bloodPressure": "血圧",
+      "weight": "体重",
+      "meal": "食事",
+      "exercise": "運動",
+      "waterIntake": "水分摂取",
+      "medicineAlert": "服薬アラート"
+    },
+    "value": {
+      "bloodSugar": "{{value}} mg/dL",
+      "weight": "{{value}}kg",
+      "checkMeal": "今日の食事を確認",
+      "checkExercise": "今日の運動を確認",
+      "totalMl": "合計 {{ml}}ml",
+      "checkNeeded": "{{count}}件 確認が必要",
+      "doseComplete": "服用完了"
+    },
+    "label": {
+      "recentMeasure": "最近の測定",
+      "noMeasureRecord": "測定記録がありません",
+      "totalIntakeKcal": "総摂取カロリー {{kcal}}kcal",
+      "burnedKcal": "消費カロリー {{kcal}}kcal",
+      "goalAchieved": "目標達成",
+      "remainCups": "目標まで {{count}}杯",
+      "goalNotSet": "目標未設定",
+      "todayMedicine": "今日服用する薬",
+      "allScheduleComplete": "今日の予定がすべて完了しました"
+    },
+    "alt": {
+      "bloodSugar": "血糖アイコン",
+      "bloodPressure": "血圧アイコン",
+      "weight": "体重アイコン",
+      "medicine": "服薬アイコン",
+      "meal": "食事アイコン",
+      "exercise": "運動アイコン",
+      "water": "水分アイコン",
+      "supplement": "サプリメントアイコン"
+    },
+    "noPrescription": "登録された処方薬がありません。"
+  },
+  "mainChart": {
+    "empty": {
+      "noRecordsTitle": "まだ記録がありません",
+      "noRecordsInRangeTitle": "選択した期間に記録がありません",
+      "noRecordsDesc": "測定結果を登録すると、ここに推移が表示されます",
+      "noRecordsInRangeDesc": "別の期間を選択してみてください"
+    }
+  },
+  "medicationProgressCard": {
+    "title": "今日の服薬遵守率",
+    "completed": "{{taken}}/{{total}} 服用完了"
+  },
+  "medicationRecordCard": {
+    "title": "自分で記録する",
+    "description": "常備薬を服用した際に記録してください。",
+    "drugNameLabel": "薬の名前",
+    "drugNamePlaceholder": "例: ビタミンC、タイレノール",
+    "dosageLabel": "服用量",
+    "dosagePlaceholder": "例: 1錠、5ml",
+    "dateLabel": "服用日",
+    "timeLabel": "服用時間",
+    "addMedicine": "薬を追加する",
+    "save": "保存する"
+  },
+  "memoCard": {
+    "title": "メモ帳",
+    "empty": "登録されたメモがありません。"
+  },
+  "prescriptionListCard": {
+    "title": "私の処方薬リスト",
+    "columnGroup": "薬グループ",
+    "columnDosage": "服用量",
+    "columnSchedule": "服用スケジュール",
+    "empty": "処方された薬がありません。",
+    "prevPage": "前のページ",
+    "nextPage": "次のページ"
+  },
+  "savedRecordsCard": {
+    "viewLabel": "{{month}}月{{day}}日",
+    "title": "常備薬",
+    "count": "{{count}}件",
+    "emptyToday": "今日記録された常備薬がありません。",
+    "emptyOtherDay": "この日付に記録された常備薬がありません。",
+    "deleteAria": "削除"
+  },
+  "todayScheduleCard": {
+    "title": {
+      "today": "今日の服用予定",
+      "other": "服用予定"
+    },
+    "status": {
+      "all": "服用完了",
+      "partial": "一部服用",
+      "none": "服用確認"
+    },
+    "close": "閉じる",
+    "selectAll": "すべて選択",
+    "confirm": "確認"
+  },
+  "weeklyCalendarCard": {
+    "status": {
+      "done": "服薬完了",
+      "partial": "一部服薬",
+      "miss": "未服薬"
+    },
+    "rows": {
+      "morning": "朝 (08:00)",
+      "lunch": "昼 (13:00)",
+      "dinner": "夕 (21:00)"
+    },
+    "dayUnit": "{{date}}日",
+    "prnLabel": "常備薬"
+  },
+  "aiAnalysisCard": {
+    "title": "AI健康分析",
+    "reward": "リワード",
+    "loading": "分析中です…",
+    "errorTitle": "分析を読み込めませんでした",
+    "errorSubtitle": "しばらくしてから再度お試しください",
+    "placeholderTitle": "分析結果を準備中です",
+    "placeholderSubtitle": "データが蓄積されると、あなたに合ったインサイトを提供します"
+  },
+  "chartSection": {
+    "apply": "適用"
+  },
+  "recordResultCards": {
+    "am": "午前",
+    "pm": "午後",
+    "exerciseType": {
+      "walking": "ウォーキング",
+      "running": "ランニング",
+      "cardio": "有酸素",
+      "strength": "筋力運動",
+      "stretching": "ストレッチ"
+    },
+    "exercise": "運動",
+    "runningDefault": "ランニング",
+    "editExerciseRecord": "運動記録の編集",
+    "waterIcon": "水分摂取アイコン",
+    "waterIntake": "水分摂取量",
+    "weightIcon": "体重アイコン",
+    "todayWeight": "今日の体重"
+  },
+  "diseaseComponents": {
+    "riskFactorsTitle": "主な危険因子",
+    "cautionLabel": "注意 : ",
+    "referencesTitle": "参考資料 (References)",
+    "referencesDisclaimer": "本ページの医学情報は、以下の信頼できる出典に基づいて作成されており、診断・治療に代わるものではありません。個人ごとの状態については、必ず医療従事者にご相談ください。",
+    "lastUpdated": "最終更新: {{date}}"
+  },
+  "authContext": {
+    "toast": {
+      "serverRestarted": "サーバーが再起動されたためログアウトされました。",
+      "serverUnreachable": "サーバーに接続できないためログアウトされました。"
+    }
+  }
+}

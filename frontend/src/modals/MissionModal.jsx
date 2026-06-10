@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import missionApi from "../api/missionApi";
 
 /*
@@ -13,23 +15,35 @@ import missionApi from "../api/missionApi";
 
 // 화면 표시용 섹션 구성. 보상/수령 가능 여부는 서버에서 받아온다.
 const MISSION_SECTIONS = [
-  { title: "일일 미션", note: "하루 1번", codes: ["DAILY_RECORD", "DAILY_RECOMMEND"] },
-  { title: "주간 미션", note: "일주일 1번", codes: ["WEEKLY_COMMENT", "WEEKLY_POST"] },
   {
-    title: "특별 미션",
+    title: i18n.t("missionModal.section.daily.title"),
+    note: i18n.t("missionModal.section.daily.note"),
+    codes: ["DAILY_RECORD", "DAILY_RECOMMEND"],
+  },
+  {
+    title: i18n.t("missionModal.section.weekly.title"),
+    note: i18n.t("missionModal.section.weekly.note"),
+    codes: ["WEEKLY_COMMENT", "WEEKLY_POST"],
+  },
+  {
+    title: i18n.t("missionModal.section.special.title"),
     codes: ["PET_CHECK", "FIRST_SUBSCRIBE", "FIRST_FAMILY", "EACH_REGISTER"],
   },
-  { title: "연속 기록 보너스", codes: ["STREAK_7", "STREAK_30"] },
+  {
+    title: i18n.t("missionModal.section.streak.title"),
+    codes: ["STREAK_7", "STREAK_30"],
+  },
 ];
 
 // 서버 title 외에 화면에서 덧붙일 부가 설명
 const MISSION_NOTES = {
-  EACH_REGISTER: "최대 3번",
-  STREAK_7: "주간 보너스",
-  STREAK_30: "월간 보너스",
+  EACH_REGISTER: i18n.t("missionModal.note.eachRegister"),
+  STREAK_7: i18n.t("missionModal.note.streak7"),
+  STREAK_30: i18n.t("missionModal.note.streak30"),
 };
 
 export default function MissionModal({ open, onClose, onClaimed }) {
+  const { t } = useTranslation();
   const [statusMap, setStatusMap] = useState({}); // code -> Status
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(null); // 수령 중인 미션 code
@@ -67,7 +81,7 @@ export default function MissionModal({ open, onClose, onClaimed }) {
     try {
       const { data } = await missionApi.claim(code);
       setStatusMap((prev) => ({ ...prev, [code]: data.mission }));
-      toast.success(`미션 완료! +${data.reward}P`);
+      toast.success(t("missionModal.toast.claimed", { reward: data.reward }));
       onClaimed?.(data.point);
     } catch {
       // 인터셉터가 에러 토스트 표시. 상태가 어긋났을 수 있으니 현황을 다시 동기화.
@@ -86,15 +100,17 @@ export default function MissionModal({ open, onClose, onClaimed }) {
 
   // 미션 한 줄의 버튼 라벨
   const buttonLabel = (status, isClaiming) => {
-    if (isClaiming) return "처리 중...";
-    if (status.claimable) return "받기";
+    if (isClaiming) return t("missionModal.button.processing");
+    if (status.claimable) return t("missionModal.button.claim");
     // 반복 미션: 한도 도달이면 "최대 달성", 아니면 현재 등록분 수령 완료 → "완료"
     if (status.period === "REPEATABLE") {
-      return status.claimedCount >= status.maxClaims ? "최대 달성" : "완료";
+      return status.claimedCount >= status.maxClaims
+        ? t("missionModal.button.maxReached")
+        : t("missionModal.button.done");
     }
     // 일반 미션: 아직 행동을 안 했으면 "미달성", 했고 이미 받았으면 "완료"
-    if (!status.achieved) return "미달성";
-    return "완료";
+    if (!status.achieved) return t("missionModal.button.notAchieved");
+    return t("missionModal.button.done");
   };
 
   return (
@@ -108,7 +124,7 @@ export default function MissionModal({ open, onClose, onClaimed }) {
       >
         {/* 헤더 */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#0F172A]">🎯 미션</h2>
+          <h2 className="text-lg font-bold text-[#0F172A]">{t("missionModal.title")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -119,7 +135,7 @@ export default function MissionModal({ open, onClose, onClaimed }) {
         </div>
 
         {loading ? (
-          <p className="py-10 text-center text-sm text-gray-400">불러오는 중...</p>
+          <p className="py-10 text-center text-sm text-gray-400">{t("missionModal.loading")}</p>
         ) : (
           <div className="flex max-h-[55vh] flex-col gap-5 overflow-y-auto pr-1">
             {MISSION_SECTIONS.map((section) => {

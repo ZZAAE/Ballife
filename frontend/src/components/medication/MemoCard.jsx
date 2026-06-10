@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 export default function MemoCard({ memoList = [] }) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const hasMemo = memoList.length > 0;
@@ -19,24 +21,24 @@ export default function MemoCard({ memoList = [] }) {
   };
 
   return (
-    <div className="w-full xl:w-[300px] bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+    <div className="w-full xl:w-[300px] flex flex-col bg-white border-b xl:border-b-0 xl:border-r border-gray-100">
       {/* 상단 헤더 */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#2563EB]" />
-          <span className="text-[16px] font-bold text-gray-900">메모장</span>
+          <span className="text-[16px] font-bold text-gray-900">{t("memoCard.title")}</span>
         </div>
       </div>
 
       {/* 본문 */}
-      <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-[#D8E8FF]">
-        <div className="min-h-[320px] bg-[#EAF3FF] px-5 py-7">
+      <div className="mx-4 mb-4 flex-1 flex flex-col rounded-xl overflow-hidden border border-[#D8E8FF]">
+        <div className="flex-1 min-h-[320px] bg-[#EAF3FF] px-5 py-7">
           {currentMemo ? (
             <p className="text-[14px] leading-[1.9] text-gray-700 whitespace-pre-line">
               {currentMemo.content}
             </p>
           ) : (
-            <p className="text-[14px] text-gray-400">등록된 메모가 없습니다.</p>
+            <p className="text-[14px] text-gray-400">{t("memoCard.empty")}</p>
           )}
         </div>
 

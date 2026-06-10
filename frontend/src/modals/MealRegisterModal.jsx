@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Camera, Plus, Brain, X, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import mealApi from "../api/mealApi";
@@ -7,48 +8,49 @@ import uploadApi from "../api/uploadApi";
 import { resizeImageFile } from "../utils/imageResize";
 import { useAuth } from "../contexts/AuthContext";
 
-const MEAL_CATEGORY_LABEL = {
-  BREAKFAST: "아침 식사",
-  LUNCH: "점심 식사",
-  DINNER: "저녁 식사",
-  SNACK: "간식",
+// 식사 카테고리 코드 → 표시 라벨 키 매핑 (값은 백엔드 코드 유지, 라벨은 t()로 렌더)
+const MEAL_CATEGORY_LABEL_KEY = {
+  BREAKFAST: "mealRegisterModal.category.breakfast",
+  LUNCH: "mealRegisterModal.category.lunch",
+  DINNER: "mealRegisterModal.category.dinner",
+  SNACK: "mealRegisterModal.category.snack",
 };
 
 
 const NUTRIENTS = [
   {
     key: "calories",
-    label: "칼로리",
+    labelKey: "mealRegisterModal.nutrient.calories",
     unit: "kcal",
     color: "#f59e0b",
     integer: true,
   },
   {
     key: "carbs",
-    label: "탄수화물",
+    labelKey: "mealRegisterModal.nutrient.carbs",
     unit: "g",
     color: "#10b981",
     integer: false,
   },
   {
     key: "protein",
-    label: "단백질",
+    labelKey: "mealRegisterModal.nutrient.protein",
     unit: "g",
     color: "#3b82f6",
     integer: false,
   },
-  { key: "fat", label: "지방", unit: "g", color: "#fbbf24", integer: false },
-  { key: "sugar", label: "당류", unit: "g", color: "#ec4899", integer: false },
+  { key: "fat", labelKey: "mealRegisterModal.nutrient.fat", unit: "g", color: "#fbbf24", integer: false },
+  { key: "sugar", labelKey: "mealRegisterModal.nutrient.sugar", unit: "g", color: "#ec4899", integer: false },
   {
     key: "sodium",
-    label: "나트륨",
+    labelKey: "mealRegisterModal.nutrient.sodium",
     unit: "mg",
     color: "#8b5cf6",
     integer: true,
   },
   {
     key: "cholesterol",
-    label: "콜레스테롤",
+    labelKey: "mealRegisterModal.nutrient.cholesterol",
     unit: "mg",
     color: "#a855f7",
     integer: true,
@@ -67,6 +69,7 @@ export default function MealRegisterModal({
   initialChips = [],
 }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // ----- State -----
   // 기존 Meal에 사진이 있었으면 그 사진으로 시작, 없으면 null
@@ -171,7 +174,7 @@ export default function MealRegisterModal({
           mealCategory: category,
           mealPhoto: imageUrl,
         });
-        toast.success("시간이 변경되었습니다.");
+        toast.success(t("mealRegisterModal.toast.timeChanged"));
         onSaved?.();
       } catch (err) {
         console.error("시간 변경 실패:", err);
@@ -421,11 +424,14 @@ export default function MealRegisterModal({
           if (foods.length > 0) {
             const names = foods.map((f) => f.name).join(", ");
             toast(
-              `${foods.length}개 음식 인식(${names})했지만 영양정보를 찾지 못했어요. 직접 입력해주세요.`,
+              t("mealRegisterModal.toast.recognizedNoNutrition", {
+                count: foods.length,
+                names,
+              }),
               { icon: "⚠️", duration: 5000 },
             );
           } else {
-            toast("사진에서 음식을 인식하지 못했어요. 직접 입력해주세요.", {
+            toast(t("mealRegisterModal.toast.notRecognized"), {
               icon: "⚠️",
               duration: 5000,
             });
@@ -460,18 +466,23 @@ export default function MealRegisterModal({
               .map((f) => f.name)
               .join(", ");
             toast.success(
-              `'${mainFood.name}' 추가됨. (${others}는 '음식 추가' 후 각자 사진을 따로 올려주세요)`,
+              t("mealRegisterModal.toast.mainFoodAddedWithOthers", {
+                name: mainFood.name,
+                others,
+              }),
               { duration: 6000 },
             );
           } else {
             toast.success(
-              `'${mainFood.name}' 인식됨. 확인 후 저장 버튼을 눌러주세요.`,
+              t("mealRegisterModal.toast.mainFoodRecognized", {
+                name: mainFood.name,
+              }),
             );
           }
         }
       } catch (err) {
         console.error("AI 분석 실패:", err);
-        toast.error("AI 분석에 실패했습니다. 직접 입력해주세요.");
+        toast.error(t("mealRegisterModal.toast.analysisFailed"));
       } finally {
         setIsAnalyzing(false);
         setAnalyzed(true);
@@ -574,14 +585,14 @@ export default function MealRegisterModal({
 
   const handleDelete = async () => {
     if (!user?.id || !savedMealId || isDeleting) return;
-    if (!window.confirm("이 식단 기록을 삭제하시겠어요?\n사진과 등록된 음식이 모두 삭제됩니다.")) {
+    if (!window.confirm(t("mealRegisterModal.confirm.deleteMeal"))) {
       return;
     }
 
     setIsDeleting(true);
     try {
       await mealApi.deleteMeal(user.id, savedMealId);
-      toast.success("식단이 삭제되었습니다.");
+      toast.success(t("mealRegisterModal.toast.mealDeleted"));
       onSaved?.();
       onClose?.();
     } catch (err) {
@@ -596,7 +607,7 @@ export default function MealRegisterModal({
   //   (편집 직후처럼 setChips 반영 전이라면 갱신된 배열을 직접 넘겨야 최신 grams가 저장됨)
   const flushPendingChips = async (chipsToFlush = chips) => {
     if (!user?.id) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("mealRegisterModal.toast.loginRequired"));
       return;
     }
     const pending = chipsToFlush.filter((c) => c.mealItemId == null);
@@ -636,11 +647,11 @@ export default function MealRegisterModal({
         }
       }
       setChips(updated);
-      toast.success(`${pending.length}개 음식이 저장되었습니다.`);
+      toast.success(t("mealRegisterModal.toast.foodsSaved", { count: pending.length }));
       onSaved?.();
     } catch (err) {
       console.error("일괄 저장 실패:", err);
-      toast.error("일부 음식 저장에 실패했습니다.");
+      toast.error(t("mealRegisterModal.toast.someFoodsSaveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -648,7 +659,7 @@ export default function MealRegisterModal({
 
   const handleSave = async () => {
     if (!user?.id) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t("mealRegisterModal.toast.loginRequired"));
       return;
     }
     // form 입력 없으면: pending(AI) chips 일괄 저장 시도
@@ -656,9 +667,9 @@ export default function MealRegisterModal({
       const pending = chips.filter((c) => c.mealItemId == null);
       if (pending.length === 0) {
         if (chips.length > 0 || savedMealId) {
-          toast.success("저장되었습니다.");
+          toast.success(t("mealRegisterModal.toast.saved"));
         } else {
-          toast.error("음식 이름을 입력해주세요.");
+          toast.error(t("mealRegisterModal.toast.enterFoodName"));
         }
         return;
       }
@@ -666,7 +677,7 @@ export default function MealRegisterModal({
       return;
     }
     if (!savedMealId && !mealTime) {
-      toast.error("식사 시간을 입력해주세요.");
+      toast.error(t("mealRegisterModal.toast.enterMealTime"));
       return;
     }
 
@@ -709,7 +720,7 @@ export default function MealRegisterModal({
                 : c,
             ),
           );
-          toast.success("수정되었습니다.");
+          toast.success(t("mealRegisterModal.toast.updated"));
           resetForm();
           onSaved?.();
         }
@@ -738,7 +749,7 @@ export default function MealRegisterModal({
           { mealItemId, ...payload },
         ]);
 
-        toast.success("저장되었습니다.");
+        toast.success(t("mealRegisterModal.toast.saved"));
         resetForm(); // 저장 후 폼 초기화 (pending 저장 경로와 동작 일치 — 저장된 음식이 '편집 중'처럼 남지 않게)
         onSaved?.();
       }
@@ -853,7 +864,7 @@ export default function MealRegisterModal({
                 className="font-bold"
                 style={{ fontSize: "28px", letterSpacing: "-0.025em" }}
               >
-                식단 등록
+                {t("mealRegisterModal.title")}
               </h1>
               <span
                 className="inline-flex items-center rounded-full text-[12.5px] font-semibold"
@@ -863,11 +874,13 @@ export default function MealRegisterModal({
                   padding: "4px 12px",
                 }}
               >
-                {MEAL_CATEGORY_LABEL[category] || "식사"}
+                {MEAL_CATEGORY_LABEL_KEY[category]
+                  ? t(MEAL_CATEGORY_LABEL_KEY[category])
+                  : t("mealRegisterModal.category.fallback")}
               </span>
             </div>
             <p className="text-sm font-normal" style={{ color: "#6b7280" }}>
-              AI가 분석한 식사 내용입니다. 상세 영양 성분을 확인해 주세요.
+              {t("mealRegisterModal.subtitle")}
             </p>
 
             {/* 식사 시간 입력 (bloodsugarModal과 동일 스타일) */}
@@ -965,7 +978,7 @@ export default function MealRegisterModal({
                   onClick={resetForm}
                 >
                   <Plus size={13} />
-                  <span>음식 추가</span>
+                  <span>{t("mealRegisterModal.addFood")}</span>
                 </div>
               </div>
             )}
@@ -1007,22 +1020,22 @@ export default function MealRegisterModal({
                       <Camera size={30} strokeWidth={2} />
                     </div>
                     <div className="text-base font-semibold mb-2">
-                      식단 사진 올리기
+                      {t("mealRegisterModal.uploadTitle")}
                     </div>
                     <div
                       className="leading-relaxed mb-3 px-5"
                       style={{ fontSize: "12.5px", color: "#6b7280" }}
                     >
-                      이곳을 클릭하거나 사진 파일을 드래그하여
+                      {t("mealRegisterModal.uploadHintLine1")}
                       <br />
-                      업로드 하세요 (JPG, PNG)
+                      {t("mealRegisterModal.uploadHintLine2")}
                     </div>
                     <div
                       className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 mb-[18px]"
                       style={{ background: "#f0f9ff", color: "#0369a1", fontSize: "11.5px", fontWeight: 600 }}
                     >
                       <Brain size={13} />
-                      AI가 음식과 영양소를 자동 인식해요
+                      {t("mealRegisterModal.aiAutoRecognize")}
                     </div>
                     <button
                       type="button"
@@ -1036,7 +1049,7 @@ export default function MealRegisterModal({
                         (e.currentTarget.style.background = "#2563eb")
                       }
                     >
-                      파일 선택하기
+                      {t("mealRegisterModal.selectFile")}
                     </button>
                   </>
                 )}
@@ -1046,7 +1059,7 @@ export default function MealRegisterModal({
                     <div className="relative w-full flex-1 overflow-hidden rounded-t-[18px]">
                       <img
                         src={imageUrl}
-                        alt="식단 사진"
+                        alt={t("mealRegisterModal.imageAlt")}
                         className="w-full h-full object-cover block"
                       />
 
@@ -1070,7 +1083,7 @@ export default function MealRegisterModal({
                             }
                           >
                             <Camera size={12} strokeWidth={2.4} />
-                            사진 변경
+                            {t("mealRegisterModal.changePhoto")}
                           </button>
                           <button
                             type="button"
@@ -1079,7 +1092,7 @@ export default function MealRegisterModal({
                               setImageUrl(null);
                               setAnalyzed(false);
                             }}
-                            aria-label="사진 제거"
+                            aria-label={t("mealRegisterModal.removePhoto")}
                             className="inline-flex items-center justify-center rounded-full shadow-sm transition"
                             style={{
                               width: 28,
@@ -1119,13 +1132,13 @@ export default function MealRegisterModal({
                           }}
                         />
                         <div className="text-[13px] font-semibold mb-1">
-                          AI가 분석하고 있어요
+                          {t("mealRegisterModal.analyzing")}
                         </div>
                         <div
                           className="text-[11.5px]"
                           style={{ color: "#6b7280" }}
                         >
-                          잠시만 기다려 주세요...
+                          {t("mealRegisterModal.analyzingWait")}
                         </div>
                       </div>
                     </div>
@@ -1143,7 +1156,7 @@ export default function MealRegisterModal({
                           style={{ color: "#4f46e5" }}
                         >
                           <Brain size={14} strokeWidth={2.5} />
-                          <span>AI 비전 분석 완료</span>
+                          <span>{t("mealRegisterModal.aiVisionDone")}</span>
                         </div>
                       </div>
                     )}
@@ -1165,7 +1178,7 @@ export default function MealRegisterModal({
               {/* Food name */}
               <div>
                 <div className="text-[13px] font-semibold mb-[9px]">
-                  음식 이름
+                  {t("mealRegisterModal.foodNameLabel")}
                 </div>
                 <div className="relative">
                   <input
@@ -1180,7 +1193,7 @@ export default function MealRegisterModal({
                       // 항목 클릭(onMouseDown)이 먼저 처리되도록 약간 지연 후 닫기
                       setTimeout(() => setShowSuggestions(false), 150);
                     }}
-                    placeholder="음식 이름을 입력하면 식약처 DB에서 검색됩니다"
+                    placeholder={t("mealRegisterModal.foodNamePlaceholder")}
                     className="mr-input w-full text-sm font-medium outline-none transition-all"
                     style={{
                       padding: "14px 18px",
@@ -1203,7 +1216,7 @@ export default function MealRegisterModal({
                     >
                       {isSearching && suggestions.length === 0 ? (
                         <div className="px-4 py-3 text-[13px] text-slate-400">
-                          검색 중...
+                          {t("mealRegisterModal.searching")}
                         </div>
                       ) : (
                         suggestions.map((s, i) => (
@@ -1234,7 +1247,7 @@ export default function MealRegisterModal({
               {/* 섭취량 (g) 입력 */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[13px] font-semibold">섭취량 (g)</span>
+                  <span className="text-[13px] font-semibold">{t("mealRegisterModal.intakeLabel")}</span>
                   <span
                     className="text-[11.5px] font-semibold rounded-full"
                     style={{
@@ -1243,7 +1256,7 @@ export default function MealRegisterModal({
                       padding: "4px 11px",
                     }}
                   >
-                    100g 기준
+                    {t("mealRegisterModal.per100g")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1314,7 +1327,7 @@ export default function MealRegisterModal({
               {/* Nutrition */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[15px] font-bold">영양 성분</span>
+                  <span className="text-[15px] font-bold">{t("mealRegisterModal.nutritionHeader")}</span>
                   <span
                     className="inline-flex items-center gap-1 text-[11px] font-semibold rounded-full"
                     style={{
@@ -1331,7 +1344,7 @@ export default function MealRegisterModal({
                         background: "#4f46e5",
                       }}
                     />
-                    AI 추정치
+                    {t("mealRegisterModal.aiEstimate")}
                   </span>
                 </div>
 
@@ -1351,7 +1364,7 @@ export default function MealRegisterModal({
                               background: n.color,
                             }}
                           />
-                          <span>{n.label}</span>
+                          <span>{t(n.labelKey)}</span>
                         </div>
                         <div className="relative">
                           <input
@@ -1410,7 +1423,7 @@ export default function MealRegisterModal({
                             background: n.color,
                           }}
                         />
-                        <span>{n.label}</span>
+                        <span>{t(n.labelKey)}</span>
                       </div>
                       <div className="relative">
                         <input
@@ -1470,7 +1483,9 @@ export default function MealRegisterModal({
                       if (!isDeleting) e.currentTarget.style.background = "#ffffff";
                     }}
                   >
-                    {isDeleting ? "삭제 중..." : "식단 삭제"}
+                    {isDeleting
+                      ? t("mealRegisterModal.deleting")
+                      : t("mealRegisterModal.deleteMeal")}
                   </button>
                 )}
                 <button
@@ -1494,10 +1509,10 @@ export default function MealRegisterModal({
                   }}
                 >
                   {isSaving
-                    ? "저장 중..."
+                    ? t("mealRegisterModal.saving")
                     : editingChipId != null
-                      ? "수정 완료"
-                      : "식단 저장 및 확인"}
+                      ? t("mealRegisterModal.editComplete")
+                      : t("mealRegisterModal.saveMeal")}
                 </button>
               </div>
             </div>

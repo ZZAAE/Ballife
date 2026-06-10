@@ -10,12 +10,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.config.MessageResolver;
+import com.prologue.ballife.domain.medicine.Medicine;
 import com.prologue.ballife.domain.medicine.Prescription;
 import com.prologue.ballife.domain.medicine.Prescription.Pcategory;
 import com.prologue.ballife.domain.medicine.UserMedicine;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.repository.medicine.PrescriptionRepository;
 import com.prologue.ballife.repository.medicine.UserMedicineRepository;
+import com.prologue.ballife.repository.medicineMongo.MedicineRepository;
 import com.prologue.ballife.repository.user.UserRepository;
 import com.prologue.ballife.web.dto.medicine.PrescriptionAndMedicineDto;
 import com.prologue.ballife.web.dto.medicine.PrescriptionDto;
@@ -31,6 +34,8 @@ public class MedicineService {
     private final PrescriptionRepository prescriptionRepository;
     private final UserMedicineRepository userMedicineRepository;
     private final UserRepository userRepository;
+    private final MedicineRepository medicineRepository; // 약품 캐시(MongoDB) — 주성분 다국어 병기용
+    private final MessageResolver messages;
 
     // 처방전+약 등록
     @Transactional
@@ -79,7 +84,7 @@ public class MedicineService {
 
         Prescription prescription = prescriptionRepository
                 .findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
-                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.prescriptionNotFound")));
 
         // 1. 처방전 정보 갱신
         prescription.setPrescriptionName(request.getPrescriptionName());
@@ -124,7 +129,11 @@ public class MedicineService {
         List<UserMedicine> list = userMedicineRepository.findByPrescription_PrescriptionId(prescriptionId);
 
         return list.stream()
-                .map(UserMedicineDto.UserMedicineResponse::from)
+                .map(um -> {
+                    // 저장된 약 이름으로 약품 캐시를 조회해 주성분(한/영)을 병기. 미조회 시 medicine=null → 한글 이름만.
+                    Medicine medicine = medicineRepository.findByItemName(um.getMedicineName()).orElse(null);
+                    return UserMedicineDto.UserMedicineResponse.from(um, medicine);
+                })
                 .toList();
     }
 
@@ -134,7 +143,7 @@ public class MedicineService {
             PrescriptionDto.UpdateRequest request) {
 
         Prescription res = prescriptionRepository.findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
-                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.prescriptionNotFound")));
 
         res.setPrescriptionName(request.getPrescriptionName());
         res.setPrescriptionDate(request.getPrescriptionDate());
@@ -152,10 +161,10 @@ public class MedicineService {
 
         UserMedicine res = userMedicineRepository
                 .findByUserMedicineIdAndPrescription_PrescriptionId(userMedicineId, prescriptionId)
-                .orElseThrow(() -> new RuntimeException("약 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.medicineNotFound")));
 
         Prescription prescription = prescriptionRepository.findById(request.getPrescriptionId())
-                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.prescriptionNotFound")));
 
         res.setPrescription(prescription);
         res.setMedicineName(request.getMedicineName());
@@ -170,14 +179,14 @@ public class MedicineService {
         // 1. 처방전 조회 (권한 체크)
         Prescription res = prescriptionRepository
                 .findByPrescriptionIdAndUser_UserId(prescriptionId, userId)
-                .orElseThrow(() -> new RuntimeException("처방전 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.prescriptionNotFound")));
 
         // 2. 약 목록 물리 삭제
         userMedicineRepository.deleteByPrescription_PrescriptionId(prescriptionId);
 
         // 3. 처방전 소프트 삭제
         if (res.isDeleted()) {
-            throw new RuntimeException("이미 삭제된 처방전");
+            throw new RuntimeException(messages.get("business.medicine.alreadyDeleted"));
         }
 
         res.setDeleted(true);
@@ -190,7 +199,7 @@ public class MedicineService {
     public void deleteUserMedicine(Long userMedicineId, Long prescriptionId) {
         UserMedicine res = userMedicineRepository
                 .findByUserMedicineIdAndPrescription_PrescriptionId(userMedicineId, prescriptionId)
-                .orElseThrow(() -> new RuntimeException("약 없음"));
+                .orElseThrow(() -> new RuntimeException(messages.get("business.medicine.medicineNotFound")));
 
         userMedicineRepository.delete(res);
 

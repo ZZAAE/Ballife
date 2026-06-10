@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.user.Medal;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.domain.user.UserMedal;
@@ -30,6 +31,7 @@ public class UserMedalService {
     private final UserMedalRepository userMedalRepository;
     private final UserRepository userRepository;
     private final MedalRepository medalRepository;
+    private final MessageResolver messages;
 
     // 유저 보유 메달 전체 조회
     public List<UserMedalDto.Response> getUserMedals(Long userId) {
@@ -42,13 +44,13 @@ public class UserMedalService {
     @Transactional
     public UserMedalDto.Response acquireMedal(Long userId, UserMedalDto.AcquireRequest request) {
         if (userMedalRepository.existsByUser_UserIdAndMedal_MedalId(userId, request.getMedalId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 보유한 메달입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messages.get("business.userMedal.alreadyOwned"));
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
         Medal medal = medalRepository.findById(request.getMedalId())
-                .orElseThrow(() -> new ResourceNotFoundException("메달", request.getMedalId()));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.medal"), request.getMedalId())));
 
         UserMedal userMedal = UserMedal.builder()
                 .id(new UserMedalId(userId, medal.getMedalId()))
@@ -65,7 +67,7 @@ public class UserMedalService {
     public void removeUserMedal(Long userId, Long medalId) {
         UserMedalId id = new UserMedalId(userId, medalId);
         if (!userMedalRepository.existsById(id)) {
-            throw new ResourceNotFoundException("보유 메달", medalId);
+            throw new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.userMedal"), medalId));
         }
         userMedalRepository.deleteById(id);
     }
@@ -80,7 +82,7 @@ public class UserMedalService {
     @Transactional
     public List<UserMedalDto.Response> checkAndGrantMedals(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
 
         long currentPoint = user.getPoint() != null ? user.getPoint() : 0L;
 
@@ -108,12 +110,12 @@ public class UserMedalService {
     @Transactional
     public void equipMedal(Long userId, Long medalId) {
         if (!userMedalRepository.existsByUser_UserIdAndMedal_MedalId(userId, medalId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "보유하지 않은 메달입니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.userMedal.notOwned"));
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.user"), userId)));
         Medal medal = medalRepository.findById(medalId)
-                .orElseThrow(() -> new ResourceNotFoundException("메달", medalId));
+                .orElseThrow(() -> new ResourceNotFoundException(messages.get("error.notFound", messages.get("resource.medal"), medalId)));
         user.setMedal(medal);
         userRepository.save(user);
     }

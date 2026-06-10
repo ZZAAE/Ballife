@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { AI_BASE_URL } from "../api/aiBase";
+import i18n from "../i18n";
 
 /* ---------- Avatars ---------- */
 const BotAvatar = ({ size = 20 }) => (
@@ -33,6 +35,7 @@ const UserAvatar = () => (
 );
 
 export default function BallChatbot() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content, time}
@@ -186,7 +189,7 @@ export default function BallChatbot() {
         ...prev,
         {
           role: "assistant",
-          content: "현재는 이미지(사진)만 첨부할 수 있어요.",
+          content: t("chatbot.message.imageOnly"),
           time: nowTime(),
         },
       ]);
@@ -200,7 +203,7 @@ export default function BallChatbot() {
         ...prev,
         {
           role: "assistant",
-          content: "사진을 불러오지 못했어요. 다시 시도해 주세요.",
+          content: t("chatbot.message.imageLoadFailed"),
           time: nowTime(),
         },
       ]);
@@ -220,7 +223,7 @@ export default function BallChatbot() {
         ...prev,
         {
           role: "assistant",
-          content: "로그인 후 이용할 수 있어요. 로그인 정보를 확인해 주세요.",
+          content: t("chatbot.message.loginRequired"),
           time: nowTime(),
         },
       ]);
@@ -244,10 +247,11 @@ export default function BallChatbot() {
         userId,
         token: localStorage.getItem("accessToken"),
         image,
+        lang: i18n.language || "ko",
       }),
     });
     const data = await response.json();
-    const reply = data.reply || "응답을 받지 못했어요.";
+    const reply = data.reply || t("chatbot.message.noReply");
 
       setMessages((prev) => [
         ...prev,
@@ -259,7 +263,7 @@ export default function BallChatbot() {
         ...prev,
         {
           role: "assistant",
-          content: "죄송해요, 잠시 응답을 가져올 수 없어요. 잠시 후 다시 시도해 주세요.",
+          content: t("chatbot.message.fetchFailed"),
           time: nowTime(),
         },
       ]);
@@ -575,7 +579,7 @@ export default function BallChatbot() {
         <button
           className="ball-fab"
           onClick={() => setIsOpen(true)}
-          aria-label="AI 챗봇 열기"
+          aria-label={t("chatbot.aria.openChatbot")}
         >
           <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="34" y="78" width="14" height="34" rx="6" fill="#B6CCE6" />
@@ -636,13 +640,13 @@ export default function BallChatbot() {
                 </svg>
               </div>
               <div className="ball-header__title-wrap">
-                <div className="ball-header__title">건강 AI 비서</div>
-                <div className="ball-header__status">실시간 상담 가능</div>
+                <div className="ball-header__title">{t("chatbot.header.title")}</div>
+                <div className="ball-header__status">{t("chatbot.header.status")}</div>
               </div>
               <button
                 className="ball-header__close"
                 onClick={() => setIsOpen(false)}
-                aria-label="닫기"
+                aria-label={t("chatbot.aria.close")}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path
@@ -662,11 +666,11 @@ export default function BallChatbot() {
                   <div className="ball-empty__icon">
                     <BotAvatar size={32} />
                   </div>
-                  <div className="ball-empty__title">안녕하세요, Ball이에요</div>
+                  <div className="ball-empty__title">{t("chatbot.empty.title")}</div>
                   <div className="ball-empty__desc">
-                    혈당, 영양, 운동, 수면 등 건강과 관련된
+                    {t("chatbot.empty.descLine1")}
                     <br />
-                    궁금한 점을 편하게 물어봐 주세요.
+                    {t("chatbot.empty.descLine2")}
                   </div>
                 </div>
               )}
@@ -679,7 +683,7 @@ export default function BallChatbot() {
                         {m.image && (
                           <img
                             src={m.image}
-                            alt="첨부 이미지"
+                            alt={t("chatbot.alt.attachedImage")}
                             className="ball-msg-img"
                           />
                         )}
@@ -730,11 +734,11 @@ export default function BallChatbot() {
             <div className="ball-input-wrap">
               {attachedImage && (
                 <div className="ball-attach">
-                  <img src={attachedImage} alt="첨부 미리보기" />
+                  <img src={attachedImage} alt={t("chatbot.alt.attachPreview")} />
                   <button
                     type="button"
                     className="ball-attach__remove"
-                    aria-label="첨부 제거"
+                    aria-label={t("chatbot.aria.removeAttach")}
                     onClick={() => setAttachedImage(null)}
                   >
                     ×
@@ -752,7 +756,7 @@ export default function BallChatbot() {
                 <button
                   className="ball-icon-btn"
                   type="button"
-                  aria-label="파일 첨부"
+                  aria-label={t("chatbot.aria.attachFile")}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -771,7 +775,7 @@ export default function BallChatbot() {
                     inputRef.current = el;
                   }}
                   rows={1}
-                  placeholder="메시지를 입력하세요..."
+                  placeholder={t("chatbot.input.placeholder")}
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
@@ -781,7 +785,7 @@ export default function BallChatbot() {
                 <button
                   className="ball-icon-btn ball-send-btn"
                   type="button"
-                  aria-label="전송"
+                  aria-label={t("chatbot.aria.send")}
                   onClick={send}
                   disabled={(!input.trim() && !attachedImage) || isWaiting}
                 >
@@ -797,7 +801,7 @@ export default function BallChatbot() {
                 </button>
               </div>
               <div className="ball-disclaimer">
-                AI 비서의 조언은 참고용이며 의학적 진단을 대신할 수 없습니다.
+                {t("chatbot.disclaimer")}
               </div>
             </div>
           </div>

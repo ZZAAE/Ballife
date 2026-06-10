@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.domain.user.UserConfig;
 import com.prologue.ballife.repository.user.UserConfigRepository;
@@ -23,17 +24,18 @@ public class UserConfigService {
 
     private final UserConfigRepository userConfigRepository;
     private final UserRepository userRepository;
+    private final MessageResolver messages;
 
     private UserConfig findUserConfigByUserId(Long userId) {
         return userConfigRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 설정 정보가 없습니다. userId=" + userId));
+                .orElseThrow(() -> new IllegalArgumentException(messages.get("business.userConfig.configNotFound", userId)));
     }
 
     public UserConfigResponse getUserConfig(Long userId) {
         UserConfig userConfig = userConfigRepository.findByUser_UserId(userId)
                 .orElseGet(() -> {
                     User user = userRepository.findByUserId(userId)
-                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId=" + userId));
+                            .orElseThrow(() -> new IllegalArgumentException(messages.get("business.userConfig.userNotFound", userId)));
                     return UserConfig.builder().user(user).build();
                 });
         return UserConfigResponse.from(userConfig);
@@ -77,7 +79,7 @@ public class UserConfigService {
         UserConfig userConfig = userConfigRepository.findByUser_UserId(userId)
                 .orElseGet(() -> {
                     User user = userRepository.findByUserId(userId)
-                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId=" + userId));
+                            .orElseThrow(() -> new IllegalArgumentException(messages.get("business.userConfig.userNotFound", userId)));
                     return UserConfig.builder().user(user).build();
                 });
 

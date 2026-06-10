@@ -1,5 +1,6 @@
 package com.prologue.ballife.analyzer;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.standard.BloodPressureStandard;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,12 @@ import java.util.List;
  */
 @Component
 public class BloodPressureAnalyzer {
+
+    private final MessageResolver messages;
+
+    public BloodPressureAnalyzer(MessageResolver messages) {
+        this.messages = messages;
+    }
 
     /**
      * @param systolicValues  수축기 측정값 리스트
@@ -41,7 +48,7 @@ public class BloodPressureAnalyzer {
 
         BloodPressureStandard.Grade grade = BloodPressureStandard.classify(avgSys, avgDia);
         return new BloodPressureAnalysisResult(
-                avgSys, avgDia, grade.grade, grade.status, grade.label,
+                avgSys, avgDia, grade.grade, grade.status, messages.get(grade.code),
                 minSys, maxSys, minDia, maxDia,
                 List.of());
     }

@@ -1,65 +1,23 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from "react-router-dom"; // 페이지 이동
+import { useTranslation } from "react-i18next";
 import toast from 'react-hot-toast';
 import Button from '../../components/button';
 import authApi from "../../api/authApi";
-
-
-const diseaseFields = [
-	{ name: 'hyperlipidemia', label: '고지혈증 보유 여부',
-        options: [
-            { value: 'NONE', label: '해당 없음' },
-            { value: 'type1', label: '고콜레스테롤혈증' },
-            { value: 'type2', label: '고LDL콜레스테롤혈증' },
-			{ value: 'type3', label: '고중성지방혈증' },
-            { value: 'type4', label: '저HDL콜레스테롤혈증' }
-        ]
-    },
-	{ name: 'hypertension', label: '고혈압 보유 여부',
-        options: [
-            { value: 'NONE', label: '해당 없음' },
-            { value: 'type1', label: '고혈압 전단계' },
-            { value: 'type2', label: '1기' },
-			{ value: 'type3', label: '2기' },
-        ]
-     },
-	{ name: 'osteoporosis', label: '골다공증 보유 여부',
-        options: [
-            { value: 'NONE', label: '해당 없음' },
-            { value: 'osteopenia', label: '골감소증' },
-            { value: 'osteoporosis', label: '골다공증' },
-        ]
-     },
-	{ name: 'diabetes', label: '당뇨 보유 여부',
-        options: [
-            { value: 'NONE', label: '해당 없음' },
-            { value: 'type1', label: '1형' },
-            { value: 'type2', label: '2형' },
-            { value: 'GESTATIONAL', label: '임신성' }
-        ]
-     },
-	{ name: 'gout', label: '통풍 보유 여부',
-        options: [
-            { value: 'NONE', label: '해당 없음' },
-            { value: 'ASYMPTOMATIC', label: '고요산혈증' },
-            { value: 'ACUTE', label: '급성' },
-            { value: 'INTERMITTENT', label: '간헐기' },
-            { value: 'CHRONIC', label: '만성' },
-        ]
-    },
-];
-
+import { DISEASE_FIELDS } from "../../utils/userProfile";
+import petApi from "../../api/petApi";
 
 function DiseasePage() {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
 	const singUpFormData = location.state;
 
     // 초기값 세팅 - 질환 필드명 기준으로 'NONE'으로 초기화
 	const [formData, setFormData] = useState(() => (
-		diseaseFields.reduce((acc, field) => {
+		DISEASE_FIELDS.reduce((acc, field) => {
 			acc[field.name] = 'NONE';
 			return acc;
 		}, {})
@@ -95,8 +53,8 @@ function DiseasePage() {
 				height: singUpFormData.height,
 				diseaseIndex: diseaseIndex
 			});
-
-			toast.success('회원가입이 완료 되었습니다!');
+			await petApi.createPet(response.data.userId);
+			toast.success(t('diseasePage.toast.signUpComplete'));
 			console.log('disease form data', formData);
 			navigate("/login"); // <Link to = "/login">로그인</Link>
 		} catch (error) {
@@ -109,11 +67,11 @@ function DiseasePage() {
 	return (
 		<div className="flex h-screen items-center justify-center overflow-hidden bg-white px-4 py-6 md:px-8">
 			<div className="flex w-full max-w-md flex-col rounded-[28px] bg-white px-6 py-6 sm:px-10 lg:w-1/3 lg:max-w-none">
-				<h1 className="text-2xl font-bold tracking-tight text-gray-950">보유 질환 체크</h1>
+				<h1 className="text-2xl font-bold tracking-tight text-gray-950">{t('diseasePage.title')}</h1>
 
 				<form onSubmit={handleSubmit} className="mt-6 flex flex-col">
 					<div className="space-y-3">
-						{diseaseFields.map((field) => (
+						{DISEASE_FIELDS.map((field) => (
 							<div key={field.name} className="space-y-1.5">
 								<label htmlFor={field.name} className="block text-sm font-semibold text-gray-900">
 									{field.label}
@@ -157,7 +115,7 @@ function DiseasePage() {
 					</div>
 
 					<Button type="submit" className="mt-6 h-11 w-full !rounded-lg !bg-black !text-sm !font-semibold !text-white hover:!bg-gray-900 focus:!ring-black">
-						완료
+						{t('diseasePage.submit')}
 					</Button>
 				</form>
 			</div>

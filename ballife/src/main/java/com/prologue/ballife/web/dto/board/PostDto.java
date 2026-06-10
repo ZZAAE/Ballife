@@ -19,11 +19,11 @@ public class PostDto {
     @AllArgsConstructor
     public static class CreateRequest { // 글 작성할 때 받는 데이터
 
-        @NotBlank(message = "제목은 필수입니다")
-        @Size(max = 50, message = "제목은 50자 이하여야 합니다.")
+        @NotBlank(message = "{validation.post.title.required}")
+        @Size(max = 50, message = "{validation.post.title.size}")
         private String title;
 
-        @NotBlank(message = "내용은 필수입니다")
+        @NotBlank(message = "{validation.post.content.required}")
         private String content;
 
         private Post.CATEGORY category;
@@ -127,11 +127,11 @@ public class PostDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest{
-        @NotBlank(message = "제목은 필수입니다")
-        @Size(max = 50, message = "제목은 50자 이하여야 합니다")
+        @NotBlank(message = "{validation.post.title.required}")
+        @Size(max = 50, message = "{validation.post.title.size}")
         private String title;
 
-        @NotBlank(message = "내용은 필수입니다")
+        @NotBlank(message = "{validation.post.content.required}")
         private String content;
 
         private Post.CATEGORY category;

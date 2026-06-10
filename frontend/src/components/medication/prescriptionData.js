@@ -1,17 +1,32 @@
 // 처방 약 그룹 = 약 페이지 전체(처방 목록 · 복용 일정 · 이행률 · 주간 달력)의 단일 데이터 소스.
 // 데이터는 백엔드 처방전(getPrescriptions + getUserMedicine)에서 받아 변환한다.
 // drugId 는 복용 일정 슬롯의 약 식별자와 연결된다 (presc-{prescriptionId}).
+import i18n from "../../i18n";
+
 const STORAGE_KEY = "prescriptionGroups";
 
 // 더미 데이터 제거 — 실제 데이터는 백엔드에서 받아온다.
 export const DEFAULT_PRESCRIPTION_GROUPS = [];
 
-// 복용 시간대 → 일정 슬롯 정의. keyword 는 백엔드 intakeIntervals("아침,점심,저녁") 매칭용.
+// 복용 시간대 → 일정 슬롯 정의.
+// keyword 는 백엔드 intakeIntervals("아침,점심,저녁") 매칭용(한글 고정, 변경 금지),
+// label 은 표시용이라 현재 언어로 lazy 해석.
+function scheduleSlot(id, time, keyword) {
+  return {
+    id,
+    time,
+    keyword,
+    get label() {
+      return i18n.t(`medication.slot.${id}`);
+    },
+  };
+}
+
 export const SCHEDULE_SLOTS = [
-  { id: "morning", label: "아침", time: "08:00", keyword: "아침" },
-  { id: "lunch", label: "점심", time: "13:00", keyword: "점심" },
-  { id: "dinner", label: "저녁", time: "19:00", keyword: "저녁" },
-  { id: "bedtime", label: "취침전", time: "22:00", keyword: "취침전" },
+  scheduleSlot("morning", "08:00", "아침"),
+  scheduleSlot("lunch", "13:00", "점심"),
+  scheduleSlot("dinner", "19:00", "저녁"),
+  scheduleSlot("bedtime", "22:00", "취침전"),
 ];
 
 // 백엔드 처방전 목록(약 목록 포함) → 약 페이지용 그룹 구조로 변환
@@ -19,7 +34,7 @@ export const mapPrescriptionsToGroups = (prescriptions) =>
   (prescriptions || []).map((p) => ({
     id: p.prescriptionId,
     prescriptionId: p.prescriptionId,
-    groupName: p.prescriptionName || "이름 없음",
+    groupName: p.prescriptionName || i18n.t("medication.noName"),
     drugId: `presc-${p.prescriptionId}`,
     dosage: p.dosage || "-",
     intakeTime: p.prescriptionDate || "",
@@ -29,10 +44,13 @@ export const mapPrescriptionsToGroups = (prescriptions) =>
     memo: p.memo || "",
     medicines: (p.medicines || []).map((m) => ({
       id: m.userMedicationId,
-      name: m.medicineName || "이름 없음",
+      name: m.medicineName || i18n.t("medication.noName"),
       purpose: "",
       dosageText: p.dosage || "",
       imageType: "white",
+      // 주성분 다국어 병기용(백엔드 약품 캐시에서 채움, 없으면 undefined)
+      ingredientKo: m.ingredientKo || "",
+      ingredientEng: m.ingredientEng || "",
     })),
   }));
 
@@ -54,7 +72,7 @@ export const buildSchedulesFromGroups = (groups, dateKey) => {
       id: slot.id,
       label: slot.label,
       time: slot.time,
-      name: `${slot.label} 복용약`,
+      name: i18n.t("medication.slotDoseName", { slot: slot.label }),
       note: "",
       drugs,
     };

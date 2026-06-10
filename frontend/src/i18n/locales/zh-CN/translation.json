@@ -1,0 +1,2743 @@
+{
+  "common": {
+    "appName": "Ballife",
+    "login": "登录",
+    "logout": "退出登录",
+    "logoutSuccess": "已退出登录。"
+  },
+  "nav": {
+    "record": "记录",
+    "check": "确认",
+    "checkAll": "全部",
+    "meal": "饮食",
+    "medicine": "药",
+    "exercise": "运动",
+    "weight": "体重",
+    "bloodSugar": "血糖",
+    "bloodPressure": "血压",
+    "community": "社区",
+    "member": "会员信息",
+    "pet": "宠物",
+    "intro": "介绍",
+    "introWeb": "网页介绍",
+    "hyperlipidemia": "高脂血症",
+    "hypertension": "高血压",
+    "osteoporosis": "骨质疏松症",
+    "diabetes": "糖尿病",
+    "obesity": "肥胖",
+    "gout": "痛风"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh-CN": "简体中文",
+    "select": "选择语言"
+  },
+  "errors": {
+    "generic": "发生错误",
+    "exerciseRequestFailed": "运动记录请求失败。"
+  },
+  "disease": {
+    "none": "无",
+    "summaryNone": "无",
+    "hyperlipidemia": {
+      "field": "是否患有高脂血症",
+      "summary": "高脂血症",
+      "type1": "高胆固醇血症",
+      "type2": "高LDL胆固醇血症",
+      "type3": "高甘油三酯血症",
+      "type4": "低HDL胆固醇血症"
+    },
+    "hypertension": {
+      "field": "是否患有高血压",
+      "summary": "高血压",
+      "type1": "高血压前期",
+      "type2": "1期",
+      "type3": "2期"
+    },
+    "osteoporosis": {
+      "field": "是否患有骨质疏松症",
+      "summary": "骨质疏松症",
+      "osteopenia": "骨量减少",
+      "osteoporosis": "骨质疏松症"
+    },
+    "diabetes": {
+      "field": "是否患有糖尿病",
+      "summary": "糖尿病",
+      "type1": "1型",
+      "type2": "2型",
+      "gestational": "妊娠期"
+    },
+    "gout": {
+      "field": "是否患有痛风",
+      "summary": "痛风",
+      "asymptomatic": "高尿酸血症",
+      "acute": "急性",
+      "intermittent": "间歇期",
+      "chronic": "慢性"
+    }
+  },
+  "exercise": {
+    "intensity": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "category": {
+      "aerobic": "有氧",
+      "anaerobic": "无氧"
+    },
+    "type": {
+      "cycling": "骑行",
+      "running": "跑步",
+      "jumprope": "跳绳",
+      "walking": "步行",
+      "stair": "登天梯",
+      "dumbbellpress": "卧推",
+      "squat": "深蹲",
+      "deadlift": "硬拉",
+      "shoulderpress": "肩推",
+      "barbellrow": "杠铃划船"
+    },
+    "fallbackName": "运动",
+    "stairIntensityHint": "1~2级 = 低 · 3~5级 = 中 · 6级~ = 高",
+    "durationHourMinSec": "{{h}}小时{{m}}分{{s}}秒",
+    "durationMinSec": "{{m}}分{{s}}秒",
+    "durationMin": "{{m}}分",
+    "durationSec": "{{s}}秒"
+  },
+  "medication": {
+    "slot": {
+      "morning": "早上",
+      "lunch": "中午",
+      "dinner": "晚上",
+      "bedtime": "睡前"
+    },
+    "slotDoseName": "{{slot}}服用药",
+    "noName": "无名称"
+  },
+  "allRecordPage": {
+    "addRecord": "添加记录",
+    "notRecordedYet": "尚未记录。",
+    "title": "全部记录管理",
+    "subtitle": "一目了然查看今日的健康记录。",
+    "bloodPressure": "血压",
+    "bloodPressureRecord": "血压记录",
+    "bloodSugar": "血糖",
+    "bloodSugarRecord": "血糖记录",
+    "weight": "体重",
+    "weightRecord": "体重记录",
+    "waterIntake": "饮水量",
+    "waterIntakeRecord": "摄入记录",
+    "activitySummary": "活动量概要",
+    "exerciseRecord": "运动记录",
+    "hasRecentRecord": "有近期记录",
+    "noRecentRecord": "无近期记录",
+    "hasTodayActivity": "有今日活动",
+    "noTodayActivity": "无今日活动",
+    "todayMeal": "今日饮食",
+    "mealWaiting": "等待饮食记录中",
+    "meal": {
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "加餐",
+      "default": "餐食"
+    },
+    "toast": {
+      "exerciseFetchFailed": "运动记录查询失败: {{error}}"
+    }
+  },
+  "bloodPressureRecordPage": {
+    "title": "血压记录查看",
+    "subtitle": "以下是对过往血压变化的分析结果。",
+    "avgBloodPressure": "平均血压",
+    "maxSystolic": "最高收缩压",
+    "minDiastolic": "最低舒张压",
+    "chartTitle": "血压变化趋势",
+    "noRecordInRange": "该时间段内没有血压记录。",
+    "systolic": "收缩压",
+    "diastolic": "舒张压",
+    "status": {
+      "noRecord": "无记录",
+      "hypertension": "高血压范围",
+      "caution": "注意范围",
+      "hypotension": "低血压范围",
+      "normal": "正常血压范围"
+    },
+    "am": "上午",
+    "pm": "下午",
+    "recordWhen": "{{month}}月{{day}}日 {{ampm}} {{hour}}:{{minute}}"
+  },
+  "bloodSugarRecordPage": {
+    "title": "血糖记录确认",
+    "subtitle": "这是对以往血糖变化的分析结果。",
+    "avgBloodSugar": "平均血糖",
+    "periodAverage": "期间内{{count}}条平均",
+    "noRecord": "无记录",
+    "recentBloodSugar": "最近血糖",
+    "beforeAfterMeal": "餐前 / 餐后",
+    "recentFastingBloodSugar": "最近空腹血糖",
+    "fasting": "空腹",
+    "chartTitle": "血糖变化趋势",
+    "toggleMealtime": "餐前 · 餐后",
+    "toggleFasting": "空腹 · 睡前",
+    "emptyChart": "该期间没有血糖记录。",
+    "legend": {
+      "beforeMeal": "餐前",
+      "afterMeal": "餐后",
+      "fasting": "空腹",
+      "bedtime": "睡前"
+    }
+  },
+  "recordPage": {
+    "toast": {
+      "loginRequired": "需要登录。"
+    },
+    "title": "我的健康记录",
+    "subtitle": "坚持记录，创造改变。",
+    "recordWeight": "记录体重"
+  },
+  "recordSummary": {
+    "mealCategory": {
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "加餐"
+    },
+    "mealType": "{{label}}",
+    "meal": {
+      "unitTarget": "/ {{value}} kcal",
+      "unit": "kcal",
+      "remaining": "剩余可摄入卡路里 {{value}}kcal",
+      "overTarget": "超出目标 {{value}}kcal",
+      "noTarget": "未设置目标"
+    },
+    "exercise": {
+      "totalBurned": "总消耗卡路里 {{value}} kcal",
+      "noRecord": "无记录"
+    },
+    "weight": {
+      "weekDelta": "较上周 {{value}}kg",
+      "noWeekRecord": "无上周记录"
+    },
+    "water": {
+      "unitTarget": "/ {{value}} L",
+      "unit": "L",
+      "goalReached": "已达成目标量",
+      "remaining": "剩余饮水量 {{value}}L",
+      "noTarget": "未设置目标"
+    },
+    "dateLabel": "{{year}}年{{month}}月{{day}}日",
+    "header": {
+      "title": "每日记录",
+      "subtitle": "分析一天身体变化的结果。"
+    },
+    "cards": {
+      "meal": {
+        "label": "饮食",
+        "description": "今日摄入 kcal"
+      },
+      "exercise": {
+        "label": "运动",
+        "description": "今日活动时间",
+        "unit": "分钟"
+      },
+      "weight": {
+        "label": "体重",
+        "description": "当前体重及趋势"
+      },
+      "water": {
+        "label": "饮水",
+        "description": "今日饮水量"
+      }
+    },
+    "bloodSugar": {
+      "title": "今日血糖变化",
+      "legendFasting": "餐前 (Fasting)",
+      "legendPostMeal": "餐后 (Post-meal)",
+      "empty": "当天没有血糖记录。"
+    },
+    "bloodPressure": {
+      "title": "今日血压变化",
+      "legendSystolic": "收缩压 (Systolic)",
+      "legendDiastolic": "舒张压 (Diastolic)",
+      "empty": "当天没有血压记录。",
+      "systolic": "收缩压",
+      "diastolic": "舒张压"
+    },
+    "medication": {
+      "title": "今日服药安排",
+      "empty": "该日期没有服药安排。",
+      "statusAll": "服药完成",
+      "statusPartial": "部分服药 ({{taken}}/{{total}})",
+      "statusNone": "未服药"
+    },
+    "mealEmpty": {
+      "title": "暂无饮食记录",
+      "linkLabel": "全部记录管理",
+      "descPart1": "页面中",
+      "descPart2": "登记今日的饮食吧。"
+    }
+  },
+  "weightRecordPage": {
+    "title": "体重记录查看",
+    "subtitle": "分析过往身体变化的结果。",
+    "currentWeight": "当前体重",
+    "weeklyDelta": "较上周平均 {{delta}} kg",
+    "weeklyDeltaInsufficient": "上周记录不足",
+    "bmiLabel": "BMI 指数",
+    "bmiFormula": "体重 / 身高(m)²",
+    "bmiUnderweight": "体重过轻",
+    "bmiNormal": "正常",
+    "bmiOverweight": "超重",
+    "targetWeight": "目标体重",
+    "currentWeightValue": "当前 {{weight}}kg",
+    "currentWeightEmpty": "当前 —",
+    "toTargetValue": "距目标 {{remaining}}kg",
+    "toTargetEmpty": "距目标 —",
+    "chartTitle": "体重变化趋势",
+    "apply": "应用",
+    "reset": "重置",
+    "chartSeriesName": "体重"
+  },
+  "exercisePage": {
+    "weekday": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "dateLabel": "{{month}}月{{day}}日 (周{{weekday}})",
+    "weekRange": "{{startMonth}}月{{startDay}}日 - {{endDay}}日",
+    "prevWeek": "上一周",
+    "nextWeek": "下一周",
+    "sessions": "组次",
+    "editSession": "编辑运动记录",
+    "setsReps": "{{sets}} 组 · {{reps}}次",
+    "title": "运动记录",
+    "subtitle": "这是对以往运动变化的分析结果。",
+    "sort": "排序",
+    "sortNewest": "最新优先",
+    "sortOldest": "最早优先",
+    "emptyDay": "所选日期没有记录。",
+    "emptyWeek": "本周没有记录。",
+    "toast": {
+      "fetchFailed": "运动记录查询失败: {{error}}"
+    }
+  },
+  "mealPage": {
+    "category": {
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "加餐"
+    },
+    "mealType": "{{label}}餐",
+    "advice": {
+      "kcal": {
+        "low": "总摄入热量低于推荐量。建议再补充一顿均衡的饮食。",
+        "high": "总摄入热量超过推荐量。建议调整下一餐的分量。"
+      },
+      "carb": {
+        "low": "碳水化合物不足。建议用糙米或全谷物来补充。",
+        "high": "碳水化合物摄入略多。建议减少精制碳水化合物。"
+      },
+      "protein": {
+        "low": "蛋白质不足。建议用鸡胸肉、鸡蛋、豆腐等来补充。",
+        "high": "蛋白质超过推荐量。建议适当调整，以免增加肾脏负担。"
+      },
+      "fat": {
+        "low": "脂肪不足。建议添加坚果、橄榄油等健康脂肪。",
+        "high": "脂肪摄入略多。建议减少油炸和油腻食物。"
+      },
+      "sugar": {
+        "high": "糖类摄入超过推荐量。建议减少含糖饮料和甜点。"
+      },
+      "na": {
+        "high": "钠摄入较多。建议减少汤汁、加工食品和咸食。"
+      },
+      "chol": {
+        "high": "胆固醇摄入较多。建议调整油腻肉类和内脏类食物。"
+      },
+      "noRecord": "在全部记录管理页面登记今天的饮食后，将为您分析摄入的营养素并提供评分和个性化建议。",
+      "balanced": "目前摄入的营养素比例非常接近推荐指南。希望您剩下的一天也继续保持这样均衡的饮食。"
+    },
+    "status": {
+      "noRecord": "暂无记录",
+      "excellent": "出色均衡",
+      "good": "良好均衡",
+      "needsWork": "需要改善",
+      "imbalanced": "注意不均衡"
+    },
+    "headline": {
+      "noRecord": "还没有记录的饮食。",
+      "excellent": "营养成分非常协调。",
+      "good": "整体上是均衡的饮食。",
+      "needsWork": "营养均衡需要稍作改善。",
+      "imbalanced": "检测到营养不均衡。"
+    },
+    "tag": {
+      "proteinEnough": "#蛋白质_充足",
+      "lowSugar": "#低糖_饮食",
+      "lowSodium": "#低盐_饮食",
+      "sugarWarn": "#糖_注意",
+      "sodiumWarn": "#钠_注意",
+      "cholWarn": "#胆固醇_注意",
+      "kcalManage": "#热量_管理",
+      "carbManage": "#碳水化合物_管理",
+      "fatManage": "#脂肪_管理",
+      "proteinLow": "#蛋白质_不足"
+    },
+    "nutrient": {
+      "carb": "碳水化合物",
+      "protein": "蛋白质",
+      "fat": "脂肪",
+      "sugar": "糖类",
+      "na": "钠",
+      "chol": "胆固醇"
+    },
+    "title": "饮食记录确认",
+    "subtitle": "这是对过往饮食记录的分析结果。",
+    "summary": {
+      "remaining": "剩余",
+      "achievement": "达成率"
+    },
+    "scoreLabel": "今日饮食评分",
+    "recordsHeading": "今日饮食记录确认",
+    "empty": {
+      "heading": "暂无记录的饮食",
+      "linkLabel": "全部记录管理",
+      "descSuffix": " 页面中",
+      "descLine2": "来登记今天的饮食吧。"
+    },
+    "nutritionHeading": "今日营养成分分析"
+  },
+  "medicationPage": {
+    "title": "用药管理",
+    "subtitle": "这是对过往服药结果的分析结果。",
+    "alert": {
+      "enterDrugName": "请输入药品名称。"
+    }
+  },
+  "boardListPage": {
+    "loading": "加载中...",
+    "title": "社区",
+    "subtitle": "在为健康生活而设的社区空间，分享您的故事吧。",
+    "searchPlaceholder": "请输入搜索词。",
+    "searchButton": "搜索",
+    "category": {
+      "all": "全部",
+      "general": "自由",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血压",
+      "osteoporosis": "骨质疏松症",
+      "diabetes": "糖尿病",
+      "obesity": "肥胖",
+      "gout": "痛风",
+      "qna": "提问"
+    },
+    "sort": {
+      "recommend": "按推荐",
+      "views": "按浏览",
+      "latest": "按日期"
+    },
+    "table": {
+      "number": "序号",
+      "category": "分类",
+      "postTitle": "帖子标题",
+      "nickname": "昵称",
+      "viewCount": "浏览量",
+      "upVote": "推荐数",
+      "createdAt": "发表日期"
+    },
+    "empty": "暂无帖子。",
+    "toast": {
+      "loginRequired": "需要登录。"
+    },
+    "writeButton": "写帖子"
+  },
+  "postCreatePage": {
+    "toast": {
+      "loginRequired": "需要登录。",
+      "selectCategory": "请选择分类。",
+      "enterTitle": "请输入标题。",
+      "enterContent": "请输入内容。",
+      "missingLoginId": "登录信息中缺少 id。请退出登录后重新登录。",
+      "created": "已发布。",
+      "createFailed": "发布帖子时发生错误。"
+    },
+    "category": {
+      "placeholder": "选择版块",
+      "general": "自由版块",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血压",
+      "osteoporosis": "骨质疏松症",
+      "diabetes": "糖尿病",
+      "obesity": "肥胖",
+      "gout": "痛风",
+      "qna": "提问"
+    },
+    "title": "版块发帖",
+    "subtitle": "在健康生活社区中分享您的故事吧。",
+    "label": {
+      "category": "分类",
+      "title": "标题",
+      "content": "内容"
+    },
+    "placeholder": {
+      "title": "请输入帖子标题",
+      "content": "请输入内容..."
+    },
+    "imageHint": "可通过工具栏的图片按钮在正文中插入照片。",
+    "button": {
+      "exit": "退出",
+      "submitting": "发布中...",
+      "submit": "发布"
+    }
+  },
+  "postDetailPage": {
+    "replyInitial": "答",
+    "commentInitial": "评",
+    "upVote": "推荐",
+    "reply": "回复",
+    "delete": "删除",
+    "category": {
+      "select": "选择版块",
+      "general": "自由版块",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血压",
+      "osteoporosis": "骨质疏松症",
+      "diabetes": "糖尿病",
+      "obesity": "肥胖",
+      "gout": "痛风",
+      "qna": "提问"
+    },
+    "anonymous": "匿名",
+    "loading": "加载中...",
+    "toast": {
+      "commentRequired": "请输入评论内容。",
+      "loginRequired": "需要登录。",
+      "commentCreated": "评论已发布。",
+      "commentCreateFailed": "评论发布失败。",
+      "commentUpVoted": "已推荐该评论。",
+      "upVoteCanceled": "已取消推荐。",
+      "commentUpVoteFailed": "评论推荐失败。",
+      "replyRequired": "请输入回复内容。",
+      "replyCreated": "回复已发布。",
+      "replyCreateFailed": "回复发布失败。",
+      "commentDeleted": "评论已删除。",
+      "commentDeleteFailed": "评论删除失败。",
+      "postDeleted": "帖子已删除。",
+      "postDeleteFailed": "帖子删除失败。",
+      "postUpVoted": "已推荐。",
+      "postUpVoteFailed": "推荐失败。"
+    },
+    "confirm": {
+      "deleteComment": "要删除这条评论吗？",
+      "deletePost": "要删除这篇帖子吗？"
+    },
+    "community": "社区",
+    "subtitle": "在为健康生活而设的社区空间，分享您的故事吧。",
+    "edit": "修改",
+    "anonymousInitial": "匿",
+    "viewCount": "浏览 {{count}}",
+    "postImageAlt": "帖子图片",
+    "commentCount": "{{count}} 条评论",
+    "writerInitial": "帖",
+    "defaultNickname": "콩콩이식사",
+    "commentPlaceholder": "请输入评论。请使用相互尊重的表达。",
+    "submit": "发布",
+    "replyPlaceholder": "请输入回复。",
+    "cancel": "取消",
+    "exit": "退出"
+  },
+  "postEditPage": {
+    "category": {
+      "general": "自由论坛",
+      "diabetes": "糖尿病",
+      "obesity": "肥胖",
+      "osteoporosis": "骨质疏松症",
+      "hyperlipidemia": "高脂血症",
+      "hypertension": "高血压",
+      "gout": "痛风",
+      "qna": "问答"
+    },
+    "toast": {
+      "loginRequired": "需要登录。",
+      "onlyOwnPost": "只能编辑本人的帖子。",
+      "titleContentRequired": "请输入标题和内容。",
+      "noUserId": "登录信息中没有 id。请退出登录后重新登录。",
+      "updated": "已修改。"
+    },
+    "checking": "确认中...",
+    "title": "编辑帖子",
+    "subtitle": "在助力健康生活的社区中分享您的故事吧。",
+    "label": {
+      "category": "分类",
+      "title": "标题",
+      "content": "内容"
+    },
+    "placeholder": {
+      "title": "请输入帖子的标题",
+      "content": "请输入内容..."
+    },
+    "imageHint": "可通过工具栏的图片按钮在正文中插入照片。",
+    "button": {
+      "cancel": "退出",
+      "saving": "修改中...",
+      "submit": "修改"
+    }
+  },
+  "familyPage": {
+    "private": "不公开",
+    "noRecord": "无记录",
+    "bloodSugarValue": "{{value}} mg/dL",
+    "exerciseValue": "{{name}} · {{kcal}} kcal",
+    "medicationDone": "已服药",
+    "medicationProgress": "{{taken}}/{{total}} 已服",
+    "avatarFallback": "会",
+    "me": "我",
+    "roleOwner": "群主",
+    "roleMember": "成员",
+    "kick": "移出",
+    "bloodSugar": "血糖",
+    "bloodPressure": "血压",
+    "recentExercise": "近期运动",
+    "medicationStatus": "服药情况",
+    "headerTitle": "家庭健康管理",
+    "headerSubtitle": "基于授权，一起查看家人的血糖和血压。",
+    "back": "返回",
+    "toast": {
+      "codeRequired": "请输入邀请码。",
+      "joined": "已加入家庭群组。",
+      "groupCreated": "已创建家庭群组。",
+      "codeRotated": "已重新生成邀请码。",
+      "left": "已退出群组。",
+      "removed": "已移除成员。",
+      "codeCopied": "已复制邀请码。",
+      "copyFailed": "复制失败。",
+      "subscribed": "订阅已激活。",
+      "subscriptionCancelled": "已取消订阅。"
+    },
+    "confirm": {
+      "leave": "要退出家庭群组吗？",
+      "remove": "要将{{nickname}}从群组中移除吗？"
+    },
+    "loading": "加载中...",
+    "joinTitle": "通过邀请码加入",
+    "joinDescription": "请输入家人发送的邀请码。无需订阅也可加入。",
+    "codePlaceholder": "例：AB3D9K2P",
+    "join": "加入",
+    "createTitle": "创建我的家庭群组",
+    "createDescriptionActive": "您正在使用家庭套餐。创建群组并邀请成员吧。",
+    "createGroup": "创建家庭群组",
+    "createDescriptionUpsell": "创建家庭群组需要订阅家庭套餐。",
+    "goSubscribe": "前往订阅",
+    "inactiveBanner": "该家庭群组当前处于未激活状态。群主的家庭套餐已到期。",
+    "renewSubscription": "续订",
+    "groupNameFallback": "家庭群组",
+    "ownerLabel": "群主 · {{nickname}}",
+    "inviteCode": "邀请码",
+    "copy": "复制",
+    "rotate": "重新生成",
+    "leaveGroup": "退出群组",
+    "myShareSettings": "我的共享设置",
+    "shareSettingsDescription": "仅向家人公开您已同意的项目。",
+    "membersTitle": "家庭成员（{{count}}）"
+  },
+  "healthCalenderPage": {
+    "monthTitle": "{{year}}年{{month}}月",
+    "prevWeek": "上一周",
+    "nextWeek": "下一周",
+    "dayTitle": "{{month}}月{{day}}日",
+    "table": {
+      "heading": "本周的我变得更健康了吗?",
+      "col": {
+        "item": "项目",
+        "lastWeek": "上周",
+        "thisWeek": "本周",
+        "change": "变化"
+      },
+      "rows": {
+        "bloodSugar": {
+          "label": "血糖",
+          "lastWeek": "118 mg/dL",
+          "thisWeek": "112 mg/dL",
+          "change": "+6 改善"
+        },
+        "bloodPressure": {
+          "label": "血压",
+          "lastWeek": "125 mmHg",
+          "thisWeek": "118 mmHg",
+          "change": "+7 改善"
+        },
+        "weight": {
+          "label": "体重",
+          "lastWeek": "78.5 kg",
+          "thisWeek": "78.0 kg",
+          "change": "-0.5 kg"
+        },
+        "exercise": {
+          "label": "运动",
+          "lastWeek": "3次",
+          "thisWeek": "5次",
+          "change": "+2次"
+        },
+        "meal": {
+          "label": "饮食",
+          "lastWeek": "72分",
+          "thisWeek": "85分",
+          "change": "+13分"
+        },
+        "sleep": {
+          "label": "睡眠",
+          "lastWeek": "85%",
+          "thisWeek": "100%",
+          "change": "+15%"
+        }
+      },
+      "footer": "整体正在改善!这是非常棒的变化。"
+    },
+    "sidebar": {
+      "monthlyTitle": "月度综合成绩",
+      "metrics": {
+        "diet": "饮食健康",
+        "bloodSugarStability": "血糖稳定度",
+        "sleepRhythm": "睡眠节律",
+        "fitnessIndex": "体能指数",
+        "exercisePerformance": "运动表现"
+      },
+      "weeklyAnalysisTitle": "周分析",
+      "streak": "🔥 已连续运动7天达成!",
+      "weekdayShort": {
+        "mon": "一",
+        "tue": "二",
+        "wed": "三",
+        "thu": "四",
+        "fri": "五",
+        "sat": "六",
+        "sun": "日"
+      }
+    },
+    "header": {
+      "title": "健康指标管理日历",
+      "subtitle": "追踪并分析过去一个月数值与活动的智能报告。"
+    },
+    "timeline": {
+      "month": "{{month}}月",
+      "date": "{{year}}年{{month}}月{{day}}日"
+    },
+    "weekday": {
+      "sun": "星期日",
+      "mon": "星期一",
+      "tue": "星期二",
+      "wed": "星期三",
+      "thu": "星期四",
+      "fri": "星期五",
+      "sat": "星期六"
+    }
+  },
+  "mainPage": {
+    "prescriptionGroup": "处方组",
+    "greeting": "{{name}}，您好。",
+    "defaultName": "会员",
+    "ageYears": "{{age}}岁",
+    "gender": {
+      "male": "男性",
+      "female": "女性"
+    },
+    "stats": {
+      "ageGender": "年龄 / 性别",
+      "height": "身高",
+      "weight": "体重"
+    },
+    "bmi": {
+      "underweight": "{{value}} (体重过轻)",
+      "normal": "{{value}} (正常)",
+      "overweight": "{{value}} (超重)",
+      "obese": "{{value}} (肥胖)"
+    },
+    "pet": {
+      "title": "我的宠物正在等您",
+      "subtitle": "和宠物一起开始健康的一天吧。",
+      "detailLink": "查看我的宠物详情",
+      "loading": "正在带来您的宠物…"
+    },
+    "chart": {
+      "weeklyTitle": "每周健康趋势",
+      "weeklySubtitle": "按日均值趋势",
+      "systolic": "收缩压",
+      "diastolic": "舒张压",
+      "bloodSugar": "血糖",
+      "bloodPressure": "血压",
+      "weight": "体重",
+      "target": "目标 {{value}}",
+      "targetSystolic": "目标收缩压 {{value}}",
+      "targetDiastolic": "目标舒张压 {{value}}"
+    },
+    "news": {
+      "title": "健康新闻",
+      "subtitle": "来看看Hidoc精选的健康资讯吧。",
+      "loadFailed": "未能加载新闻。"
+    }
+  },
+  "diabetesReportPage": {
+    "riskFactors": {
+      "0": "腹型肥胖及胰岛素抵抗 (韩国人2型糖尿病的核心危险因素)",
+      "1": "身体活动不足及以精制碳水化合物为主的饮食习惯",
+      "2": "家族史、40岁以上年龄、伴有高血压·血脂异常"
+    },
+    "title": "糖尿病(Diabetes Mellitus)",
+    "intro": "糖尿病是因胰岛素分泌不足或胰岛素抵抗导致血糖慢性升高的代谢疾病(WHO)。根据大韩糖尿病学会2023诊疗指南, 以空腹血糖、HbA1c、餐后血糖为标准进行诊断, 系统的血糖管理与生活习惯矫正是预防并发症的关键。",
+    "overview": {
+      "heading": "什么是糖尿病?",
+      "paragraph1": "糖尿病是以高血糖为共同特征的慢性代谢疾病群(WHO)。慢性血糖升高会引发视网膜·肾脏·神经等微血管并发症, 以及心肌梗死·脑卒中等大血管并发症。据韩国疾病管理厅国民健康营养调查(2022), 国内30岁以上成人约14%患有糖尿病, 若包含糖尿病前期则接近半数。",
+      "paragraph2": "正常情况下, 血糖由胰腺β细胞分泌的胰岛素调节。糖尿病中, 因胰岛素分泌不足或胰岛素抵抗使该调节机制崩溃, 若不治疗放任不管, 会导致心血管疾病·肾衰竭·失明等重大并发症。"
+    },
+    "diagnosis": {
+      "sectionTitle": "诊断标准 (Diagnosis)",
+      "fasting": {
+        "title": "空腹血糖 126 mg/dL 以上",
+        "subTitle": "大韩糖尿病学会 2023 标准",
+        "desc": "空腹8小时以上后血糖达126 mg/dL以上即为糖尿病, 100~125 mg/dL则属于空腹血糖受损(糖尿病前期)。餐后2小时血糖200 mg/dL以上也是诊断标准。"
+      },
+      "hba1c": {
+        "title": "糖化血红蛋白(HbA1c) 6.5% 以上",
+        "subTitle": "长期血糖指标",
+        "desc": "反映过去2~3个月的平均血糖。HbA1c 6.5%以上为糖尿病, 5.7~6.4%归类为糖尿病前期(WHO·大韩糖尿病学会)。"
+      },
+      "ogtt": {
+        "title": "75g 口服葡萄糖耐量试验(OGTT)",
+        "subTitle": "确诊及并发症评估",
+        "desc": "摄入75g葡萄糖2小时后血糖达200 mg/dL以上即诊断为糖尿病。确诊后通过眼底·微量白蛋白尿·神经检查评估靶器官并发症。"
+      }
+    },
+    "types": {
+      "sectionTitle": "糖尿病的种类",
+      "heading": "糖尿病的种类",
+      "type1": {
+        "title": "1型糖尿病",
+        "desc": "因胰腺β细胞自身免疫性破坏导致胰岛素分泌绝对缺乏的类型。主要在儿童·青少年期发病, 离开外源性胰岛素注射难以生存。",
+        "point": "必须外源性胰岛素注入"
+      },
+      "type2": {
+        "title": "2型糖尿病",
+        "desc": "占韩国糖尿病患者90%以上的最常见类型, 是胰岛素抵抗与相对胰岛素分泌不足结合的状态。与肥胖·运动不足·老龄化密切相关。",
+        "point": "代谢进行性疾病"
+      }
+    },
+    "nutrition": {
+      "heading": "营养及生活习惯",
+      "avoidTitle": "应避免的食物",
+      "avoid": {
+        "0": "单糖·精制碳水化合物 (白糖、碳酸饮料、白米饭、年糕)",
+        "1": "含糖饮料及过量果汁",
+        "2": "含饱和脂肪·反式脂肪的加工食品"
+      },
+      "recommendTitle": "推荐事项",
+      "recommend": {
+        "0": "富含膳食纤维的全谷物 (糙米、杂粮、燕麦)",
+        "1": "新鲜蔬菜及优质蛋白质 (豆类、豆腐、鱼类)",
+        "2": "不饱和脂肪酸 (坚果、青背鱼、橄榄油)"
+      }
+    },
+    "activity": {
+      "headingLine1": "规律的身体活动",
+      "headingLine2": "(Physical Activity)",
+      "desc": "按WHO建议, 推荐每周150~300分钟中等强度有氧运动及每周2次以上力量训练。尤其餐后30分钟~1小时后散步, 能有效抑制餐后血糖升高。"
+    },
+    "symptoms": {
+      "sectionTitle": "临床症状及体征",
+      "step1": {
+        "title": "三多症状 - 早期信号",
+        "desc": "多饮·多尿·多食最具代表性。因高血糖使糖分随尿液排出, 引发渗透性利尿所致。"
+      },
+      "step2": {
+        "title": "警示症状 - 体重减少·视力变化",
+        "desc": "因胰岛素作用下降, 机体分解脂肪·蛋白质代替葡萄糖, 短期内体重减轻。视物模糊、频繁感染、手脚麻木也是危险信号。"
+      },
+      "step3": {
+        "title": "慢性并发症",
+        "desc": "长期放任时, 可能发生糖尿病视网膜病变、糖尿病肾病(透析首位病因)、糖尿病神经病变、心肌梗死·脑卒中等全身并发症。"
+      },
+      "caution": "早期糖尿病多无症状, 韩国疾病管理厅建议40岁以上或携带危险因素者每年定期检查空腹血糖·HbA1c。"
+    },
+    "references": {
+      "kda": {
+        "source": "大韩糖尿病学会",
+        "detail": "糖尿病诊疗指南 2023"
+      },
+      "kdca": {
+        "source": "韩国疾病管理厅(KDCA)",
+        "detail": "国民健康营养调查 2022, 慢性病统计"
+      }
+    }
+  },
+  "dyslipidemiaReportPage": {
+    "riskFactors": {
+      "0": "国内30岁以上成人约40%患有高脂血症 (疾病管理厅2022)",
+      "1": "无自觉症状即进展为动脉硬化、心脑血管疾病",
+      "2": "必须并行饮食、运动、体重管理与他汀类等药物治疗"
+    },
+    "title": "高脂血症 (Hyperlipidemia)",
+    "subtitle": "依据韩国血脂·动脉硬化学会(KSoLA) 2022诊疗指南，当LDL 160、总胆固醇240、甘油三酯200 mg/dL以上或HDL低于40 mg/dL时诊断的慢性代谢疾病。",
+    "overview": {
+      "heading": "什么是高脂血症？",
+      "paragraph1": "血脂异常定义为血中LDL胆固醇、总胆固醇、甘油三酯升高或HDL胆固醇降低(KSoLA)。在疾病管理厅2022年调查中，报告国内30岁以上成人约40%患有血脂异常，且随年龄增长患病率急剧上升。",
+      "paragraph2": "过量血脂会在血管内皮形成斑块，加速动脉硬化，最终引发心绞痛、心肌梗死、脑卒中、外周血管疾病。由于常与代谢综合征、糖尿病、高血压并存，因此综合风险评估与LDL目标值管理是关键。"
+    },
+    "diagnosis": {
+      "sectionTitle": "诊断标准 (Diagnosis)",
+      "card1": {
+        "title": "LDL 160 / TC 240 / TG 200 mg/dL",
+        "subTitle": "KSoLA 2022诊断标准",
+        "desc": "LDL 160 mg/dL以上、总胆固醇240 mg/dL以上、甘油三酯200 mg/dL以上、HDL低于40 mg/dL中符合任一项即诊断为血脂异常。"
+      },
+      "card2": {
+        "title": "9~12小时空腹血液检查",
+        "subTitle": "血脂谱测定",
+        "desc": "为确保甘油三酯准确度，空腹9~12小时后采血测定TC、LDL、HDL、TG。以1~2周间隔复查以排除一时性波动。"
+      },
+      "card3": {
+        "title": "心血管风险评估",
+        "subTitle": "伴随危险因素分析",
+        "desc": "通过颈动脉超声、冠状动脉CT确认动脉硬化，综合年龄、高血压、糖尿病、吸烟、家族史评估10年心血管风险，据此设定LDL目标。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理指南",
+      "pharmacology": {
+        "heading": "药物治疗 (Pharmacology)",
+        "lipidLowering": {
+          "title": "降低血脂数值",
+          "item": "他汀(Statin)作为一线药物，通过抑制肝脏胆固醇合成使LDL降低30~50%。必要时联用依折麦布、PCSK9抑制剂。"
+        },
+        "monitoring": {
+          "title": "持续监测",
+          "item": "根据风险维持目标LDL(高危人群低于70 mg/dL、中度低于100 mg/dL、低危低于130 mg/dL)，并通过定期血液检查进行监测。"
+        }
+      }
+    },
+    "nutrition": {
+      "heading": "营养及生活习惯",
+      "avoid": {
+        "heading": "应避免的食物",
+        "item1": "饱和脂肪、反式脂肪 (五花肉、黄油、油炸食品、人造黄油)",
+        "item2": "过度饮酒 (甘油三酯急剧上升的主因)",
+        "item3": "单糖、液态果糖 (碳酸饮料、速溶咖啡、甜点)"
+      },
+      "recommend": {
+        "heading": "推荐事项",
+        "item1": "富含水溶性膳食纤维的全谷物、燕麦、豆类",
+        "item2": "欧米伽-3不饱和脂肪酸 (青背鱼、坚果)",
+        "item3": "新鲜蔬菜、水果、海藻类"
+      }
+    },
+    "physicalActivity": {
+      "heading": {
+        "line1": "身体活动及体重管理",
+        "line2": "(Physical Activity)"
+      },
+      "paragraph": "按WHO建议，每周150~300分钟中强度或75~150分钟高强度有氧运动可提高HDL并降低TG。仅减重5~10%即可显著改善LDL、TG。"
+    },
+    "symptoms": {
+      "sectionTitle": "临床症状及征象",
+      "step1": {
+        "title": "早期无症状 (Silent Phase)",
+        "desc": "血脂异常本身几乎没有疼痛、外观变化，仅能通过定期血液检查(40岁以上每4年一次国家体检)发现。"
+      },
+      "step2": {
+        "title": "警示征象 (Warning Signs)",
+        "desc": "重症时可能出现眼睑黄色瘤、角膜环、足跟腱黄色瘤，并可能伴有心绞痛样的胸闷。"
+      },
+      "step3": {
+        "title": "慢性并发症 (Chronic Complications)",
+        "desc": "随动脉硬化进展会发生心肌梗死、脑梗死、外周血管疾病，甘油三酯超过500 mg/dL时急性胰腺炎风险也急剧增加。"
+      },
+      "caution": "需同时管理高血压、糖尿病、肥胖等伴随疾病，并根据风险以6个月~1年间隔进行血脂检查监测。"
+    },
+    "references": {
+      "ksola": {
+        "source": "韩国血脂·动脉硬化学会(KSoLA)",
+        "detail": "血脂异常诊疗指南第5版，2022"
+      },
+      "kdca": {
+        "source": "疾病管理厅(KDCA)",
+        "detail": "国民健康营养调查 2022，慢性病现况报告"
+      }
+    }
+  },
+  "goutReportPage": {
+    "riskFactors": {
+      "0": "男性发病率约为女性的3~4倍，40~50岁人群急剧上升",
+      "1": "急性发作半数以上始于大脚趾第一跖趾关节",
+      "2": "必须同时进行饮食调节、体重管理与降尿酸药物治疗"
+    },
+    "title": "痛风(Gout)",
+    "intro": "因血清尿酸超过7.0 mg/dL所定义的高尿酸血症，导致尿酸结晶(MSU)沉积于关节而引发的慢性炎症性关节炎(ACR/大韩风湿病学会2020)。",
+    "overview": {
+      "heading": "什么是痛风？",
+      "paragraph1": "痛风因嘌呤代谢异常使血清尿酸超过7.0 mg/dL(高尿酸血症)，导致单钠尿酸盐(MSU)结晶沉积于关节及软组织而发生。\n                沉积于关节的结晶会引发急剧的炎症反应，导致伴有剧烈疼痛、肿胀、发红、灼热感的急性发作。国内痛风患者近10年间约增加了2倍。",
+      "paragraph2": "痛风不仅是单纯的关节疾病，还与代谢综合征、高血压、慢性肾病密切相关，若不加管理，可能进展为慢性结节性痛风、肾结石、肾衰竭等。"
+    },
+    "diagnosis": {
+      "sectionTitle": "诊断标准 (Diagnosis)",
+      "card1": {
+        "title": "血清尿酸 > 7.0 mg/dL",
+        "subTitle": "高尿酸血症标准",
+        "desc": "血清尿酸超过7.0 mg/dL定义为高尿酸血症(ACR/KCR 2020)。但急性发作期间也可能显示正常值，因此需根据时期进行复查。"
+      },
+      "card2": {
+        "title": "关节液MSU结晶确认",
+        "subTitle": "确诊金标准",
+        "desc": "通过关节穿刺抽取的滑液中，若在偏振光显微镜下确认呈负性双折射的针状单钠尿酸盐(MSU)结晶，即可确诊。"
+      },
+      "card3": {
+        "title": "超声·DECT影像诊断",
+        "subTitle": "非侵入性诊断",
+        "desc": "通过关节超声确认'Double Contour'征象，或以双能CT(DECT)使尿酸结晶沉积可视化，可进行非侵入性诊断。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理指南"
+    },
+    "pharmacology": {
+      "heading": "药物治疗 (Pharmacology)",
+      "acute": {
+        "heading": "急性期缓解",
+        "item1": "单独或联合使用NSAIDs、秋水仙碱(低剂量)、类固醇制剂，在发作24小时内抑制炎症。"
+      },
+      "longTerm": {
+        "heading": "长期预防(ULT)",
+        "item1": "坚持服用降尿酸药物(别嘌醇、非布司他)，将血清尿酸维持在6.0 mg/dL以下(结节性痛风为5.0 mg/dL以下)。"
+      }
+    },
+    "nutrition": {
+      "heading": "营养及生活习惯",
+      "avoid": {
+        "heading": "应避免的食物",
+        "item1": "啤酒、蒸馏酒等酒精 (促进尿酸生成)",
+        "item2": "高嘌呤肉类 (红肉、培根)",
+        "item3": "动物内脏、凤尾鱼、沙丁鱼、鲭鱼等高嘌呤鱼类"
+      },
+      "recommend": {
+        "heading": "推荐事项",
+        "item1": "低脂牛奶、酸奶等乳制品 (有助尿酸排出)",
+        "item2": "蔬菜、樱桃及富含维生素C的食物",
+        "item3": "以全谷物为主的复合碳水化合物"
+      }
+    },
+    "hydration": {
+      "heading": {
+        "line1": "饮水量",
+        "line2": "(Hydration)"
+      },
+      "description": "每日摄取2L以上的水可促进经肾脏的尿酸排泄并预防尿酸结石形成。含糖饮料、果糖饮料反而会增加尿酸生成，应予避免。"
+    },
+    "symptoms": {
+      "sectionTitle": "临床症状及征象",
+      "step1": {
+        "title": "急性痛风性关节炎",
+        "desc": "多在夜间急剧发作，关节发红肿胀并出现剧烈疼痛。首次发作50%以上发生在大脚趾第一跖趾关节。"
+      },
+      "step2": {
+        "title": "间歇期痛风",
+        "desc": "发作后症状消失的无症状期，易于中断治疗，但若不进行尿酸调控，复发间隔会逐渐缩短。"
+      },
+      "step3": {
+        "title": "慢性结节性痛风",
+        "desc": "放任数年后尿酸结晶会形成结节(Tophus)，引发关节破坏与变形，并因肾结石、尿酸肾病导致肾功能下降。"
+      },
+      "caution": "对高血压、糖尿病、高脂血症、肥胖等代谢综合征的共同管理对痛风预后起决定性作用，需定期进行尿酸、肾功能检查。"
+    },
+    "references": {
+      "0": {
+        "source": "大韩风湿病学会(KCR)",
+        "detail": "痛风诊疗指南 2020"
+      },
+      "1": {
+        "source": "American College of Rheumatology (ACR)",
+        "detail": "Guideline for the Management of Gout, 2020"
+      },
+      "2": {
+        "source": "疾病管理厅(KDCA)",
+        "detail": "慢性病统计 (痛风患病趋势)"
+      },
+      "3": {
+        "source": "EULAR",
+        "detail": "Recommendations for the Management of Gout, 2016 (updated)"
+      }
+    }
+  },
+  "healthReportPage": {
+    "tab": {
+      "bloodSugar": "血糖",
+      "bloodPressure": "血压",
+      "weight": "体重",
+      "bmi": "BMI"
+    },
+    "header": {
+      "title": "健康报告",
+      "subtitle": "一目了然查看您近期的健康指标。"
+    },
+    "loading": "加载中...",
+    "locked": {
+      "title": "个人/家庭套餐专属功能",
+      "description": "健康报告可在个人套餐或家庭套餐中使用。",
+      "subscribe": "前往订阅"
+    },
+    "summary": {
+      "noRecord": "无记录",
+      "bloodSugar": {
+        "label": "最近血糖",
+        "avg": "平均 {{value}} mg/dL"
+      },
+      "bloodPressure": {
+        "label": "最近血压",
+        "sub": "收缩压 / 舒张压"
+      },
+      "weight": {
+        "label": "体重",
+        "height": "身高 {{value}}cm"
+      },
+      "bmi": {
+        "label": "BMI",
+        "needData": "需要体重/身高",
+        "underweight": "体重过轻",
+        "normal": "正常",
+        "overweight": "超重",
+        "obese": "肥胖"
+      }
+    },
+    "chart": {
+      "bloodSugar": {
+        "title": "近期血糖趋势",
+        "empty": "暂无血糖记录。",
+        "lineName": "血糖"
+      },
+      "bloodPressure": {
+        "title": "近期血压趋势",
+        "empty": "暂无血压记录。",
+        "systolic": "收缩压",
+        "diastolic": "舒张压"
+      },
+      "weight": {
+        "title": "近期体重趋势",
+        "empty": "暂无体重记录。",
+        "lineName": "体重"
+      },
+      "bmi": {
+        "title": "近期BMI趋势",
+        "emptyWeight": "暂无体重记录。",
+        "emptyHeight": "需要身高信息。",
+        "lineName": "BMI"
+      }
+    }
+  },
+  "hypertensionReportPage": {
+    "riskFactors": {
+      "0": "国内30岁以上成人约28%患有高血压（韩国疾病管理厅2022）",
+      "1": "无症状进展，发现时可能已造成靶器官损害",
+      "2": "必须同时进行低盐饮食、体重管理与药物治疗"
+    },
+    "title": "高血压（Hypertension）",
+    "intro": "根据大韩高血压学会2022诊疗指南，诊室血压达到140/90 mmHg以上、家庭血压达到135/85 mmHg以上时即诊断为高血压的慢性疾病。\n            因早期无症状而被称为“沉默的杀手”，为预防中风、心肌梗死等并发症，系统化管理必不可少。",
+    "overview": {
+      "heading": "什么是高血压？",
+      "paragraph1": "高血压是指血管壁所承受的压力持续超出正常范围的状态（WHO）。根据韩国疾病管理厅国民健康营养调查2022，\n                国内30岁以上成人约28%患有高血压，65岁以上人群中超过半数。慢性的压力升高会损伤血管内皮并加速动脉硬化，进而导致中风、心肌梗死等致命并发症。",
+      "paragraph2": "高血压与代谢综合征密切相关，若不加以管理，会增加心力衰竭、肾衰竭（透析）、视网膜病变及痴呆的风险。通过家庭血压测量和定期就诊进行持续管理是关键。"
+    },
+    "diagnosis": {
+      "sectionTitle": "诊断标准 (Diagnosis)",
+      "card1": {
+        "title": "诊室血压140/90 mmHg以上",
+        "subTitle": "大韩高血压学会2022标准",
+        "desc": "在2次以上就诊时测得的诊室血压收缩压达到140或舒张压达到90 mmHg以上即诊断为高血压。130～139/80～89为注意阶段。"
+      },
+      "card2": {
+        "title": "家庭血压135/85 mmHg以上",
+        "subTitle": "家庭·24小时动态血压测量",
+        "desc": "为鉴别白大衣高血压和隐匿性高血压，测量家庭血压或24小时动态血压。动态血压日间平均135/85、夜间120/70以上为诊断标准。"
+      },
+      "card3": {
+        "title": "靶器官损害评估",
+        "subTitle": "并发症伴随检查",
+        "desc": "通过心电图、心脏超声、眼底检查、尿液（微量白蛋白尿）及肾功能检查，评估左心室肥厚、视网膜病变、肾脏损害等靶器官损害。"
+      }
+    },
+    "management": {
+      "sectionTitle": "管理指南"
+    },
+    "pharmacology": {
+      "heading": "药物治疗 (Pharmacology)",
+      "initial": {
+        "heading": "初期血压调控",
+        "item1": "ACE抑制剂、ARB（血管紧张素受体阻滞剂）、钙通道阻滞剂（CCB）、利尿剂作为一线药物使用，根据患者状况以单一或联合疗法安全地将血压调控至目标值。"
+      },
+      "longTerm": {
+        "heading": "长期维持",
+        "item1": "通过家庭血压测量、规律运动及遵医嘱坚持服药，一般成人以维持140/90 mmHg以下为目标，伴有糖尿病、肾脏疾病时则以130/80 mmHg以下为目标。"
+      }
+    },
+    "nutrition": {
+      "heading": "营养与生活习惯",
+      "avoid": {
+        "heading": "应节制的食物",
+        "item1": "高钠食品（方便面、腌渍海鲜、泡菜、加工肉）",
+        "item2": "过量饮酒（限制为男2杯/女1杯以下）",
+        "item3": "饱和脂肪、反式脂肪、单糖"
+      },
+      "recommend": {
+        "heading": "推荐事项",
+        "item1": "DASH饮食（蔬菜、水果、低脂乳制品）",
+        "item2": "富含钾的食物（香蕉、菠菜、土豆）",
+        "item3": "全谷物及低脂蛋白质（鱼、豆类、鸡胸肉）"
+      }
+    },
+    "lifestyle": {
+      "heading": {
+        "line1": "体重管理与有氧运动",
+        "line2": "(Lifestyle Changes)"
+      },
+      "description": "WHO建议每周进行150～300分钟的中等强度有氧运动，并建议将盐摄入量限制在每天5g（钠2,000mg）以下。体重每减轻1kg，血压约下降1 mmHg。"
+    },
+    "symptoms": {
+      "sectionTitle": "临床症状及体征",
+      "step1": {
+        "title": "初期无症状 (Silent Phase)",
+        "desc": "大多数患者无法察觉血压升高。这正是其被称为“沉默的杀手”的原因，只能通过家庭血压测量和定期健康检查来发现。"
+      },
+      "step2": {
+        "title": "警告症状 (Warning Signs)",
+        "desc": "血压急剧升高时可能出现后枕部头痛、头晕、鼻出血、视野模糊，180/120 mmHg以上的高血压急症需立即前往急诊就诊。"
+      },
+      "step3": {
+        "title": "慢性并发症 (Chronic Complications)",
+        "desc": "长期放任会导致动脉硬化进展，进而引发中风、心肌梗死、心力衰竭、慢性肾病、高血压性视网膜病变等靶器官损害。"
+      },
+      "caution": "应同时管理糖尿病、血脂异常、肥胖等伴随疾病，并通过每6个月～1年一次的定期检查及早发现并发症，这一点很重要。"
+    },
+    "references": {
+      "0": {
+        "source": "WHO",
+        "detail": "Hypertension Fact Sheet, 2023"
+      },
+      "1": {
+        "source": "大韩高血压学会",
+        "detail": "高血压诊疗指南 2022"
+      },
+      "2": {
+        "source": "韩国疾病管理厅(KDCA)",
+        "detail": "国民健康统计 2022（高血压患病率）"
+      },
+      "3": {
+        "source": "ESC/ESH",
+        "detail": "Guidelines for the Management of Arterial Hypertension, 2023"
+      }
+    }
+  },
+  "mainReportPage": {
+    "heroBadges": {
+      "diet": "饮食·运动记录",
+      "bloodTracking": "血压·血糖追踪",
+      "aiReport": "AI 分析报告",
+      "diseaseGuide": "分疾病指南"
+    },
+    "features": {
+      "dailyRecord": {
+        "title": "每日健康记录",
+        "description": "从饮食、运动、饮水量、体重、血压、血糖到服药，在同一界面录入并管理一天的所有健康记录。",
+        "tags": {
+          "diet": "饮食",
+          "exercise": "运动",
+          "water": "饮水",
+          "bloodPressureSugar": "血压/血糖"
+        }
+      },
+      "stats": {
+        "title": "记录统计与报告",
+        "description": "通过分时段统计与可视化图表，一目了然地掌握变化趋势，并可获取每周综合报告。",
+        "tags": {
+          "periodStats": "日/周/月统计",
+          "trendGraph": "趋势图",
+          "comprehensiveReport": "综合报告"
+        }
+      },
+      "goal": {
+        "title": "个性化目标设定",
+        "description": "设定目标体重、饮水量、摄入/消耗卡路里，并配合每日作息（起床·用餐·就寝）接收提醒。",
+        "tags": {
+          "goalMetric": "目标指标",
+          "routineAlert": "作息提醒",
+          "achievementRate": "达成率"
+        }
+      },
+      "medication": {
+        "title": "服药管理",
+        "description": "只需一张处方照片即可自动登记正在服用的药物，并通过分时段服药提醒做到不遗漏。",
+        "tags": {
+          "prescriptionOcr": "处方 OCR",
+          "medicationAlert": "服药提醒",
+          "medicationHistory": "服药记录"
+        }
+      },
+      "diseaseGuide": {
+        "title": "分疾病指南",
+        "description": "提供高血压、糖尿病、高脂血症、肥胖、痛风、骨质疏松症等主要慢性病的权威医学信息与管理方法。",
+        "tags": {
+          "whoKdca": "基于 WHO·KDCA",
+          "sixDiseases": "六大疾病",
+          "management": "管理方法"
+        }
+      },
+      "community": {
+        "title": "健康社区",
+        "description": "与有相同困扰的人分享经验，在分类版块自由交流提问、心得与日常。",
+        "tags": {
+          "categoryBoard": "分类版块",
+          "qa": "提问/回答",
+          "recommendView": "推荐/浏览"
+        }
+      }
+    },
+    "howItWorks": {
+      "record": {
+        "title": "记录",
+        "description": "只需轻松录入今天吃的饮食、运动以及血压·血糖·体重，数据便会一点点累积起来。"
+      },
+      "analyze": {
+        "title": "分析",
+        "description": "AI 会分析累积的数据，为您指出变化趋势、风险信号以及需要改善的方面。"
+      },
+      "manage": {
+        "title": "管理",
+        "description": "通过个性化目标、作息、服药提醒及社区的鼓励，帮助您持续保持健康习惯。"
+      }
+    },
+    "hero": {
+      "titleLine1": "每天的点滴记录，",
+      "titleHighlight": "一生的健康",
+      "titleLine2Suffix": "。",
+      "description": "Ballife 将分散的饮食、运动、血压、血糖、服药等健康数据汇聚一处，并以 AI 分析的洞察与社区的鼓励，助您实现可持续的健康管理。",
+      "startNow": "立即开始",
+      "exploreFeatures": "了解主要功能"
+    },
+    "heroVisual": {
+      "todaySummary": "今日健康概览",
+      "bloodPressure": "血压",
+      "bloodSugar": "血糖",
+      "goalAchievement": "今日目标达成率"
+    },
+    "featuresSection": {
+      "title": "健康管理所需的一切，尽在一处",
+      "subtitle": "借助 Ballife 提供的 6 大核心功能，让健康管理更轻松、更智能。"
+    },
+    "howItWorksSection": {
+      "title": "三步开启健康习惯"
+    },
+    "aiSection": {
+      "titleLine1": "24 小时陪伴的",
+      "titleLine2": "AI 健康助手",
+      "description": "从健康疑问、饮食照片分析到服药时间提醒，根据您的生活方式提供个性化建议。",
+      "points": {
+        "interaction": "检查与所服药物的相互作用",
+        "nutrition": "分析今天所吃食物的营养",
+        "interpretation": "解读血压·血糖数值"
+      },
+      "chatUser": "今天午餐后血糖到了 180，没问题吗？",
+      "chatAi": "餐后 2 小时血糖 180mg/dL 比正常标准（低于 140）略高。建议以富含膳食纤维的杂粮和蔬菜为主进餐，餐后 20 分钟的轻度散步也会有帮助。"
+    },
+    "cta": {
+      "title": "迈向更好明天的第一步",
+      "subtitle": "现在就加入 Ballife，与更优秀的用户一起开启健康的生活方式吧。"
+    }
+  },
+  "obesityReportPage": {
+    "riskFactors": {
+      "0": "国内成人约38%为肥胖 (BMI ≥ 25, 韩国疾病管理厅 2022)",
+      "1": "脂肪细胞分泌炎性细胞因子, 引发代谢与激素失衡",
+      "2": "饮食·运动·行为疗法并行, 必要时考虑药物·手术治疗"
+    },
+    "title": "肥胖(Obesity)",
+    "intro": {
+      "line1": "按WHO西太平洋地区及韩国肥胖学会(KSSO)标准, 体质指数(BMI)达到25 kg/m²以上即定义为肥胖, 是对健康产生不良影响的慢性疾病。",
+      "line2": "作为2型糖尿病·高血压·血脂异常·心血管疾病的主要病因, 它是一种应被独立管理的疾病。"
+    },
+    "overview": {
+      "heading": "什么是肥胖?",
+      "paragraph1": "肥胖是能量摄入超过消耗、体脂过度堆积的状态(WHO)。韩国人将BMI 25 kg/m²以上归类为肥胖, 腰围男性达90cm·女性达85cm以上则诊断为腹型肥胖。据韩国疾病管理厅2022年调查, 国内成人肥胖患病率约为38%, 男性尤为突出。",
+      "paragraph2": "肥胖不仅是美容问题, 更是代谢综合征的核心病因, 会增加2型糖尿病、高血压、血脂异常、心脑血管疾病、脂肪肝、睡眠呼吸暂停、骨关节炎及部分癌症(结肠癌·乳腺癌等)的风险, 并与抑郁症相关。"
+    },
+    "diagnosis": {
+      "title": "诊断标准 (Diagnosis)",
+      "subTitle": "* 体质指数(BMI) = 体重(kg) / [身高(m)]²",
+      "normal": {
+        "subTitle": "正常体重",
+        "desc": "维持健康的正常BMI推荐范围(KSSO)"
+      },
+      "preObesity": {
+        "subTitle": "肥胖前期 (超重)",
+        "desc": "肥胖前期, 强烈建议进行生活习惯矫正"
+      },
+      "stage1": {
+        "subTitle": "1级肥胖",
+        "desc": "1级肥胖, 糖尿病·高血压等并发风险显著增加"
+      },
+      "stage2": {
+        "subTitle": "2级以上肥胖",
+        "desc": "2~3级肥胖, 需考虑专业医疗干预及药物·手术"
+      }
+    },
+    "guideline": {
+      "title": "管理指南"
+    },
+    "pharmacology": {
+      "title": "药物治疗 (Pharmacology)",
+      "weightLoss": {
+        "title": "辅助减重",
+        "item1": "BMI 25以上, 或伴有并发症且BMI 23以上者, 可考虑处方GLP-1类似物、食欲抑制剂、脂肪吸收抑制剂等",
+        "item2": "在专科医生处方下, 与饮食·运动疗法并行以最大化疗效"
+      },
+      "maintenance": {
+        "title": "持续维持管理",
+        "item1": "为维持减下的体重, 进行长期用药及随访观察",
+        "item2": "达成初始体重5~10%减重目标后, 仍持续定期咨询与生活习惯监测"
+      }
+    },
+    "caution": {
+      "fructose": {
+        "title": "液态果糖的危害",
+        "desc": "WHO建议将添加糖限制在总热量的10%以下(尽可能5%以下)。液态果糖直达肝脏, 引发脂肪肝·胰岛素抵抗。"
+      },
+      "lateNight": {
+        "title": "夜宵与代谢障碍",
+        "desc": "睡前3小时内进食会扰乱胰岛素分泌节律且易转化为脂肪储存, 并破坏睡眠质量及次日食欲激素(瘦素·胃饥饿素)的平衡。"
+      }
+    },
+    "physicalActivity": {
+      "title": "身体活动疗法 (Physical Activity)",
+      "desc": "按WHO建议, 每周进行150~300分钟中等强度有氧运动(快走、游泳、骑行)或75~150分钟高强度运动, 并每周2次以上力量训练。",
+      "cardio": {
+        "title": "有氧运动",
+        "desc": "提升心肺耐力及减少体脂"
+      },
+      "strength": {
+        "title": "力量训练",
+        "desc": "提高基础代谢率及预防肌肉流失"
+      },
+      "imageAlt": "运动中的女性"
+    },
+    "diet": {
+      "title": "饮食疗法",
+      "items": {
+        "0": "每日减少500~750 kcal(目标每周减少0.5~1kg)",
+        "1": "以蛋白质·膳食纤维为主的均衡饮食",
+        "2": "遵守规律的进餐时间, 睡前3小时禁食"
+      },
+      "note": "* 节食减肥会引发肌肉流失·反弹, 因此适量摄入优质营养素才是关键。"
+    },
+    "behavior": {
+      "title": "行为治疗",
+      "step1": {
+        "title": "自我监测",
+        "desc": "每日记录饮食·体重·运动, 客观掌握生活模式并找出改善点。"
+      },
+      "step2": {
+        "title": "压力管理",
+        "desc": "区分生理性饥饿与情绪性饥饿, 通过冥想·兴趣活动预防压力性暴食。"
+      },
+      "step3": {
+        "title": "设定现实目标",
+        "desc": "以6个月内减少初始体重5~10%为目标, 制定分阶段计划以维持成就感与动力。"
+      }
+    },
+    "surgery": {
+      "title": "药物及手术",
+      "step1": {
+        "title": "BMI 35以上, 或伴有并发症且BMI 30以上的重度肥胖者, 可考虑袖状胃切除术等代谢·减重手术。"
+      },
+      "step2": {
+        "title": "伴有高血压·糖尿病·血脂异常等并发症时, 制定同时进行疾病治疗与肥胖管理的综合治疗方案。"
+      }
+    },
+    "references": {
+      "ksso": {
+        "source": "韩国肥胖学会(KSSO)",
+        "detail": "肥胖诊疗指南 2022"
+      },
+      "kdca": {
+        "source": "韩国疾病管理厅(KDCA)",
+        "detail": "国民健康营养调查 2022, 肥胖患病率"
+      }
+    }
+  },
+  "osteoporosisReportPage": {
+    "riskFactors": {
+      "0": "高龄及绝经后雌激素减少（国内 50 岁以上女性约 38% 患有骨质疏松症）",
+      "1": "家族史及体重过轻（BMI < 18.5）",
+      "2": "长期服用类固醇（糖皮质激素）",
+      "3": "过度饮酒·吸烟及身体活动不足"
+    },
+    "title": "骨质疏松症（Osteoporosis）",
+    "intro": "根据 WHO 定义，当 DXA 骨密度 T 值在 -2.5 以下时即可确诊，是因骨量减少和微结构破坏而导致骨折风险升高的全身性骨骼疾病。随着老龄化，国内 50 岁以上人群的骨质疏松症患病率正快速上升，公共卫生管理极为重要。",
+    "overview": {
+      "heading": "什么是骨质疏松症？",
+      "paragraph1": "骨质疏松症是因骨量减少和骨组织微结构变化而导致骨强度减弱的状态（WHO）。骨骼终生反复进行吸收与形成，当绝经、衰老、特定药物等导致平衡被打破时，骨密度便会下降。据疾病管理厅资料，国内 50 岁以上女性约 38%、男性约 7% 患有骨质疏松症。",
+      "paragraph2a": "骨质疏松症在进展过程中几乎没有症状，最终会发展为",
+      "paragraph2highlight": "仅因轻微外伤或日常动作就会发生脊椎·髋关节·手腕骨折的脆弱状态",
+      "paragraph2b": "。髋关节骨折是会提高高龄者一年内死亡率的重大并发症。"
+    },
+    "diagnosis": {
+      "title": "诊断标准（WHO T 值）",
+      "subTitle": "以双能 X 线吸收测定法（DXA）测得腰椎·股骨骨密度的 T 值为标准诊断依据（WHO）。",
+      "normal": {
+        "label": "正常",
+        "desc": "骨密度与年轻成人平均值相比处于稳定状态，建议维持预防性的生活习惯。"
+      },
+      "osteopenia": {
+        "label": "骨量减少",
+        "desc": "处于骨量减少阶段，需通过补充钙·维生素 D 及加强运动来阻止骨质疏松症进展。"
+      },
+      "osteoporosis": {
+        "label": "骨质疏松症",
+        "desc": "符合 WHO 诊断标准，需采用双膦酸盐等积极药物治疗的阶段。"
+      }
+    },
+    "management": {
+      "title": "管理指南",
+      "pharmacology": {
+        "heading": "药物治疗（Pharmacology）",
+        "antiresorptive": {
+          "heading": "骨吸收抑制剂",
+          "item1": "双膦酸盐（Bisphosphonates）- 最为普遍",
+          "item2": "地舒单抗（Denosumab）- 每 6 个月一次的注射剂",
+          "item3": "选择性雌激素受体调节剂（SERM）"
+        },
+        "anabolic": {
+          "heading": "促骨形成剂",
+          "item1": "特立帕肽（Teriparatide）",
+          "item2": "罗莫单抗（Romosozumab）- 近期引入的强效药物"
+        }
+      }
+    },
+    "lifestyle": {
+      "heading": "营养与生活习惯",
+      "calcium": {
+        "title": "钙摄入",
+        "desc": "50 岁以上建议每日 800~1,000mg（牛奶、凤尾鱼、豆腐、羽衣甘蓝）"
+      },
+      "vitaminD": {
+        "title": "维生素 D",
+        "desc": "建议每日 800~1,000 IU，并配合每周 2~3 次晒太阳"
+      },
+      "weightBearing": {
+        "title": "负重运动",
+        "desc": "步行·慢跑·爬楼梯每周 3~5 次，遵循 WHO 推荐每周 150 分钟以上"
+      }
+    },
+    "fallPrevention": {
+      "heading": "跌倒预防（Fall Prevention）",
+      "intro": "高龄者骨折大多由跌倒引起，因此营造不易摔倒的环境与强健骨骼同样重要（大韩骨代谢学会 KSBMR）。",
+      "check1": "确保室内照明充足并清除地面障碍物",
+      "check2": "在浴室·楼梯安装防滑垫·扶手",
+      "check3": "定期检查视力·听力并进行提升平衡感的运动（太极拳等）"
+    },
+    "symptoms": {
+      "title": "临床症状与征兆",
+      "fractureRisk": {
+        "heading": "骨折风险（Fracture Risk）",
+        "desc": "手腕·脊椎·髋关节部位的骨折最为常见，尤其是髋关节骨折一年内死亡率高达约 15~20%，相当致命。脊椎甚至可能仅因轻微外伤或咳嗽就发生压缩性骨折。"
+      },
+      "bodyChange": {
+        "title": "体型变化",
+        "desc": "脊椎压缩性骨折累积后，可能出现身高缩短 3cm 以上或驼背的脊柱后凸。"
+      },
+      "dullPain": {
+        "title": "钝痛",
+        "desc": "骨质疏松症本身无症状，但发生微骨折·压缩性骨折时，可能伴有慢性腰痛和全身疼痛。"
+      }
+    },
+    "references": {
+      "ksbmr": {
+        "source": "大韩骨代谢学会（KSBMR）",
+        "detail": "骨质疏松症诊疗指南 2022"
+      },
+      "kdca": {
+        "source": "疾病管理厅（KDCA）",
+        "detail": "国民健康营养调查 2022，骨质疏松症患病率"
+      }
+    }
+  },
+  "diseaseEditPage": {
+    "toast": {
+      "loadFailed": "无法加载疾病信息。",
+      "demoSaved": "疾病编辑界面演示值已保存。",
+      "saved": "已修改持有疾病信息。",
+      "saveFailed": "疾病信息修改失败。"
+    },
+    "eyebrow": {
+      "member": "修改持有疾病",
+      "demo": "疾病编辑演示"
+    },
+    "title": "疾病信息编辑",
+    "subtitle": "请选择并更新当前持有的慢性疾病状态。",
+    "demoNotice": "无需登录即可查看界面,保存值仅保存在浏览器中。",
+    "close": "关闭",
+    "loading": "正在加载疾病信息。",
+    "cancel": "取消",
+    "saving": "保存中...",
+    "submit": "保存"
+  },
+  "diseasePage": {
+    "title": "现患疾病检查",
+    "submit": "完成",
+    "toast": {
+      "signUpComplete": "注册已完成！"
+    }
+  },
+  "loginPage": {
+    "title": "登录",
+    "submit": "登录",
+    "submitting": "登录中...",
+    "loginIdPlaceholder": "请输入账号。",
+    "passwordPlaceholder": "请输入密码。",
+    "validation": {
+      "loginIdRequired": "请输入账号。",
+      "passwordRequired": "请输入密码。"
+    },
+    "toast": {
+      "welcome": "欢迎您，{{name}}！",
+      "loginFailed": "账号或密码不正确。"
+    },
+    "noAccount": "还没有账号吗？",
+    "signUp": "注册"
+  },
+  "profileEditPage": {
+    "toast": {
+      "loadFailed": "未能加载会员信息。",
+      "imageOnly": "只能选择图片文件。",
+      "imageTooLarge": "头像照片只能上传 10MB 以下的文件。",
+      "imageLoadFailed": "无法加载图片。",
+      "profileSaved": "个人资料已保存。",
+      "memberUpdated": "会员信息已修改。",
+      "imageSavedLocally": "头像照片已保存在此浏览器中。",
+      "updateFailed": "会员信息修改失败。"
+    },
+    "eyebrow": {
+      "member": "修改会员信息",
+      "demo": "个人资料编辑演示"
+    },
+    "title": "修改个人资料",
+    "description": "可以修改姓名、昵称、出生日期、性别和身体信息。",
+    "demoNotice": "无需登录即可查看页面，保存的值仅保留在浏览器中。",
+    "close": "关闭",
+    "loading": "正在加载会员信息。",
+    "imageAlt": "头像预览",
+    "imageLabel": "头像照片",
+    "imageHint": "可上传 JPG、PNG、WEBP 图片。照片将在此浏览器中即时生效。",
+    "selectImage": "选择照片",
+    "defaultImage": "默认图片",
+    "field": {
+      "email": "邮箱",
+      "username": "姓名",
+      "nickname": "昵称",
+      "birthDate": "出生日期",
+      "gender": "性别",
+      "weight": "体重(kg)",
+      "height": "身高(cm)"
+    },
+    "gender": {
+      "none": "不选择",
+      "male": "男性",
+      "female": "女性"
+    },
+    "cancel": "取消",
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "signUpPage": {
+    "title": "注册",
+    "devAutoFill": "[DEV] 自动填入测试数据",
+    "labels": {
+      "loginId": "账号",
+      "password": "密码",
+      "passwordConfirm": "确认密码",
+      "username": "用户姓名",
+      "email": "身份验证邮箱",
+      "birthDate": "出生日期",
+      "nickname": "昵称",
+      "gender": "性别",
+      "height": "身高",
+      "weight": "体重"
+    },
+    "optional": "（可选）",
+    "placeholders": {
+      "loginId": "请输入账号。",
+      "password": "请输入6位以上的英文与数字组合。",
+      "passwordConfirm": "请再次输入密码。",
+      "username": "请输入姓名。",
+      "nickname": "请输入要显示的名称。"
+    },
+    "checkDuplicate": "重复检查",
+    "checkingDuplicate": "检查中...",
+    "loginIdAvailable": "该账号可以使用。",
+    "loginIdTaken": "该账号已被使用。",
+    "selectEmailDomain": "选择邮箱",
+    "customDomain": "手动输入",
+    "genderMale": "男性",
+    "genderFemale": "女性",
+    "submit": "注册",
+    "submitting": "注册中...",
+    "alreadyHaveAccount": "已经有账号了吗？",
+    "login": "登录",
+    "toast": {
+      "checkFailed": "重复检查失败。请稍后再试。",
+      "autoFillDone": "测试数据自动填入完成"
+    },
+    "errors": {
+      "loginIdRequired": "请输入账号。",
+      "loginIdMinLength": "账号需为5位以上。",
+      "loginIdCheckRequired": "请完成账号重复检查。",
+      "passwordRequired": "请输入密码。",
+      "passwordMinLength": "密码需为6位以上。",
+      "passwordConfirmRequired": "请输入确认密码。",
+      "passwordMismatch": "密码不一致。",
+      "emailRequired": "请输入邮箱。",
+      "emailInvalid": "邮箱格式不正确。",
+      "birthDateRequired": "请输入出生日期。",
+      "genderRequired": "请选择性别。",
+      "weightRequired": "请输入体重。",
+      "heightRequired": "请输入身高。",
+      "positiveNumber": "请输入0以上的数字。"
+    }
+  },
+  "userInformation": {
+    "routine": {
+      "wakeup": "起床",
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "bedtime": "就寝",
+      "title": "每日生活作息",
+      "edit": "修改作息"
+    },
+    "confirm": {
+      "deletePrescription": "要删除这张处方吗？"
+    },
+    "toast": {
+      "prescriptionDeleted": "处方已删除。",
+      "reportGenerating": "正在生成健康分析报告…",
+      "reportDownloaded": "健康分析报告下载完成",
+      "memberLoadFailed": "未能加载会员信息。",
+      "configLoadFailed": "未能加载目标/作息信息。",
+      "loginRequired": "需要登录。",
+      "targetsSaved": "目标已保存。",
+      "routineSaved": "作息已保存。",
+      "subscriptionActivated": "订阅已激活。",
+      "subscriptionCancelled": "已取消订阅。"
+    },
+    "metric": {
+      "currentWeight": "当前体重 {{weight}}kg",
+      "calorieOutWithGoal": "当前消耗卡路里 {{current}}kcal / 达成 {{goal}}kcal",
+      "calorieOut": "当前消耗卡路里 {{current}}kcal",
+      "calorieInWithGoal": "当前摄入卡路里 {{current}}kcal / 达成 {{goal}}kcal",
+      "calorieIn": "当前摄入卡路里 {{current}}kcal",
+      "waterMl": "{{current}} ml / {{target}} ml",
+      "targetWeight": "目标体重",
+      "targetWater": "目标饮水量",
+      "targetCalorieIn": "目标摄入卡路里",
+      "targetCalorieOut": "目标消耗卡路里",
+      "editBadge": "修改",
+      "cupUnit": "杯"
+    },
+    "subscription": {
+      "familyPlan": "家庭套餐",
+      "individualPlan": "个人套餐",
+      "free": "免费",
+      "title": "订阅",
+      "activePlan": "正在使用 {{plan}}",
+      "expiryUntil": " · 至 {{date}}",
+      "promo": "订阅套餐，体验健康报告和家庭健康共享吧。",
+      "generating": "生成中…",
+      "healthReportBtn": "健康分析报告",
+      "familyManage": "家庭管理",
+      "subscribe": "订阅",
+      "manage": "管理订阅"
+    },
+    "loginRequiredPage": "此页面需要登录。",
+    "goToLogin": "前往登录",
+    "profileImageAlt": "头像",
+    "editProfile": "修改资料",
+    "editDisease": "修改既往疾病",
+    "medal": "🏅 勋章",
+    "mission": "🎯 任务",
+    "points": "持有积分",
+    "pointsValue": "{{value}} P",
+    "memberInfo": {
+      "title": "会员信息",
+      "email": "电子邮箱",
+      "birthDate": "出生日期",
+      "gender": "性别",
+      "disease": "疾病"
+    },
+    "normalBloodSugar": {
+      "title": "正常血糖",
+      "fasting": "空腹",
+      "afterMeal1h": "餐后1小时",
+      "afterMeal2h": "餐后2小时"
+    },
+    "normalBloodPressure": {
+      "title": "正常血压",
+      "systolic": "收缩压",
+      "diastolic": "舒张压"
+    },
+    "healthReport": {
+      "title": "健康报告",
+      "subtitle": "一目了然地查看我近期的健康指标。",
+      "viewBtn": "查看健康报告"
+    },
+    "prescription": {
+      "title": "💊 处方列表",
+      "noName": "未命名",
+      "editAria": "修改处方",
+      "deleteAria": "删除处方",
+      "medicineCount": "药品列表 {{count}}种",
+      "noMedicines": "暂无已登记的药品。",
+      "emptyTitle": "暂无已登记的处方",
+      "emptyHint": "请通过下方按钮登记处方",
+      "uploadBtn": "上传处方"
+    }
+  },
+  "bloodPressureRecordModal": {
+    "tab": {
+      "아침": "早晨",
+      "점심": "中午",
+      "저녁": "晚上",
+      "취침전": "睡前"
+    },
+    "toast": {
+      "loginRequired": "需要登录。",
+      "enterBoth": "请同时输入收缩压和舒张压。",
+      "systolicGreater": "收缩压必须大于舒张压。",
+      "updated": "血压记录已修改。",
+      "created": "血压已记录。",
+      "deleted": "血压记录已删除。"
+    },
+    "confirm": {
+      "delete": "要删除这条血压记录吗？"
+    },
+    "status": {
+      "empty": {
+        "label": "输入数值前",
+        "comment": "输入收缩压和舒张压后，即可查看当前血压状态。",
+        "tip": "测量后立即输入，记录管理会更轻松。"
+      },
+      "low": {
+        "label": "低血压",
+        "comment": "当前血压偏低。",
+        "tip": "如有头晕或疲劳感，请充分休息并观察身体状态。"
+      },
+      "high": {
+        "label": "高血压",
+        "comment": "当前血压偏高。",
+        "tip": "如反复偏高，请检查生活习惯，必要时考虑咨询专科医生。"
+      },
+      "caution": {
+        "label": "注意数值",
+        "comment": "测量值比正常范围略高。",
+        "tip": "建议一并检查咸味食物、咖啡因和压力等因素。"
+      },
+      "normal": {
+        "label": "正常数值",
+        "comment": "当前血压走势较为稳定。",
+        "tip": "像现在这样坚持记录，更容易掌握变化趋势。"
+      }
+    },
+    "title": {
+      "edit": "修改血压记录",
+      "create": "记录血压"
+    },
+    "subtitle": {
+      "edit": "可以修改数值或删除记录。",
+      "create": "简单查看并记录今天的血压状态吧。"
+    },
+    "close": "关闭",
+    "info": {
+      "normal": "正常血压：收缩压低于120mmHg，舒张压低于80mmHg",
+      "high": "高血压：收缩压140mmHg以上或舒张压90mmHg以上",
+      "low": "低血压：通常收缩压90mmHg以下或舒张压60mmHg以下"
+    },
+    "systolic": "收缩压",
+    "diastolic": "舒张压",
+    "statusHeading": "血压状态",
+    "gauge": {
+      "low": "低血压",
+      "normal": "正常",
+      "caution": "注意",
+      "high": "高血压"
+    },
+    "button": {
+      "deleting": "删除中...",
+      "delete": "删除",
+      "saving": "保存中...",
+      "update": "保存修改",
+      "submit": "保存并确认记录"
+    }
+  },
+  "chatbot": {
+    "message": {
+      "imageOnly": "目前仅可附加图片(照片)。",
+      "imageLoadFailed": "无法加载照片, 请重试。",
+      "loginRequired": "登录后方可使用。请确认登录信息。",
+      "noReply": "未收到回复。",
+      "fetchFailed": "抱歉, 暂时无法获取回复。请稍后重试。"
+    },
+    "aria": {
+      "openChatbot": "打开AI聊天机器人",
+      "close": "关闭",
+      "removeAttach": "移除附件",
+      "attachFile": "附加文件",
+      "send": "发送"
+    },
+    "header": {
+      "title": "健康AI助手",
+      "status": "可实时咨询"
+    },
+    "empty": {
+      "title": "您好, 我是Ball",
+      "descLine1": "血糖、营养、运动、睡眠等与健康相关的",
+      "descLine2": "疑问, 请随时向我提问。"
+    },
+    "alt": {
+      "attachedImage": "附加图片",
+      "attachPreview": "附件预览"
+    },
+    "input": {
+      "placeholder": "请输入消息..."
+    },
+    "disclaimer": "AI助手的建议仅供参考, 不能替代医学诊断。"
+  },
+  "dailyTimelineModal": {
+    "recordedItems": "今天记录的项目",
+    "close": "关闭",
+    "timelineCount": "时间线（{{count}} 条）",
+    "empty": "这一天没有记录。",
+    "category": {
+      "diet": "饮食",
+      "bloodPressure": "血压",
+      "bloodSugar": "血糖",
+      "water": "饮水",
+      "medication": "服药",
+      "exercise": "运动",
+      "weight": "体重"
+    }
+  },
+  "exerciseModal": {
+    "validation": {
+      "atLeastOne": "请至少添加一项运动。",
+      "aerobicDuration": "有氧运动时间请按 13分30秒 或 13:30 格式输入。",
+      "anaerobicSetReps": "无氧运动请同时输入组数和次数。",
+      "anaerobicDuration": "无氧运动时间请按 13分30秒 或 13:30 格式输入。"
+    },
+    "confirm": {
+      "delete": "要删除这条运动记录吗？"
+    },
+    "toast": {
+      "loginRequired": "需要登录。",
+      "deleted": "运动记录已删除。",
+      "deleteFailed": "删除运动记录失败。",
+      "updated": "运动记录已修改。",
+      "saved": "运动记录已保存。",
+      "updateFailed": "修改运动记录失败。",
+      "saveFailed": "保存运动记录失败。"
+    },
+    "title": {
+      "edit": "修改运动记录",
+      "create": "记录运动"
+    },
+    "subtitle": {
+      "edit": "修改所选的运动记录。",
+      "create": "精确记录今天的努力。"
+    },
+    "close": "关闭",
+    "tab": {
+      "anaerobic": "无氧",
+      "aerobic": "有氧"
+    },
+    "expectedCalorie": "预计消耗卡路里",
+    "setDetailLabel": "各组详细记录",
+    "recording": "记录中",
+    "field": {
+      "exerciseType": "运动种类",
+      "set": "组",
+      "weight": "重量 (KG)",
+      "reps": "次数 (REPS)",
+      "duration": "时间",
+      "kilometer": "公里",
+      "intensity": "强度"
+    },
+    "placeholder": {
+      "duration": "13分30秒"
+    },
+    "intensity": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "addItem": "添加",
+    "button": {
+      "deleting": "删除中...",
+      "delete": "删除",
+      "saving": "保存中...",
+      "updateDone": "修改完成",
+      "saveAndConfirm": "保存并确认记录",
+      "saveAndConfirmCount": "保存并确认记录 ({{count}})"
+    }
+  },
+  "mealDetailModal": {
+    "sample": {
+      "mealType": "午餐",
+      "salmonSalad": "三文鱼沙拉",
+      "brownRiceHalf": "糙米饭半碗"
+    },
+    "label": {
+      "dietRecord": "饮食记录"
+    },
+    "nutrition": {
+      "carbs": "碳水化合物",
+      "protein": "蛋白质",
+      "fat": "脂肪",
+      "sugar": "糖",
+      "cholesterol": "胆固醇",
+      "sodium": "钠"
+    },
+    "totalCalories": "总卡路里"
+  },
+  "mealRegisterModal": {
+    "title": "饮食登记",
+    "subtitle": "以下是 AI 分析的用餐内容，请确认详细营养成分。",
+    "category": {
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "加餐",
+      "fallback": "用餐"
+    },
+    "nutrient": {
+      "calories": "卡路里",
+      "carbs": "碳水化合物",
+      "protein": "蛋白质",
+      "fat": "脂肪",
+      "sugar": "糖",
+      "sodium": "钠",
+      "cholesterol": "胆固醇"
+    },
+    "addFood": "添加食物",
+    "uploadTitle": "上传饮食照片",
+    "uploadHintLine1": "点击此处或拖动照片文件",
+    "uploadHintLine2": "进行上传 (JPG, PNG)",
+    "aiAutoRecognize": "AI 自动识别食物和营养成分",
+    "selectFile": "选择文件",
+    "imageAlt": "饮食照片",
+    "changePhoto": "更换照片",
+    "removePhoto": "移除照片",
+    "analyzing": "AI 正在分析",
+    "analyzingWait": "请稍候...",
+    "aiVisionDone": "AI 视觉分析完成",
+    "foodNameLabel": "食物名称",
+    "foodNamePlaceholder": "输入食物名称将在食药处数据库中检索",
+    "searching": "检索中...",
+    "intakeLabel": "摄入量 (g)",
+    "per100g": "以 100g 为准",
+    "nutritionHeader": "营养成分",
+    "aiEstimate": "AI 估算值",
+    "deleting": "删除中...",
+    "deleteMeal": "删除饮食",
+    "saving": "保存中...",
+    "editComplete": "修改完成",
+    "saveMeal": "保存并确认饮食",
+    "confirm": {
+      "deleteMeal": "确定要删除这条饮食记录吗？\n照片和已登记的食物将全部删除。"
+    },
+    "toast": {
+      "timeChanged": "时间已更改。",
+      "recognizedNoNutrition": "已识别 {{count}} 种食物（{{names}}），但未找到营养信息。请手动输入。",
+      "notRecognized": "未能从照片中识别食物。请手动输入。",
+      "mainFoodAddedWithOthers": "已添加“{{name}}”。（{{others}} 请在“添加食物”后分别单独上传照片）",
+      "mainFoodRecognized": "已识别“{{name}}”。确认后请点击保存按钮。",
+      "analysisFailed": "AI 分析失败。请手动输入。",
+      "mealDeleted": "饮食已删除。",
+      "loginRequired": "需要登录。",
+      "foodsSaved": "已保存 {{count}} 种食物。",
+      "someFoodsSaveFailed": "部分食物保存失败。",
+      "saved": "已保存。",
+      "enterFoodName": "请输入食物名称。",
+      "enterMealTime": "请输入用餐时间。",
+      "updated": "已修改。"
+    }
+  },
+  "medicineSearchTestModal": {
+    "title": "药品检索",
+    "searchPlaceholder": "例：모티리톤정",
+    "searching": "查询中...",
+    "search": "查询",
+    "error": {
+      "notFound": "未找到该药品。",
+      "searchFailed": "查询时发生错误。"
+    },
+    "itemSeqLabel": "品目基准编码",
+    "chartLabel": "性状",
+    "storageMethodLabel": "贮藏方法"
+  },
+  "missionModal": {
+    "section": {
+      "daily": {
+        "title": "每日任务",
+        "note": "每天1次"
+      },
+      "weekly": {
+        "title": "每周任务",
+        "note": "每周1次"
+      },
+      "special": {
+        "title": "特别任务"
+      },
+      "streak": {
+        "title": "连续记录奖励"
+      }
+    },
+    "note": {
+      "eachRegister": "最多3次",
+      "streak7": "每周奖励",
+      "streak30": "每月奖励"
+    },
+    "title": "🎯 任务",
+    "loading": "加载中...",
+    "toast": {
+      "claimed": "任务完成！+{{reward}}P"
+    },
+    "button": {
+      "processing": "处理中...",
+      "claim": "领取",
+      "maxReached": "已达上限",
+      "done": "完成",
+      "notAchieved": "未达成"
+    }
+  },
+  "prescriptionDetailModal": {
+    "title": "我的 [{{groupName}}] 处方列表",
+    "totalCount": "共开具了 {{count}} 种药。",
+    "ingredientLabel": "成分: {{ingredient}}",
+    "empty": "没有开具的药。若删除全部药品，该分组将从服药日程和依从率中一并消失。",
+    "placeholder": {
+      "name": "药名",
+      "purpose": "功效",
+      "dosage": "服用方法"
+    },
+    "action": {
+      "save": "保存",
+      "cancel": "取消",
+      "edit": "修改",
+      "delete": "删除"
+    },
+    "confirmDelete": {
+      "title": "确定要删除吗？",
+      "target": "将删除该药。",
+      "warning": "删除后无法恢复。"
+    }
+  },
+  "prescriptionRegisterModal": {
+    "defaultTitle": "早上服药",
+    "close": "关闭",
+    "scanLabel": "药品处方扫描",
+    "filePlaceholder": "附加文件",
+    "upload": "上传",
+    "groupNameLabel": "处方组名称",
+    "groupNamePlaceholder": "例：降压药",
+    "memoLabel": "备注",
+    "memoPlaceholder": "输入备注...",
+    "detailLabel": "服药详细信息",
+    "column": {
+      "name": "名称",
+      "dosage": "剂量 (MG/PILL)",
+      "manage": "管理"
+    },
+    "emptyList": "尚未登记任何药品。",
+    "medicineNamePlaceholder": "药品名称",
+    "categoryPlaceholder": "分类",
+    "deleteRow": "删除行",
+    "addRow": "添加行",
+    "submitting": "保存中...",
+    "submit": "保存",
+    "alert": {
+      "groupNameRequired": "请输入处方组名称。",
+      "saveFailed": "保存时发生错误。请稍后再试。"
+    }
+  },
+  "routineModal": {
+    "title": "修改日常生活作息",
+    "close": "关闭",
+    "description": "请输入每日的生活时间。系统将根据所输入的时间调整提醒和推荐时点。",
+    "scheduleLabel": "生活时间设置",
+    "saving": "保存中...",
+    "save": "保存",
+    "saveError": "保存时发生错误。请稍后重试。",
+    "meridiemLabel": "上午/下午",
+    "am": "上午",
+    "pm": "下午",
+    "hourLabel": "时",
+    "hourUnit": "{{value}}时",
+    "minuteLabel": "分",
+    "minuteUnit": "{{value}}分"
+  },
+  "searchMedicineModal": {
+    "error": {
+      "notFound": "未能找到该药品。",
+      "generic": "查询时发生错误。"
+    },
+    "title": "搜索",
+    "searchLabel": "药物名称搜索",
+    "searchPlaceholder": "请输入或选择药物名称",
+    "searchingButton": "查询中...",
+    "searchButton": "搜索",
+    "addManually": "搜索结果中没有？直接添加“{{keyword}}”",
+    "detailTitle": "服用详细信息",
+    "column": {
+      "name": "名称",
+      "dosage": "剂量 (MG/PILL)"
+    },
+    "emptyState": "请搜索药物名称。"
+  },
+  "subscriptionModal": {
+    "title": "家庭健康管理订阅",
+    "subtitle": "选择套餐并开始吧。",
+    "close": "关闭",
+    "currentPlanBadge": "当前套餐",
+    "perMonth": "/ 月",
+    "nextStep": "下一步",
+    "plan": {
+      "individual": {
+        "name": "个人套餐",
+        "tagline": "更深入地关注我的健康"
+      },
+      "family": {
+        "name": "家庭套餐",
+        "tagline": "与家人一起管理健康"
+      }
+    },
+    "feature": {
+      "healthReport": "健康报告",
+      "bioSummary": "血糖·血压·体重摘要",
+      "parentBio": "查看父母的血糖/血压",
+      "inviteFamily": "邀请家庭成员",
+      "shareMedication": "共享服药提醒",
+      "shareExercise": "共享运动情况"
+    },
+    "button": {
+      "processing": "处理中...",
+      "currentPlan": "当前使用的套餐",
+      "changeTo": "更改为 {{plan}}",
+      "pay": "支付 {{plan}}",
+      "cancelling": "取消中...",
+      "cancelSubscription": "取消订阅",
+      "close": "取消"
+    },
+    "confirm": {
+      "cancel": "要取消订阅吗？\n如果是家庭套餐，家庭健康共享也将停止。"
+    }
+  },
+  "targetModal": {
+    "title": "修改目标指标",
+    "subtitle": "可以一次性设置每日的目标数值。",
+    "close": "关闭",
+    "reset": "重置",
+    "cancel": "取消",
+    "submit": "保存",
+    "saving": "保存中...",
+    "alert": {
+      "saveError": "保存时发生错误。请稍后重试。"
+    },
+    "field": {
+      "weight": {
+        "label": "目标体重",
+        "description": "请输入您想达到的体重。"
+      },
+      "water": {
+        "label": "目标饮水量",
+        "description": "一天要喝的水量（1杯 = 约200ml）。",
+        "unit": "杯"
+      },
+      "calorieIn": {
+        "label": "目标摄入卡路里",
+        "description": "请输入每日推荐摄入热量。"
+      },
+      "calorieOut": {
+        "label": "目标消耗卡路里",
+        "description": "通过运动和活动要消耗的目标热量。"
+      }
+    }
+  },
+  "userMedalModal": {
+    "title": "我的勋章",
+    "loading": "加载中...",
+    "ownedMedalsLabel": "持有勋章 · 点击装备",
+    "noMedals": "还没有获得的勋章。",
+    "allMedalsLabel": "全部勋章",
+    "equipped": "已装备",
+    "equipping": "装备中...",
+    "equip": "装备",
+    "owned": "持有",
+    "priceRequired": "需要{{price}}P",
+    "toast": {
+      "loadFailed": "未能加载勋章信息。",
+      "equipped": "已装备勋章。",
+      "equipFailed": "勋章装备失败。"
+    }
+  },
+  "weightRecordModal": {
+    "toast": {
+      "loginRequired": "需要登录。",
+      "invalidWeight": "请正确输入体重。",
+      "updated": "{{date}} 的体重记录已修改。",
+      "created": "{{date}} 的体重已记录。"
+    },
+    "title": "记录体重",
+    "subtitle": "记录今天的体重。",
+    "close": "关闭",
+    "targetWeight": "目标体重",
+    "emptyKg": "— kg",
+    "diffFromCurrent": "与当前的差距",
+    "currentWeight": "当前 {{weight}}kg",
+    "progressAchieved": "距目标已达成 {{progress}}%",
+    "advice": {
+      "noTarget": "设定目标体重后即可查看达成率和个性化建议。",
+      "reached": "恭喜！已达到目标体重。请专注于保持维护吧。",
+      "remaining": "距目标还差 {{diff}}kg。再加把劲！"
+    },
+    "submitting": "保存中...",
+    "submit": "保存并确认记录"
+  },
+  "bloodsugarModal": {
+    "title": {
+      "edit": "编辑血糖记录",
+      "create": "记录血糖"
+    },
+    "subtitle": {
+      "edit": "可以修改数值或删除记录。",
+      "create": "记录今天的血糖。"
+    },
+    "close": "关闭",
+    "guide": {
+      "header": "{{diabetes}} · {{context}} 标准"
+    },
+    "statusHeading": "血糖状态",
+    "diabetes": {
+      "none": "无糖尿病",
+      "type1": "1型糖尿病",
+      "type2": "2型糖尿病",
+      "gestational": "妊娠糖尿病"
+    },
+    "context": {
+      "fasting": "空腹",
+      "beforeBed": "睡前",
+      "beforeMeal": "餐前",
+      "afterMeal": "餐后"
+    },
+    "meal": {
+      "fasting": "空腹",
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "beforeBed": "睡前"
+    },
+    "timing": {
+      "beforeMeal": "餐前",
+      "afterMeal": "餐后"
+    },
+    "zone": {
+      "hypo": "低血糖",
+      "normal": "正常",
+      "warn": "警告",
+      "danger": "危险"
+    },
+    "status": {
+      "hypo": {
+        "text": "低血糖",
+        "label": "处于低血糖状态",
+        "description": "血糖偏低。请摄入含糖食物。"
+      },
+      "normal": {
+        "text": "正常",
+        "label": "血糖处于理想水平",
+        "description": "当前血糖数值在正常范围内。请继续保持稳定管理。"
+      },
+      "warn": {
+        "text": "警告",
+        "label": "需要进行血糖管理",
+        "description": "血糖偏高。需要通过饮食和运动进行管理。"
+      },
+      "danger": {
+        "text": "危险",
+        "label": "血糖非常高",
+        "description": "血糖处于危险水平。请咨询医务人员。"
+      }
+    },
+    "toast": {
+      "loginRequired": "需要登录。",
+      "enterValue": "请输入血糖数值",
+      "updated": "血糖记录已修改",
+      "saved": "血糖已保存",
+      "deleted": "血糖记录已删除"
+    },
+    "confirm": {
+      "delete": "要删除这条血糖记录吗？"
+    },
+    "button": {
+      "deleting": "删除中...",
+      "delete": "删除",
+      "saving": "保存中...",
+      "saveEdit": "保存修改",
+      "saved": "保存完成 ✓",
+      "save": "保存并确认记录"
+    }
+  },
+  "prescriptionOcrTestModal": {
+    "intakeOption": {
+      "morning": "早上",
+      "lunch": "中午",
+      "dinner": "晚上",
+      "beforeSleep": "睡前"
+    },
+    "toast": {
+      "nameRequired": "处方名称不能为空。",
+      "noMedicine": "没有可登记的药品。",
+      "updated": "处方已修改。",
+      "registered": "处方已登记。",
+      "nameFetchFailed": "未能获取药品名称。",
+      "alreadyAdded": "该药品已添加。",
+      "added": "已添加“{{name}}”"
+    },
+    "error": {
+      "ocrFailed": "未能获取药品名称。请重试。"
+    },
+    "title": {
+      "edit": "修改处方",
+      "register": "登记处方"
+    },
+    "subtitle": "上传处方图片后会自动提取药品名称。",
+    "imagePreviewAlt": "处方预览",
+    "imageDropTitle": "图片放置处",
+    "imageDropHint": "点击以选择处方图片",
+    "label": {
+      "prescriptionName": "处方名称",
+      "memo": "备注",
+      "intakeTime": "服用时段"
+    },
+    "placeholder": {
+      "prescriptionName": "例：5月定期处方",
+      "memo": "为处方留下简短备注吧。"
+    },
+    "medicineListTitle": "药品名称列表",
+    "addMedicine": "添加药品",
+    "extracting": "正在提取药品名称...",
+    "removeMedicineAria": "删除{{name}}",
+    "emptyState": "放入图片后将显示药品名称。",
+    "submit": {
+      "edit": "修改",
+      "register": "登记"
+    }
+  },
+  "waterRecordModal": {
+    "progress": {
+      "done": "已达成今日目标。也一起检查一下身体状况吧。",
+      "high": "保持当前节奏，今天可以轻松达成目标。",
+      "mid": "节奏不错。继续慢慢饮用就能接近目标。",
+      "low": "还有余地。少量多次饮用就能轻松达成目标。"
+    },
+    "toast": {
+      "loginRequired": "需要登录。"
+    },
+    "title": "记录饮水量",
+    "subtitle": "记录今天的饮水量。",
+    "close": "关闭",
+    "cupIncrease": "增加杯数",
+    "cupDecrease": "减少杯数",
+    "cupUnit": "杯",
+    "currentIntake": "当前饮水量",
+    "milliliters": "= {{ml}}ml",
+    "targetIntake": "目标饮水量",
+    "cupsValue": "{{count}}杯",
+    "advicePrefix": "相对于目标饮水量约 ",
+    "adviceSuffix": "已达成。",
+    "submit": "保存并确认记录"
+  },
+  "inputSelectBox": {
+    "option": {
+      "placeholder": "-- 选择 --",
+      "beforeStart": "未开始",
+      "inProgress": "进行中",
+      "completed": "已完成"
+    }
+  },
+  "mealScoreCard": {
+    "todayScoreLabel": "今日饮食评分",
+    "balanceStatus": "出色均衡",
+    "heading": "营养成分非常协调。",
+    "description": "目前摄入的营养素比例非常接近推荐指南。尤其是蛋白质和脂肪的比例很稳定，剩下的一天只要注意补充膳食纤维，就会是完美的一天。",
+    "tagProtein": "#蛋白质_充足",
+    "tagLowSugar": "#低糖_饮食"
+  },
+  "mealRecordCard": {
+    "hiddenCount": "等{{count}}个",
+    "total": "合计",
+    "macro": {
+      "carb": "碳",
+      "protein": "蛋",
+      "fat": "脂",
+      "sugar": "糖",
+      "chol": "胆",
+      "na": "钠"
+    }
+  },
+  "richTextEditor": {
+    "placeholder": "请输入内容...",
+    "font": {
+      "default": "默认",
+      "malgunGothic": "Malgun Gothic",
+      "nanumGothic": "Nanum Gothic",
+      "nanumMyeongjo": "Nanum Myeongjo",
+      "gungsuh": "Gungsuh"
+    },
+    "toast": {
+      "imageOnly": "仅可附加图片文件。",
+      "imageTooLarge": "仅可附加5MB以下的图片。",
+      "uploading": "图片上传中...",
+      "imageAttached": "已附加图片。",
+      "uploadFailed": "图片上传失败。"
+    }
+  },
+  "mainCalendar": {
+    "meal": {
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snack": "加餐"
+    },
+    "medicationSlot": {
+      "morning": "早间服药",
+      "lunch": "午间服药",
+      "dinner": "晚间服药"
+    },
+    "item": {
+      "bloodSugarCheck": "血糖检测",
+      "bloodPressureCheck": "血压测量",
+      "weightCheck": "体重测量",
+      "waterIntake": "饮水量",
+      "exercise": "运动 ({{name}})",
+      "exerciseFallback": "运动",
+      "minutes": "{{count}}分钟",
+      "medication": "服药",
+      "meal": "饮食",
+      "count": "{{count}}条"
+    },
+    "weekdayShort": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "weekdayLong": {
+      "sun": "星期日",
+      "mon": "星期一",
+      "tue": "星期二",
+      "wed": "星期三",
+      "thu": "星期四",
+      "fri": "星期五",
+      "sat": "星期六"
+    },
+    "monthLabel": "{{month}}月",
+    "yearLabel": "{{year}}年",
+    "aria": {
+      "prevMonth": "上个月",
+      "nextMonth": "下个月",
+      "yearMonthPicker": "年/月选择",
+      "prevYear": "上一年",
+      "nextYear": "下一年"
+    },
+    "empty": "无记录",
+    "moreItems": "+{{count}}条更多 (点击查看)"
+  },
+  "mainCard": {
+    "noRecord": "暂无记录",
+    "status": {
+      "overRange": "超出正常范围",
+      "underRange": "低于正常范围",
+      "normalRange": "正常范围"
+    },
+    "systolicDiastolic": "收缩压 / 舒张压",
+    "type": {
+      "bloodSugar": "血糖",
+      "bloodPressure": "血压",
+      "weight": "体重",
+      "meal": "饮食",
+      "exercise": "运动",
+      "waterIntake": "饮水量",
+      "medicineAlert": "服药提醒"
+    },
+    "value": {
+      "bloodSugar": "{{value}} mg/dL",
+      "weight": "{{value}}kg",
+      "checkMeal": "查看今日饮食",
+      "checkExercise": "查看今日运动",
+      "totalMl": "共 {{ml}}ml",
+      "checkNeeded": "{{count}}项需确认",
+      "doseComplete": "服药完成"
+    },
+    "label": {
+      "recentMeasure": "最近测量",
+      "noMeasureRecord": "暂无测量记录",
+      "totalIntakeKcal": "总摄入热量 {{kcal}}kcal",
+      "burnedKcal": "消耗热量 {{kcal}}kcal",
+      "goalAchieved": "已达成目标",
+      "remainCups": "距目标还差 {{count}}杯",
+      "goalNotSet": "未设置目标",
+      "todayMedicine": "今天需服用的药",
+      "allScheduleComplete": "今天的日程已全部完成"
+    },
+    "alt": {
+      "bloodSugar": "血糖图标",
+      "bloodPressure": "血压图标",
+      "weight": "体重图标",
+      "medicine": "服药图标",
+      "meal": "饮食图标",
+      "exercise": "运动图标",
+      "water": "饮水图标",
+      "supplement": "营养品图标"
+    },
+    "noPrescription": "暂无已登记的处方药。"
+  },
+  "mainChart": {
+    "empty": {
+      "noRecordsTitle": "暂无记录",
+      "noRecordsInRangeTitle": "所选期间内无记录",
+      "noRecordsDesc": "登记测量结果后, 此处将显示趋势",
+      "noRecordsInRangeDesc": "请尝试选择其他期间"
+    }
+  },
+  "medicationProgressCard": {
+    "title": "今日服药依从率",
+    "completed": "{{taken}}/{{total}} 服药完成"
+  },
+  "medicationRecordCard": {
+    "title": "手动记录",
+    "description": "服用常备药时请记录。",
+    "drugNameLabel": "药品名称",
+    "drugNamePlaceholder": "例：维生素C、泰诺",
+    "dosageLabel": "服用量",
+    "dosagePlaceholder": "例：1片、5ml",
+    "dateLabel": "服用日期",
+    "timeLabel": "服用时间",
+    "addMedicine": "添加药品",
+    "save": "保存"
+  },
+  "memoCard": {
+    "title": "备忘录",
+    "empty": "暂无备忘录。"
+  },
+  "prescriptionListCard": {
+    "title": "我的处方药列表",
+    "columnGroup": "药品组",
+    "columnDosage": "服用量",
+    "columnSchedule": "服用日程",
+    "empty": "暂无处方药。",
+    "prevPage": "上一页",
+    "nextPage": "下一页"
+  },
+  "savedRecordsCard": {
+    "viewLabel": "{{month}}月{{day}}日",
+    "title": "常备药",
+    "count": "{{count}} 条",
+    "emptyToday": "今天没有记录的常备药。",
+    "emptyOtherDay": "该日期没有记录的常备药。",
+    "deleteAria": "删除"
+  },
+  "todayScheduleCard": {
+    "title": {
+      "today": "今日服药日程",
+      "other": "服药日程"
+    },
+    "status": {
+      "all": "服药完成",
+      "partial": "部分服药",
+      "none": "服药确认"
+    },
+    "close": "关闭",
+    "selectAll": "全选",
+    "confirm": "确认"
+  },
+  "weeklyCalendarCard": {
+    "status": {
+      "done": "已服药",
+      "partial": "部分服用",
+      "miss": "未服用"
+    },
+    "rows": {
+      "morning": "早晨 (08:00)",
+      "lunch": "中午 (13:00)",
+      "dinner": "晚上 (21:00)"
+    },
+    "dayUnit": "{{date}}日",
+    "prnLabel": "常备药"
+  },
+  "aiAnalysisCard": {
+    "title": "AI 健康分析",
+    "reward": "奖励",
+    "loading": "分析中…",
+    "errorTitle": "无法加载分析",
+    "errorSubtitle": "请稍后再试",
+    "placeholderTitle": "正在准备分析结果",
+    "placeholderSubtitle": "数据累积后将为您提供专属洞察"
+  },
+  "chartSection": {
+    "apply": "应用"
+  },
+  "recordResultCards": {
+    "am": "上午",
+    "pm": "下午",
+    "exerciseType": {
+      "walking": "步行",
+      "running": "跑步",
+      "cardio": "有氧",
+      "strength": "力量训练",
+      "stretching": "拉伸"
+    },
+    "exercise": "运动",
+    "runningDefault": "跑步",
+    "editExerciseRecord": "编辑运动记录",
+    "waterIcon": "饮水图标",
+    "waterIntake": "饮水量",
+    "weightIcon": "体重图标",
+    "todayWeight": "今日体重"
+  },
+  "diseaseComponents": {
+    "riskFactorsTitle": "主要危险因素",
+    "cautionLabel": "注意 : ",
+    "referencesTitle": "参考资料 (References)",
+    "referencesDisclaimer": "本页面的医学信息基于以下权威来源编写，不能替代诊断与治疗。个人状况请务必咨询医疗专业人员。",
+    "lastUpdated": "最后更新：{{date}}"
+  },
+  "authContext": {
+    "toast": {
+      "serverRestarted": "服务器已重启，您已退出登录。",
+      "serverUnreachable": "无法连接服务器，您已退出登录。"
+    }
+  }
+}

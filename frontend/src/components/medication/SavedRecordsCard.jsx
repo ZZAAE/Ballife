@@ -1,7 +1,10 @@
 import { useRef, useState } from "react";
-import { Calendar, Clock, Pill, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Calendar, CalendarDays, Clock, Pill, Trash2 } from "lucide-react";
+import { formatDate } from "../../utils/format";
 
 export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) {
+  const { t } = useTranslation();
   const [viewDate, setViewDate] = useState(todayKey || "");
   const dateInputRef = useRef(null);
 
@@ -21,32 +24,32 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
     if (!dateKey) return "";
     const [y, m, d] = dateKey.split("-");
     if (!y || !m || !d) return dateKey;
-    return `${parseInt(m, 10)}월 ${parseInt(d, 10)}일`;
+    return formatDate(dateKey);
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
+    <div className="-mt-4 flex-1 min-h-0 flex flex-col bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <Pill className="w-4 h-4 text-[#2563EB]" />
             <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900">
-              상비약
+              {t("savedRecordsCard.title")}
             </h3>
           </div>
           {viewDate && (
             <button
               type="button"
               onClick={openDatePicker}
-              className="text-[12px] text-[#2563EB] bg-blue-50 px-2.5 py-0.5 rounded-full font-medium hover:bg-blue-100 transition-colors inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors"
             >
               {formatViewLabel(viewDate)}
-              <Calendar className="w-3 h-3" />
+              <CalendarDays className="h-3.5 w-3.5 text-[#2563EB]" />
             </button>
           )}
         </div>
         <span className="text-[12px] font-semibold text-gray-500">
-          {filtered.length}건
+          {t("savedRecordsCard.count", { count: filtered.length })}
         </span>
       </div>
 
@@ -62,14 +65,15 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
       />
 
 
+      <div className="relative flex-1">
       {filtered.length === 0 ? (
-        <p className="flex-1 flex items-center justify-center text-[13px] text-gray-400 text-center">
+        <p className="absolute inset-0 flex items-center justify-center text-[13px] text-gray-400 text-center">
           {isToday
-            ? "오늘 기록된 상비약이 없습니다."
-            : "해당 날짜에 기록된 상비약이 없습니다."}
+            ? t("savedRecordsCard.emptyToday")
+            : t("savedRecordsCard.emptyOtherDay")}
         </p>
       ) : (
-        <ul className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-1 max-h-[100px]">
+        <ul className="absolute inset-0 space-y-2 overflow-y-auto pr-1">
           {filtered.map((r) => (
             <li
               key={r.id}
@@ -102,7 +106,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
                 type="button"
                 onClick={() => onDeleteRecord(r.id)}
                 className="text-gray-400 hover:text-red-500 transition-colors"
-                aria-label="삭제"
+                aria-label={t("savedRecordsCard.deleteAria")}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -110,6 +114,7 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
           ))}
         </ul>
       )}
+      </div>
     </div>
   );
 }

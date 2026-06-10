@@ -26,48 +26,48 @@ public class MealItemDto {
 
         private Meal meal;
 
-        @NotBlank(message = "음식이름을 입력해주세요")
-        @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
+        @NotBlank(message = "{validation.mealItem.foodName.required}")
+        @Size(max = 20, message = "{validation.mealItem.foodName.size}")
         private String foodName;
 
-        @Size(max = 500, message = "사진 URL은 500자 이하여야 합니다")
+        @Size(max = 500, message = "{validation.mealItem.mealPhoto.size}")
         private String mealPhoto;
 
-        @Min(value = 0, message = "그램은 0 이상이어야 합니다")
+        @Min(value = 0, message = "{validation.mealItem.grams.min}")
         private Integer grams;
 
-        @NotNull(message = "칼로리를 입력해주세요")
-        @Min(value = 0, message = "칼로리는 0 이상이어야 합니다")
+        @NotNull(message = "{validation.mealItem.calorie.required}")
+        @Min(value = 0, message = "{validation.mealItem.calorie.min}")
         private Integer calorie;
 
-        @NotNull(message = "탄수화물을 입력해주세요")
-        @Min(value = 0, message = "탄수화물은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "탄수화물은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.carbohydrate.required}")
+        @Min(value = 0, message = "{validation.mealItem.carbohydrate.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.carbohydrate.digits}")
         private Double carbohydrate;
 
-        @NotNull(message = "당을 입력해주세요")
-        @Min(value = 0, message = "당은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "당은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.sugar.required}")
+        @Min(value = 0, message = "{validation.mealItem.sugar.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.sugar.digits}")
         private Double sugar;
 
-        @NotNull(message = "나트륨을 입력해주세요")
-        @Min(value = 0, message = "나트륨은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "나트륨은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.sodium.required}")
+        @Min(value = 0, message = "{validation.mealItem.sodium.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.sodium.digits}")
         private Double sodium;
 
-        @NotNull(message = "콜레스테롤을 입력해주세요")
-        @Min(value = 0, message = "콜레스테롤은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "콜레스테롤은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.cholesterol.required}")
+        @Min(value = 0, message = "{validation.mealItem.cholesterol.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.cholesterol.digits}")
         private Double cholesterol;
 
-        @NotNull(message = "포화지방을 입력해주세요")
-        @Min(value = 0, message = "포화지방은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "포화지방은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.saturatedFat.required}")
+        @Min(value = 0, message = "{validation.mealItem.saturatedFat.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.saturatedFat.digits}")
         private Double saturatedFat;
 
-        @NotNull(message = "단백질을 입력해주세요")
-        @Min(value = 0, message = "단백질은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "단백질은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.protein.required}")
+        @Min(value = 0, message = "{validation.mealItem.protein.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.protein.digits}")
         private Double protein;
 
 
@@ -86,48 +86,48 @@ public class MealItemDto {
 
         private Meal meal;
 
-        @NotBlank(message = "음식이름을 입력해주세요")
-        @Size(max = 20, message = "음식이름은 20자 이하여야 합니다")
+        @NotBlank(message = "{validation.mealItem.foodName.required}")
+        @Size(max = 20, message = "{validation.mealItem.foodName.size}")
         private String foodName;
 
-        @Size(max = 500, message = "사진 URL은 500자 이하여야 합니다")
+        @Size(max = 500, message = "{validation.mealItem.mealPhoto.size}")
         private String mealPhoto;
 
-        @Min(value = 0, message = "그램은 0 이상이어야 합니다")
+        @Min(value = 0, message = "{validation.mealItem.grams.min}")
         private Integer grams;
 
-        @NotNull(message = "칼로리를 입력해주세요")
-        @Min(value = 0, message = "칼로리는 0 이상이어야 합니다")
+        @NotNull(message = "{validation.mealItem.calorie.required}")
+        @Min(value = 0, message = "{validation.mealItem.calorie.min}")
         private Integer calorie;
 
-        @NotNull(message = "탄수화물을 입력해주세요")
-        @Min(value = 0, message = "탄수화물은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "탄수화물은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.carbohydrate.required}")
+        @Min(value = 0, message = "{validation.mealItem.carbohydrate.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.carbohydrate.digits}")
         private Double carbohydrate;
 
-        @NotNull(message = "당을 입력해주세요")
-        @Min(value = 0, message = "당은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "당은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.sugar.required}")
+        @Min(value = 0, message = "{validation.mealItem.sugar.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.sugar.digits}")
         private Double sugar;
 
-        @NotNull(message = "나트륨을 입력해주세요")
-        @Min(value = 0, message = "나트륨은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "나트륨은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.sodium.required}")
+        @Min(value = 0, message = "{validation.mealItem.sodium.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.sodium.digits}")
         private Double sodium;
 
-        @NotNull(message = "콜레스테롤을 입력해주세요")
-        @Min(value = 0, message = "콜레스테롤은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "콜레스테롤은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.cholesterol.required}")
+        @Min(value = 0, message = "{validation.mealItem.cholesterol.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.cholesterol.digits}")
         private Double cholesterol;
 
-        @NotNull(message = "포화지방을 입력해주세요")
-        @Min(value = 0, message = "포화지방은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "포화지방은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.saturatedFat.required}")
+        @Min(value = 0, message = "{validation.mealItem.saturatedFat.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.saturatedFat.digits}")
         private Double saturatedFat;
 
-        @NotNull(message = "단백질을 입력해주세요")
-        @Min(value = 0, message = "단백질은 0 이상이어야 합니다")
-        @Digits(integer = 10, fraction = 2, message = "단백질은 소수점 2자리까지 입력 가능합니다")
+        @NotNull(message = "{validation.mealItem.protein.required}")
+        @Min(value = 0, message = "{validation.mealItem.protein.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.mealItem.protein.digits}")
         private Double protein;
 
 

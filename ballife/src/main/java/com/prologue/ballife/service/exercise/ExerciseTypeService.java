@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.exercise.ExerciseType;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.exerciseMongo.ExerciseTypeRepository;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ExerciseTypeService {
 
     private final ExerciseTypeRepository exerciseTypeRepository;
+    private final MessageResolver messages;
 
     public List<ExerciseTypeDto.Response> findAll() {
         return exerciseTypeRepository.findAll().stream()
@@ -27,14 +29,16 @@ public class ExerciseTypeService {
 
     public ExerciseTypeDto.Response findById(String exerciseTypeId) {
         ExerciseType found = exerciseTypeRepository.findById(exerciseTypeId)
-                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeId)));
         return ExerciseTypeDto.Response.from(found);
     }
 
     public ExerciseTypeDto.Response create(ExerciseTypeDto.CreateRequest request) {
         exerciseTypeRepository.findByExerciseName(request.getExerciseName())
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException("이미 존재하는 운동명입니다: " + request.getExerciseName());
+                    throw new IllegalArgumentException(
+                            messages.get("business.exerciseType.duplicateExerciseName", request.getExerciseName()));
                 });
 
         ExerciseType saved = exerciseTypeRepository.save(ExerciseType.builder()
@@ -50,7 +54,8 @@ public class ExerciseTypeService {
 
     public ExerciseTypeDto.Response update(String exerciseTypeId, ExerciseTypeDto.UpdateRequest request) {
         ExerciseType found = exerciseTypeRepository.findById(exerciseTypeId)
-                .orElseThrow(() -> new ResourceNotFoundException("운동 종류", exerciseTypeId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeId)));
 
         if (request.getExerciseName() != null) {
             found.setExerciseName(request.getExerciseName());
@@ -73,7 +78,8 @@ public class ExerciseTypeService {
 
     public void delete(String exerciseTypeId) {
         if (!exerciseTypeRepository.existsById(exerciseTypeId)) {
-            throw new ResourceNotFoundException("운동 종류", exerciseTypeId);
+            throw new ResourceNotFoundException(
+                    messages.get("error.notFound", messages.get("resource.exerciseType"), exerciseTypeId));
         }
         exerciseTypeRepository.deleteById(exerciseTypeId);
     }

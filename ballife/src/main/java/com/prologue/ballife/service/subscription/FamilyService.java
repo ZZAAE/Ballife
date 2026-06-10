@@ -15,6 +15,7 @@ import com.prologue.ballife.domain.subscription.FamilyMember;
 import com.prologue.ballife.domain.subscription.FamilyRole;
 import com.prologue.ballife.domain.subscription.SubscriptionPlan;
 import com.prologue.ballife.domain.subscription.SubscriptionStatus;
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.domain.user.User;
 import com.prologue.ballife.exception.ResourceNotFoundException;
 import com.prologue.ballife.repository.daily.BioValueRecordRepository;
@@ -44,6 +45,7 @@ public class FamilyService {
     private final BioValueRecordRepository bioValueRecordRepository;
     private final UserExerciseRepository userExerciseRepository;
     private final ExerciseTypeRepository exerciseTypeRepository;
+    private final MessageResolver messages;
 
     // 혼동되는 문자(0,O,1,I) 제외한 base32 유사 알파벳
     private static final String CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -69,7 +71,7 @@ public class FamilyService {
         // 오너가 이미 다른 그룹의 구성원이면 막는다
         if (familyMemberRepository.existsByUser_UserId(ownerId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "이미 다른 가족 그룹에 속해 있습니다. 먼저 그룹을 나가주세요.");
+                    messages.get("business.family.alreadyInOtherGroup"));
         }
         FamilyGroup group = familyGroupRepository.save(FamilyGroup.builder()
                 .owner(owner)
@@ -90,7 +92,8 @@ public class FamilyService {
     @Transactional
     public FamilyDto.MyFamilyResponse createGroup(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
         requireOwnerFamilySubscription(userId);
         ensureGroupForOwner(user);
         return getMyFamily(userId);
@@ -99,7 +102,7 @@ public class FamilyService {
     @Transactional
     public String rotateInviteCode(Long userId) {
         FamilyGroup group = familyGroupRepository.findByOwner_UserId(userId)
-                .orElseThrow(() -> forbidden("가족 그룹의 오너가 아닙니다."));
+                .orElseThrow(() -> forbidden(messages.get("business.family.notOwner")));
         group.rotateInviteCode(generateUniqueInviteCode());
         return group.getInviteCode();
     }
@@ -110,15 +113,16 @@ public class FamilyService {
     @Transactional
     public FamilyDto.MyFamilyResponse join(Long userId, String rawCode) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("회원", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.user"), userId)));
         if (familyMemberRepository.existsByUser_UserId(userId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 가족 그룹에 속해 있습니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, messages.get("business.family.alreadyInGroup"));
         }
         String code = rawCode == null ? "" : rawCode.trim().toUpperCase();
         FamilyGroup group = familyGroupRepository.findByInviteCode(code)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 초대 코드입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, messages.get("business.family.invalidInviteCode")));
         if (!Boolean.TRUE.equals(group.getIsActive()) || !isOwnerSubscriptionActive(group)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "현재 사용할 수 없는 가족 그룹입니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.family.groupUnavailable"));
         }
         familyMemberRepository.save(FamilyMember.builder()
                 .familyGroup(group).user(user).role(FamilyRole.MEMBER).build());
@@ -128,9 +132,9 @@ public class FamilyService {
     @Transactional
     public void leave(Long userId) {
         FamilyMember me = familyMemberRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "가족 그룹에 속해 있지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, messages.get("business.family.notInGroup")));
         if (me.getRole() == FamilyRole.OWNER) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "오너는 그룹을 나갈 수 없습니다. 구독을 해지해주세요.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.family.ownerCannotLeave"));
         }
         familyMemberRepository.delete(me);
     }
@@ -138,14 +142,15 @@ public class FamilyService {
     @Transactional
     public void removeMember(Long ownerUserId, Long targetUserId) {
         FamilyGroup group = familyGroupRepository.findByOwner_UserId(ownerUserId)
-                .orElseThrow(() -> forbidden("가족 그룹의 오너가 아닙니다."));
+                .orElseThrow(() -> forbidden(messages.get("business.family.notOwner")));
         if (ownerUserId.equals(targetUserId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오너 자신은 제거할 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messages.get("business.family.cannotRemoveOwner"));
         }
         FamilyMember target = familyMemberRepository.findByUser_UserId(targetUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("구성원", targetUserId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.familyMember"), targetUserId)));
         if (!target.getFamilyGroup().getFamilyGroupId().equals(group.getFamilyGroupId())) {
-            throw forbidden("이 그룹의 구성원이 아닙니다.");
+            throw forbidden(messages.get("business.family.notGroupMember"));
         }
         familyMemberRepository.delete(target);
     }
@@ -156,7 +161,7 @@ public class FamilyService {
     @Transactional
     public FamilyDto.MyFamilyResponse updateConsent(Long userId, FamilyDto.ConsentUpdateRequest req) {
         FamilyMember me = familyMemberRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> forbidden("가족 그룹에 속해 있지 않습니다."));
+                .orElseThrow(() -> forbidden(messages.get("business.family.notInGroup")));
         if (req.getShareBloodSugar() != null) me.setShareBloodSugar(req.getShareBloodSugar());
         if (req.getShareBloodPressure() != null) me.setShareBloodPressure(req.getShareBloodPressure());
         if (req.getShareMedication() != null) me.setShareMedication(req.getShareMedication());
@@ -198,9 +203,10 @@ public class FamilyService {
     public FamilyDto.MemberHealthResponse getMemberHealth(Long userId, Long targetUserId) {
         FamilyMember viewer = requireViewableGroup(userId);
         FamilyMember target = familyMemberRepository.findByUser_UserId(targetUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("구성원", targetUserId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        messages.get("error.notFound", messages.get("resource.familyMember"), targetUserId)));
         if (!target.getFamilyGroup().getFamilyGroupId().equals(viewer.getFamilyGroup().getFamilyGroupId())) {
-            throw forbidden("같은 가족 그룹이 아닙니다.");
+            throw forbidden(messages.get("business.family.notSameGroup"));
         }
         boolean isSelf = targetUserId.equals(userId);
         FamilyDto.LatestBloodSugar bs =
@@ -307,10 +313,10 @@ public class FamilyService {
     // 조회자가 활성 그룹에 속해 있어야 함 (오너 구독 만료 시 차단)
     private FamilyMember requireViewableGroup(Long userId) {
         FamilyMember viewer = familyMemberRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> forbidden("가족 그룹에 속해 있지 않습니다."));
+                .orElseThrow(() -> forbidden(messages.get("business.family.notInGroup")));
         FamilyGroup group = viewer.getFamilyGroup();
         if (!Boolean.TRUE.equals(group.getIsActive()) || !isOwnerSubscriptionActive(group)) {
-            throw forbidden("가족 플랜이 만료되었습니다.");
+            throw forbidden(messages.get("business.family.planExpired"));
         }
         return viewer;
     }
@@ -321,7 +327,7 @@ public class FamilyService {
                 .map(s -> s.isActive() && s.getPlan() == SubscriptionPlan.FAMILY)
                 .orElse(false);
         if (!ok) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "가족 플랜 구독이 필요합니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messages.get("business.family.subscriptionRequired"));
         }
     }
 
@@ -344,7 +350,7 @@ public class FamilyService {
                 return code;
             }
         }
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "초대 코드 생성에 실패했습니다.");
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, messages.get("business.family.inviteCodeGenerationFailed"));
     }
 
     private ResponseStatusException forbidden(String message) {

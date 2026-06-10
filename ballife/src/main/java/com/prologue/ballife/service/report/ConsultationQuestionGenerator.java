@@ -9,6 +9,7 @@ import com.prologue.ballife.analyzer.BloodPressureAnalysisResult;
 import com.prologue.ballife.analyzer.BloodSugarAnalysisResult;
 import com.prologue.ballife.analyzer.BmiAnalysisResult;
 import com.prologue.ballife.analyzer.MedicationAnalysisResult;
+import com.prologue.ballife.config.MessageResolver;
 import com.prologue.ballife.web.analysis.dto.HealthAnalysisResponse;
 
 /**
@@ -31,22 +32,11 @@ public class ConsultationQuestionGenerator {
 
     private static final int MEDICATION_LOW_THRESHOLD = 60;
 
-    static final String Q_BP_RISK =
-            "혈압이 위험 수준입니다. 약물 조정 필요성에 대해 상담해 보세요.";
-    static final String Q_BP_CAUTION =
-            "혈압이 다소 높게 측정되었습니다. 생활습관 관리에 대해 상담해 보세요.";
-    static final String Q_BS_FASTING_RISK =
-            "공복혈당이 위험 수준입니다. 추가 검사 필요성을 문의해 보세요.";
-    static final String Q_BS_FASTING_CAUTION =
-            "공복혈당이 다소 높습니다. 식이 조절 방법을 문의해 보세요.";
-    static final String Q_BS_POSTMEAL_RISK =
-            "식후혈당이 위험 수준입니다. 식사 후 혈당 관리법을 상담해 보세요.";
-    static final String Q_BMI_RISK =
-            "체중 관리가 필요한 상태입니다. 안전한 감량 방법을 상담해 보세요.";
-    static final String Q_MED_LOW =
-            "복약 이행률이 낮습니다. 복용을 어렵게 만드는 요인이 있는지 상담해 보세요.";
-    static final String Q_DEFAULT =
-            "정기 진료 시 평소 궁금했던 점을 자유롭게 상담해 보세요.";
+    private final MessageResolver messages;
+
+    public ConsultationQuestionGenerator(MessageResolver messages) {
+        this.messages = messages;
+    }
 
     public List<String> generate(HealthAnalysisResponse data) {
         List<String> questions = new ArrayList<>();
@@ -58,7 +48,7 @@ public class ConsultationQuestionGenerator {
         addMedicationQuestion(data.medication(), questions);
 
         if (questions.isEmpty()) {
-            questions.add(Q_DEFAULT);
+            questions.add(messages.get("report.q.default"));
         }
         return questions;
     }
@@ -66,39 +56,39 @@ public class ConsultationQuestionGenerator {
     private void addBloodPressureQuestion(BloodPressureAnalysisResult bp, List<String> out) {
         if (bp == null) return;
         if ("RISK".equals(bp.status())) {
-            out.add(Q_BP_RISK);
+            out.add(messages.get("report.q.bp.risk"));
         } else if ("CAUTION".equals(bp.status())) {
-            out.add(Q_BP_CAUTION);
+            out.add(messages.get("report.q.bp.caution"));
         }
     }
 
     private void addBloodSugarFastingQuestion(BloodSugarAnalysisResult bs, List<String> out) {
         if (bs == null) return;
         if ("RISK".equals(bs.fastingStatus())) {
-            out.add(Q_BS_FASTING_RISK);
+            out.add(messages.get("report.q.bs.fasting.risk"));
         } else if ("CAUTION".equals(bs.fastingStatus())) {
-            out.add(Q_BS_FASTING_CAUTION);
+            out.add(messages.get("report.q.bs.fasting.caution"));
         }
     }
 
     private void addBloodSugarPostMealQuestion(BloodSugarAnalysisResult bs, List<String> out) {
         if (bs == null) return;
         if ("RISK".equals(bs.postMealStatus())) {
-            out.add(Q_BS_POSTMEAL_RISK);
+            out.add(messages.get("report.q.bs.postMeal.risk"));
         }
     }
 
     private void addBmiQuestion(BmiAnalysisResult bmi, List<String> out) {
         if (bmi == null) return;
         if ("RISK".equals(bmi.status())) {
-            out.add(Q_BMI_RISK);
+            out.add(messages.get("report.q.bmi.risk"));
         }
     }
 
     private void addMedicationQuestion(MedicationAnalysisResult med, List<String> out) {
         if (med == null || med.adherenceRate() == null) return;
         if (med.adherenceRate() < MEDICATION_LOW_THRESHOLD) {
-            out.add(Q_MED_LOW);
+            out.add(messages.get("report.q.med.low"));
         }
     }
 }

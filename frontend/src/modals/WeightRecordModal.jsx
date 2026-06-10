@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { Sparkles, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import bioValueRecordApi from '../api/bioValueRecordApi';
@@ -29,6 +30,7 @@ const resolveUserId = (user) => {
 };
 
 const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = resolveUserId(user);
 
@@ -100,12 +102,12 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
 
   const handleSubmit = async () => {
     if (!userId) {
-      toast.error("로그인이 필요합니다.");
+      toast.error(t('weightRecordModal.toast.loginRequired'));
       return;
     }
     const weightValue = parseFloat(weight);
     if (!weightValue || weightValue <= 0) {
-      toast.error("체중을 정확히 입력해주세요.");
+      toast.error(t('weightRecordModal.toast.invalidWeight'));
       return;
     }
 
@@ -139,11 +141,11 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
           existing.recordId,
           payload,
         );
-        toast.success(`${targetDate} 체중 기록이 수정되었습니다.`);
+        toast.success(t('weightRecordModal.toast.updated', { date: targetDate }));
       } else {
         // 2-b. 없으면 insert
         res = await bioValueRecordApi.createBioValueRecord(userId, payload);
-        toast.success(`${targetDate} 체중이 기록되었습니다.`);
+        toast.success(t('weightRecordModal.toast.created', { date: targetDate }));
       }
 
       // 3. 회원정보의 현재 체중(member.weight)도 동기화 — UserInformation 페이지의 "현재 체중" 갱신용
@@ -178,14 +180,14 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">체중 기록하기</h2>
-            <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">오늘의 체중을 기록하세요.</p>
+            <h2 className="text-[24px] font-bold leading-tight text-[#0F172A]">{t('weightRecordModal.title')}</h2>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#94A3B8]">{t('weightRecordModal.subtitle')}</p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            aria-label="닫기"
+            aria-label={t('weightRecordModal.close')}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0F172A]"
           >
             <X size={18} strokeWidth={2.2} />
@@ -213,16 +215,16 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
           <div className="space-y-5">
             <div className="flex justify-between items-end px-1">
               <div>
-                <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">목표 체중</p>
+                <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">{t('weightRecordModal.targetWeight')}</p>
                 <p className="text-2xl font-extrabold text-slate-800">
-                  {targetWeight != null ? `${targetWeight.toFixed(1)} kg` : "— kg"}
+                  {targetWeight != null ? `${targetWeight.toFixed(1)} kg` : t('weightRecordModal.emptyKg')}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">현재와의 차이</p>
+                <p className="text-[13px] text-slate-400 font-bold mb-1 uppercase tracking-wider">{t('weightRecordModal.diffFromCurrent')}</p>
                 <p className={`text-2xl font-extrabold ${weightDiff != null && parseFloat(weightDiff) <= 0 ? 'text-green-500' : 'text-blue-600'}`}>
                    {weightDiff == null
-                     ? "— kg"
+                     ? t('weightRecordModal.emptyKg')
                      : `${parseFloat(weightDiff) > 0 ? "+ " : ""}${weightDiff} kg`}
                 </p>
               </div>
@@ -238,8 +240,8 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
             </div>
 
             <div className="flex justify-between items-center text-[13px] text-slate-400 font-bold px-1">
-              <span>현재 {weight || "0"}kg</span>
-              <span className="text-blue-600">목표까지 {progress}% 달성</span>
+              <span>{t('weightRecordModal.currentWeight', { weight: weight || "0" })}</span>
+              <span className="text-blue-600">{t('weightRecordModal.progressAchieved', { progress })}</span>
             </div>
           </div>
 
@@ -253,10 +255,10 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
               <div className="flex-1">
                 <p className="text-[13px] leading-relaxed text-[#475569]">
                   {targetWeight == null
-                    ? "목표 체중을 설정하면 달성률과 맞춤 조언을 확인할 수 있어요."
+                    ? t('weightRecordModal.advice.noTarget')
                     : progress >= 100
-                      ? "축하합니다! 목표 체중에 도달했습니다. 유지 관리에 집중해보세요."
-                      : `목표까지 ${weightDiff}kg 남았습니다. 조금만 더 힘내세요!`}
+                      ? t('weightRecordModal.advice.reached')
+                      : t('weightRecordModal.advice.remaining', { diff: weightDiff })}
                 </p>
               </div>
             </div>
@@ -269,7 +271,7 @@ const WeightRecordModal = ({ isOpen, onClose, onSaved, recordDate }) => {
               disabled={submitting}
               className="w-full rounded-[20px] bg-[#1a1a2e] py-5 text-lg font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] transition hover:bg-[#25253d] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {submitting ? "저장 중..." : "기록 저장 및 확인"}
+              {submitting ? t('weightRecordModal.submitting') : t('weightRecordModal.submit')}
             </button>
           </div>
         </div>
