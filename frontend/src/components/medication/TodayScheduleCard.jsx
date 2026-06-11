@@ -22,6 +22,7 @@ export default function TodayScheduleCard({
   schedules,
   scheduleDate,
   todayKey,
+  slotTimes = {},
   onDateChange,
   onToggleDrug,
   onToggleAllDrugs,
@@ -29,6 +30,9 @@ export default function TodayScheduleCard({
   const { t } = useTranslation();
   const [openScheduleId, setOpenScheduleId] = useState(null);
   const dateInputRef = useRef(null);
+
+  // 표시 시간 = 회원정보 루틴 시간(있으면) / 없으면 일정 기본 시간(schedule.time)
+  const displayTime = (schedule) => slotTimes[schedule.id] || schedule.time;
 
   const isToday = !scheduleDate || scheduleDate === todayKey;
 
@@ -105,7 +109,7 @@ export default function TodayScheduleCard({
               className={`w-[240px] flex-shrink-0 rounded-xl p-5 ${cardBorder}`}
             >
               <div className="flex items-center gap-1.5 text-[12px] text-gray-400 mb-3">
-                <Sun className="w-3.5 h-3.5" /> {schedule.label} ({schedule.time})
+                <Sun className="w-3.5 h-3.5" /> {schedule.label} ({displayTime(schedule)})
               </div>
               <button
                 type="button"
@@ -146,7 +150,7 @@ export default function TodayScheduleCard({
                   {openSchedule.name}
                 </h3>
                 <p className="mt-1 text-[12px] text-gray-500">
-                  {openSchedule.label} ({openSchedule.time}) · {openSchedule.note}
+                  {openSchedule.label} ({displayTime(openSchedule)}) · {openSchedule.note}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-3">
