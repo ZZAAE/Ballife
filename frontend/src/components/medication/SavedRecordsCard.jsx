@@ -1,11 +1,18 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Calendar, CalendarDays, Clock, Pill, Trash2 } from "lucide-react";
 import { formatDate } from "../../utils/format";
 
-export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) {
+// viewDate / onChangeViewDate 로 외부(직접 기록하기의 '복용 날짜')와 날짜를 공유한다.
+// 복용 날짜를 바꾸면 이 목록도 같은 날짜로 필터되고, 그 날짜로 저장하면 바로 보인다.
+export default function SavedRecordsCard({
+  records,
+  todayKey,
+  viewDate,
+  onChangeViewDate,
+  onDeleteRecord,
+}) {
   const { t } = useTranslation();
-  const [viewDate, setViewDate] = useState(todayKey || "");
   const dateInputRef = useRef(null);
 
   const openDatePicker = () => {
@@ -57,8 +64,8 @@ export default function SavedRecordsCard({ records, todayKey, onDeleteRecord }) 
       <input
         ref={dateInputRef}
         type="date"
-        value={viewDate}
-        onChange={(e) => setViewDate(e.target.value)}
+        value={viewDate || ""}
+        onChange={(e) => onChangeViewDate(e.target.value)}
         className="sr-only"
         tabIndex={-1}
         aria-hidden="true"

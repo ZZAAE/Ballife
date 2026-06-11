@@ -166,7 +166,11 @@ export default function MedicationPage() {
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
   const [time, setTime] = useState(() => formatTimeNow());
-  const [date, setDate] = useState(() => formatDateKey(new Date()));
+
+  const todayKey = formatDateKey(new Date());
+  // 페이지 전체가 공유하는 날짜. 맨 위 '복용 일정' = 직접 기록하기 '복용 날짜' = 상비약 목록 필터가
+  // 모두 이 값을 본다. 어느 한 곳에서 날짜를 바꾸면 셋 다 같이 움직이고, 저장도 이 날짜로 들어간다.
+  const [scheduleDate, setScheduleDate] = useState(todayKey);
 
   // 상비약 직접 기록(PRN) — MongoDB 영속본. 로드는 아래 userId 확정 후 effect 에서 수행.
   const [savedRecords, setSavedRecords] = useState([]);
@@ -179,7 +183,8 @@ export default function MedicationPage() {
     const payload = {
       drugName: drugName.trim(),
       dosage: dosage.trim(),
-      date,
+      // 저장 날짜 = 현재 보고 있는 '복용 일정' 날짜 → 저장 직후 같은 화면에서 바로 보인다
+      date: scheduleDate,
       // 시간을 비웠으면 저장 시점의 현재 시각으로 기록
       time: time || formatTimeNow(),
     };
@@ -384,10 +389,7 @@ export default function MedicationPage() {
     );
   };
 
-  const todayKey = formatDateKey(new Date());
-
-  // 복용 일정 카드에서 조회/수정 중인 날짜 (기본 오늘, 헤더에서 변경 가능)
-  const [scheduleDate, setScheduleDate] = useState(todayKey);
+  // (scheduleDate / todayKey 는 컴포넌트 상단에서 선언 — 페이지 공유 날짜)
   const [todaySchedules, setTodaySchedules] = useState([]);
 
   // 선택한 날짜의 DB 복용기록 = taken 의 단일 권위 소스.
@@ -653,14 +655,16 @@ export default function MedicationPage() {
               setDosage={setDosage}
               time={time}
               setTime={setTime}
-              date={date}
-              setDate={setDate}
+              date={scheduleDate}
+              setDate={setScheduleDate}
               onSaveRecord={handleSaveRecord}
             />
 
             <SavedRecordsCard
               records={savedRecords}
               todayKey={todayKey}
+              viewDate={scheduleDate}
+              onChangeViewDate={setScheduleDate}
               onDeleteRecord={handleDeleteRecord}
             />
           </div>
