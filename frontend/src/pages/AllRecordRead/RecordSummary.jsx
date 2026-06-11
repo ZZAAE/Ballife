@@ -803,7 +803,7 @@ export default function RecordSummary() {
                 <h3 className="text-base font-bold text-gray-900">
                   {t("recordSummary.medication.title")}
                 </h3>
-                <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-3 py-1">
+                <span className="inline-flex items-center gap-1.5 text-[12px] text-[#2563EB] bg-blue-50 px-3 py-1 rounded-full font-medium hover:bg-blue-100 transition-colors">
                   {medDateLabel}
                 </span>
               </div>
