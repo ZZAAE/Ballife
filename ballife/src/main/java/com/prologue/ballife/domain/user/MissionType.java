@@ -8,7 +8,8 @@ package com.prologue.ballife.domain.user;
 public enum MissionType {
 
     // 일일 미션 (하루 1번)
-    DAILY_RECORD("기록 · 출석", 1, Period.DAILY, 1),
+    DAILY_RECORD("기록", 1, Period.DAILY, 1),
+    DAILY_ATTENDANCE("출석", 1, Period.DAILY, 1),
     DAILY_RECOMMEND("추천", 2, Period.DAILY, 1),
 
     // 주간 미션 (일주일 1번)

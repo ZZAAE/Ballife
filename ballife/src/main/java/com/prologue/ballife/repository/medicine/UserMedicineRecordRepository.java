@@ -1,6 +1,7 @@
 package com.prologue.ballife.repository.medicine;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,11 +10,24 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.prologue.ballife.domain.medicine.UserMedicineRecord;
+import com.prologue.ballife.domain.medicine.UserMedicineRecord.TakenCategory;
 
 @Repository
 public interface UserMedicineRecordRepository extends JpaRepository<UserMedicineRecord, Long>{
 
     Optional<UserMedicineRecord> findById(Long userMedicineRecordId);
+
+    // 특정 유저가 특정 날짜에 복용 체크한 기록들 (처방전→유저로 매칭)
+    List<UserMedicineRecord> findByPrescription_User_UserIdAndIntakeDate(
+            Long userId, LocalDate intakeDate);
+
+    // 같은 (처방전, 날짜, 시간대) 체크가 이미 있는지 — 중복 저장 방지
+    boolean existsByPrescription_PrescriptionIdAndIntakeDateAndTakenCategory(
+            Long prescriptionId, LocalDate intakeDate, TakenCategory takenCategory);
+
+    // 체크 해제 시 해당 (처방전, 날짜, 시간대) 기록 삭제
+    void deleteByPrescription_PrescriptionIdAndIntakeDateAndTakenCategory(
+            Long prescriptionId, LocalDate intakeDate, TakenCategory takenCategory);
 
     /**
      * 특정 유저의 특정 기간(시작~끝, 양 끝 포함) 동안 실제 복용 기록 수.

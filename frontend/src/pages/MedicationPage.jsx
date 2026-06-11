@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 
 import MedicationProgressCard from "../components/medication/MedicationProgressCard";
 import MedicationRecordCard from "../components/medication/MedicationRecordCard";
@@ -15,6 +16,7 @@ import {
 import PrescriptionDetailModal from "../modals/PrescriptionDetailModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import medicineApi from "../api/medicineApi";
+import userConfigApi from "../api/userConfigApi";
 import { USER_KEY } from "../api/api";
 import { useAuth } from "../contexts/AuthContext";
 import { translateTexts } from "../utils/aiTranslate";
@@ -38,6 +40,80 @@ const resolveUserId = (user) => {
 
 const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
 const SAVED_RECORDS_KEY = "savedMedicationRecords";
+
+// 일정 슬롯(id) ↔ 백엔드 TakenCategory / 대표 복용시각 매핑.
+const SLOT_TO_CATEGORY = {
+  morning: "MORNING",
+  lunch: "LUNCH",
+  dinner: "DINNER",
+  bedtime: "BEDTIME",
+};
+const SLOT_TIME = {
+  morning: "08:00",
+  lunch: "13:00",
+  dinner: "19:00",
+  bedtime: "22:00",
+};
+
+// 주간 달력 슬롯 시간 = 회원정보 루틴 시간(있으면) / 없으면 기본값.
+// 루틴은 userConfig 에 breakfastTime/lunchTime/dinnerTime/bedTime 으로 저장된다.
+const ROUTINE_SLOT_KEY = {
+  morning: "breakfastTime",
+  lunch: "lunchTime",
+  dinner: "dinnerTime",
+  bedtime: "bedTime",
+};
+const SLOT_TIME_DEFAULT = {
+  morning: "08:00",
+  lunch: "13:00",
+  dinner: "19:00",
+  bedtime: "23:00",
+};
+// 백엔드 LocalTime("HH:mm:ss") → "HH:mm". 값이 없거나 형식이 어긋나면 null.
+const toHHMM = (s) =>
+  typeof s === "string" && s.length >= 5 ? s.slice(0, 5) : null;
+// drugId("presc-123") → 처방전 id(123). 형식이 다르면 null.
+const drugIdToPrescriptionId = (drugId) => {
+  const m = /^presc-(\d+)$/.exec(String(drugId ?? ""));
+  return m ? Number(m[1]) : null;
+};
+
+// 복용 체크 키 = `${prescriptionId}|${TakenCategory}` (예: "12|MORNING").
+// DB 복용기록과 일정 슬롯/약을 잇는 공통 식별자.
+const takenKey = (prescriptionId, category) => `${prescriptionId}|${category}`;
+
+// 일정(schedules)에서 현재 체크(taken)된 약들을 키 Set 으로 추출.
+// DB 기록이 아직 안 온 날짜에서 토글할 때, 화면 상태를 시작점으로 삼는 데 쓴다.
+const buildKeysFromSchedules = (schedules) => {
+  const keys = new Set();
+  (schedules || []).forEach((slot) => {
+    const cat = SLOT_TO_CATEGORY[slot.id];
+    if (!cat) return;
+    slot.drugs.forEach((d) => {
+      const pid = drugIdToPrescriptionId(d.id);
+      if (pid != null && d.taken) keys.add(takenKey(pid, cat));
+    });
+  });
+  return keys;
+};
+
+// DB 복용기록(remote.keys)을 일정 위에 덮어써 각 약의 taken 을 확정한다(권위 소스).
+// remote.date 가 보고 있는 날짜와 다르면(아직 미로드) 그대로 둬서 localStorage 캐시를 유지.
+const applyRemoteTaken = (schedules, remote, dateKey) => {
+  if (!remote || remote.date !== dateKey) return schedules;
+  return schedules.map((slot) => {
+    const cat = SLOT_TO_CATEGORY[slot.id];
+    if (!cat) return slot;
+    return {
+      ...slot,
+      drugs: slot.drugs.map((d) => {
+        const pid = drugIdToPrescriptionId(d.id);
+        if (pid == null) return d;
+        return { ...d, taken: remote.keys.has(takenKey(pid, cat)) };
+      }),
+    };
+  });
+};
 
 const formatDateKey = (date) => {
   const y = date.getFullYear();
@@ -145,6 +221,28 @@ export default function MedicationPage() {
   // 사용자 입력 한글(처방 이름·메모)을 현재 언어로 즉석 번역한 맵 { 원문: 번역문 }.
   // 약 이름(공식 의약품명)은 번역 대상이 아니므로 넣지 않는다.
   const [txMap, setTxMap] = useState({});
+  // 회원정보 루틴 시간(아침/점심/저녁/취침). 주간 달력 슬롯 시간 표시에 사용.
+  const [userConfig, setUserConfig] = useState(null);
+
+  // 회원정보(루틴 시간) 로드. 실패/비로그인 시 기본 시간으로 폴백된다.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (userId == null) {
+        if (!cancelled) setUserConfig(null);
+        return;
+      }
+      try {
+        const { data } = await userConfigApi.getUserConfig(userId);
+        if (!cancelled) setUserConfig(data);
+      } catch {
+        if (!cancelled) setUserConfig(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -252,14 +350,23 @@ export default function MedicationPage() {
   const [scheduleDate, setScheduleDate] = useState(todayKey);
   const [todaySchedules, setTodaySchedules] = useState([]);
 
-  // 처방 그룹이 (백엔드에서) 로드/변경되면 현재 보고 있는 날짜의 일정을 다시 만든다.
+  // 선택한 날짜의 DB 복용기록 = taken 의 단일 권위 소스.
+  // { date: "YYYY-MM-DD", keys: Set("pid|CATEGORY") }
+  // DB 조회/토글이 모두 이 값을 갱신하고, 일정은 항상 이 위에서 파생된다.
+  const [remoteTaken, setRemoteTaken] = useState({ date: null, keys: new Set() });
+
+  // 처방 그룹·날짜·DB 복용기록 중 하나라도 바뀌면 일정을 다시 만들고,
+  // 그 위에 DB 복용 체크(remoteTaken)를 항상 덮어쓴다 → 어떤 재빌드/타이밍에도 체크가 유지됨.
   // effect 대신 렌더 중 조건부 setState 사용 (React 권장: prop/state 변화에 맞춰 state 조정).
-  const [syncedGroups, setSyncedGroups] = useState(null);
-  if (syncedGroups !== prescriptionGroups) {
-    setSyncedGroups(prescriptionGroups);
-    setTodaySchedules(
-      loadSchedulesForDate(scheduleDate, todayKey, prescriptionGroups)
-    );
+  const [synced, setSynced] = useState({ groups: null, date: null, remote: null });
+  if (
+    synced.groups !== prescriptionGroups ||
+    synced.date !== scheduleDate ||
+    synced.remote !== remoteTaken
+  ) {
+    setSynced({ groups: prescriptionGroups, date: scheduleDate, remote: remoteTaken });
+    const base = loadSchedulesForDate(scheduleDate, todayKey, prescriptionGroups);
+    setTodaySchedules(applyRemoteTaken(base, remoteTaken, scheduleDate));
   }
 
   // 오늘의 실제 체크 상태만 저장 (다른 날짜는 달력과 동일한 데모 데이터라 저장하지 않음)
@@ -280,6 +387,29 @@ export default function MedicationPage() {
       JSON.stringify(filtered)
     );
   }, [todaySchedules, scheduleDate, todayKey, prescriptionGroups, prescriptionsLoaded]);
+
+  // DB에서 해당 날짜의 복용 기록을 불러와 권위 소스(remoteTaken)에 싣는다(영속 소스).
+  // 로그아웃→재로그인으로 localStorage 가 비워져도 DB에서 복원되므로 체크가 유지된다.
+  // 일정 반영은 위의 동기화 블록이 remoteTaken 을 덮어쓰며 처리한다.
+  useEffect(() => {
+    if (userId == null || !prescriptionsLoaded) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await medicineApi.getMedicineRecords(scheduleDate);
+        if (cancelled) return;
+        const keys = new Set(
+          (data || []).map((r) => takenKey(r.prescriptionId, r.takenCategory))
+        );
+        setRemoteTaken({ date: scheduleDate, keys });
+      } catch {
+        // 조회 실패 시 기존(localStorage 캐시) 상태 유지
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [scheduleDate, userId, prescriptionsLoaded]);
 
   // 주간 달력에 표시할 "과거 날짜의 실제 저장 일정" 모음.
   // 오늘 저장된 복용 체크는 날짜가 지나면 그대로 과거 기록이 되므로,
@@ -304,11 +434,10 @@ export default function MedicationPage() {
     return map;
   }, [todayKey, todaySchedules, scheduleDate, prescriptionGroups]);
 
-  // 헤더 날짜 변경 시 날짜와 그 날의 일정을 함께 갱신
+  // 헤더 날짜 변경 — 날짜만 바꾸면 위 동기화 블록이 일정 재빌드 + remoteTaken 덮어쓰기를 처리.
   const handleScheduleDateChange = (newDate) => {
     if (!newDate) return;
     setScheduleDate(newDate);
-    setTodaySchedules(loadSchedulesForDate(newDate, todayKey, prescriptionGroups));
   };
 
   // 주간 달력은 항상 실제 오늘 기준 데이터를 사용
@@ -333,6 +462,16 @@ export default function MedicationPage() {
   // 주간 달력의 "오늘" 셀은 항상 실제 오늘 기준이라 활성 필터 적용
   const weekDisplaySchedules = txSchedules(filterToActiveDrugs(weekTodaySchedules));
 
+  // 슬롯별 표시 시간 = 회원정보 루틴 시간(있으면) / 없으면 기본값.
+  const slotTimes = useMemo(() => {
+    const out = {};
+    ["morning", "lunch", "dinner", "bedtime"].forEach((slot) => {
+      out[slot] =
+        toHHMM(userConfig?.[ROUTINE_SLOT_KEY[slot]]) || SLOT_TIME_DEFAULT[slot];
+    });
+    return out;
+  }, [userConfig]);
+
   // 처방 목록에 표시할 "복용일정" = 그 그룹의 약이 포함된 일정 슬롯(아침·점심·저녁)
   const prescriptionsForList = activeGroups.map((g) => {
     const slots = displaySchedules
@@ -350,40 +489,91 @@ export default function MedicationPage() {
     .filter((g) => g.memo)
     .map((g) => ({ id: g.id, groupName: tx(g.groupName), content: tx(g.memo) }));
 
-  const handleToggleDrug = (scheduleId, drugId) => {
-    setTodaySchedules((prev) =>
-      prev.map((s) =>
-        s.id === scheduleId
-          ? {
-              ...s,
-              drugs: s.drugs.map((d) =>
-                d.id === drugId ? { ...d, taken: !d.taken } : d
-              ),
-            }
-          : s
-      )
+  // 한 약 체크 ON/OFF 를 DB에 반영(실패 시 권위 소스 remoteTaken 롤백).
+  const persistTaken = async (scheduleId, drugId, nowTaken) => {
+    const prescriptionId = drugIdToPrescriptionId(drugId);
+    const takenCategory = SLOT_TO_CATEGORY[scheduleId];
+    if (userId == null || prescriptionId == null || !takenCategory) return;
+    const dateAtCall = scheduleDate;
+    try {
+      if (nowTaken) {
+        await medicineApi.markMedicineTaken({
+          prescriptionId,
+          intakeDate: dateAtCall,
+          intakeTime: SLOT_TIME[scheduleId] || "12:00",
+          takenCategory,
+        });
+      } else {
+        await medicineApi.unmarkMedicineTaken({
+          prescriptionId,
+          date: dateAtCall,
+          takenCategory,
+        });
+      }
+    } catch {
+      toast.error(
+        t("medicationPage.toast.saveFailed", {
+          defaultValue: "복용 체크 저장에 실패했습니다.",
+        })
+      );
+      // 롤백 — 방금 바꾼 체크 키를 원래대로 (다른 날짜로 이동했으면 건드리지 않음)
+      setRemoteTaken((prev) => {
+        if (prev.date !== dateAtCall) return prev;
+        const keys = new Set(prev.keys);
+        const key = takenKey(prescriptionId, takenCategory);
+        if (nowTaken) keys.delete(key);
+        else keys.add(key);
+        return { date: dateAtCall, keys };
+      });
+    }
+  };
+
+  // 복용 체크 변경을 권위 소스(remoteTaken)에 낙관적 반영한 뒤 DB로 영속한다.
+  // deltas: [{ scheduleId, drugId, nowTaken }]
+  const applyTakenDeltas = (deltas) => {
+    if (deltas.length === 0) return;
+    setRemoteTaken((prev) => {
+      // DB 가 이 날짜로 로드돼 있으면 그 키를, 아니면 현재 화면을 시작점으로
+      const keys =
+        prev.date === scheduleDate
+          ? new Set(prev.keys)
+          : buildKeysFromSchedules(todaySchedules);
+      deltas.forEach(({ scheduleId, drugId, nowTaken }) => {
+        const pid = drugIdToPrescriptionId(drugId);
+        const cat = SLOT_TO_CATEGORY[scheduleId];
+        if (pid == null || !cat) return;
+        const key = takenKey(pid, cat);
+        if (nowTaken) keys.add(key);
+        else keys.delete(key);
+      });
+      return { date: scheduleDate, keys };
+    });
+    deltas.forEach(({ scheduleId, drugId, nowTaken }) =>
+      persistTaken(scheduleId, drugId, nowTaken)
     );
+  };
+
+  const handleToggleDrug = (scheduleId, drugId) => {
+    const slot = todaySchedules.find((s) => s.id === scheduleId);
+    const drug = slot?.drugs.find((d) => d.id === drugId);
+    if (!drug) return;
+    applyTakenDeltas([{ scheduleId, drugId, nowTaken: !drug.taken }]);
   };
 
   const handleToggleAllDrugs = (scheduleId) => {
     // 오늘/미래는 활성 그룹 기준, 과거는 그 당시 보이는 모든 약 기준으로 토글
     const isActiveOnly = scheduleDate >= todayKey;
-    setTodaySchedules((prev) =>
-      prev.map((s) => {
-        if (s.id !== scheduleId) return s;
-        const target = isActiveOnly
-          ? s.drugs.filter((d) => activeDrugIds.has(d.id))
-          : s.drugs;
-        const allTaken = target.length > 0 && target.every((d) => d.taken);
-        return {
-          ...s,
-          drugs: s.drugs.map((d) => {
-            const inTarget = !isActiveOnly || activeDrugIds.has(d.id);
-            return inTarget ? { ...d, taken: !allTaken } : d;
-          }),
-        };
-      })
-    );
+    const slot = todaySchedules.find((s) => s.id === scheduleId);
+    if (!slot) return;
+    const target = isActiveOnly
+      ? slot.drugs.filter((d) => activeDrugIds.has(d.id))
+      : slot.drugs;
+    const allTaken = target.length > 0 && target.every((d) => d.taken);
+    const nextTaken = !allTaken;
+    const deltas = target
+      .filter((d) => d.taken !== nextTaken)
+      .map((d) => ({ scheduleId, drugId: d.id, nowTaken: nextTaken }));
+    applyTakenDeltas(deltas);
   };
 
   const openPrescriptionModal = (group) => {
@@ -441,6 +631,7 @@ export default function MedicationPage() {
               schedules={displaySchedules}
               scheduleDate={scheduleDate}
               todayKey={todayKey}
+              slotTimes={slotTimes}
               onDateChange={handleScheduleDateChange}
               onToggleDrug={handleToggleDrug}
               onToggleAllDrugs={handleToggleAllDrugs}
@@ -453,6 +644,7 @@ export default function MedicationPage() {
                 prnRecords={savedRecords}
                 todayKey={todayKey}
                 savedSchedulesByDate={savedSchedulesByDate}
+                slotTimes={slotTimes}
               />
             </div>
           </div>
