@@ -16,6 +16,7 @@ import {
 import PrescriptionDetailModal from "../modals/PrescriptionDetailModal";
 import BloodPressureRecordModal from "../modals/BloodPressureRecordModal";
 import medicineApi from "../api/medicineApi";
+import userConfigApi from "../api/userConfigApi";
 import { USER_KEY } from "../api/api";
 import { useAuth } from "../contexts/AuthContext";
 import { translateTexts } from "../utils/aiTranslate";
@@ -53,6 +54,24 @@ const SLOT_TIME = {
   dinner: "19:00",
   bedtime: "22:00",
 };
+
+// 주간 달력 슬롯 시간 = 회원정보 루틴 시간(있으면) / 없으면 기본값.
+// 루틴은 userConfig 에 breakfastTime/lunchTime/dinnerTime/bedTime 으로 저장된다.
+const ROUTINE_SLOT_KEY = {
+  morning: "breakfastTime",
+  lunch: "lunchTime",
+  dinner: "dinnerTime",
+  bedtime: "bedTime",
+};
+const SLOT_TIME_DEFAULT = {
+  morning: "08:00",
+  lunch: "13:00",
+  dinner: "19:00",
+  bedtime: "23:00",
+};
+// 백엔드 LocalTime("HH:mm:ss") → "HH:mm". 값이 없거나 형식이 어긋나면 null.
+const toHHMM = (s) =>
+  typeof s === "string" && s.length >= 5 ? s.slice(0, 5) : null;
 // drugId("presc-123") → 처방전 id(123). 형식이 다르면 null.
 const drugIdToPrescriptionId = (drugId) => {
   const m = /^presc-(\d+)$/.exec(String(drugId ?? ""));
@@ -202,6 +221,28 @@ export default function MedicationPage() {
   // 사용자 입력 한글(처방 이름·메모)을 현재 언어로 즉석 번역한 맵 { 원문: 번역문 }.
   // 약 이름(공식 의약품명)은 번역 대상이 아니므로 넣지 않는다.
   const [txMap, setTxMap] = useState({});
+  // 회원정보 루틴 시간(아침/점심/저녁/취침). 주간 달력 슬롯 시간 표시에 사용.
+  const [userConfig, setUserConfig] = useState(null);
+
+  // 회원정보(루틴 시간) 로드. 실패/비로그인 시 기본 시간으로 폴백된다.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (userId == null) {
+        if (!cancelled) setUserConfig(null);
+        return;
+      }
+      try {
+        const { data } = await userConfigApi.getUserConfig(userId);
+        if (!cancelled) setUserConfig(data);
+      } catch {
+        if (!cancelled) setUserConfig(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -421,6 +462,16 @@ export default function MedicationPage() {
   // 주간 달력의 "오늘" 셀은 항상 실제 오늘 기준이라 활성 필터 적용
   const weekDisplaySchedules = txSchedules(filterToActiveDrugs(weekTodaySchedules));
 
+  // 슬롯별 표시 시간 = 회원정보 루틴 시간(있으면) / 없으면 기본값.
+  const slotTimes = useMemo(() => {
+    const out = {};
+    ["morning", "lunch", "dinner", "bedtime"].forEach((slot) => {
+      out[slot] =
+        toHHMM(userConfig?.[ROUTINE_SLOT_KEY[slot]]) || SLOT_TIME_DEFAULT[slot];
+    });
+    return out;
+  }, [userConfig]);
+
   // 처방 목록에 표시할 "복용일정" = 그 그룹의 약이 포함된 일정 슬롯(아침·점심·저녁)
   const prescriptionsForList = activeGroups.map((g) => {
     const slots = displaySchedules
@@ -580,6 +631,7 @@ export default function MedicationPage() {
               schedules={displaySchedules}
               scheduleDate={scheduleDate}
               todayKey={todayKey}
+              slotTimes={slotTimes}
               onDateChange={handleScheduleDateChange}
               onToggleDrug={handleToggleDrug}
               onToggleAllDrugs={handleToggleAllDrugs}
@@ -592,6 +644,7 @@ export default function MedicationPage() {
                 prnRecords={savedRecords}
                 todayKey={todayKey}
                 savedSchedulesByDate={savedSchedulesByDate}
+                slotTimes={slotTimes}
               />
             </div>
           </div>

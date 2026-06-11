@@ -46,12 +46,21 @@ const getPastStatus = (drugs) => {
   return "partial";
 };
 
+// 루틴 시간이 없을 때(또는 prop 미전달 시) 슬롯 기본 표시 시간.
+const SLOT_TIME_FALLBACK = {
+  morning: "08:00",
+  lunch: "13:00",
+  dinner: "19:00",
+  bedtime: "23:00",
+};
+
 export default function WeeklyCalendarCard({
   todaySchedules,
   prnRecords = [],
   todayKey,
   drugNames = [],
   savedSchedulesByDate = {},
+  slotTimes = {},
 }) {
   const { t } = useTranslation();
   const weekData = getCurrentWeekData(todayKey ? new Date(todayKey + "T00:00:00") : new Date());
@@ -62,12 +71,20 @@ export default function WeeklyCalendarCard({
     miss: t("weeklyCalendarCard.status.miss"),
   };
 
+  // 시간은 회원정보 루틴(slotTimes)에서 가져오고, 없으면 기본값.
   const rows = [
-    { key: "morning", label: "아침 (08:00)", icon: Sun },
-    { key: "lunch", label: "점심 (13:00)", icon: Sun },
-    { key: "dinner", label: "저녁 (21:00)", icon: Moon },
-    { key: "bedtime", label: "취침전 (23:00)", icon: Moon },
+    { key: "morning", label: "아침", icon: Sun },
+    { key: "lunch", label: "점심", icon: Sun },
+    { key: "dinner", label: "저녁", icon: Moon },
+    { key: "bedtime", label: "취침전", icon: Moon },
   ];
+
+  // 복용 일정에 취침전 약이 있는지. 없으면(아침·점심·저녁만) 취침전 줄을 비활성(회색)으로 막는다.
+  const slotHasDrugs = (list, id) =>
+    Array.isArray(list) && list.some((s) => s.id === id && (s.drugs?.length ?? 0) > 0);
+  const bedtimeScheduled =
+    slotHasDrugs(todaySchedules, "bedtime") ||
+    Object.values(savedSchedulesByDate || {}).some((list) => slotHasDrugs(list, "bedtime"));
 
   const todayStatusMap = todaySchedules
     ? todaySchedules.reduce((acc, s) => {
@@ -169,11 +186,13 @@ export default function WeeklyCalendarCard({
         <div className="space-y-5">
           {rows.map((row) => {
             const RowIcon = row.icon;
-            const labelText = row.label.match(/^[^(]+/)?.[0].trim();
-            const timeText = row.label.match(/\([^)]+\)/)?.[0];
+            const labelText = row.label;
+            const timeText = `(${slotTimes[row.key] || SLOT_TIME_FALLBACK[row.key]})`;
+            // 취침전 약이 일정에 없으면 이 줄은 비활성(회색) — 복용 상태/툴팁을 막는다.
+            const rowDisabled = row.key === "bedtime" && !bedtimeScheduled;
 
             return (
-              <div key={row.key}>
+              <div key={row.key} className={rowDisabled ? "opacity-50" : ""}>
                 {/* 아침 / 점심 / 저녁 라벨 */}
                 <div className="mb-2 flex items-center gap-2 text-[14px] font-semibold text-gray-600">
                   <RowIcon className="h-4 w-4 shrink-0 text-gray-400" strokeWidth={1.8} />
@@ -186,9 +205,9 @@ export default function WeeklyCalendarCard({
                 {/* 체크 도형들 */}
                 <div className="mb-4 grid grid-cols-7 items-start gap-1">
                   {weekData.map((item, index) => {
-                    const status = getCellStatus(item, row.key, index);
-                    const drugs = getCellDrugs(item, row.key, index);
-                    const prn = getCellPrn(item, row.key, index);
+                    const status = rowDisabled ? null : getCellStatus(item, row.key, index);
+                    const drugs = rowDisabled ? [] : getCellDrugs(item, row.key, index);
+                    const prn = rowDisabled ? [] : getCellPrn(item, row.key, index);
                     const hasContent = drugs.length > 0 || prn.length > 0;
 
                     return (
@@ -196,12 +215,12 @@ export default function WeeklyCalendarCard({
                         key={`${row.key}-${index}`}
                         className="group relative flex min-w-0 justify-center"
                       >
-                        <MedicationStatusIcon status={status} />
+                        <MedicationStatusIcon status={status} disabled={rowDisabled} />
 
                         {hasContent && (
                           <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-[180px] -translate-x-1/2 rounded-xl bg-[#0F172A] px-3 py-2.5 text-[12px] text-white shadow-xl group-hover:block">
                             <p className="mb-1.5 text-[11px] font-bold text-gray-300">
-                              {item.day} {t("weeklyCalendarCard.dayUnit", { date: item.date })} · {row.label.match(/^[^(]+/)?.[0].trim()}
+                              {item.day} {t("weeklyCalendarCard.dayUnit", { date: item.date })} · {row.label}
                               {status && (
                                 <span className="ml-1 font-normal text-gray-400">
                                   ({STATUS_LABEL[status] || ""})
@@ -279,13 +298,27 @@ export default function WeeklyCalendarCard({
 }
 
 /* -------------------- 내부 상태 아이콘 -------------------- */
-function MedicationStatusIcon({ status, size = "md" }) {
+function MedicationStatusIcon({ status, size = "md", disabled = false }) {
   const isSmall = size === "sm";
 
   const wrapperSize = isSmall ? "h-5 w-5" : "h-9 w-9";
   const checkSize = isSmall ? "h-3 w-3" : "h-5 w-5";
   const triangleSize = isSmall ? "h-3 w-3" : "h-5 w-5";
   const xSize = isSmall ? "h-3 w-3" : "h-5 w-5";
+
+  // 비활성(취침전 미사용 등): 상태와 무관하게 꽉 찬 회색 원으로 막는다.
+  if (disabled) {
+    return (
+      <div
+        className={`${wrapperSize} flex items-center justify-center rounded-full border-2 border-gray-200 bg-gray-100`}
+      >
+        <Circle
+          className={`${isSmall ? "h-2 w-2" : "h-3 w-3"} text-gray-300`}
+          strokeWidth={2.5}
+        />
+      </div>
+    );
+  }
 
   if (status === "done") {
     return (
