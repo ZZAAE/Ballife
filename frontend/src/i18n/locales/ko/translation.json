@@ -453,6 +453,7 @@
       "nickname": "닉네임",
       "viewCount": "조회수",
       "upVote": "추천수",
+      "commentCount": "댓글 수",
       "createdAt": "작성일"
     },
     "empty": "게시글이 없습니다.",

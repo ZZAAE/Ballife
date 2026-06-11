@@ -100,9 +100,15 @@ public class PostDto {
         private String title;
         private Integer upVote;
         private Integer viewCount;
+        @Builder.Default
+        private Long commentCount = 0L; // 삭제되지 않은 댓글 수 (목록 표시용)
         private LocalDateTime createdAt;
 
         public static PostListResponse from(Post post){
+            return from(post, 0L);
+        }
+
+        public static PostListResponse from(Post post, long commentCount){
             String userNickname = post.getUserId().getNickname() != null
                                 && !post.getUserId().getNickname().isBlank()
                                 ? post.getUserId().getNickname()
@@ -116,6 +122,7 @@ public class PostDto {
                         .upVote(post.getUpVote())
                         .title(post.getTitle())
                         .viewCount(post.getViewCount())
+                        .commentCount(commentCount)
                         .createdAt(post.getCreatedAt())
                         .build();
         }

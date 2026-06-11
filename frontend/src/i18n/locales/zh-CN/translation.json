@@ -453,6 +453,7 @@
       "nickname": "昵称",
       "viewCount": "浏览量",
       "upVote": "推荐数",
+      "commentCount": "评论数",
       "createdAt": "发表日期"
     },
     "empty": "暂无帖子。",
