@@ -56,6 +56,14 @@ const medicineApi = {
   // 복용 체크 OFF. { prescriptionId, date:"YYYY-MM-DD", takenCategory }
   unmarkMedicineTaken: ({ prescriptionId, date, takenCategory }) =>
     api.delete('/medicine-records', { params: { prescriptionId, date, takenCategory } }),
+
+  // ── 상비약 직접 기록(PRN) — MongoDB 영속 (로그아웃해도 유지) ──────
+  // 로그인 사용자의 상비약 기록 목록 (최신순)
+  getPrnMedications: () => api.get('/prn-medications'),
+  // 상비약 기록 추가. payload: { drugName, dosage, date:"YYYY-MM-DD", time:"HH:mm" }
+  createPrnMedication: (payload) => api.post('/prn-medications', payload),
+  // 상비약 기록 삭제 (id 는 Mongo 문자열 id)
+  deletePrnMedication: (id) => api.delete(`/prn-medications/${id}`),
 };
 
 export default medicineApi;
