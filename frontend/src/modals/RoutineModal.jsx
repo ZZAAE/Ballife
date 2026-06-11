@@ -2,73 +2,47 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Clock, X, ChevronDown } from "lucide-react";
 
-const HOUR12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")); // "01" ~ "12"
-const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+const HOUR24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")); // "00" ~ "23"
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0")); // 5분 단위
 
-// "HH:mm" (24h) → { meridiem: "AM"|"PM", hour12: "01"~"12", minute: "00" }
+// "HH:mm" (24h) → { hour: "00"~"23", minute: "00" }. 값이 없으면 빈 문자열.
 const parseTime = (time) => {
   if (!time || typeof time !== "string" || !time.includes(":")) {
-    return { meridiem: "", hour12: "", minute: "" };
+    return { hour: "", minute: "" };
   }
   const [hStr, mStr] = time.split(":");
-  const h24 = Number(hStr);
-  if (Number.isNaN(h24)) return { meridiem: "", hour12: "", minute: "" };
-  const meridiem = h24 < 12 ? "AM" : "PM";
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return {
-    meridiem,
-    hour12: String(h12).padStart(2, "0"),
-    minute: mStr ?? "",
-  };
+  const h = Number(hStr);
+  if (Number.isNaN(h)) return { hour: "", minute: "" };
+  return { hour: String(h).padStart(2, "0"), minute: mStr ?? "" };
 };
 
-// { meridiem, hour12, minute } → "HH:mm" (24h)
-const composeTime = (meridiem, hour12, minute) => {
-  if (!meridiem && !hour12 && !minute) return "";
-  const m = meridiem || "AM";
-  const h12 = Number(hour12 || "12");
-  let h24 = h12 % 12;
-  if (m === "PM") h24 += 12;
-  return `${String(h24).padStart(2, "0")}:${minute || "00"}`;
+// { hour, minute } → "HH:mm" (24h). 둘 다 비면 "".
+const composeTime = (hour, minute) => {
+  if (!hour && !minute) return "";
+  return `${(hour || "00").padStart(2, "0")}:${minute || "00"}`;
 };
 
 function TimeSelect({ value, onChange }) {
   const { t } = useTranslation();
-  const { meridiem, hour12, minute } = parseTime(value);
+  const { hour, minute } = parseTime(value);
 
   const selectClass =
     "appearance-none h-9 pl-3 pr-7 rounded-lg bg-gray-100 text-[13px] text-gray-700 outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition cursor-pointer";
 
   return (
     <div className="flex items-center gap-1.5 justify-end">
-      {/* 오전/오후 */}
+      {/* 시 (00~23) */}
       <div className="relative">
         <select
-          value={meridiem}
-          onChange={(e) => onChange(composeTime(e.target.value, hour12, minute))}
-          className={selectClass}
-          aria-label={t("routineModal.meridiemLabel")}
-        >
-          <option value="" disabled>
-            {t("routineModal.meridiemLabel")}
-          </option>
-          <option value="AM">{t("routineModal.am")}</option>
-          <option value="PM">{t("routineModal.pm")}</option>
-        </select>
-        <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-      </div>
-      {/* 시 */}
-      <div className="relative">
-        <select
-          value={hour12}
-          onChange={(e) => onChange(composeTime(meridiem, e.target.value, minute))}
+          value={hour}
+          onChange={(e) => onChange(composeTime(e.target.value, minute))}
           className={selectClass}
           aria-label={t("routineModal.hourLabel")}
         >
           <option value="" disabled>
             {t("routineModal.hourLabel")}
           </option>
-          {HOUR12.map((h) => (
+          {HOUR24.map((h) => (
             <option key={h} value={h}>
               {t("routineModal.hourUnit", { value: h })}
             </option>
@@ -77,11 +51,11 @@ function TimeSelect({ value, onChange }) {
         <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
       <span className="text-gray-400 text-[13px]">:</span>
-      {/* 분 */}
+      {/* 분 (5분 단위) */}
       <div className="relative">
         <select
           value={minute}
-          onChange={(e) => onChange(composeTime(meridiem, hour12, e.target.value))}
+          onChange={(e) => onChange(composeTime(hour, e.target.value))}
           className={selectClass}
           aria-label={t("routineModal.minuteLabel")}
         >
