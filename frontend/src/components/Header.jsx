@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import ballifeLogo from "../assets/icons/ballifeLogo.svg";
 import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_LANGUAGES } from "../i18n";
+import NotificationBell from "./NotificationBell";
 
 // DB Inc 디자인 토큰
 const TOKENS = {
@@ -166,7 +167,7 @@ export default function Header() {
         </nav>
 
         {/* h_etc */}
-        <div className="h_etc flex w-auto xl:w-[180px] shrink-0 items-center justify-end gap-2">
+        <div className="h_etc flex w-auto xl:min-w-[180px] shrink-0 items-center justify-end gap-2">
           {/* 언어 스위처 — 내비 메뉴처럼 마우스를 올리면 목록이 열린다 (클릭 토글은 터치용으로 유지) */}
           <div
             className="relative"
@@ -223,11 +224,14 @@ export default function Header() {
             )}
           </div>
 
+          {/* 알림 벨 — 로그인 시에만 노출 */}
+          <NotificationBell />
+
           {isAuthenticated ? (
             <button
               type="button"
               onClick={handleLogout}
-              className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white/25 bg-transparent px-[16px] text-[13px] font-semibold text-white no-underline transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
+              className="group flex h-[34px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full border border-white/25 bg-transparent px-[16px] text-[13px] font-semibold text-white no-underline transition-all duration-200 hover:border-white hover:bg-white hover:text-[#121212]"
             >
               <span>{t("common.logout")}</span>
               <svg
@@ -246,7 +250,7 @@ export default function Header() {
           ) : (
             <Link
               to="/login"
-              className="group flex h-[34px] items-center gap-[6px] rounded-full border border-white bg-white px-[16px] text-[13px] font-semibold text-[#121212] no-underline transition-all duration-200 hover:bg-[#f3f6f8]"
+              className="group flex h-[34px] shrink-0 items-center gap-[6px] whitespace-nowrap rounded-full border border-white bg-white px-[16px] text-[13px] font-semibold text-[#121212] no-underline transition-all duration-200 hover:bg-[#f3f6f8]"
             >
               <span>{t("common.login")}</span>
             </Link>

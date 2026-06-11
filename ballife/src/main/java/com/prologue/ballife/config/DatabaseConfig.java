@@ -15,7 +15,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
         "com.prologue.ballife.repository.meal",
         "com.prologue.ballife.repository.medicine",
         "com.prologue.ballife.repository.subscription", // 구독/가족 = MySQL(JPA)
-        "com.prologue.ballife.repository.pet" // 펫/펫에셋 = MySQL(JPA)
+        "com.prologue.ballife.repository.pet", // 펫/펫에셋 = MySQL(JPA)
+        "com.prologue.ballife.repository.notification" // 알림 = MySQL(JPA)
         //"com.prologue.ballife.repository.userexercise" // UserExercise = MySQL(JPA)
 })
 @EnableMongoRepositories(basePackages = {

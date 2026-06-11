@@ -2741,5 +2741,24 @@
       "serverRestarted": "서버가 재시작되어 로그아웃되었습니다.",
       "serverUnreachable": "서버에 연결할 수 없어 로그아웃되었습니다."
     }
+  },
+  "notification": {
+    "title": "알림",
+    "ariaLabel": "알림",
+    "empty": "새로운 알림이 없습니다",
+    "markAllRead": "모두 읽음",
+    "types": {
+      "COMMENT": "{{actor}}님이 회원님의 글에 댓글을 남겼습니다",
+      "REPLY": "{{actor}}님이 회원님의 댓글에 답글을 남겼습니다",
+      "POST_LIKE": "{{actor}}님이 회원님의 글을 추천했습니다",
+      "COMMENT_LIKE": "{{actor}}님이 회원님의 댓글을 추천했습니다",
+      "DEFAULT": "{{actor}}님이 새로운 활동을 남겼습니다"
+    },
+    "time": {
+      "justNow": "방금 전",
+      "minutesAgo": "{{count}}분 전",
+      "hoursAgo": "{{count}}시간 전",
+      "daysAgo": "{{count}}일 전"
+    }
   }
 }

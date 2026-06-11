@@ -2741,5 +2741,24 @@
       "serverRestarted": "サーバーが再起動されたためログアウトされました。",
       "serverUnreachable": "サーバーに接続できないためログアウトされました。"
     }
+  },
+  "notification": {
+    "title": "通知",
+    "ariaLabel": "通知",
+    "empty": "新しい通知はありません",
+    "markAllRead": "すべて既読",
+    "types": {
+      "COMMENT": "{{actor}}さんがあなたの投稿にコメントしました",
+      "REPLY": "{{actor}}さんがあなたのコメントに返信しました",
+      "POST_LIKE": "{{actor}}さんがあなたの投稿をおすすめしました",
+      "COMMENT_LIKE": "{{actor}}さんがあなたのコメントをおすすめしました",
+      "DEFAULT": "{{actor}}さんが新しいアクティビティを残しました"
+    },
+    "time": {
+      "justNow": "たった今",
+      "minutesAgo": "{{count}}分前",
+      "hoursAgo": "{{count}}時間前",
+      "daysAgo": "{{count}}日前"
+    }
   }
 }

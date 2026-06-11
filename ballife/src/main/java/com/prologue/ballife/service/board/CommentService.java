@@ -21,6 +21,7 @@ import com.prologue.ballife.repository.board.CommentLikeRepository;
 import com.prologue.ballife.repository.board.CommentRepository;
 import com.prologue.ballife.repository.board.PostRepository;
 import com.prologue.ballife.repository.user.UserRepository;
+import com.prologue.ballife.service.notification.NotificationService;
 import com.prologue.ballife.web.dto.board.CommentDto;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final NotificationService notificationService;
     private final MessageResolver messages;
 
     // 댓글 작성
@@ -55,7 +57,12 @@ public class CommentService {
                 .imageUrl(request.getImageUrl() != null ? request.getImageUrl() : "")
                 .build();
 
-        return CommentDto.CommentResponse.from(commentRepository.save(comment));
+        Comment saved = commentRepository.save(comment);
+
+        // 게시글 주인(일반 댓글) 또는 부모 댓글 주인(대댓글)에게 알림 — 본인 글/댓글이면 생략됨
+        notificationService.notifyOnComment(saved);
+
+        return CommentDto.CommentResponse.from(saved);
     }
 
     // 게시글별 댓글 목록 조회
@@ -147,6 +154,8 @@ public class CommentService {
             commentLikeRepository.save(CommentLike.builder().comment(comment).user(user).build());
             comment.upvoteComment();
             liked = true;
+            // 댓글 주인에게 추천 알림 — 본인 댓글이거나 이미 알린 경우 생략됨
+            notificationService.notifyOnCommentLike(comment, user);
         }
 
         return CommentDto.UpVoteResponse.builder()
