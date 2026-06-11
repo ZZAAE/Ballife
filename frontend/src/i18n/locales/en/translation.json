@@ -2741,5 +2741,24 @@
       "serverRestarted": "You were logged out because the server restarted.",
       "serverUnreachable": "You were logged out because the server could not be reached."
     }
+  },
+  "notification": {
+    "title": "Notifications",
+    "ariaLabel": "Notifications",
+    "empty": "No new notifications",
+    "markAllRead": "Mark all read",
+    "types": {
+      "COMMENT": "{{actor}} commented on your post",
+      "REPLY": "{{actor}} replied to your comment",
+      "POST_LIKE": "{{actor}} liked your post",
+      "COMMENT_LIKE": "{{actor}} liked your comment",
+      "DEFAULT": "{{actor}} interacted with your activity"
+    },
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{{count}} min ago",
+      "hoursAgo": "{{count}} h ago",
+      "daysAgo": "{{count}} d ago"
+    }
   }
 }

@@ -26,6 +26,7 @@ import com.prologue.ballife.repository.board.CommentRepository;
 import com.prologue.ballife.repository.board.PostLikeRepository;
 import com.prologue.ballife.repository.board.PostRepository;
 import com.prologue.ballife.repository.user.UserRepository;
+import com.prologue.ballife.service.notification.NotificationService;
 import com.prologue.ballife.web.dto.board.PostDto;
 
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final NotificationService notificationService;
     private final MessageResolver messages;
     // 게시글작성,수정,삭제 | 전체게시글조회,카테고리별조회
 
@@ -161,6 +163,7 @@ public class PostService {
     commentLikeRepository.deleteAllByPostId(postId);
     commentRepository.deleteAllByPostId(postId);
     postLikeRepository.deleteAllByPostId(postId);
+    notificationService.deleteByPostId(postId); // 이 글과 연결된 알림 정리
     postRepository.delete(post);
     }
 
@@ -188,6 +191,8 @@ public class PostService {
             postLikeRepository.save(PostLike.builder().post(post).user(user).build());
             post.increaseUpVote();
             liked = true;
+            // 게시글 주인에게 추천 알림 — 본인 글이거나 이미 알린 경우 생략됨
+            notificationService.notifyOnPostLike(post, user);
         }
 
         return PostDto.UpVoteResponse.builder()

@@ -2741,5 +2741,24 @@
       "serverRestarted": "服务器已重启，您已退出登录。",
       "serverUnreachable": "无法连接服务器，您已退出登录。"
     }
+  },
+  "notification": {
+    "title": "通知",
+    "ariaLabel": "通知",
+    "empty": "暂无新通知",
+    "markAllRead": "全部已读",
+    "types": {
+      "COMMENT": "{{actor}} 评论了您的帖子",
+      "REPLY": "{{actor}} 回复了您的评论",
+      "POST_LIKE": "{{actor}} 推荐了您的帖子",
+      "COMMENT_LIKE": "{{actor}} 推荐了您的评论",
+      "DEFAULT": "{{actor}} 与您的内容进行了互动"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    }
   }
 }
