@@ -39,7 +39,6 @@ const resolveUserId = (user) => {
 };
 
 const SCHEDULE_STORAGE_PREFIX = "medicationSchedules_";
-const SAVED_RECORDS_KEY = "savedMedicationRecords";
 
 // 일정 슬롯(id) ↔ 백엔드 TakenCategory / 대표 복용시각 매핑.
 const SLOT_TO_CATEGORY = {
@@ -169,40 +168,51 @@ export default function MedicationPage() {
   const [time, setTime] = useState(() => formatTimeNow());
   const [date, setDate] = useState(() => formatDateKey(new Date()));
 
-  const [savedRecords, setSavedRecords] = useState(() => {
-    try {
-      const raw = localStorage.getItem(SAVED_RECORDS_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
+  // 상비약 직접 기록(PRN) — MongoDB 영속본. 로드는 아래 userId 확정 후 effect 에서 수행.
+  const [savedRecords, setSavedRecords] = useState([]);
 
-  useEffect(() => {
-    localStorage.setItem(SAVED_RECORDS_KEY, JSON.stringify(savedRecords));
-  }, [savedRecords]);
-
-  const handleSaveRecord = () => {
+  const handleSaveRecord = async () => {
     if (!drugName.trim()) {
       alert(t("medicationPage.alert.enterDrugName"));
       return;
     }
-    const newRecord = {
-      id: Date.now(),
+    const payload = {
       drugName: drugName.trim(),
       dosage: dosage.trim(),
       date,
       // 시간을 비웠으면 저장 시점의 현재 시각으로 기록
       time: time || formatTimeNow(),
     };
-    setSavedRecords((prev) => [newRecord, ...prev]);
-    setDrugName("");
-    setDosage("");
-    setTime(formatTimeNow());
+    try {
+      const { data } = await medicineApi.createPrnMedication(payload);
+      // 서버가 부여한 Mongo id 로 목록 맨 앞에 추가
+      setSavedRecords((prev) => [
+        {
+          id: data.id,
+          drugName: data.drugName,
+          dosage: data.dosage,
+          date: data.date,
+          time: data.time,
+        },
+        ...prev,
+      ]);
+      setDrugName("");
+      setDosage("");
+      setTime(formatTimeNow());
+    } catch {
+      // 인터셉터가 에러 토스트를 띄우므로 별도 처리 없음
+    }
   };
 
-  const handleDeleteRecord = (id) => {
-    setSavedRecords((prev) => prev.filter((r) => r.id !== id));
+  const handleDeleteRecord = async (id) => {
+    const prev = savedRecords;
+    // 낙관적 제거 후 실패 시 롤백
+    setSavedRecords((list) => list.filter((r) => r.id !== id));
+    try {
+      await medicineApi.deletePrnMedication(id);
+    } catch {
+      setSavedRecords(prev);
+    }
   };
 
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -268,6 +278,36 @@ export default function MedicationPage() {
       } finally {
         // 성공/실패와 무관하게 로드 시도가 끝나면 저장 허용
         if (!cancelled) setPrescriptionsLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // 상비약 직접 기록(PRN) 로드 — MongoDB 영속본. 로그아웃→재로그인해도 유지된다.
+  useEffect(() => {
+    if (userId == null) {
+      setSavedRecords([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await medicineApi.getPrnMedications();
+        if (cancelled) return;
+        const list = Array.isArray(data) ? data : [];
+        setSavedRecords(
+          list.map((r) => ({
+            id: r.id,
+            drugName: r.drugName,
+            dosage: r.dosage,
+            date: r.date,
+            time: r.time,
+          }))
+        );
+      } catch {
+        // 조회 실패 시 빈 목록 유지 (인터셉터가 토스트 처리)
       }
     })();
     return () => {
