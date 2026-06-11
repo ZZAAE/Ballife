@@ -16,7 +16,10 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      // 백엔드(:8080)에 저장된 업로드 이미지를 프론트(:5173)에서 그대로 노출
-      // 예: <img src="/uploads/meal/2026/05/29/xxx.jpg" />
-      //     → 실제로는 http://localhost:8080/uploads/... 로 프록시됨
       '/uploads': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+  },
+})
