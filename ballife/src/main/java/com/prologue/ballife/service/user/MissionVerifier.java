@@ -36,6 +36,9 @@ public class MissionVerifier {
             case DAILY_RECORD:
                 // 오늘 어떤 기록(식단/운동/생체/복약)이라도 남겼는가
                 return query.recordDates(userId).contains(today);
+            case DAILY_ATTENDANCE:
+                // 출석: 로그인만 하면 달성 (이 검증 호출 자체가 로그인 상태이므로 항상 true)
+                return true;
             case DAILY_RECOMMEND:
                 // 오늘 게시글/댓글 추천을 눌렀는가
                 return query.countRecommendsSince(userId, dayStart) > 0;

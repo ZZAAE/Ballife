@@ -176,6 +176,7 @@ function BoardListPage() {
             <col className="w-[130px]" />
             <col className="w-[90px]" />
             <col className="w-[90px]" />
+            <col className="w-[90px]" />
             <col className="w-[120px]" />
           </colgroup>
           <thead className="border-b border-[#E5E7EB] bg-[#F9FAFB] text-[#64748B]">
@@ -186,6 +187,7 @@ function BoardListPage() {
               <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.nickname")}</th>
               <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.viewCount")}</th>
               <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.upVote")}</th>
+              <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.commentCount")}</th>
               <th className="px-4 py-3 text-center font-medium">{t("boardListPage.table.createdAt")}</th>
             </tr>
           </thead>
@@ -225,6 +227,7 @@ function BoardListPage() {
                   </td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.viewCount}</td>
                   <td className="px-4 py-3 text-center text-[#64748B]">{post.upVote ?? 0}</td>
+                  <td className="px-4 py-3 text-center text-[#64748B]">{post.commentCount ?? 0}</td>
                   <td className="px-4 py-3 text-center text-[#94A3B8]">
                     {formatDate(post.createdAt)}
                   </td>
@@ -233,7 +236,7 @@ function BoardListPage() {
             ) : (
               <tr>
                 <td
-                  colSpan="7"
+                  colSpan="8"
                   className="px-4 py-10 text-center text-[#94A3B8]"
                 >
                   {t("boardListPage.empty")}

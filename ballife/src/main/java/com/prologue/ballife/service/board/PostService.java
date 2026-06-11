@@ -2,6 +2,11 @@ package com.prologue.ballife.service.board;
 
 
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,25 +74,41 @@ public class PostService {
     // 전체 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPosts(int page, int size, String sort) {
         Pageable pageable = PageRequest.of(page, size, buildSort(sort));
-        return postRepository.findByIsDeletedFalse(pageable).map(PostDto.PostListResponse::from);
+        return toListPage(postRepository.findByIsDeletedFalse(pageable));
     }
 
     // 카테고리별 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsByCategory(int page, int size, Post.CATEGORY category, String sort) {
         Pageable pageable = PageRequest.of(page, size, buildSort(sort));
-        return postRepository.findByCategoryAndIsDeletedFalse(category, pageable).map(PostDto.PostListResponse::from);
+        return toListPage(postRepository.findByCategoryAndIsDeletedFalse(category, pageable));
     }
 
     // 검색으로 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsBySearch(int page, int size, String sort, String keyword) {
         Pageable pageable = PageRequest.of(page, size, buildSort(sort));
-        return postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageable).map(PostDto.PostListResponse::from);
+        return toListPage(postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageable));
     }
 
     // 카테고리 내에서 검색으로 게시글 목록 조회
     public Page<PostDto.PostListResponse> getPostsByCategoryWithKeyword(int page, int size, Post.CATEGORY category, String sort, String keyword) {
         Pageable pageable = PageRequest.of(page, size, buildSort(sort));
-        return postRepository.findByCategoryAndTitleContainingAndIsDeletedFalse(category, keyword, pageable).map(PostDto.PostListResponse::from);
+        return toListPage(postRepository.findByCategoryAndTitleContainingAndIsDeletedFalse(category, keyword, pageable));
+    }
+
+    // 게시글 페이지 → 목록 DTO 변환. 페이지 내 글들의 댓글 수를 단일 쿼리로 집계해
+    // 각 DTO 에 채워준다(N+1 회피). 댓글이 없는 글은 0 으로 처리.
+    private Page<PostDto.PostListResponse> toListPage(Page<Post> posts) {
+        List<Long> postIds = posts.getContent().stream()
+                .map(Post::getPostId)
+                .collect(Collectors.toList());
+        Map<Long, Long> commentCounts = new HashMap<>();
+        if (!postIds.isEmpty()) {
+            for (Object[] row : commentRepository.countByPostIds(postIds)) {
+                commentCounts.put((Long) row[0], (Long) row[1]);
+            }
+        }
+        return posts.map(post ->
+                PostDto.PostListResponse.from(post, commentCounts.getOrDefault(post.getPostId(), 0L)));
     }
 
     // 게시글 상세 조회 (조회수는 올리지 않음 — 수정 화면·React StrictMode 이중 호출과 분리)

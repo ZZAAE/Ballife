@@ -453,6 +453,7 @@
       "nickname": "Nickname",
       "viewCount": "Views",
       "upVote": "Upvotes",
+      "commentCount": "Comments",
       "createdAt": "Date"
     },
     "empty": "No posts.",

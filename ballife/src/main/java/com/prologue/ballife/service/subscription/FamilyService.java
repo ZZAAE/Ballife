@@ -86,7 +86,23 @@ public class FamilyService {
 
     @Transactional
     public void freezeOwnerGroup(Long ownerId) {
-        familyGroupRepository.findByOwner_UserId(ownerId).ifPresent(FamilyGroup::freeze);
+        familyGroupRepository.findByOwner_UserId(ownerId).ifPresent(group -> {
+            List<FamilyMember> members = familyMemberRepository
+                    .findByFamilyGroup_FamilyGroupIdOrderByJoinedAtAsc(group.getFamilyGroupId());
+            // 오너 혼자뿐인(합류한 다른 멤버가 없는) 그룹은 동결하지 않고 해제한다.
+            // 구독 시 그룹이 자동 생성되므로, 한 번 구독했다 해지한 1인 오너가
+            // 동결 그룹에 묶여 다른 가족에 코드로 합류하지 못하는 문제를 막는다.
+            // → 해제하면 inGroup=false 가 되어 "코드로 참가하기"가 다시 노출된다.
+            //   다른 멤버가 있는(실제로 구성된) 그룹은 기존대로 동결만 한다.
+            boolean onlyOwner = members.stream()
+                    .allMatch(m -> m.getUser().getUserId().equals(ownerId));
+            if (onlyOwner) {
+                familyMemberRepository.deleteAll(members);
+                familyGroupRepository.delete(group);
+            } else {
+                group.freeze();
+            }
+        });
     }
 
     @Transactional

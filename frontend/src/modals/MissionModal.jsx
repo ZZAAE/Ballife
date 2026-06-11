@@ -18,7 +18,7 @@ const MISSION_SECTIONS = [
   {
     title: i18n.t("missionModal.section.daily.title"),
     note: i18n.t("missionModal.section.daily.note"),
-    codes: ["DAILY_RECORD", "DAILY_RECOMMEND"],
+    codes: ["DAILY_RECORD", "DAILY_ATTENDANCE", "DAILY_RECOMMEND"],
   },
   {
     title: i18n.t("missionModal.section.weekly.title"),

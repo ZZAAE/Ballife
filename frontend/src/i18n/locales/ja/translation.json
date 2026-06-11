@@ -453,6 +453,7 @@
       "nickname": "ニックネーム",
       "viewCount": "閲覧数",
       "upVote": "おすすめ数",
+      "commentCount": "コメント数",
       "createdAt": "作成日"
     },
     "empty": "投稿がありません。",
